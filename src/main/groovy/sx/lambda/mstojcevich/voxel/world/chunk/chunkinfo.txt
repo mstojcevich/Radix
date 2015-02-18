@@ -1,0 +1,1 @@
+Chunks don't store their own position. That is stored in a map of <2D Point, Chunk> in the World

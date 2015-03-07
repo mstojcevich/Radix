@@ -51,7 +51,7 @@ public class VoxelGame {
 
     public static final String GAME_TITLE = "VoxelTest"
 
-    private static final int START_WIDTH = 2560, START_HEIGHT = 1440; //TODO Config - screen size
+    private static final int START_WIDTH = 320, START_HEIGHT = 240; //TODO Config - screen size
 
     private int renderedFrames = 0;
 

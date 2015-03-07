@@ -74,9 +74,6 @@ public class World implements IWorld {
                     glPopMatrix();
                 }
             }
-            for(Entity e : getLoadedEntities()) {
-                e.render(); //TODO frustum check
-            }
         } else {
             System.err.println("Why the hell is the server running render?");
         }

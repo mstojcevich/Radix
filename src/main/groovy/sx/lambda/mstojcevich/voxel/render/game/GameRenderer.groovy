@@ -26,7 +26,7 @@ class GameRenderer implements Renderer {
         game.getWorld().render()
         drawBlockSelection()
         for(Entity e : game.world.loadedEntities) {
-            if(e != null) {
+            if(e != null && e != game.player) {
                 e.render()
             }
         }

@@ -38,7 +38,6 @@ abstract class Entity implements Serializable {
         if(model != null) {
             glPushMatrix()
             glTranslatef(position.x, position.y, position.z)
-            glColor3f(0, 0, 1)
             model.render()
             glPopMatrix()
         }

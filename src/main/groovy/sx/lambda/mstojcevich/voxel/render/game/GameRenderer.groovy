@@ -24,12 +24,10 @@ class GameRenderer implements Renderer {
     void render() {
         prepareWorldRender()
         game.getWorld().render()
+        glPushMatrix()
         drawBlockSelection()
-        for(Entity e : game.world.loadedEntities) {
-            if(e != null && e != game.player) {
-                e.render()
-            }
-        }
+        glPopMatrix()
+        renderEntities()
     }
 
     @Override
@@ -74,6 +72,19 @@ class GameRenderer implements Renderer {
             glEnable GL_TEXTURE_2D
             glEnable GL_DEPTH_TEST
         }
+    }
+
+    private void renderEntities() {
+        glDisable GL_TEXTURE_2D
+        glDisable GL_LIGHTING
+        glColor3f(1, 1, 1)
+        for(Entity e : game.world.loadedEntities) {
+            if(e != null && e != game.player) {
+                e.render()
+            }
+        }
+        glEnable GL_LIGHTING
+        glEnable GL_TEXTURE_2D
     }
 
 }

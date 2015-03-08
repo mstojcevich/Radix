@@ -10,7 +10,7 @@ class VisualSettings implements Serializable {
      * Distance, in chunks, to load the world
      * Defaults to 2
      */
-    private int viewDistance = 2
+    private int viewDistance = 5
 
     /**
      * Whether to run the game in fullscreen

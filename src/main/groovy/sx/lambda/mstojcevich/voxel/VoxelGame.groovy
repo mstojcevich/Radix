@@ -61,8 +61,6 @@ public class VoxelGame {
 
     private boolean done
 
-    private final int VIEW_DISTANCE = 2
-
     private synchronized Vec3i selectedBlock, selectedNextPlace
 
     private int hudDisplayList
@@ -279,7 +277,8 @@ public class VoxelGame {
         glMatrixMode GL_PROJECTION //Currently altering projection matrix
         glLoadIdentity()
 
-        GLU.gluPerspective(100, (float) Display.getWidth() / Display.getHeight(), 0.1f, (float) (VIEW_DISTANCE * world.getChunkSize()));
+        GLU.gluPerspective(100, (float) Display.getWidth() / Display.getHeight(), 0.1f,
+                settingsManager.visualSettings.viewDistance * world.getChunkSize());
         //Set up camera
 
         glMatrixMode GL_MODELVIEW //Currently altering modelview matrix

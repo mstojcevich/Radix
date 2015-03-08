@@ -53,7 +53,8 @@ class MovementHandler implements RepeatedTask {
                 if (!checkCollision(deltaX, deltaY, deltaZ)) {
                     player.getPosition().offset(deltaX, deltaY, deltaZ)
                 }
-            } else if (isKeyDown(KEY_S)) {
+            }
+            if (isKeyDown(KEY_S)) {
                 float yaw = player.getRotation().getYaw()
                 float pitch = player.getRotation().getPitch()
                 float deltaX
@@ -72,7 +73,8 @@ class MovementHandler implements RepeatedTask {
                 if (!checkCollision(deltaX, deltaY, deltaZ)) {
                     player.getPosition().offset(deltaX, deltaY, deltaZ)
                 }
-            } else if (isKeyDown(KEY_A)) { //Strafe left
+            }
+            if (isKeyDown(KEY_A)) { //Strafe left
                 float deltaX
                 float deltaZ
                 float yaw = player.getRotation().getYaw()
@@ -83,7 +85,8 @@ class MovementHandler implements RepeatedTask {
                 if (!checkCollision(deltaX, 0, deltaZ)) {
                     player.getPosition().offset(deltaX, 0, deltaZ)
                 }
-            } else if (isKeyDown(KEY_D)) { //Strafe right
+            }
+            if (isKeyDown(KEY_D)) { //Strafe right
                 float deltaX
                 float deltaZ
                 float yaw = player.getRotation().getYaw()

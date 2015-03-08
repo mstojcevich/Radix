@@ -1,6 +1,8 @@
 package sx.lambda.mstojcevich.voxel.world.chunk
 
 import groovy.transform.CompileStatic
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
+import sx.lambda.mstojcevich.voxel.api.events.render.EventChunkRender
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.VoxelGame
@@ -103,7 +105,7 @@ public class Chunk implements IChunk {
         }
         glEndList()
 
-
+        VoxelGameAPI.instance.eventManager.push(new EventChunkRender(this))
     }
 
     @Override

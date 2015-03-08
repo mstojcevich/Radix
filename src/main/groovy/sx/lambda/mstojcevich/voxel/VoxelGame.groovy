@@ -8,6 +8,9 @@ import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.DisplayMode
 import org.lwjgl.util.glu.GLU
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
+import sx.lambda.mstojcevich.voxel.api.events.EventGameTick
+import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
 import sx.lambda.mstojcevich.voxel.client.gui.GuiScreen
 import sx.lambda.mstojcevich.voxel.client.gui.screens.IngameHUD
 import sx.lambda.mstojcevich.voxel.entity.EntityRotation
@@ -140,10 +143,15 @@ public class VoxelGame {
             public void run() {
                 while(!done) {
                     player.onUpdate()
-                    Thread.sleep(20l);
+
+                    VoxelGameAPI.instance.eventManager.push(new EventGameTick(world))
+
+                    Thread.sleep(50l);
                 }
             }
         }.start()
+
+        VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
 
         this.run()
     }

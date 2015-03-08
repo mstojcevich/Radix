@@ -1,6 +1,8 @@
 package sx.lambda.mstojcevich.voxel.world;
 
 import sx.lambda.mstojcevich.voxel.VoxelGame;
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI;
+import sx.lambda.mstojcevich.voxel.api.events.worldgen.EventFinishChunkGen;
 import sx.lambda.mstojcevich.voxel.block.Block;
 import sx.lambda.mstojcevich.voxel.entity.Entity;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
@@ -210,6 +212,7 @@ public class World implements IWorld {
         IChunk foundChunk = chunkMap.get(pos);
         if (foundChunk == null && !remote) {
             final IChunk c = new Chunk(this, pos);
+            VoxelGameAPI.instance.getEventManager().push(new EventFinishChunkGen(c));
             this.chunkMap.put(pos, c);
             this.chunkList.add(c);
             if(!server) {

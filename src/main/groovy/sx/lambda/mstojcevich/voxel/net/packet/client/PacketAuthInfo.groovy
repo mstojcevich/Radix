@@ -2,6 +2,8 @@ package sx.lambda.mstojcevich.voxel.net.packet.client
 
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
+import sx.lambda.mstojcevich.voxel.api.events.server.EventClientJoin
 import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.entity.player.Player
 import sx.lambda.mstojcevich.voxel.net.packet.server.PacketAuthSuccess
@@ -68,6 +70,8 @@ class PacketAuthInfo implements ClientPacket {
             //Send us them
             ctx.writeAndFlush(new PacketNewEntity(client.getPlayer()))
         }
+
+        VoxelGameAPI.instance.eventManager.push(new EventClientJoin(server.getClient(ctx)))
     }
 
 }

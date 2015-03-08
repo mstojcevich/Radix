@@ -5,6 +5,9 @@ import org.lwjgl.util.glu.GLU
 import org.lwjgl.util.glu.Sphere
 import org.newdawn.slick.Color
 import sx.lambda.mstojcevich.voxel.VoxelGame
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
+import sx.lambda.mstojcevich.voxel.api.events.render.EventEntityRender
+import sx.lambda.mstojcevich.voxel.api.events.render.EventPostWorldRender
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.entity.Entity
 
@@ -24,6 +27,7 @@ class GameRenderer implements Renderer {
     void render() {
         prepareWorldRender()
         game.getWorld().render()
+        VoxelGameAPI.instance.eventManager.push(new EventPostWorldRender())
         glPushMatrix()
         drawBlockSelection()
         glPopMatrix()
@@ -81,6 +85,7 @@ class GameRenderer implements Renderer {
         for(Entity e : game.world.loadedEntities) {
             if(e != null && e != game.player) {
                 e.render()
+                VoxelGameAPI.instance.eventManager.push(new EventEntityRender(e))
             }
         }
         glEnable GL_LIGHTING

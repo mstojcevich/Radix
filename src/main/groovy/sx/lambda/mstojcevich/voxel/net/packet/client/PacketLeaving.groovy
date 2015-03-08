@@ -2,6 +2,8 @@ package sx.lambda.mstojcevich.voxel.net.packet.client
 
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
+import sx.lambda.mstojcevich.voxel.api.events.server.EventClientDisconnect
 import sx.lambda.mstojcevich.voxel.net.packet.ClientPacket
 import sx.lambda.mstojcevich.voxel.net.packet.server.PacketRmEntity
 import sx.lambda.mstojcevich.voxel.server.VoxelGameServer
@@ -20,6 +22,9 @@ class PacketLeaving implements ClientPacket {
     void handleServerReceive(VoxelGameServer server, ChannelHandlerContext ctx) {
         String hostname = ((InetSocketAddress)ctx.channel().remoteAddress()).hostName
         println "$hostname is leaving. $message."
+
+        VoxelGameAPI.instance.eventManager.push(new EventClientDisconnect(server.getClient(ctx), message))
+
         if(server.getClient(ctx) != null) {
             if(server.getClient(ctx).player != null) {
                 for(ConnectedClient c : server.clientList) {

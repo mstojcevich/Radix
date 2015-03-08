@@ -14,6 +14,8 @@ import io.netty.handler.codec.serialization.ObjectDecoder
 import io.netty.handler.codec.serialization.ObjectEncoder
 import io.netty.handler.logging.LogLevel
 import io.netty.handler.logging.LoggingHandler
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
+import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
 import sx.lambda.mstojcevich.voxel.server.dedicated.config.ServerConfig
 import sx.lambda.mstojcevich.voxel.server.net.VoxelGameServerHandler
 import sx.lambda.mstojcevich.voxel.server.net.ConnectedClient
@@ -26,6 +28,8 @@ import sx.lambda.mstojcevich.voxel.world.World
  */
 @CompileStatic
 class VoxelGameServer {
+
+    public static VoxelGameServer instance
 
     private ServerConfig config = new ServerConfig()
     private IWorld currentWorld
@@ -96,8 +100,9 @@ class VoxelGameServer {
     }
 
     static void main(String[] args) {
-        VoxelGameServer server = new VoxelGameServer()
-        server.start()
+        instance = new VoxelGameServer()
+        VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
+        instance.start()
     }
 
 }

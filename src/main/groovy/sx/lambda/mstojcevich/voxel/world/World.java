@@ -43,7 +43,7 @@ public class World implements IWorld {
         this.remote = remote;
         this.server = server;
         if(!remote) {
-            this.noise = new SimplexNoise(24, 0.8, new Random().nextInt());
+            this.noise = new SimplexNoise(100, 0.05, new Random().nextInt());
         } else {
             this.noise = null;
         }
@@ -94,7 +94,7 @@ public class World implements IWorld {
 
     @Override
     public int getHeightAboveSeaLevel(int x, int z) {
-        return (int)Math.round(Math.abs(this.noise.getNoise(x, z)));
+        return (int)Math.round(100*this.noise.getNoise(x, z));
     }
 
     private int getChunkPosition(float value) {

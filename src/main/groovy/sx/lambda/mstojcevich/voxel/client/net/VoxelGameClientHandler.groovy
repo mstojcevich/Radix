@@ -3,6 +3,7 @@ package sx.lambda.mstojcevich.voxel.client.net
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerAdapter
 import io.netty.channel.ChannelHandlerContext
+import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.net.packet.server.PacketEntityPosition
 import sx.lambda.mstojcevich.voxel.net.packet.server.PacketNewEntity
 import sx.lambda.mstojcevich.voxel.net.packet.server.PacketRmEntity
@@ -45,10 +46,14 @@ class VoxelGameClientHandler extends ChannelHandlerAdapter  {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        for(Class<ServerPacket> c : receiveablePackets) {
-            if(c.isInstance(msg)) {
-                c.cast(msg).handleClientReceive(ctx)
+        try {
+            for (Class<ServerPacket> c : receiveablePackets) {
+                if (c.isInstance(msg)) {
+                    c.cast(msg).handleClientReceive(ctx)
+                }
             }
+        } catch(Exception e) {
+            VoxelGame.instance.handleCriticalException(e)
         }
     }
 

@@ -20,7 +20,11 @@ class PacketChunkData implements ServerPacket {
         new Thread("Chunk Add") {
             @Override
             public void run() {
-                VoxelGame.instance.getWorld().addChunk(chunk)
+                try {
+                    VoxelGame.instance.getWorld().addChunk(chunk)
+                } catch(Exception ex) {
+                    VoxelGame.instance.handleCriticalException(ex)
+                }
             }
         }.start()
     }

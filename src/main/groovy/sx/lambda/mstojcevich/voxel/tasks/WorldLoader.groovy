@@ -19,23 +19,27 @@ class WorldLoader implements RepeatedTask {
 
     @Override
     void run() {
-        while (!game.isDone()) {
-            if (game.getPlayer() != null && game.getWorld() != null) {
-                int viewDistance = game.getSettingsManager().getVisualSettings().getViewDistance()
-                EntityPosition playerPos = game.getPlayer().getPosition()
-                if (currentChunk == null) {
-                    game.getWorld().loadChunks(playerPos, viewDistance)
-                    currentChunk = game.getWorld().getChunkAtPosition(new Vec3i((int) playerPos.getX(), (int) playerPos.getY(), (int) playerPos.getZ()));
-                } else {
-                    if (Math.abs(currentChunk.getStartPosition().x - game.getPlayer().getPosition().getX()) > game.getWorld().getChunkSize()
-                            || Math.abs(currentChunk.getStartPosition().z - game.getPlayer().getPosition().getZ()) > game.getWorld().getChunkSize()) {
-                        currentChunk = game.getWorld().getChunkAtPosition(new Vec3i((int) playerPos.getX(), (int) playerPos.getY(), (int) playerPos.getZ()));
+        try {
+            while (!game.isDone()) {
+                if (game.getPlayer() != null && game.getWorld() != null) {
+                    int viewDistance = game.getSettingsManager().getVisualSettings().getViewDistance()
+                    EntityPosition playerPos = game.getPlayer().getPosition()
+                    if (currentChunk == null) {
                         game.getWorld().loadChunks(playerPos, viewDistance)
+                        currentChunk = game.getWorld().getChunkAtPosition(new Vec3i((int) playerPos.getX(), (int) playerPos.getY(), (int) playerPos.getZ()));
+                    } else {
+                        if (Math.abs(currentChunk.getStartPosition().x - game.getPlayer().getPosition().getX()) > game.getWorld().getChunkSize()
+                                || Math.abs(currentChunk.getStartPosition().z - game.getPlayer().getPosition().getZ()) > game.getWorld().getChunkSize()) {
+                            currentChunk = game.getWorld().getChunkAtPosition(new Vec3i((int) playerPos.getX(), (int) playerPos.getY(), (int) playerPos.getZ()));
+                            game.getWorld().loadChunks(playerPos, viewDistance)
+                        }
                     }
                 }
-            }
 
-            sleep(100);
+                sleep(100);
+            }
+        } catch(Exception e) {
+            VoxelGame.instance.handleCriticalException(e)
         }
     }
 

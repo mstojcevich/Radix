@@ -37,6 +37,7 @@ import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.util.gl.ShaderManager
 import sx.lambda.mstojcevich.voxel.util.gl.ShaderProgram
 
+import javax.swing.JOptionPane
 import javax.vecmath.Vector3f
 import java.nio.FloatBuffer
 import java.util.concurrent.LinkedBlockingDeque
@@ -141,12 +142,16 @@ public class VoxelGame {
         new Thread("Entity Update") {
             @Override
             public void run() {
-                while(!done) {
-                    player.onUpdate()
+                try {
+                    while (!done) {
+                        player.onUpdate()
 
-                    VoxelGameAPI.instance.eventManager.push(new EventGameTick(world))
+                        VoxelGameAPI.instance.eventManager.push(new EventGameTick(world))
 
-                    sleep(50l);
+                        sleep(50l);
+                    }
+                } catch(Exception ex) {
+                    handleCriticalException(ex)
                 }
             }
         }.start()
@@ -216,23 +221,27 @@ public class VoxelGame {
 
     private void run() {
         long startTime = System.currentTimeMillis()
-        while (!Display.isCloseRequested() && !done) {
-            render()
+        try {
+            while (!Display.isCloseRequested() && !done) {
+                render()
 
-            Display.update()
-            Display.sync getSettingsManager().getVisualSettings().getMaxFPS()
+                Display.update()
+                Display.sync getSettingsManager().getVisualSettings().getMaxFPS()
 
-            if (renderedFrames % 100 == 0) {
-                println renderedFrames / ((System.currentTimeMillis() - startTime) / 1000)
+                if (renderedFrames % 100 == 0) {
+                    println renderedFrames / ((System.currentTimeMillis() - startTime) / 1000)
+                }
+
+                Thread.yield()
             }
-
-            Thread.yield()
-        }
-        done = true
-        Display.destroy()
-        if(isRemote() && this.serverChanCtx != null) {
-            this.serverChanCtx.writeAndFlush(new PacketLeaving("Game closed"))
-            this.serverChanCtx.disconnect()
+            done = true
+            Display.destroy()
+            if (isRemote() && this.serverChanCtx != null) {
+                this.serverChanCtx.writeAndFlush(new PacketLeaving("Game closed"))
+                this.serverChanCtx.disconnect()
+            }
+        } catch (Exception e) {
+            handleCriticalException(e)
         }
     }
 
@@ -408,6 +417,12 @@ public class VoxelGame {
     public ChannelHandlerContext getServerChanCtx() { serverChanCtx }
 
     public void setServerChanCtx(ChannelHandlerContext ctx) { serverChanCtx = ctx }
+
+    public void handleCriticalException(Exception ex) {
+        this.done = true
+        Mouse.setGrabbed false
+        JOptionPane.showMessageDialog(null, "$GAME_TITLE crashed. $ex", "$GAME_TITLE crashed", JOptionPane.ERROR_MESSAGE)
+    }
 
     //TODO move frustum calc, light pos, etc into GameRenderer
 

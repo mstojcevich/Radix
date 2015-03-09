@@ -30,67 +30,71 @@ class InputHandler implements RepeatedTask {
 
     @Override
     void run() {
-        while (!game.isDone()) {
-            while (next()) {
-                if (getEventKeyState()) { //Press down, not release
-                    int key = getEventKey()
-                    switch (key) {
-                        case KEY_SPACE:
-                            if (game.getPlayer().onGround) {
-                                game.getPlayer().setYVelocity(0.11f)
-                                game.getPlayer().setOnGround(false)
-                            }
-                            break;
-                        case KEY_UP:
-                            game.getPlayer().setItemInHand Block.values()[(game.getPlayer().getItemInHand().ordinal() + 1) % Block.values().size()]
-                            game.addToGLQueue(new Runnable() {
-                                @Override
-                                public void run() {
-                                    game.rerenderHud()
+        try {
+            while (!game.isDone()) {
+                while (next()) {
+                    if (getEventKeyState()) { //Press down, not release
+                        int key = getEventKey()
+                        switch (key) {
+                            case KEY_SPACE:
+                                if (game.getPlayer().onGround) {
+                                    game.getPlayer().setYVelocity(0.11f)
+                                    game.getPlayer().setOnGround(false)
                                 }
-                            })
-                            break;
-                        case KEY_ESCAPE:
-                            game.startShutdown()
-                            break
-                        default:
-                            break;
-                    }
+                                break;
+                            case KEY_UP:
+                                game.getPlayer().setItemInHand Block.values()[(game.getPlayer().getItemInHand().ordinal() + 1) % Block.values().size()]
+                                game.addToGLQueue(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        game.rerenderHud()
+                                    }
+                                })
+                                break;
+                            case KEY_ESCAPE:
+                                game.startShutdown()
+                                break
+                            default:
+                                break;
+                        }
 
-                }
-            }
-            while (Mouse.next()) {
-                if (Mouse.getEventButtonState()) {
-                    int button = Mouse.getEventButton()
-                    switch (button) {
-                        case 0:
-                            if (game.getSelectedBlock() != null) {
-                                if(VoxelGame.instance.isRemote() && VoxelGame.instance.serverChanCtx != null) {
-                                    VoxelGame.instance.serverChanCtx.writeAndFlush(new PacketBreakBlock(
-                                            game.getSelectedBlock()))
-                                } else {
-                                    game.getWorld().removeBlock(game.getSelectedBlock())
-                                }
-                            }
-                            break;
-                        case 1:
-                            if (game.getNextPlacePos() != null) {
-                                if(VoxelGame.instance.isRemote() && VoxelGame.instance.serverChanCtx != null) {
-                                    VoxelGame.instance.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
-                                            game.getNextPlacePos(),
-                                            game.getPlayer().getItemInHand()
-                                    ));
-                                } else {
-                                    game.getWorld().addBlock(game.getPlayer().getItemInHand(), game.getNextPlacePos())
-                                }
-                            }
-                            break
-                        default:
-                            break;
                     }
                 }
+                while (Mouse.next()) {
+                    if (Mouse.getEventButtonState()) {
+                        int button = Mouse.getEventButton()
+                        switch (button) {
+                            case 0:
+                                if (game.getSelectedBlock() != null) {
+                                    if (VoxelGame.instance.isRemote() && VoxelGame.instance.serverChanCtx != null) {
+                                        VoxelGame.instance.serverChanCtx.writeAndFlush(new PacketBreakBlock(
+                                                game.getSelectedBlock()))
+                                    } else {
+                                        game.getWorld().removeBlock(game.getSelectedBlock())
+                                    }
+                                }
+                                break;
+                            case 1:
+                                if (game.getNextPlacePos() != null) {
+                                    if (VoxelGame.instance.isRemote() && VoxelGame.instance.serverChanCtx != null) {
+                                        VoxelGame.instance.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
+                                                game.getNextPlacePos(),
+                                                game.getPlayer().getItemInHand()
+                                        ));
+                                    } else {
+                                        game.getWorld().addBlock(game.getPlayer().getItemInHand(), game.getNextPlacePos())
+                                    }
+                                }
+                                break
+                            default:
+                                break;
+                        }
+                    }
+                }
+                sleep(10)
             }
-            sleep(10)
+        } catch (Exception e) {
+            VoxelGame.instance.handleCriticalException(e)
         }
     }
 

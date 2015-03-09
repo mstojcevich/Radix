@@ -21,47 +21,54 @@ class CubeRenderer {
         int v = 0
         int u2 = 0
         int v2 = 0
-        glBegin(GL_QUADS);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y, z+1);
-            glTexCoord2f(u, v2); glVertex3f(x, y, z+1);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z+1);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z+1);
-            glEnd();
+
+        //top
+        glBegin GL_QUADS
+            glTexCoord2f(u, v); glVertex3f(x + 1, y, z+1)
+            glTexCoord2f(u, v2); glVertex3f(x, y, z+1)
+            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z+1)
+            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z+1)
+        glEnd()
+
         //left
-            glBegin(GL_QUADS);
-            glTexCoord2f(u, v); glVertex3f(x, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x, y, z + 1);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x, y + 1, z);
-            glEnd();
-            //right
-            glBegin(GL_QUADS);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x + 1, y + 1, z);
-            glTexCoord2f(u2, v2); glVertex3f(x + 1, y + 1, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y, z + 1);
-            glEnd();
-            //front
-            glBegin(GL_QUADS);
-            glTexCoord2f(u, v); glVertex3f(x, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x + 1, y, z);
-            glTexCoord2f(u2, v2); glVertex3f(x + 1, y, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x, y, z + 1);
-            glEnd();
+        glBegin GL_QUADS
+            glTexCoord2f(u, v); glVertex3f(x, y, z)
+            glTexCoord2f(u, v2); glVertex3f(x, y, z + 1)
+            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z + 1)
+            glTexCoord2f(u2, v); glVertex3f(x, y + 1, z)
+        glEnd()
+
+        //right
+        glBegin GL_QUADS
+            glTexCoord2f(u, v); glVertex3f(x + 1, y, z)
+            glTexCoord2f(u, v2); glVertex3f(x + 1, y + 1, z)
+            glTexCoord2f(u2, v2); glVertex3f(x + 1, y + 1, z + 1)
+            glTexCoord2f(u2, v); glVertex3f(x + 1, y, z + 1)
+        glEnd()
+
+        //front
+        glBegin GL_QUADS
+            glTexCoord2f(u, v); glVertex3f(x, y, z)
+            glTexCoord2f(u, v2); glVertex3f(x + 1, y, z)
+            glTexCoord2f(u2, v2); glVertex3f(x + 1, y, z + 1)
+            glTexCoord2f(u2, v); glVertex3f(x, y, z + 1)
+        glEnd()
+
         //back
-            glBegin(GL_QUADS);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y + 1, z);
-            glTexCoord2f(u, v2); glVertex3f(x, y + 1, z);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z + 1);
-            glEnd();
+        glBegin GL_QUADS
+            glTexCoord2f(u, v); glVertex3f(x + 1, y + 1, z)
+            glTexCoord2f(u, v2); glVertex3f(x, y + 1, z)
+            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z + 1)
+            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z + 1)
+        glEnd()
+
         //bottom
-            glBegin(GL_QUADS);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x, y, z);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z);
-            glEnd();
+        glBegin GL_QUADS
+            glTexCoord2f(u, v); glVertex3f(x + 1, y, z)
+            glTexCoord2f(u, v2); glVertex3f(x, y, z)
+            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z)
+            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z)
+        glEnd()
     }
 
 }

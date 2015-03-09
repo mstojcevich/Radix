@@ -1,5 +1,6 @@
 package sx.lambda.mstojcevich.voxel.world;
 
+import io.netty.util.internal.ConcurrentSet;
 import sx.lambda.mstojcevich.voxel.VoxelGame;
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI;
 import sx.lambda.mstojcevich.voxel.api.events.worldgen.EventFinishChunkGen;
@@ -11,10 +12,7 @@ import sx.lambda.mstojcevich.voxel.world.chunk.Chunk;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 import sx.lambda.mstojcevich.voxel.world.generation.SimplexNoise;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -29,7 +27,7 @@ public class World implements IWorld {
     private static final int SEA_LEVEL = 64;
 
     private final Map<Vec3i, IChunk> chunkMap = new ConcurrentHashMap<>();
-    private final List<IChunk> chunkList = new CopyOnWriteArrayList<>();
+    private final Set<IChunk> chunkList = new ConcurrentSet<IChunk>();
 
     private static final float GRAVITY = 4.69f;
 

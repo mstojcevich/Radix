@@ -114,17 +114,17 @@ public class VoxelGame {
 
     private void start() throws LWJGLException {
         settingsManager = new SettingsManager()
-        setupWindow();
-        this.setupOGL();
+        setupWindow()
+        setupOGL()
         world = new World(remote, false)
         player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
         player.init()
-        world.addEntity(player)
+        world.addEntity player
         currentScreen = new IngameHUD()
         currentScreen.init()
-        this.startHandlers()
-        this.setRenderer(new GameRenderer(this))
-        this.hudDisplayList = glGenLists(1)
+        startHandlers()
+        setRenderer(new GameRenderer(this))
+        hudDisplayList = glGenLists 1
         rerenderHud()
         if(remote) {
             new Thread() {
@@ -135,7 +135,7 @@ public class VoxelGame {
             }.start()
         }
         if(!remote) {
-            world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())
+            world.loadChunks(new EntityPosition(0, 0, 0), settingsManager.visualSettings.viewDistance)
         }
 
         new Thread() {
@@ -146,24 +146,23 @@ public class VoxelGame {
 
                     VoxelGameAPI.instance.eventManager.push(new EventGameTick(world))
 
-                    Thread.sleep(50l);
+                    sleep(50l);
                 }
             }
         }.start()
 
         VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
-
-        this.run()
+        run()
     }
 
     private void startHandlers() {
         for(RepeatedTask r : handlers) {
-            new Thread(r, r.getIdentifier()).start()
+            new Thread(r, r.identifier).start()
         }
     }
 
     private void setupWindow() throws LWJGLException {
-        Display.setFullscreen getSettingsManager().getVisualSettings().isFullscreen()
+        Display.setFullscreen settingsManager.visualSettings.fullscreen
 
         Display.setTitle GAME_TITLE
 
@@ -220,7 +219,7 @@ public class VoxelGame {
             render()
 
             Display.update()
-            Display.sync getSettingsManager().getVisualSettings().getMaxFPS()
+            Display.sync settingsManager.visualSettings.maxFPS
 
             if (renderedFrames % 100 == 0) {
                 println renderedFrames / ((System.currentTimeMillis() - startTime) / 1000)
@@ -228,9 +227,9 @@ public class VoxelGame {
         }
         done = true
         Display.destroy()
-        if(isRemote() && this.serverChanCtx != null) {
-            this.serverChanCtx.writeAndFlush(new PacketLeaving("Game closed"))
-            this.serverChanCtx.disconnect()
+        if(isRemote() && serverChanCtx != null) {
+            serverChanCtx.writeAndFlush(new PacketLeaving("Game closed"))
+            serverChanCtx.disconnect()
         }
     }
 
@@ -253,7 +252,7 @@ public class VoxelGame {
         prepare2D()
 
         glCallList hudDisplayList //TODO move to HUD GUI
-        currentScreen.render(true) //Render as ingame
+        currentScreen.render true //Render as ingame
 
         glPopMatrix()
         glPopAttrib()
@@ -272,7 +271,7 @@ public class VoxelGame {
     private static void prepare2D() {
         glMatrixMode GL_PROJECTION
         glLoadIdentity()
-        glOrtho(0, Display.getWidth(), Display.getHeight(), 0, -1, 1)
+        glOrtho(0, Display.width, Display.height, 0, -1, 1)
         glMatrixMode GL_MODELVIEW
         glLoadIdentity()
         glColor4f(1, 1, 1, 1)
@@ -285,24 +284,24 @@ public class VoxelGame {
         glMatrixMode GL_PROJECTION //Currently altering projection matrix
         glLoadIdentity()
 
-        GLU.gluPerspective(100, (float) Display.getWidth() / Display.getHeight(), 0.1f,
-                settingsManager.visualSettings.viewDistance * world.getChunkSize());
+        GLU.gluPerspective(100, (float) Display.width / Display.height, 0.1f,
+                settingsManager.visualSettings.viewDistance * world.chunkSize);
         //Set up camera
 
         glMatrixMode GL_MODELVIEW //Currently altering modelview matrix
         glLoadIdentity()
 
-        getTextureManager().bindTexture(-1)
+        textureManager.bindTexture(-1)
     }
 
     public void updateSelectedBlock() {
         PlotCell3f plotter = new PlotCell3f(0, 0, 0, 1, 1, 1)
-        float x = player.getPosition().getX()
-        float y = player.getPosition().getY() + player.getEyeHeight()
-        float z = player.getPosition().getZ()
-        float pitch = player.getRotation().getPitch()
-        float yaw = player.getRotation().getYaw()
-        float reach = player.getReach()
+        float x = player.position.x
+        float y = player.position.y
+        float z = player.position.z
+        float pitch = player.rotation.pitch
+        float yaw = player.rotation.yaw
+        float reach = player.reach
 
         float deltaX = (float)(Math.cos(Math.toRadians(pitch)) * Math.sin(Math.toRadians(yaw)))
         float deltaY = (float)(Math.sin(Math.toRadians(pitch)))
@@ -333,7 +332,7 @@ public class VoxelGame {
     }
 
     public void addToGLQueue(Runnable runnable) {
-        glQueue.add(runnable)
+        glQueue.add runnable
     }
 
     public static VoxelGame getInstance() {
@@ -343,7 +342,7 @@ public class VoxelGame {
     public void rerenderHud() {
         if(player == null || world == null)return
         glNewList(hudDisplayList, GL_COMPILE)
-        player.getItemInHand().getRenderer().render2d(0, 0, 20)
+        player.itemInHand.renderer.render2d(0, 0, 20)
         glEndList()
     }
 
@@ -386,13 +385,13 @@ public class VoxelGame {
 
     private ShaderProgram createShader(String shaderName) {
         String nameNoExt = "/shaders/$shaderName/$shaderName"
-        String vertex = this.getClass().getResourceAsStream(nameNoExt + ".vert").getText()
-        String fragment = this.getClass().getResourceAsStream(nameNoExt + ".frag").getText()
+        String vertex = this.class.getResourceAsStream(nameNoExt + ".vert").text
+        String fragment = this.class.getResourceAsStream(nameNoExt + ".frag").text
 
         ShaderProgram program = new ShaderProgram(vertex, fragment);
 
-        if(!program.getLog().isEmpty()) {
-            System.err.println(program.getLog())
+        if(!program.log.isEmpty()) {
+            System.err.println program.log
             return null
         }
 

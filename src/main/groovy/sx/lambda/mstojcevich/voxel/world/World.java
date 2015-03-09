@@ -27,7 +27,7 @@ public class World implements IWorld {
     private static final int SEA_LEVEL = 64;
 
     private final Map<Vec3i, IChunk> chunkMap = new ConcurrentHashMap<>();
-    private final Set<IChunk> chunkList = new ConcurrentSet<IChunk>();
+    private final Set<IChunk> chunkList = new ConcurrentSet<>();
 
     private static final float GRAVITY = 4.69f;
 

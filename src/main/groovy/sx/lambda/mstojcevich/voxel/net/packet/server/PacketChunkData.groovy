@@ -17,7 +17,7 @@ class PacketChunkData implements ServerPacket {
 
     @Override
     void handleClientReceive(ChannelHandlerContext ctx) {
-        new Thread() {
+        new Thread("Chunk Add") {
             @Override
             public void run() {
                 VoxelGame.instance.getWorld().addChunk(chunk)

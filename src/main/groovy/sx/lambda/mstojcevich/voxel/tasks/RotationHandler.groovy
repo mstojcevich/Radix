@@ -33,8 +33,8 @@ class RotationHandler implements RepeatedTask {
                 game.getPlayer().getRotation().offset(deltaPitch, deltaYaw)
                 game.updateSelectedBlock()
                 game.calculateFrustum()
-                Thread.yield()
             }
+            sleep(10)
         }
     }
 

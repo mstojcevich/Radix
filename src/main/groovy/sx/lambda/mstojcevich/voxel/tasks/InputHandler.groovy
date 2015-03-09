@@ -90,7 +90,7 @@ class InputHandler implements RepeatedTask {
                     }
                 }
             }
-            Thread.yield()
+            sleep(10)
         }
     }
 

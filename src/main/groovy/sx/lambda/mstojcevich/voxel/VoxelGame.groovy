@@ -127,7 +127,7 @@ public class VoxelGame {
         this.hudDisplayList = glGenLists(1)
         rerenderHud()
         if(remote) {
-            new Thread() {
+            new Thread("Client Connection") {
                 @Override
                 public void run() {
                     new ClientConnection(hostname, port).start()
@@ -138,7 +138,7 @@ public class VoxelGame {
             world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())
         }
 
-        new Thread() {
+        new Thread("Entity Update") {
             @Override
             public void run() {
                 while(!done) {
@@ -146,7 +146,7 @@ public class VoxelGame {
 
                     VoxelGameAPI.instance.eventManager.push(new EventGameTick(world))
 
-                    Thread.sleep(50l);
+                    sleep(50l);
                 }
             }
         }.start()
@@ -225,6 +225,8 @@ public class VoxelGame {
             if (renderedFrames % 100 == 0) {
                 println renderedFrames / ((System.currentTimeMillis() - startTime) / 1000)
             }
+
+            Thread.yield()
         }
         done = true
         Display.destroy()

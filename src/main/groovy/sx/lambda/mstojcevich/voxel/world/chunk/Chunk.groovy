@@ -1,6 +1,8 @@
 package sx.lambda.mstojcevich.voxel.world.chunk
 
 import groovy.transform.CompileStatic
+import org.lwjgl.BufferUtils
+import org.lwjgl.opengl.GL15
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.api.events.render.EventChunkRender
 import sx.lambda.mstojcevich.voxel.block.Block
@@ -8,6 +10,9 @@ import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.world.IWorld
+
+import java.nio.FloatBuffer
+import java.nio.IntBuffer
 
 import static org.lwjgl.opengl.GL11.*
 
@@ -23,9 +28,17 @@ public class Chunk implements IChunk {
 
     private transient int displayList = -1
 
-    private Vec3i startPosition;
+    private Vec3i startPosition
 
     private int highestPoint
+
+    private int blockCount
+    private transient int numVisibleSides = 0
+
+    private static final boolean USE_VBO = true
+    private transient int vboVertexHandle = -1
+    private transient int vboTextureHandle = -1
+    private transient int vboNormalHandle = -1
 
     public Chunk(IWorld world, Vec3i startPosition) {
         this.parentWorld = world
@@ -37,6 +50,7 @@ public class Chunk implements IChunk {
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
                 int yMax = world.getSeaLevel() + world.getHeightAboveSeaLevel(startPosition.x + x, startPosition.z + z);
+                blockCount += yMax
                 for (int y = 0; y < yMax; y++) {
                     blockList[x][y][z] = Block.STONE //Set to stone by default
                     highestPoint = Math.max(highestPoint, y + 1)
@@ -47,65 +61,176 @@ public class Chunk implements IChunk {
 
     @Override
     public void rerender() {
-        if (displayList == -1 || displayList == 0) {
-            glDeleteLists(displayList, 1)
-            displayList = glGenLists(1)
-        }
+        if (USE_VBO) {
+            if(vboVertexHandle == -1 || vboVertexHandle == 0) {
+                IntBuffer buffer = BufferUtils.createIntBuffer(3)
+                GL15.glGenBuffers(buffer)
+                vboVertexHandle = buffer.get(0)
+                vboTextureHandle = buffer.get(1)
+                vboNormalHandle = buffer.get(2)
 
-        glNewList(displayList, GL_COMPILE)
-        for (int x = 0; x < size; x++) {
-            for (int z = 0; z < size; z++) {
-                for (int y = 0; y < height; y++) {
-                    Block block = blockList[x][y][z]
-                    if (block == null) continue;
-                    //block.getRenderer().prerender()
+                glEnableClientState(GL_NORMAL_ARRAY)
+                glEnableClientState(GL_VERTEX_ARRAY)
+                glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+            }
 
-                    boolean shouldRenderTop = true;
-                    if (z == size - 1)
-                        shouldRenderTop = true;
-                    else if (blockList[x][y][z + 1] != null)
-                        shouldRenderTop = false
+            numVisibleSides = 6*blockCount
+            boolean[][][] shouldRenderTop = new boolean[size][height][size];
+            boolean[][][] shouldRenderBottom = new boolean[size][height][size];
+            boolean[][][] shouldRenderLeft = new boolean[size][height][size];
+            boolean[][][] shouldRenderRight = new boolean[size][height][size];
+            boolean[][][] shouldRenderFront = new boolean[size][height][size];
+            boolean[][][] shouldRenderBack = new boolean[size][height][size];
+            for (int x = 0; x < size; x++) {
+                for (int z = 0; z < size; z++) {
+                    for (int y = 0; y < height; y++) {
+                        Block block = blockList[x][y][z]
+                        if (block != null) {
+                            int zed = z
+                            shouldRenderTop[x][y][z] = true
+                            if (z == size - 1)
+                                shouldRenderTop[x][y][z] = true
+                            else if (blockList[x][y][zed + 1] != null) {
+                                shouldRenderTop[x][y][z] = false
+                                numVisibleSides--
+                            }
 
-                    boolean shouldRenderLeft = true
-                    if (x == 0)
-                        shouldRenderLeft = true
-                    else if (blockList[x - 1][y][z] != null)
-                        shouldRenderLeft = false
+                            shouldRenderLeft[x][y][z] = true
+                            if (x == 0)
+                                shouldRenderLeft[x][y][z] = true
+                            else if (blockList[x - 1][y][z] != null) {
+                                shouldRenderLeft[x][y][z] = false
+                                numVisibleSides--
+                            }
 
-                    boolean shouldRenderRight = true
-                    if (x == size - 1)
-                        shouldRenderRight = true
-                    else if (blockList[x + 1][y][z] != null)
-                        shouldRenderRight = false
+                            shouldRenderRight[x][y][z] = true
+                            if (x == size - 1)
+                                shouldRenderRight[x][y][z] = true
+                            else if (blockList[x + 1][y][z] != null) {
+                                shouldRenderRight[x][y][z] = false
+                                numVisibleSides--
+                            }
 
-                    boolean shouldRenderFront = true
-                    if (y == 0)
-                        shouldRenderFront = true
-                    else if (blockList[x][y - 1][z] != null)
-                        shouldRenderFront = false
+                            shouldRenderFront[x][y][z] = true
+                            if (y == 0)
+                                shouldRenderFront[x][y][z] = true
+                            else if (blockList[x][y - 1][z] != null) {
+                                shouldRenderFront[x][y][z] = false
+                                numVisibleSides--
+                            }
 
-                    boolean shouldRenderBack = true
-                    if (y == height - 1)
-                        shouldRenderBack = true
-                    else if (blockList[x][y + 1][z] != null)
-                        shouldRenderBack = false
+                            shouldRenderBack[x][y][z] = true
+                            if (y == height - 1)
+                                shouldRenderBack[x][y][z] = true
+                            else if (blockList[x][y + 1][z] != null) {
+                                shouldRenderBack[x][y][z] = false
+                                numVisibleSides--
+                            }
 
-                    boolean shouldRenderBottom = true
-                    if (z == 0)
-                        shouldRenderBottom = true
-                    else if (blockList[x][y][z - 1] != null)
-                        shouldRenderBottom = false;
-
-                    block.getRenderer().render(x, y, z,
-                            shouldRenderTop, shouldRenderBottom,
-                            shouldRenderLeft, shouldRenderRight,
-                            shouldRenderFront, shouldRenderBack)
+                            shouldRenderBottom[x][y][z] = true
+                            if (z == 0)
+                                shouldRenderBottom[x][y][z] = true
+                            else if (blockList[x][y][zed - 1] != null) {
+                                shouldRenderBottom[x][y][z] = false
+                                numVisibleSides--
+                            }
+                        }
+                    }
                 }
             }
-        }
-        glEndList()
 
-        VoxelGameAPI.instance.eventManager.push(new EventChunkRender(this))
+            FloatBuffer vertexPosData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
+            FloatBuffer textureData = BufferUtils.createFloatBuffer(numVisibleSides*4*2)
+            FloatBuffer normalData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
+            for (int x = 0; x < size; x++) {
+                for (int z = 0; z < size; z++) {
+                    for (int y = 0; y < height; y++) {
+                        Block block = blockList[x][y][z]
+                        if(block != null) {
+                            block.renderer.renderVBO(x, y, z,
+                                    vertexPosData, textureData, normalData,
+                                    shouldRenderTop[x][y][z], shouldRenderBottom[x][y][z],
+                                    shouldRenderLeft[x][y][z], shouldRenderRight[x][y][z],
+                                    shouldRenderFront[x][y][z], shouldRenderBack[x][y][z])
+                        }
+                    }
+                }
+            }
+            vertexPosData.flip()
+            textureData.flip()
+            normalData.flip()
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexPosData, GL15.GL_STATIC_DRAW)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboTextureHandle)
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, textureData, GL15.GL_STATIC_DRAW)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, normalData, GL15.GL_STATIC_DRAW)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
+        } else {
+            if (displayList == -1 || displayList == 0) {
+                glDeleteLists(displayList, 1)
+                displayList = glGenLists(1)
+            }
+
+            glNewList(displayList, GL_COMPILE)
+            for (int x = 0; x < size; x++) {
+                for (int z = 0; z < size; z++) {
+                    for (int y = 0; y < height; y++) {
+                        Block block = blockList[x][y][z]
+                        if (block == null) continue;
+                        //block.getRenderer().prerender()
+
+                        boolean shouldRenderTop = true;
+                        if (z == size - 1)
+                            shouldRenderTop = true;
+                        else if (blockList[x][y][z + 1] != null)
+                            shouldRenderTop = false
+
+                        boolean shouldRenderLeft = true
+                        if (x == 0)
+                            shouldRenderLeft = true
+                        else if (blockList[x - 1][y][z] != null)
+                            shouldRenderLeft = false
+
+                        boolean shouldRenderRight = true
+                        if (x == size - 1)
+                            shouldRenderRight = true
+                        else if (blockList[x + 1][y][z] != null)
+                            shouldRenderRight = false
+
+                        boolean shouldRenderFront = true
+                        if (y == 0)
+                            shouldRenderFront = true
+                        else if (blockList[x][y - 1][z] != null)
+                            shouldRenderFront = false
+
+                        boolean shouldRenderBack = true
+                        if (y == height - 1)
+                            shouldRenderBack = true
+                        else if (blockList[x][y + 1][z] != null)
+                            shouldRenderBack = false
+
+                        boolean shouldRenderBottom = true
+                        if (z == 0)
+                            shouldRenderBottom = true
+                        else if (blockList[x][y][z - 1] != null)
+                            shouldRenderBottom = false;
+
+                        block.getRenderer().render(x, y, z,
+                                shouldRenderTop, shouldRenderBottom,
+                                shouldRenderLeft, shouldRenderRight,
+                                shouldRenderFront, shouldRenderBack)
+                    }
+                }
+            }
+            glEndList()
+
+            VoxelGameAPI.instance.eventManager.push(new EventChunkRender(this))
+        }
     }
 
     @Override
@@ -113,7 +238,20 @@ public class Chunk implements IChunk {
         glPushMatrix();
 
         VoxelGame.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap.getTextureID())
-        glCallList(displayList)
+        if(USE_VBO) {
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
+            glVertexPointer(3, GL_FLOAT, 0, 0)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboTextureHandle)
+            glTexCoordPointer(2, GL_FLOAT, 0, 0)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
+            glNormalPointer(GL_FLOAT, 0, 0)
+
+            glDrawArrays(GL_QUADS, 0, numVisibleSides*4)
+        } else {
+            glCallList(displayList)
+        }
 
         glPopMatrix();
 
@@ -151,6 +289,8 @@ public class Chunk implements IChunk {
         if (y > height - 1) return
 
         blockList[x][y][z] = null
+
+        blockCount--
     }
 
     @Override
@@ -171,6 +311,8 @@ public class Chunk implements IChunk {
         if (block != null) {
             highestPoint = Math.max(highestPoint, y + 1)
         }
+
+        blockCount++
     }
 
     @Override

@@ -8,6 +8,9 @@ import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.DisplayMode
 import org.lwjgl.util.glu.GLU
+import org.newdawn.slick.Color
+import org.newdawn.slick.UnicodeFont
+import org.newdawn.slick.font.effects.ColorEffect
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.api.events.EventGameTick
 import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
@@ -17,7 +20,6 @@ import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketLeaving
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.settings.SettingsManager
-import sx.lambda.mstojcevich.voxel.tasks.*
 import sx.lambda.mstojcevich.voxel.tasks.InputHandler
 import sx.lambda.mstojcevich.voxel.tasks.MovementHandler
 import sx.lambda.mstojcevich.voxel.tasks.RepeatedTask
@@ -39,7 +41,9 @@ import sx.lambda.mstojcevich.voxel.util.gl.ShaderProgram
 
 import javax.swing.JOptionPane
 import javax.vecmath.Vector3f
+import java.awt.Font
 import java.nio.FloatBuffer
+import java.text.DecimalFormat
 import java.util.concurrent.LinkedBlockingDeque
 
 import static org.lwjgl.opengl.GL11.*
@@ -73,6 +77,8 @@ public class VoxelGame {
 
     private GuiScreen currentScreen
 
+    private int fps
+
     private TextureManager textureManager = new TextureManager()
     private ShaderManager shaderManager = new ShaderManager()
 
@@ -90,6 +96,8 @@ public class VoxelGame {
     private String hostname
     private short port
     private ChannelHandlerContext serverChanCtx;
+
+    private UnicodeFont debugTextRenderer;
 
     private RepeatedTask[] handlers = [
         new WorldLoader(this),
@@ -117,6 +125,10 @@ public class VoxelGame {
         settingsManager = new SettingsManager()
         setupWindow();
         this.setupOGL();
+        debugTextRenderer = new UnicodeFont(new Font(Font.MONOSPACED, Font.PLAIN, 16))
+        debugTextRenderer.effects.add(new ColorEffect(java.awt.Color.WHITE))
+        debugTextRenderer.addAsciiGlyphs()
+        debugTextRenderer.loadGlyphs()
         world = new World(remote, false)
         player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
         player.init()
@@ -229,7 +241,9 @@ public class VoxelGame {
                 Display.sync getSettingsManager().getVisualSettings().getMaxFPS()
 
                 if (renderedFrames % 100 == 0) {
-                    println renderedFrames / ((System.currentTimeMillis() - startTime) / 1000)
+                    fps = (int)(renderedFrames / ((System.currentTimeMillis() - startTime) / 1000))
+                    startTime = System.currentTimeMillis()
+                    renderedFrames = 0
                 }
 
                 Thread.yield()
@@ -262,6 +276,26 @@ public class VoxelGame {
         glPushMatrix()
         glPushAttrib GL_ENABLE_BIT
         prepare2D()
+
+        glEnable(GL_BLEND)
+        int debugTextHeight = 0
+        String fpsStr = "FPS: " + Integer.toString(fps)
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr, Color.white)
+        debugTextHeight += debugTextRenderer.getLineHeight()
+        DecimalFormat posFormat = new DecimalFormat("#.00");
+        String coordsStr = String.format("(x,y,z): %s,%s,%s",
+                posFormat.format(player.position.x),
+                posFormat.format(player.position.y),
+                posFormat.format(player.position.z))
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(coordsStr), debugTextHeight, coordsStr)
+        debugTextHeight += debugTextRenderer.getLineHeight()
+        String headingStr = String.format("(yaw,pitch): %s,%s",
+                posFormat.format(player.rotation.yaw),
+                posFormat.format(player.rotation.pitch))
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(headingStr), debugTextHeight, headingStr)
+        debugTextHeight += debugTextRenderer.getLineHeight()
+        String threadsStr = "Active threads:" + Thread.activeCount()
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
 
         glCallList hudDisplayList //TODO move to HUD GUI
         currentScreen.render(true) //Render as ingame
@@ -419,6 +453,7 @@ public class VoxelGame {
     public void setServerChanCtx(ChannelHandlerContext ctx) { serverChanCtx = ctx }
 
     public void handleCriticalException(Exception ex) {
+        ex.printStackTrace()
         this.done = true
         Mouse.setGrabbed false
         JOptionPane.showMessageDialog(null, "$GAME_TITLE crashed. $ex", "$GAME_TITLE crashed", JOptionPane.ERROR_MESSAGE)

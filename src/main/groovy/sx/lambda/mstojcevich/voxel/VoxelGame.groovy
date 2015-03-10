@@ -51,7 +51,7 @@ import static org.lwjgl.opengl.GL11.*
 @CompileStatic
 public class VoxelGame {
 
-    public static final boolean DEBUG = false
+    public static final boolean DEBUG = true
 
     private static VoxelGame theGame
 
@@ -78,6 +78,8 @@ public class VoxelGame {
     private GuiScreen currentScreen
 
     private int fps
+    public int chunkRenderTimes = 0
+    public int numChunkRenders = 0
 
     private TextureManager textureManager = new TextureManager()
     private ShaderManager shaderManager = new ShaderManager()
@@ -226,9 +228,9 @@ public class VoxelGame {
 
         glLightModel(GL_LIGHT_MODEL_AMBIENT, diffuseVec)
 
-//        defaultShader = createShader("default")
-//
-//        getShaderManager().setShader(defaultShader)
+        defaultShader = createShader("default")
+
+        getShaderManager().setShader(defaultShader)
     }
 
     private void run() {
@@ -279,8 +281,15 @@ public class VoxelGame {
 
         glEnable(GL_BLEND)
         int debugTextHeight = 0
-        String fpsStr = "FPS: " + Integer.toString(fps)
+        String fpsStr = "FPS: $fps"
         debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr, Color.white)
+        debugTextHeight += debugTextRenderer.getLineHeight()
+        int acrt = 0
+        if(numChunkRenders > 0) {
+            acrt = (int)(chunkRenderTimes/numChunkRenders)
+        }
+        String lcrtStr = "AWRT: $acrt ns"
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(lcrtStr), debugTextHeight, lcrtStr, Color.white)
         debugTextHeight += debugTextRenderer.getLineHeight()
         DecimalFormat posFormat = new DecimalFormat("#.00");
         String coordsStr = String.format("(x,y,z): %s,%s,%s",

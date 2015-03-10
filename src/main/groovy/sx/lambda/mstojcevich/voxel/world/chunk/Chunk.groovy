@@ -39,6 +39,7 @@ public class Chunk implements IChunk {
     private transient int vboVertexHandle = -1
     private transient int vboTextureHandle = -1
     private transient int vboNormalHandle = -1
+    private transient int vboColorHandle = -1
 
     public Chunk(IWorld world, Vec3i startPosition) {
         this.parentWorld = world
@@ -63,15 +64,17 @@ public class Chunk implements IChunk {
     public void rerender() {
         if (USE_VBO) {
             if(vboVertexHandle == -1 || vboVertexHandle == 0) {
-                IntBuffer buffer = BufferUtils.createIntBuffer(3)
+                IntBuffer buffer = BufferUtils.createIntBuffer(4)
                 GL15.glGenBuffers(buffer)
                 vboVertexHandle = buffer.get(0)
                 vboTextureHandle = buffer.get(1)
                 vboNormalHandle = buffer.get(2)
+                vboColorHandle = buffer.get(3)
 
                 glEnableClientState(GL_NORMAL_ARRAY)
                 glEnableClientState(GL_VERTEX_ARRAY)
                 glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+                glEnableClientState(GL_COLOR_ARRAY)
             }
 
             numVisibleSides = 6*blockCount
@@ -81,11 +84,18 @@ public class Chunk implements IChunk {
             boolean[][][] shouldRenderRight = new boolean[size][height][size];
             boolean[][][] shouldRenderFront = new boolean[size][height][size];
             boolean[][][] shouldRenderBack = new boolean[size][height][size];
+            float[][][] lightLevels = new float[size][height][size];
             for (int x = 0; x < size; x++) {
                 for (int z = 0; z < size; z++) {
-                    for (int y = 0; y < height; y++) {
+                    float lightLevel = 1.0f
+                    boolean firstBlock = false
+                    for (int y = height-1; y >= 0; y--) {
                         Block block = blockList[x][y][z]
                         if (block != null) {
+                            if(!firstBlock) {
+                                firstBlock = true
+                                lightLevel = 1.0f
+                            }
                             int zed = z
                             shouldRenderTop[x][y][z] = true
                             if (z == size - 1)
@@ -134,7 +144,14 @@ public class Chunk implements IChunk {
                                 shouldRenderBottom[x][y][z] = false
                                 numVisibleSides--
                             }
+
+                            lightLevels[x][y][z] = lightLevel
+                        } else if(!firstBlock) {
+                            lightLevels[x][y][z] = 1.0f
+                        } else {
+                            lightLevels[x][y][z] = lightLevel
                         }
+                        lightLevel *= 0.8f
                     }
                 }
             }
@@ -142,13 +159,18 @@ public class Chunk implements IChunk {
             FloatBuffer vertexPosData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
             FloatBuffer textureData = BufferUtils.createFloatBuffer(numVisibleSides*4*2)
             FloatBuffer normalData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
+            FloatBuffer colorData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
             for (int x = 0; x < size; x++) {
                 for (int z = 0; z < size; z++) {
-                    for (int y = 0; y < height; y++) {
+                    boolean firstBlock = false
+                    for (int y = height-1; y >= 0; y--) {
                         Block block = blockList[x][y][z]
                         if(block != null) {
-                            block.renderer.renderVBO(x, y, z,
-                                    vertexPosData, textureData, normalData,
+                            if(!firstBlock) {
+                                firstBlock = true
+                            }
+                            block.renderer.renderVBO(x, y, z, lightLevels,
+                                    vertexPosData, textureData, normalData, colorData,
                                     shouldRenderTop[x][y][z], shouldRenderBottom[x][y][z],
                                     shouldRenderLeft[x][y][z], shouldRenderRight[x][y][z],
                                     shouldRenderFront[x][y][z], shouldRenderBack[x][y][z])
@@ -159,6 +181,7 @@ public class Chunk implements IChunk {
             vertexPosData.flip()
             textureData.flip()
             normalData.flip()
+            colorData.flip()
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
             GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexPosData, GL15.GL_STATIC_DRAW)
@@ -168,6 +191,9 @@ public class Chunk implements IChunk {
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
             GL15.glBufferData(GL15.GL_ARRAY_BUFFER, normalData, GL15.GL_STATIC_DRAW)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
+            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorData, GL15.GL_STATIC_DRAW)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
         } else {
@@ -248,13 +274,15 @@ public class Chunk implements IChunk {
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
             glNormalPointer(GL_FLOAT, 0, 0)
 
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
+            glColorPointer(3, GL_FLOAT, 0, 0)
+
             glDrawArrays(GL_QUADS, 0, numVisibleSides*4)
         } else {
             glCallList(displayList)
         }
 
         glPopMatrix();
-
     }
 
     public Block getBlockAtPosition(Vec3i position) {

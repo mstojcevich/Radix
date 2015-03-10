@@ -97,8 +97,8 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderVBO(float x, float y, float z,
-                          FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer,
+    public void renderVBO(float x, float y, float z, float[][][] lightLevels,
+                          FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,
                           boolean shouldRenderFront, boolean shouldRenderBack) {
@@ -125,6 +125,13 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, 0, 1,
                     0, 0, 1
             });
+            float usedLightLevel = 1.0f;
+            if(z+1 < lightLevels.length) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x][(int)y][(int)z+1];
+            }
+            for(int i = 0; i < 4*3; i++) {
+                colorBuffer.put(usedLightLevel);
+            }
         }
 
         if(shouldRenderLeft) {
@@ -147,6 +154,13 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     -1, 0, 0,
                     -1, 0, 0,
             });
+            float usedLightLevel = 1.0f;
+            if(x-1 > 0) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x-1][(int)y][(int)z];
+            }
+            for(int i = 0; i < 4*3; i++) {
+                colorBuffer.put(usedLightLevel);
+            }
         }
 
         if(shouldRenderRight) {
@@ -169,6 +183,13 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     1, 0, 0,
                     1, 0, 0,
             });
+            float usedLightLevel = 1.0f;
+            if(x+1 < lightLevels.length) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x+1][(int)y][(int)z];
+            }
+            for(int i = 0; i < 4*3; i++) {
+                colorBuffer.put(usedLightLevel);
+            }
         }
 
         if(shouldRenderFront) {
@@ -191,6 +212,13 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, -1, 0,
                     0, -1, 0,
             });
+            float usedLightLevel = 1.0f;
+            if(y-1 > 0) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x][(int)y-1][(int)z];
+            }
+            for(int i = 0; i < 4*3; i++) {
+                colorBuffer.put(usedLightLevel);
+            }
         }
 
         if(shouldRenderBack) {
@@ -213,6 +241,13 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, 1, 0,
                     0, 1, 0,
             });
+            float usedLightLevel = 1.0f;
+            if(y+1 < lightLevels[0].length) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x][(int)y+1][(int)z];
+            }
+            for(int i = 0; i < 4*3; i++) {
+                colorBuffer.put(usedLightLevel);
+            }
         }
 
         if(shouldRenderBottom) {
@@ -235,6 +270,13 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, 0, -1,
                     0, 0, -1,
             });
+            float usedLightLevel = 1.0f;
+            if(z-1 > 0) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x][(int)y][(int)z-1];
+            }
+            for(int i = 0; i < 4*3; i++) {
+                colorBuffer.put(usedLightLevel);
+            }
         }
     }
 

@@ -9,8 +9,8 @@ public interface IBlockRenderer {
                 boolean shouldRenderLeft, boolean shouldRenderRight,
                 boolean shouldRenderFront, boolean shouldRenderBack);
 
-    public void renderVBO(float x, float y, float z,
-                          FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer,
+    public void renderVBO(float x, float y, float z, float[][][] lightLevels,
+                          FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,
                           boolean shouldRenderFront, boolean shouldRenderBack);

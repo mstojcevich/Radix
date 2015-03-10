@@ -66,6 +66,7 @@ public class World implements IWorld {
 
     public void render() {
         if(!server) {
+            long renderStartNS = System.nanoTime();
             for (IChunk c : this.chunkList) {
                 if (VoxelGame.getInstance().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
                     glPushMatrix();
@@ -74,6 +75,12 @@ public class World implements IWorld {
                     glPopMatrix();
                 }
             }
+            if(VoxelGame.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
+                VoxelGame.getInstance().numChunkRenders = 0;
+                VoxelGame.getInstance().chunkRenderTimes = 0;
+            }
+            VoxelGame.getInstance().chunkRenderTimes += (int)(System.nanoTime() - renderStartNS);
+            VoxelGame.getInstance().numChunkRenders++;
         } else {
             System.err.println("Why the hell is the server running render?");
         }

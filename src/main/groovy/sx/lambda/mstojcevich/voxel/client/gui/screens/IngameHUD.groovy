@@ -4,6 +4,7 @@ import org.lwjgl.opengl.Display
 import org.newdawn.slick.opengl.Texture
 import org.newdawn.slick.opengl.TextureLoader
 import sx.lambda.mstojcevich.voxel.VoxelGame
+import sx.lambda.mstojcevich.voxel.block.Block
 
 import static org.lwjgl.opengl.GL11.*
 import sx.lambda.mstojcevich.voxel.client.gui.BufferedGUIScreen
@@ -26,12 +27,26 @@ class IngameHUD extends BufferedGUIScreen {
 
     @Override
     public void render(boolean inGame) {
-       // super.render(inGame)
+        glEnable(GL_BLEND)
+
+        Block blockInHead = VoxelGame.instance.player.getBlockInHead(VoxelGame.instance.world)
+        if(blockInHead != null) {
+            switch(blockInHead) {
+                case Block.WATER:
+                    glColor4f(1, 1, 1, 0.6f)
+                    Block.WATER.getRenderer().render2d(0, 0, Math.max(Display.getWidth(), Display.getHeight()))
+                    glColor4f(1, 1, 1, 1)
+                    break;
+                default:
+                    glColor4f(1, 1, 1, 1)
+                    blockInHead.getRenderer().render2d(0, 0, Math.max(Display.getWidth(), Display.getHeight()))
+            }
+        }
+
         float centerX = Display.getWidth()/2f
         float centerY = Display.getHeight()/2f
         float crosshairSize = 32
         float halfCrosshairSize = crosshairSize/2f
-        glEnable(GL_BLEND)
         glBlendFunc(775, 769)
         this.drawTexture(0, (int)Math.round(centerX-halfCrosshairSize), (int)Math.round(centerY-halfCrosshairSize), (int)Math.round(centerX+halfCrosshairSize), (int)Math.round(centerY+halfCrosshairSize))
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)

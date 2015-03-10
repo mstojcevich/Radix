@@ -6,8 +6,11 @@ import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.entity.LivingEntity
 import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketPlayerPosition
+import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.util.gl.ObjModel
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition
+import sx.lambda.mstojcevich.voxel.world.IWorld
+import sx.lambda.mstojcevich.voxel.world.chunk.IChunk
 
 @CompileStatic
 class Player extends LivingEntity implements Serializable {
@@ -59,6 +62,16 @@ class Player extends LivingEntity implements Serializable {
     @Override
     public ObjModel getDefaultModel() {
         playerModel
+    }
+
+    public Block getBlockInHead(IWorld world) {
+        Vec3i eyePosition = new Vec3i(getPosition().x as int, getPosition().y+HEIGHT as int, getPosition().z as int)
+        IChunk chunk = world.getChunkAtPosition(eyePosition)
+        if(chunk != null) {
+            return chunk.getBlockAtPosition(eyePosition)
+        } else {
+            return null
+        }
     }
 
 }

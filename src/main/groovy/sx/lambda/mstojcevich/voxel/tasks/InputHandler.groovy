@@ -12,6 +12,7 @@ import static org.lwjgl.input.Keyboard.KEY_SPACE
 import static org.lwjgl.input.Keyboard.KEY_UP
 import static org.lwjgl.input.Keyboard.getEventKey
 import static org.lwjgl.input.Keyboard.getEventKeyState
+import static org.lwjgl.input.Keyboard.isKeyDown
 import static org.lwjgl.input.Keyboard.next
 
 @CompileStatic
@@ -66,8 +67,8 @@ class InputHandler implements RepeatedTask {
                         switch (button) {
                             case 0:
                                 if (game.getSelectedBlock() != null) {
-                                    if (VoxelGame.instance.isRemote() && VoxelGame.instance.serverChanCtx != null) {
-                                        VoxelGame.instance.serverChanCtx.writeAndFlush(new PacketBreakBlock(
+                                    if (game.isRemote() && game.serverChanCtx != null) {
+                                        game.serverChanCtx.writeAndFlush(new PacketBreakBlock(
                                                 game.getSelectedBlock()))
                                     } else {
                                         game.getWorld().removeBlock(game.getSelectedBlock())
@@ -76,8 +77,8 @@ class InputHandler implements RepeatedTask {
                                 break;
                             case 1:
                                 if (game.getNextPlacePos() != null) {
-                                    if (VoxelGame.instance.isRemote() && VoxelGame.instance.serverChanCtx != null) {
-                                        VoxelGame.instance.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
+                                    if (game.isRemote() && game.serverChanCtx != null) {
+                                        game.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
                                                 game.getNextPlacePos(),
                                                 game.getPlayer().getItemInHand()
                                         ));
@@ -91,10 +92,13 @@ class InputHandler implements RepeatedTask {
                         }
                     }
                 }
+                if(isKeyDown(KEY_SPACE) && game.player.getBlockInFeet(game.world) == Block.WATER) {
+                    game.player.setYVelocity(0.02f);
+                }
                 sleep(10)
             }
         } catch (Exception e) {
-            VoxelGame.instance.handleCriticalException(e)
+            game.handleCriticalException(e)
         }
     }
 

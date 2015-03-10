@@ -1,7 +1,11 @@
 package sx.lambda.mstojcevich.voxel.entity
 
 import groovy.transform.CompileStatic
+import sx.lambda.mstojcevich.voxel.block.Block
+import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.util.gl.ObjModel
+import sx.lambda.mstojcevich.voxel.world.IWorld
+import sx.lambda.mstojcevich.voxel.world.chunk.IChunk
 
 @CompileStatic
 public abstract class LivingEntity extends Entity implements Serializable {
@@ -56,5 +60,15 @@ public abstract class LivingEntity extends Entity implements Serializable {
      * Called 20 times a second
      */
     public void onUpdate() {}
+
+    public Block getBlockInFeet(IWorld world) {
+        Vec3i feetPosition = new Vec3i(getPosition().x as int, getPosition().y as int, getPosition().z as int)
+        IChunk chunk = world.getChunkAtPosition(feetPosition)
+        if(chunk != null) {
+            return chunk.getBlockAtPosition(feetPosition)
+        } else {
+            return null
+        }
+    }
 
 }

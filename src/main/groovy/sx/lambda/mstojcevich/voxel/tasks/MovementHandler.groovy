@@ -1,7 +1,9 @@
 package sx.lambda.mstojcevich.voxel.tasks
 
 import groovy.transform.CompileStatic
+import org.lwjgl.input.Keyboard
 import sx.lambda.mstojcevich.voxel.VoxelGame
+import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition
 import sx.lambda.mstojcevich.voxel.entity.player.Player
 import sx.lambda.mstojcevich.voxel.util.Vec3i
@@ -109,12 +111,21 @@ class MovementHandler implements RepeatedTask {
                     IChunk playerChunk = world.getChunkAtPosition(playerPosition);
                     player.setOnGround(false)
                     if (playerChunk != null) {
-                        if (playerChunk.getBlockAtPosition(playerPosition) != null) {
-                            player.setOnGround(true)
+                        Block blockAtPlayer = playerChunk.getBlockAtPosition(playerPosition)
+                        if (blockAtPlayer != null) {
+                            if(blockAtPlayer.isSolid()) {
+                                player.setOnGround(true)
+                            }
                         }
                     }
 
-                    player.setYVelocity(world.applyGravity(player.getYVelocity(), moveDiffMS));
+                    if(player.getBlockInFeet(world) == Block.WATER) {
+                        if(!isKeyDown(KEY_SPACE)) {
+                            player.setYVelocity(-0.05f);
+                        }
+                    } else {
+                        player.setYVelocity(world.applyGravity(player.getYVelocity(), moveDiffMS));
+                    }
                     player.updateMovement();
                     game.calculateFrustum()
                 }
@@ -146,7 +157,13 @@ class MovementHandler implements RepeatedTask {
         IChunk newChunk2 = game.getWorld().getChunkAtPosition(newPosition2);
         if (newChunk2 == null) return true
         if (newChunk == null) return true
-        return newChunk.getBlockAtPosition(newPosition) != null || newChunk.getBlockAtPosition(newPosition2) != null
+        Block block1 = newChunk.getBlockAtPosition(newPosition);
+        Block block2 = newChunk.getBlockAtPosition(newPosition);
+        if(block1 != null || block2 != null) {
+            return block1.isSolid() && block2.isSolid();
+        } else {
+            return false;
+        }
     }
 
 }

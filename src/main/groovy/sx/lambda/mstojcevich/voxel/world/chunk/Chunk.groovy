@@ -65,7 +65,7 @@ public class Chunk implements IChunk {
                 for (int y = 0; y < yMax; y++) {
                     Block blockType = Block.STONE
 
-                    if(y == world.getSeaLevel() && y == yMax-1) {
+                    if(y == world.getSeaLevel()-1 && y == yMax-1) {
                         blockCount++
                         blockList[x][y+1][z] = Block.SAND
                     }

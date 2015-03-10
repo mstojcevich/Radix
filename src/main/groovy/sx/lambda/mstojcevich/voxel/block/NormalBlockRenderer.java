@@ -24,8 +24,8 @@ public class NormalBlockRenderer implements IBlockRenderer {
 
 	public NormalBlockRenderer(int blockID) {
 		this.blockID = blockID;
-        u = ((blockID%9)*TEXTURE_PERCENTAGE);
-        v = ((blockID/9)*TEXTURE_PERCENTAGE);
+        u = ((blockID%4)*TEXTURE_PERCENTAGE);
+        v = ((blockID/4)*TEXTURE_PERCENTAGE);
 	}
 
     @Override

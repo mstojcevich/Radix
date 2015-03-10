@@ -1,6 +1,7 @@
 package sx.lambda.mstojcevich.voxel.util.gl
 
 import groovy.transform.CompileStatic
+import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20
 
@@ -11,6 +12,8 @@ class ShaderManager {
 
     private int enableLightingLoc = -1
     private int enableTexturingLoc = -1
+    private int screenSizeLoc = -1
+    private int cameraRangeLoc = -1
 
     private ShaderProgram currentProgram
 
@@ -20,8 +23,13 @@ class ShaderManager {
             currentShaderID = id
             GL20.glUseProgram(program.getID())
             currentProgram = program
+
             this.enableLightingLoc = currentProgram.getUniformLocation("enableLighting")
             this.enableTexturingLoc = currentProgram.getUniformLocation("enableTexturing")
+            this.screenSizeLoc = currentProgram.getUniformLocation("screensize")
+            this.cameraRangeLoc = currentProgram.getUniformLocation("camerarange")
+
+            updateScreenSize()
         }
     }
 
@@ -55,6 +63,18 @@ class ShaderManager {
         } else {
             GL11.glDisable(GL11.GL_TEXTURE_2D)
             GL11.glBindTexture(GL11.GL_TEXTURE_2D, -1)
+        }
+    }
+
+    public void updateScreenSize() {
+        if(currentShaderID != -1) {
+            currentProgram.setUniformi(screenSizeLoc, Display.width, Display.height)
+        }
+    }
+
+    public void onPerspective(float near, float far) {
+        if(currentShaderID != -1) {
+            currentProgram.setUniformf(cameraRangeLoc, near, far)
         }
     }
 

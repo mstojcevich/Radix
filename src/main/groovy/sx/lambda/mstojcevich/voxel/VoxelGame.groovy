@@ -59,7 +59,7 @@ public class VoxelGame {
 
     public static final String GAME_TITLE = "VoxelTest"
 
-    private static final int START_WIDTH = 320, START_HEIGHT = 240; //TODO Config - screen size
+    private static final int START_WIDTH = 1280, START_HEIGHT = 720; //TODO Config - screen size
 
     private int renderedFrames = 0;
 
@@ -237,6 +237,10 @@ public class VoxelGame {
         long startTime = System.currentTimeMillis()
         try {
             while (!Display.isCloseRequested() && !done) {
+                if(Display.wasResized()) {
+                    shaderManager.updateScreenSize()
+                }
+
                 render()
 
                 Display.update()
@@ -340,8 +344,10 @@ public class VoxelGame {
         glMatrixMode GL_PROJECTION //Currently altering projection matrix
         glLoadIdentity()
 
-        GLU.gluPerspective(100, (float) Display.getWidth() / Display.getHeight(), 0.1f,
-                settingsManager.visualSettings.viewDistance * world.getChunkSize());
+        float camNear = 0.1f
+        float camFar = settingsManager.visualSettings.viewDistance * world.getChunkSize()
+        GLU.gluPerspective(100, (float) Display.getWidth() / Display.getHeight(), camNear, camFar)
+        shaderManager.onPerspective(camNear, camFar)
         //Set up camera
 
         glMatrixMode GL_MODELVIEW //Currently altering modelview matrix

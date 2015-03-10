@@ -30,7 +30,7 @@ class VoxelGameAPI {
     }
 
     /**
-     * @return Whether the current game is a client
+     * @return Whether the current game is a client\
      */
     public boolean isClient() {
         return VoxelGame.instance != null

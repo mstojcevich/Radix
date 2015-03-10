@@ -1,5 +1,7 @@
 uniform sampler2D texSampler;
 varying vec3 normal;
+uniform int enableLighting;
+uniform int enableTexturing;
 
 struct SimpleDirectionalLight
 {
@@ -18,8 +20,11 @@ void main() {
 
     float fDiffuseIntensity = max(0.0, dot(normalize(normal), -sunLight.vDirection));
 
-    if (true)
-        gl_FragColor = texture2D(texSampler, gl_TexCoord[0].st)*gl_Color*(sunLight.fAmbientIntensity+fDiffuseIntensity);
-    else
-        gl_FragColor = gl_Color;
+    gl_FragColor = gl_Color;
+    if(enableTexturing > 0) {
+        gl_FragColor *= texture2D(texSampler, gl_TexCoord[0].st);
+    }
+    if(enableLighting > 0) {
+        gl_FragColor *= sunLight.fAmbientIntensity+fDiffuseIntensity;
+    }
 }

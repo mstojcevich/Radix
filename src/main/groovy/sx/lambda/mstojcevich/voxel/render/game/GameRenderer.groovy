@@ -59,8 +59,8 @@ class GameRenderer implements Renderer {
     private void drawBlockSelection() {
         if (game.getSelectedBlock() != null) {
             glDisable GL_DEPTH_TEST
-            glDisable GL_TEXTURE_2D
-            glDisable GL_LIGHTING
+            VoxelGame.instance.shaderManager.disableTexturing()
+            VoxelGame.instance.shaderManager.disableLighting()
             if (game.getSelectedBlock() != null) {
                 glTranslatef((float) (game.getSelectedBlock().x + 0.5f), (float) (game.getSelectedBlock().y + 0.5f), (float) (game.getSelectedBlock().z + 0.5f))
                 glRotatef((float) ((System.currentTimeMillis() % 720) / 2f), 1, 1, 1)
@@ -72,15 +72,15 @@ class GameRenderer implements Renderer {
                 }
                 glCallList(sphereList)
             }
-            glEnable GL_LIGHTING
-            glEnable GL_TEXTURE_2D
+            VoxelGame.instance.shaderManager.enableLighting()
+            VoxelGame.instance.shaderManager.enableTexturing()
             glEnable GL_DEPTH_TEST
         }
     }
 
     private void renderEntities() {
-        glDisable GL_TEXTURE_2D
-        glDisable GL_LIGHTING
+        VoxelGame.instance.shaderManager.disableTexturing()
+        VoxelGame.instance.shaderManager.disableLighting()
         glColor3f(1, 1, 1)
         for(Entity e : game.world.loadedEntities) {
             if(e != null && e != game.player) {
@@ -88,8 +88,8 @@ class GameRenderer implements Renderer {
                 VoxelGameAPI.instance.eventManager.push(new EventEntityRender(e))
             }
         }
-        glEnable GL_LIGHTING
-        glEnable GL_TEXTURE_2D
+        VoxelGame.instance.shaderManager.enableLighting()
+        VoxelGame.instance.shaderManager.enableTexturing()
     }
 
 }

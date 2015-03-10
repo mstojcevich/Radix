@@ -51,7 +51,7 @@ import static org.lwjgl.opengl.GL11.*
 @CompileStatic
 public class VoxelGame {
 
-    public static final boolean DEBUG = true
+    public static final boolean DEBUG = false
 
     private static VoxelGame theGame
 
@@ -323,7 +323,7 @@ public class VoxelGame {
         }
     }
 
-    private static void prepare2D() {
+    private void prepare2D() {
         glMatrixMode GL_PROJECTION
         glLoadIdentity()
         glOrtho(0, Display.getWidth(), Display.getHeight(), 0, -1, 1)
@@ -332,6 +332,7 @@ public class VoxelGame {
         glColor4f(1, 1, 1, 1)
         glDisable GL_LIGHTING
         glDisable GL_DEPTH_TEST
+        shaderManager.disableLighting()
     }
 
     private void prepareNewFrame() {
@@ -347,6 +348,8 @@ public class VoxelGame {
         glLoadIdentity()
 
         getTextureManager().bindTexture(-1)
+
+        shaderManager.enableLighting()
     }
 
     public void updateSelectedBlock() {

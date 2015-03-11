@@ -94,12 +94,6 @@ public class Chunk implements IChunk {
 
     @Override
     public void rerender() {
-        if(this.parentWorld == null) {
-            if(VoxelGame.instance != null) {
-                this.parentWorld = VoxelGame.instance.world
-            }
-        }
-
         if (USE_VBO) {
             if(vboVertexHandle == -1 || vboVertexHandle == 0) {
                 IntBuffer buffer = BufferUtils.createIntBuffer(8)
@@ -211,24 +205,6 @@ public class Chunk implements IChunk {
             glColorPointer(3, GL_FLOAT, 0, 0)
 
             glDrawArrays(GL_QUADS, 0, numVisibleSides*4)
-
-            VoxelGame.instance.shaderManager.enableWave()
-            glEnable(GL_BLEND)
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
-            glVertexPointer(3, GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboTextureHandle)
-            glTexCoordPointer(2, GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboNormalHandle)
-            glNormalPointer(GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboColorHandle)
-            glColorPointer(4, GL_FLOAT, 0, 0)
-
-            glDrawArrays(GL_QUADS, 0, liquidVisibleSides*4)
-            glDisable(GL_BLEND)
-            VoxelGame.instance.shaderManager.disableWave()
         } else {
             glCallList(displayList)
         }
@@ -395,10 +371,17 @@ public class Chunk implements IChunk {
      * @param hasAlpha Whether you use the alpha channel when setting colors
      * @return New number of visible sides
      */
-    private int calcShouldRender(Closure condition, int visibleSideCount,
+    @Override
+    public int calcShouldRender(Closure condition, int visibleSideCount,
                                  boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,
                                  boolean[][][] shouldRenderLeft, boolean[][][] shouldRenderRight,
                                  boolean[][][] shouldRenderFront, boolean[][][] shouldRenderBack) {
+        if(this.parentWorld == null) {
+            if(VoxelGame.instance != null) {
+                this.parentWorld = VoxelGame.instance.world
+            }
+        }
+
         int newVisSideCount = visibleSideCount
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
@@ -568,6 +551,10 @@ public class Chunk implements IChunk {
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorVbo)
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorData, GL15.GL_STATIC_DRAW)
+    }
+
+    public int getLiquidBlockCount() {
+        return liquidBlockCount
     }
 
 }

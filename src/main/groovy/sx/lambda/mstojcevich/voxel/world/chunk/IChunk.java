@@ -1,5 +1,6 @@
 package sx.lambda.mstojcevich.voxel.world.chunk;
 
+import groovy.lang.Closure;
 import sx.lambda.mstojcevich.voxel.block.Block;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 
@@ -28,5 +29,12 @@ public interface IChunk extends Serializable {
     public Vec3i getStartPosition();
 
     public float getHighestPoint();
+
+    public int calcShouldRender(Closure condition, int visibleSideCount,
+                                boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,
+                                boolean[][][] shouldRenderLeft, boolean[][][] shouldRenderRight,
+                                boolean[][][] shouldRenderFront, boolean[][][] shouldRenderBack);
+
+    public int getLiquidBlockCount();
 
 }

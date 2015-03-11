@@ -41,6 +41,13 @@ public class Chunk implements IChunk {
     private transient int vboNormalHandle = -1
     private transient int vboColorHandle = -1
 
+    private int liquidBlockCount
+    private transient int liquidVisibleSides = 0
+    private transient int liquidVboVertexHandle = -1
+    private transient int liquidVboTextureHandle = -1
+    private transient int liquidVboNormalHandle = -1
+    private transient int liquidVboColorHandle = -1
+
     public Chunk(IWorld world, Vec3i startPosition) {
         this.parentWorld = world
         this.startPosition = startPosition;
@@ -52,12 +59,14 @@ public class Chunk implements IChunk {
             for (int z = 0; z < size; z++) {
                 int distFromSeaLevel = world.getHeightAboveSeaLevel(startPosition.x + x, startPosition.z + z)
                 int yMax = world.getSeaLevel() + distFromSeaLevel
-                blockCount += Math.max(yMax, world.getSeaLevel())
                 if(yMax < world.getSeaLevel()) {
                     for (int y = yMax; y < world.getSeaLevel(); y++) {
                         Block blockType = Block.WATER
                         if(y == yMax) {
                             blockType = Block.SAND
+                            blockCount++
+                        } else {
+                            liquidBlockCount++
                         }
                         blockList[x][y][z] = blockType
                     }
@@ -75,6 +84,7 @@ public class Chunk implements IChunk {
                     } else if(y > yMax-5) {
                         blockType = Block.DIRT
                     }
+                    blockCount++
                     blockList[x][y][z] = blockType
                     highestPoint = Math.max(highestPoint, y + 1)
                 }
@@ -92,12 +102,16 @@ public class Chunk implements IChunk {
 
         if (USE_VBO) {
             if(vboVertexHandle == -1 || vboVertexHandle == 0) {
-                IntBuffer buffer = BufferUtils.createIntBuffer(4)
+                IntBuffer buffer = BufferUtils.createIntBuffer(8)
                 GL15.glGenBuffers(buffer)
                 vboVertexHandle = buffer.get(0)
                 vboTextureHandle = buffer.get(1)
                 vboNormalHandle = buffer.get(2)
                 vboColorHandle = buffer.get(3)
+                liquidVboVertexHandle = buffer.get(4)
+                liquidVboTextureHandle = buffer.get(5)
+                liquidVboNormalHandle = buffer.get(6)
+                liquidVboColorHandle = buffer.get(7)
 
                 glEnableClientState(GL_NORMAL_ARRAY)
                 glEnableClientState(GL_VERTEX_ARRAY)
@@ -105,183 +119,9 @@ public class Chunk implements IChunk {
                 glEnableClientState(GL_COLOR_ARRAY)
             }
 
-            numVisibleSides = 6*blockCount
-            boolean[][][] shouldRenderTop = new boolean[size][height][size];
-            boolean[][][] shouldRenderBottom = new boolean[size][height][size];
-            boolean[][][] shouldRenderLeft = new boolean[size][height][size];
-            boolean[][][] shouldRenderRight = new boolean[size][height][size];
-            boolean[][][] shouldRenderFront = new boolean[size][height][size];
-            boolean[][][] shouldRenderBack = new boolean[size][height][size];
-            float[][][] lightLevels = new float[size][height][size];
-            for (int x = 0; x < size; x++) {
-                for (int z = 0; z < size; z++) {
-                    float lightLevel = 1.0f
-                    boolean firstBlock = false
-                    for (int y = height-1; y >= 0; y--) {
-                        Block block = blockList[x][y][z]
-                        if (block != null) {
-                            if(!firstBlock) {
-                                firstBlock = true
-                                lightLevel = 1.0f
-                            }
-                            int zed = z
-                            shouldRenderTop[x][y][z] = true
-                            if(z == size - 1) {
-                                Vec3i adjPos = new Vec3i(
-                                        x, y, 0)
-                                Vec3i askWorld = new Vec3i(startPosition.x, y, startPosition.z+size+1)
-                                IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
-                                if(adjChunk != null) {
-                                    Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
-                                    if(adjBlock != null) {
-                                        if(!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
-                                            shouldRenderTop[x][y][z] = false
-                                            numVisibleSides--
-                                        }
-                                    }
-                                }
-                            } else if (blockList[x][y][zed + 1] != null) {
-                                if (!blockList[x][y][zed + 1].isTransparent() || blockList[x][y][z].isTransparent()) {
-                                    shouldRenderTop[x][y][z] = false
-                                    numVisibleSides--
-                                }
-                            }
-
-                            shouldRenderLeft[x][y][z] = true
-                            if (x == 0) {
-                                Vec3i adjPos = new Vec3i(
-                                        size-1, y, z)
-                                Vec3i askWorld = new Vec3i(startPosition.x-1, y, startPosition.z)
-                                IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
-                                if(adjChunk != null) {
-                                    Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
-                                    if(adjBlock != null) {
-                                        if(!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
-                                            shouldRenderLeft[x][y][z] = false
-                                            numVisibleSides--
-                                        }
-                                    }
-                                }
-                            } else if (blockList[x - 1][y][z] != null) {
-                                if(!blockList[x - 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
-                                    shouldRenderLeft[x][y][z] = false
-                                    numVisibleSides--
-                                }
-                            }
-
-                            shouldRenderRight[x][y][z] = true
-                            if (x == size - 1) {
-                                Vec3i adjPos = new Vec3i(
-                                        0, y, z)
-                                Vec3i askWorld = new Vec3i(startPosition.x+size+1, y, startPosition.z)
-                                IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
-                                if(adjChunk != null) {
-                                    Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
-                                    if(adjBlock != null) {
-                                        if(!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
-                                            shouldRenderRight[x][y][z] = false
-                                            numVisibleSides--
-                                        }
-                                    }
-                                }
-                            } else if (blockList[x + 1][y][z] != null) {
-                                if(!blockList[x + 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
-                                    shouldRenderRight[x][y][z] = false
-                                    numVisibleSides--
-                                }
-                            }
-
-                            shouldRenderFront[x][y][z] = true
-                            if (y == 0)
-                                shouldRenderFront[x][y][z] = true
-                            else if (blockList[x][y - 1][z] != null) {
-                                if(!blockList[x][y-1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
-                                    shouldRenderFront[x][y][z] = false
-                                    numVisibleSides--
-                                }
-                            }
-
-                            shouldRenderBack[x][y][z] = true
-                            if (y == height - 1)
-                                shouldRenderBack[x][y][z] = true
-                            else if (blockList[x][y + 1][z] != null) {
-                                if(!blockList[x][y+1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
-                                    shouldRenderBack[x][y][z] = false
-                                    numVisibleSides--
-                                }
-                            }
-
-                            shouldRenderBottom[x][y][z] = true
-                            if (z == 0) {
-                                Vec3i adjPos = new Vec3i(
-                                        x, y, size-1)
-                                Vec3i askWorld = new Vec3i(startPosition.x, y, startPosition.z-1)
-                                IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
-                                if(adjChunk != null) {
-                                    Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
-                                    if(adjBlock != null) {
-                                        if(!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
-                                            shouldRenderBottom[x][y][z] = false
-                                            numVisibleSides--
-                                        }
-                                    }
-                                }
-                            } else if (blockList[x][y][zed - 1] != null) {
-                                if(!blockList[x][y][zed-1].isTransparent() || blockList[x][y][z].isTransparent()) {
-                                    shouldRenderBottom[x][y][z] = false
-                                    numVisibleSides--
-                                }
-                            }
-
-                            lightLevels[x][y][z] = lightLevel
-                        } else if(!firstBlock) {
-                            lightLevels[x][y][z] = 1.0f
-                        } else {
-                            lightLevels[x][y][z] = lightLevel
-                        }
-                        lightLevel *= 0.8f
-                    }
-                }
-            }
-
-            FloatBuffer vertexPosData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
-            FloatBuffer textureData = BufferUtils.createFloatBuffer(numVisibleSides*4*2)
-            FloatBuffer normalData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
-            FloatBuffer colorData = BufferUtils.createFloatBuffer(numVisibleSides*4*4)
-            for (int x = 0; x < size; x++) {
-                for (int z = 0; z < size; z++) {
-                    boolean firstBlock = false
-                    for (int y = height-1; y >= 0; y--) {
-                        Block block = blockList[x][y][z]
-                        if(block != null) {
-                            if(!firstBlock) {
-                                firstBlock = true
-                            }
-                            block.renderer.renderVBO(x, y, z, lightLevels,
-                                    vertexPosData, textureData, normalData, colorData,
-                                    shouldRenderTop[x][y][z], shouldRenderBottom[x][y][z],
-                                    shouldRenderLeft[x][y][z], shouldRenderRight[x][y][z],
-                                    shouldRenderFront[x][y][z], shouldRenderBack[x][y][z])
-                        }
-                    }
-                }
-            }
-            vertexPosData.flip()
-            textureData.flip()
-            normalData.flip()
-            colorData.flip()
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexPosData, GL15.GL_STATIC_DRAW)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboTextureHandle)
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, textureData, GL15.GL_STATIC_DRAW)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, normalData, GL15.GL_STATIC_DRAW)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorData, GL15.GL_STATIC_DRAW)
+            float[][][] lightLevels = new float[size][height][size]
+            drawBlocksVbo(lightLevels)
+            drawLiquidsVbo(lightLevels)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
         } else {
@@ -351,11 +191,10 @@ public class Chunk implements IChunk {
     public void render() {
         glPushMatrix();
 
-        glEnable(GL_ALPHA_TEST)
-        glEnable(GL_BLEND)
-
         VoxelGame.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap.getTextureID())
         if(USE_VBO) {
+            glDisable(GL_BLEND)
+
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
             glVertexPointer(3, GL_FLOAT, 0, 0)
 
@@ -366,9 +205,25 @@ public class Chunk implements IChunk {
             glNormalPointer(GL_FLOAT, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
-            glColorPointer(4, GL_FLOAT, 0, 0)
+            glColorPointer(3, GL_FLOAT, 0, 0)
 
             glDrawArrays(GL_QUADS, 0, numVisibleSides*4)
+
+            glEnable(GL_BLEND)
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
+            glVertexPointer(3, GL_FLOAT, 0, 0)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboTextureHandle)
+            glTexCoordPointer(2, GL_FLOAT, 0, 0)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboNormalHandle)
+            glNormalPointer(GL_FLOAT, 0, 0)
+
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboColorHandle)
+            glColorPointer(4, GL_FLOAT, 0, 0)
+
+            glDrawArrays(GL_QUADS, 0, liquidVisibleSides*4)
+            glDisable(GL_BLEND)
         } else {
             glCallList(displayList)
         }
@@ -407,9 +262,14 @@ public class Chunk implements IChunk {
 
         if (y > height - 1) return
 
-        blockList[x][y][z] = null
+        Block block = blockList[x][y][z]
+        if(block == Block.WATER) {
+            liquidBlockCount--
+        } else {
+            blockCount--
+        }
 
-        blockCount--
+        blockList[x][y][z] = null
     }
 
     @Override
@@ -431,7 +291,11 @@ public class Chunk implements IChunk {
             highestPoint = Math.max(highestPoint, y + 1)
         }
 
-        blockCount++
+        if(block == Block.WATER) {
+            liquidBlockCount++
+        } else {
+            blockCount++
+        }
     }
 
     @Override
@@ -451,5 +315,242 @@ public class Chunk implements IChunk {
 
     @Override
     public float getHighestPoint() { highestPoint }
+
+    private void drawBlocksVbo(float[][][] lightLevels) {
+        numVisibleSides = 6*blockCount
+
+        boolean[][][] shouldRenderTop = new boolean[size][height][size];
+        boolean[][][] shouldRenderBottom = new boolean[size][height][size];
+        boolean[][][] shouldRenderLeft = new boolean[size][height][size];
+        boolean[][][] shouldRenderRight = new boolean[size][height][size];
+        boolean[][][] shouldRenderFront = new boolean[size][height][size];
+        boolean[][][] shouldRenderBack = new boolean[size][height][size];
+
+        numVisibleSides = calcShouldRender({block -> block != Block.WATER}, numVisibleSides, lightLevels,
+                shouldRenderTop, shouldRenderBottom,
+                shouldRenderLeft, shouldRenderRight,
+                shouldRenderFront, shouldRenderBack)
+
+        renderBlocks({block -> block != Block.WATER}, numVisibleSides, false, lightLevels,
+                shouldRenderTop, shouldRenderBottom,
+                shouldRenderLeft, shouldRenderRight,
+                shouldRenderFront, shouldRenderBack,
+                vboVertexHandle, vboTextureHandle, vboNormalHandle, vboColorHandle)
+    }
+
+    private void drawLiquidsVbo(float[][][] lightLevels) {
+        liquidVisibleSides = 6*liquidBlockCount
+
+        boolean[][][] shouldRenderTop = new boolean[size][height][size];
+        boolean[][][] shouldRenderBottom = new boolean[size][height][size];
+        boolean[][][] shouldRenderLeft = new boolean[size][height][size];
+        boolean[][][] shouldRenderRight = new boolean[size][height][size];
+        boolean[][][] shouldRenderFront = new boolean[size][height][size];
+        boolean[][][] shouldRenderBack = new boolean[size][height][size];
+
+        liquidVisibleSides = calcShouldRender({block -> block == Block.WATER}, liquidVisibleSides, lightLevels,
+                shouldRenderTop, shouldRenderBottom,
+                shouldRenderLeft, shouldRenderRight,
+                shouldRenderFront, shouldRenderBack)
+
+        renderBlocks({block -> block == Block.WATER}, liquidVisibleSides, true, lightLevels,
+                shouldRenderTop, shouldRenderBottom,
+                shouldRenderLeft, shouldRenderRight,
+                shouldRenderFront, shouldRenderBack,
+                liquidVboVertexHandle, liquidVboTextureHandle, liquidVboNormalHandle, liquidVboColorHandle)
+    }
+
+    /**
+     * @param condition Check to see if block should be rendered
+     * @param visibleSideCount Number of sides on target blocks
+     * @param hasAlpha Whether you use the alpha channel when setting colors
+     * @return New number of visible sides
+     */
+    private int calcShouldRender(Closure condition, int visibleSideCount, float[][][] lightLevels,
+                                 boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,
+                                 boolean[][][] shouldRenderLeft, boolean[][][] shouldRenderRight,
+                                 boolean[][][] shouldRenderFront, boolean[][][] shouldRenderBack) {
+        int newVisSideCount = visibleSideCount
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
+                float lightLevel = 1.0f
+                boolean firstBlock = false
+                for (int y = height - 1; y >= 0; y--) {
+                    Block block = blockList[x][y][z]
+                    if (!condition.call(block)) continue;
+                    if (block != null) {
+                        if (!firstBlock) {
+                            firstBlock = true
+                            lightLevel = 1.0f
+                        }
+                        int zed = z
+                        shouldRenderTop[x][y][z] = true
+                        if (z == size - 1) {
+                            Vec3i adjPos = new Vec3i(
+                                    x, y, 0)
+                            Vec3i askWorld = new Vec3i(startPosition.x, y, startPosition.z + size + 1)
+                            IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
+                            if (adjChunk != null) {
+                                Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
+                                if (adjBlock != null) {
+                                    if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                        shouldRenderTop[x][y][z] = false
+                                        newVisSideCount--
+                                    }
+                                }
+                            }
+                        } else if (blockList[x][y][zed + 1] != null) {
+                            if (!blockList[x][y][zed + 1].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                shouldRenderTop[x][y][z] = false
+                                newVisSideCount--
+                            }
+                        }
+
+                        shouldRenderLeft[x][y][z] = true
+                        if (x == 0) {
+                            Vec3i adjPos = new Vec3i(
+                                    size - 1, y, z)
+                            Vec3i askWorld = new Vec3i(startPosition.x - 1, y, startPosition.z)
+                            IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
+                            if (adjChunk != null) {
+                                Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
+                                if (adjBlock != null) {
+                                    if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                        shouldRenderLeft[x][y][z] = false
+                                        newVisSideCount--
+                                    }
+                                }
+                            }
+                        } else if (blockList[x - 1][y][z] != null) {
+                            if (!blockList[x - 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                shouldRenderLeft[x][y][z] = false
+                                newVisSideCount--
+                            }
+                        }
+
+                        shouldRenderRight[x][y][z] = true
+                        if (x == size - 1) {
+                            Vec3i adjPos = new Vec3i(
+                                    0, y, z)
+                            Vec3i askWorld = new Vec3i(startPosition.x + size + 1, y, startPosition.z)
+                            IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
+                            if (adjChunk != null) {
+                                Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
+                                if (adjBlock != null) {
+                                    if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                        shouldRenderRight[x][y][z] = false
+                                        newVisSideCount--
+                                    }
+                                }
+                            }
+                        } else if (blockList[x + 1][y][z] != null) {
+                            if (!blockList[x + 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                shouldRenderRight[x][y][z] = false
+                                newVisSideCount--
+                            }
+                        }
+
+                        shouldRenderFront[x][y][z] = true
+                        if (y == 0)
+                            shouldRenderFront[x][y][z] = true
+                        else if (blockList[x][y - 1][z] != null) {
+                            if (!blockList[x][y - 1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                shouldRenderFront[x][y][z] = false
+                                newVisSideCount--
+                            }
+                        }
+
+                        shouldRenderBack[x][y][z] = true
+                        if (y == height - 1)
+                            shouldRenderBack[x][y][z] = true
+                        else if (blockList[x][y + 1][z] != null) {
+                            if (!blockList[x][y + 1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                shouldRenderBack[x][y][z] = false
+                                newVisSideCount--
+                            }
+                        }
+
+                        shouldRenderBottom[x][y][z] = true
+                        if (z == 0) {
+                            Vec3i adjPos = new Vec3i(
+                                    x, y, size - 1)
+                            Vec3i askWorld = new Vec3i(startPosition.x, y, startPosition.z - 1)
+                            IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
+                            if (adjChunk != null) {
+                                Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
+                                if (adjBlock != null) {
+                                    if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                        shouldRenderBottom[x][y][z] = false
+                                        newVisSideCount--
+                                    }
+                                }
+                            }
+                        } else if (blockList[x][y][zed - 1] != null) {
+                            if (!blockList[x][y][zed - 1].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                shouldRenderBottom[x][y][z] = false
+                                newVisSideCount--
+                            }
+                        }
+
+                        lightLevels[x][y][z] = lightLevel
+                    } else if (!firstBlock) {
+                        lightLevels[x][y][z] = 1.0f
+                    } else {
+                        lightLevels[x][y][z] = lightLevel
+                    }
+                    lightLevel *= 0.8f
+                }
+            }
+        }
+
+        return newVisSideCount
+    }
+
+    public void renderBlocks(Closure condition, int visibleSideCount, boolean useAlpha, float[][][] lightLevels,
+                             boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,
+                             boolean[][][] shouldRenderLeft, boolean[][][] shouldRenderRight,
+                             boolean[][][] shouldRenderFront, boolean[][][] shouldRenderBack,
+                             int vertexVbo, int textureVbo, int normalVbo, int colorVbo) {
+        FloatBuffer vertexPosData = BufferUtils.createFloatBuffer(visibleSideCount*4*3)
+        FloatBuffer textureData = BufferUtils.createFloatBuffer(visibleSideCount*4*2)
+        FloatBuffer normalData = BufferUtils.createFloatBuffer(visibleSideCount*4*3)
+        FloatBuffer colorData = BufferUtils.createFloatBuffer(visibleSideCount*4*(useAlpha ? 4 : 3))
+
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
+                boolean firstBlock = false
+                for (int y = height-1; y >= 0; y--) {
+                    Block block = blockList[x][y][z]
+                    if(!condition.call(block))continue;
+                    if(block != null) {
+                        if(!firstBlock) {
+                            firstBlock = true
+                        }
+                        block.renderer.renderVBO(x, y, z, lightLevels,
+                                vertexPosData, textureData, normalData, colorData,
+                                shouldRenderTop[x][y][z], shouldRenderBottom[x][y][z],
+                                shouldRenderLeft[x][y][z], shouldRenderRight[x][y][z],
+                                shouldRenderFront[x][y][z], shouldRenderBack[x][y][z])
+                    }
+                }
+            }
+        }
+        vertexPosData.flip()
+        textureData.flip()
+        normalData.flip()
+        colorData.flip()
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexVbo)
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexPosData, GL15.GL_STATIC_DRAW)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, textureVbo)
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, textureData, GL15.GL_STATIC_DRAW)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, normalVbo)
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, normalData, GL15.GL_STATIC_DRAW)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorVbo)
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorData, GL15.GL_STATIC_DRAW)
+    }
 
 }

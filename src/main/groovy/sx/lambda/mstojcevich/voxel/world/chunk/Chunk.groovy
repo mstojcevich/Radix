@@ -123,48 +123,60 @@ public class Chunk implements IChunk {
                             if (z == size - 1)
                                 shouldRenderTop[x][y][z] = true
                             else if (blockList[x][y][zed + 1] != null) {
-                                shouldRenderTop[x][y][z] = false
-                                numVisibleSides--
+                                if(!blockList[x][y][zed+1].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    shouldRenderTop[x][y][z] = false
+                                    numVisibleSides--
+                                }
                             }
 
                             shouldRenderLeft[x][y][z] = true
                             if (x == 0)
                                 shouldRenderLeft[x][y][z] = true
                             else if (blockList[x - 1][y][z] != null) {
-                                shouldRenderLeft[x][y][z] = false
-                                numVisibleSides--
+                                if(!blockList[x - 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    shouldRenderLeft[x][y][z] = false
+                                    numVisibleSides--
+                                }
                             }
 
                             shouldRenderRight[x][y][z] = true
                             if (x == size - 1)
                                 shouldRenderRight[x][y][z] = true
                             else if (blockList[x + 1][y][z] != null) {
-                                shouldRenderRight[x][y][z] = false
-                                numVisibleSides--
+                                if(!blockList[x + 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    shouldRenderRight[x][y][z] = false
+                                    numVisibleSides--
+                                }
                             }
 
                             shouldRenderFront[x][y][z] = true
                             if (y == 0)
                                 shouldRenderFront[x][y][z] = true
                             else if (blockList[x][y - 1][z] != null) {
-                                shouldRenderFront[x][y][z] = false
-                                numVisibleSides--
+                                if(!blockList[x][y-1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    shouldRenderFront[x][y][z] = false
+                                    numVisibleSides--
+                                }
                             }
 
                             shouldRenderBack[x][y][z] = true
                             if (y == height - 1)
                                 shouldRenderBack[x][y][z] = true
                             else if (blockList[x][y + 1][z] != null) {
-                                shouldRenderBack[x][y][z] = false
-                                numVisibleSides--
+                                if(!blockList[x][y+1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    shouldRenderBack[x][y][z] = false
+                                    numVisibleSides--
+                                }
                             }
 
                             shouldRenderBottom[x][y][z] = true
                             if (z == 0)
                                 shouldRenderBottom[x][y][z] = true
                             else if (blockList[x][y][zed - 1] != null) {
-                                shouldRenderBottom[x][y][z] = false
-                                numVisibleSides--
+                                if(!blockList[x][y][zed-1].isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    shouldRenderBottom[x][y][z] = false
+                                    numVisibleSides--
+                                }
                             }
 
                             lightLevels[x][y][z] = lightLevel

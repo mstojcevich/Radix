@@ -120,6 +120,7 @@ public class Chunk implements IChunk {
             }
 
             float[][][] lightLevels = new float[size][height][size]
+            calcLightLevels(lightLevels)
             drawBlocksVbo(lightLevels)
             drawLiquidsVbo(lightLevels)
 
@@ -191,6 +192,8 @@ public class Chunk implements IChunk {
     public void render() {
         glPushMatrix();
 
+        VoxelGame.instance.shaderManager.setChunkOffset(startPosition.x, startPosition.y, startPosition.z)
+
         VoxelGame.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap.getTextureID())
         if(USE_VBO) {
             glDisable(GL_BLEND)
@@ -209,6 +212,7 @@ public class Chunk implements IChunk {
 
             glDrawArrays(GL_QUADS, 0, numVisibleSides*4)
 
+            VoxelGame.instance.shaderManager.enableWave()
             glEnable(GL_BLEND)
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
             glVertexPointer(3, GL_FLOAT, 0, 0)
@@ -224,6 +228,7 @@ public class Chunk implements IChunk {
 
             glDrawArrays(GL_QUADS, 0, liquidVisibleSides*4)
             glDisable(GL_BLEND)
+            VoxelGame.instance.shaderManager.disableWave()
         } else {
             glCallList(displayList)
         }
@@ -326,7 +331,7 @@ public class Chunk implements IChunk {
         boolean[][][] shouldRenderFront = new boolean[size][height][size];
         boolean[][][] shouldRenderBack = new boolean[size][height][size];
 
-        numVisibleSides = calcShouldRender({block -> block != Block.WATER}, numVisibleSides, lightLevels,
+        numVisibleSides = calcShouldRender({block -> block != Block.WATER}, numVisibleSides,
                 shouldRenderTop, shouldRenderBottom,
                 shouldRenderLeft, shouldRenderRight,
                 shouldRenderFront, shouldRenderBack)
@@ -348,7 +353,7 @@ public class Chunk implements IChunk {
         boolean[][][] shouldRenderFront = new boolean[size][height][size];
         boolean[][][] shouldRenderBack = new boolean[size][height][size];
 
-        liquidVisibleSides = calcShouldRender({block -> block == Block.WATER}, liquidVisibleSides, lightLevels,
+        liquidVisibleSides = calcShouldRender({block -> block == Block.WATER}, liquidVisibleSides,
                 shouldRenderTop, shouldRenderBottom,
                 shouldRenderLeft, shouldRenderRight,
                 shouldRenderFront, shouldRenderBack)
@@ -360,29 +365,48 @@ public class Chunk implements IChunk {
                 liquidVboVertexHandle, liquidVboTextureHandle, liquidVboNormalHandle, liquidVboColorHandle)
     }
 
-    /**
-     * @param condition Check to see if block should be rendered
-     * @param visibleSideCount Number of sides on target blocks
-     * @param hasAlpha Whether you use the alpha channel when setting colors
-     * @return New number of visible sides
-     */
-    private int calcShouldRender(Closure condition, int visibleSideCount, float[][][] lightLevels,
-                                 boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,
-                                 boolean[][][] shouldRenderLeft, boolean[][][] shouldRenderRight,
-                                 boolean[][][] shouldRenderFront, boolean[][][] shouldRenderBack) {
-        int newVisSideCount = visibleSideCount
+    private void calcLightLevels(float[][][] lightLevels) {
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
                 float lightLevel = 1.0f
                 boolean firstBlock = false
                 for (int y = height - 1; y >= 0; y--) {
                     Block block = blockList[x][y][z]
-                    if (!condition.call(block)) continue;
                     if (block != null) {
                         if (!firstBlock) {
                             firstBlock = true
                             lightLevel = 1.0f
                         }
+                        lightLevels[x][y][z] = lightLevel
+                    } else if (!firstBlock) {
+                        lightLevels[x][y][z] = 1.0f
+                    } else {
+                        lightLevels[x][y][z] = lightLevel
+                    }
+                    lightLevel *= 0.8f
+                }
+            }
+        }
+    }
+
+    /**
+     * @param condition Check to see if block should be rendered
+     * @param visibleSideCount Number of sides on target blocks
+     * @param hasAlpha Whether you use the alpha channel when setting colors
+     * @return New number of visible sides
+     */
+    private int calcShouldRender(Closure condition, int visibleSideCount,
+                                 boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,
+                                 boolean[][][] shouldRenderLeft, boolean[][][] shouldRenderRight,
+                                 boolean[][][] shouldRenderFront, boolean[][][] shouldRenderBack) {
+        int newVisSideCount = visibleSideCount
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
+                boolean firstBlock = false
+                for (int y = height - 1; y >= 0; y--) {
+                    Block block = blockList[x][y][z]
+                    if (!condition.call(block)) continue;
+                    if (block != null) {
                         int zed = z
                         shouldRenderTop[x][y][z] = true
                         if (z == size - 1) {
@@ -491,14 +515,7 @@ public class Chunk implements IChunk {
                                 newVisSideCount--
                             }
                         }
-
-                        lightLevels[x][y][z] = lightLevel
-                    } else if (!firstBlock) {
-                        lightLevels[x][y][z] = 1.0f
-                    } else {
-                        lightLevels[x][y][z] = lightLevel
                     }
-                    lightLevel *= 0.8f
                 }
             }
         }

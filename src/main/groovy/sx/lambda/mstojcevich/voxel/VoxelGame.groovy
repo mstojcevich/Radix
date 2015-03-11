@@ -356,6 +356,8 @@ public class VoxelGame {
         getTextureManager().bindTexture(-1)
 
         shaderManager.enableLighting()
+
+        shaderManager.setAnimTime((int)(System.currentTimeMillis() % 100000));
     }
 
     public void updateSelectedBlock() {

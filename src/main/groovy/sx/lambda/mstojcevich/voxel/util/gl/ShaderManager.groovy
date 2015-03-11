@@ -14,6 +14,9 @@ class ShaderManager {
     private int enableTexturingLoc = -1
     private int screenSizeLoc = -1
     private int cameraRangeLoc = -1
+    private int animTimeLoc = -1
+    private int enableWaveLoc = -1
+    private int chunkOffsetLoc = -1
 
     private ShaderProgram currentProgram
 
@@ -28,6 +31,9 @@ class ShaderManager {
             this.enableTexturingLoc = currentProgram.getUniformLocation("enableTexturing")
             this.screenSizeLoc = currentProgram.getUniformLocation("screensize")
             this.cameraRangeLoc = currentProgram.getUniformLocation("camerarange")
+            this.animTimeLoc = currentProgram.getUniformLocation("animTime")
+            this.enableWaveLoc = currentProgram.getUniformLocation("enableWave")
+            this.chunkOffsetLoc = currentProgram.getUniformLocation("chunkOffset")
 
             updateScreenSize()
         }
@@ -75,6 +81,30 @@ class ShaderManager {
     public void onPerspective(float near, float far) {
         if(currentShaderID != -1) {
             currentProgram.setUniformf(cameraRangeLoc, near, far)
+        }
+    }
+
+    public void setAnimTime(int ms) {
+        if(currentShaderID != -1) {
+            currentProgram.setUniformi(animTimeLoc, ms)
+        }
+    }
+
+    public void enableWave() {
+        if (currentShaderID != -1) {
+            currentProgram.setUniformi(enableWaveLoc, 1)
+        }
+    }
+
+    public void disableWave() {
+        if (currentShaderID != -1) {
+            currentProgram.setUniformi(enableWaveLoc, 0)
+        }
+    }
+
+    public void setChunkOffset(float x, float y, float z) {
+        if (currentShaderID != -1) {
+            currentProgram.setUniformf(chunkOffsetLoc, x, y, z);
         }
     }
 

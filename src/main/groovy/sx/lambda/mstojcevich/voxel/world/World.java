@@ -1,31 +1,23 @@
-package sx.lambda.mstojcevich.voxel.world
+package sx.lambda.mstojcevich.voxel.world;
 
-import groovy.transform.CompileStatic;
-import io.netty.util.internal.ConcurrentSet
-import org.lwjgl.BufferUtils
-import org.lwjgl.opengl.GL15;
+import io.netty.util.internal.ConcurrentSet;
 import sx.lambda.mstojcevich.voxel.VoxelGame;
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI;
 import sx.lambda.mstojcevich.voxel.api.events.worldgen.EventFinishChunkGen;
-import sx.lambda.mstojcevich.voxel.block.Block
-import sx.lambda.mstojcevich.voxel.block.IBlockRenderer;
+import sx.lambda.mstojcevich.voxel.block.Block;
 import sx.lambda.mstojcevich.voxel.entity.Entity;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition;
 import sx.lambda.mstojcevich.voxel.world.chunk.Chunk;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
-import sx.lambda.mstojcevich.voxel.world.generation.SimplexNoise
+import sx.lambda.mstojcevich.voxel.world.generation.SimplexNoise;
 
-import java.nio.FloatBuffer
-import java.nio.IntBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.lwjgl.opengl.GL11.*;
 
-@CompileStatic
 public class World implements IWorld {
 	
 	private static final int CHUNK_SIZE = 16;
@@ -46,14 +38,6 @@ public class World implements IWorld {
     private final boolean remote, server;
 
     private List<Entity> loadedEntities = new CopyOnWriteArrayList<>();
-
-    private transient int liquidVertexVbo = -1;
-    private transient int liquidTextureVbo = -1;
-    private transient int liquidNormalVbo = -1;
-    private transient int liquidColorVbo = -1;
-    private transient int liquidVisibleSides = 0
-
-    private boolean toRerenderLiquids = true
 
     public World(boolean remote, boolean server) {
         this.remote = remote;
@@ -82,10 +66,6 @@ public class World implements IWorld {
 
     public void render() {
         if(!server) {
-            if(toRerenderLiquids) {
-                actuallyRerenderLiquids()
-                toRerenderLiquids = false
-            }
             long renderStartNS = System.nanoTime();
             for (IChunk c : this.chunkList) {
                 if (VoxelGame.getInstance().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
@@ -95,25 +75,6 @@ public class World implements IWorld {
                     glPopMatrix();
                 }
             }
-
-            VoxelGame.instance.shaderManager.enableWave()
-            glEnable(GL_BLEND)
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVertexVbo)
-            glVertexPointer(3, GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidTextureVbo)
-            glTexCoordPointer(2, GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidNormalVbo)
-            glNormalPointer(GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidColorVbo)
-            glColorPointer(4, GL_FLOAT, 0, 0)
-
-            glDrawArrays(GL_QUADS, 0, liquidVisibleSides*4)
-            glDisable(GL_BLEND)
-            VoxelGame.instance.shaderManager.disableWave()
-
             if(VoxelGame.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
                 VoxelGame.getInstance().numChunkRenders = 0;
                 VoxelGame.getInstance().chunkRenderTimes = 0;
@@ -171,8 +132,7 @@ public class World implements IWorld {
                 VoxelGame.getInstance().addToGLQueue(new Runnable() {
                     @Override
                     public void run() {
-                        c.rerender()
-                        rerenderLiquids()
+                        c.rerender();
                     }
                 });
 
@@ -182,7 +142,6 @@ public class World implements IWorld {
                             @Override
                             public void run() {
                                 getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)).rerender();
-                                rerenderLiquids()
                             }
                         });
                     } else {
@@ -190,7 +149,6 @@ public class World implements IWorld {
                             @Override
                             public void run() {
                                 getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)).rerender();
-                                rerenderLiquids()
                             }
                         });
                     }
@@ -200,7 +158,6 @@ public class World implements IWorld {
                             @Override
                             public void run() {
                                 getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)).rerender();
-                                rerenderLiquids()
                             }
                         });
                     } else {
@@ -208,7 +165,6 @@ public class World implements IWorld {
                             @Override
                             public void run() {
                                 getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)).rerender();
-                                rerenderLiquids()
                             }
                         });
                     }
@@ -220,7 +176,6 @@ public class World implements IWorld {
                             @Override
                             public void run() {
                                 getChunkAtPosition(new Vec3i(position.x, position.y, position.z - 1)).rerender();
-                                rerenderLiquids()
                             }
                         });
                     } else {
@@ -228,7 +183,6 @@ public class World implements IWorld {
                             @Override
                             public void run() {
                                 getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)).rerender();
-                                rerenderLiquids()
                             }
                         });
                     }
@@ -238,7 +192,6 @@ public class World implements IWorld {
                             @Override
                             public void run() {
                                 getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)).rerender();
-                                rerenderLiquids()
                             }
                         });
                     } else {
@@ -246,7 +199,6 @@ public class World implements IWorld {
                             @Override
                             public void run() {
                                 getChunkAtPosition(new Vec3i(position.x, position.y, position.z-1)).rerender();
-                                rerenderLiquids()
                             }
                         });
                     }
@@ -265,7 +217,6 @@ public class World implements IWorld {
                     @Override
                     public void run() {
                         c.rerender();
-                        rerenderLiquids()
                     }
                 });
             }
@@ -301,7 +252,6 @@ public class World implements IWorld {
                 @Override
                 public void run() {
                     chunk.rerender();
-                    rerenderLiquids()
                 }
             });
         }
@@ -343,7 +293,6 @@ public class World implements IWorld {
                     @Override
                     public void run() {
                         c.rerender();
-                        rerenderLiquids()
                     }
                 });
             }
@@ -355,107 +304,6 @@ public class World implements IWorld {
 
     public void addEntity(Entity e) {
         loadedEntities.add(e);
-    }
-
-    private void rerenderLiquids() {
-        this.toRerenderLiquids = true
-    }
-
-    private void actuallyRerenderLiquids() {
-        if(liquidVertexVbo == -1 || liquidVertexVbo == 0) {
-            IntBuffer buffer = BufferUtils.createIntBuffer(4)
-            GL15.glGenBuffers(buffer)
-            liquidVertexVbo = buffer.get(0)
-            liquidTextureVbo = buffer.get(1)
-            liquidNormalVbo = buffer.get(2)
-            liquidColorVbo = buffer.get(3)
-
-            glEnableClientState(GL_NORMAL_ARRAY)
-            glEnableClientState(GL_VERTEX_ARRAY)
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY)
-            glEnableClientState(GL_COLOR_ARRAY)
-        }
-
-        Queue<Vec3i> liquidBlocks = new LinkedBlockingDeque<>();
-        boolean[][] shouldRenderSides = new boolean[CHUNK_SIZE*CHUNK_SIZE*WORLD_HEIGHT][6]
-        int totalVisibleFaceCount = 0
-        for(IChunk c : chunkList) {
-            boolean[][][] shouldRenderTopC = new boolean[CHUNK_SIZE][WORLD_HEIGHT][CHUNK_SIZE];
-            boolean[][][] shouldRenderBottomC = new boolean[CHUNK_SIZE][WORLD_HEIGHT][CHUNK_SIZE];
-            boolean[][][] shouldRenderLeftC = new boolean[CHUNK_SIZE][WORLD_HEIGHT][CHUNK_SIZE];
-            boolean[][][] shouldRenderRightC = new boolean[CHUNK_SIZE][WORLD_HEIGHT][CHUNK_SIZE];
-            boolean[][][] shouldRenderFrontC = new boolean[CHUNK_SIZE][WORLD_HEIGHT][CHUNK_SIZE];
-            boolean[][][] shouldRenderBackC = new boolean[CHUNK_SIZE][WORLD_HEIGHT][CHUNK_SIZE];
-
-            int liquidFaceCount = c.liquidBlockCount*6
-
-            liquidFaceCount = c.calcShouldRender({it == Block.WATER}, liquidFaceCount,
-                    shouldRenderTopC, shouldRenderBottomC,
-                    shouldRenderLeftC, shouldRenderRightC,
-                    shouldRenderFrontC, shouldRenderBackC);
-
-            totalVisibleFaceCount += liquidFaceCount
-
-            for(int x = 0; x < CHUNK_SIZE; x++) {
-                for(int y = 0; y < WORLD_HEIGHT; y++) {
-                    for(int z = 0; z < CHUNK_SIZE; z++) {
-                        Vec3i pos = new Vec3i(x, y, z)
-                        Block b = c.getBlockAtPosition(pos)
-                        if(b == Block.WATER) {
-                            liquidBlocks.push(pos)
-                            boolean[] srs = [shouldRenderTopC[x][y][z],
-                                shouldRenderBottomC[x][y][z],
-                                shouldRenderLeftC[x][y][z],
-                                shouldRenderRightC[x][y][z],
-                                shouldRenderFrontC[x][y][z],
-                                shouldRenderBackC[x][y][z]];
-                            shouldRenderSides[liquidBlocks.size()-1] = srs
-                        }
-                    }
-                }
-            }
-
-            IBlockRenderer waterRenderer = Block.WATER.renderer
-            FloatBuffer vertexPosData = BufferUtils.createFloatBuffer(totalVisibleFaceCount*4*3)
-            FloatBuffer textureData = BufferUtils.createFloatBuffer(totalVisibleFaceCount*4*2)
-            FloatBuffer normalData = BufferUtils.createFloatBuffer(totalVisibleFaceCount*4*3)
-            FloatBuffer colorData = BufferUtils.createFloatBuffer(totalVisibleFaceCount*4*4)
-
-            //TODO get light levels from the respective chunks
-            float[][][] lightLevels = new float[CHUNK_SIZE][WORLD_HEIGHT][CHUNK_SIZE]
-            for(int r = 0; r < CHUNK_SIZE; r++) {
-                for(int g = 0; g < WORLD_HEIGHT; g++) {
-                    for(int b = 0; b < CHUNK_SIZE; b++) {
-                        lightLevels[r][g][b] = 1.0f;
-                    }
-                }
-            }
-            Vec3i pos
-            while((pos = liquidBlocks.poll()) != null) {
-                boolean[] srs = shouldRenderSides[liquidBlocks.size()]
-                waterRenderer.renderVBO(pos.x, pos.y, pos.z, lightLevels,
-                        vertexPosData, textureData, normalData, colorData,
-                        srs[0], srs[1], srs[2], srs[3], srs[4], srs[5])
-            }
-
-            vertexPosData.flip()
-            textureData.flip()
-            normalData.flip()
-            colorData.flip()
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVertexVbo)
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertexPosData, GL15.GL_STATIC_DRAW)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidTextureVbo)
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, textureData, GL15.GL_STATIC_DRAW)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidNormalVbo)
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, normalData, GL15.GL_STATIC_DRAW)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidColorVbo)
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorData, GL15.GL_STATIC_DRAW)
-        }
-        this.liquidVisibleSides = totalVisibleFaceCount
     }
 
 }

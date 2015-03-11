@@ -212,8 +212,8 @@ public class Chunk implements IChunk {
 
             glDrawArrays(GL_QUADS, 0, numVisibleSides*4)
 
-            VoxelGame.instance.shaderManager.enableWave()
-            glEnable(GL_BLEND)
+            //VoxelGame.instance.shaderManager.enableWave()
+            //glEnable(GL_BLEND)
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
             glVertexPointer(3, GL_FLOAT, 0, 0)
 
@@ -227,8 +227,8 @@ public class Chunk implements IChunk {
             glColorPointer(4, GL_FLOAT, 0, 0)
 
             glDrawArrays(GL_QUADS, 0, liquidVisibleSides*4)
-            glDisable(GL_BLEND)
-            VoxelGame.instance.shaderManager.disableWave()
+            //glDisable(GL_BLEND)
+            //VoxelGame.instance.shaderManager.disableWave()
         } else {
             glCallList(displayList)
         }
@@ -412,7 +412,7 @@ public class Chunk implements IChunk {
                         if (z == size - 1) {
                             Vec3i adjPos = new Vec3i(
                                     x, y, 0)
-                            Vec3i askWorld = new Vec3i(startPosition.x, y, startPosition.z + size + 1)
+                            Vec3i askWorld = new Vec3i(startPosition.x, y, startPosition.z + size)
                             IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
                             if (adjChunk != null) {
                                 Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
@@ -456,7 +456,7 @@ public class Chunk implements IChunk {
                         if (x == size - 1) {
                             Vec3i adjPos = new Vec3i(
                                     0, y, z)
-                            Vec3i askWorld = new Vec3i(startPosition.x + size + 1, y, startPosition.z)
+                            Vec3i askWorld = new Vec3i(startPosition.x + size, y, startPosition.z)
                             IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
                             if (adjChunk != null) {
                                 Block adjBlock = adjChunk.getBlockAtPosition(adjPos)

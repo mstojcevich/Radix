@@ -42,7 +42,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 usedLightLevel = lightLevels[(int)x][(int)y][(int)z+1];
             }
             for(int i = 0; i < 4; i++) {
-                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.2f});
+                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }
         }
 
@@ -71,7 +71,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 usedLightLevel = lightLevels[(int)x-1][(int)y][(int)z];
             }
             for(int i = 0; i < 4; i++) {
-                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.2f});
+                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }
         }
 

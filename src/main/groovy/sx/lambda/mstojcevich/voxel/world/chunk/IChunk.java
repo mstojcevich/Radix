@@ -29,4 +29,6 @@ public interface IChunk extends Serializable {
 
     public float getHighestPoint();
 
+    public float getLightLevel(int x, int y, int z);
+
 }

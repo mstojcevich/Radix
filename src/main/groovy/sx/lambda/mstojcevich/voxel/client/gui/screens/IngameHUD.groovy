@@ -37,9 +37,9 @@ class IngameHUD extends BufferedGUIScreen {
                     Block.WATER.getRenderer().render2d(0, 0, Math.max(Display.getWidth(), Display.getHeight()))
                     glColor4f(1, 1, 1, 1)
                     break;
-                default:
-                    glColor4f(1, 1, 1, 1)
-                    blockInHead.getRenderer().render2d(0, 0, Math.max(Display.getWidth(), Display.getHeight()))
+//                default:
+//                    glColor4f(1, 1, 1, 1)
+//                    blockInHead.getRenderer().render2d(0, 0, Math.max(Display.getWidth(), Display.getHeight()))
             }
         }
 

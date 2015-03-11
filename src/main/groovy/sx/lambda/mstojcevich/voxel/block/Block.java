@@ -2,7 +2,7 @@ package sx.lambda.mstojcevich.voxel.block;
 
 public enum Block {
 	
-	AIR(0), DIRT(1), GRASS(2), STONE(3), WATER(4, new NormalBlockRenderer(4), true, false), SAND(5);
+	AIR(0), DIRT(1), GRASS(2), STONE(3), WATER(4, new WaterRenderer(4), true, false), SAND(5);
 	
 	final int id;
 	final transient IBlockRenderer renderer;

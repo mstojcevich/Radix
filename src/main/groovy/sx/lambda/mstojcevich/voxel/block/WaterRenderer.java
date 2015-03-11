@@ -1,97 +1,11 @@
 package sx.lambda.mstojcevich.voxel.block;
 
-import groovy.transform.CompileStatic;
-import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
-import sx.lambda.mstojcevich.voxel.VoxelGame;
-
-import java.io.IOException;
 import java.nio.FloatBuffer;
 
-import static org.lwjgl.opengl.GL11.*;
+public class WaterRenderer extends NormalBlockRenderer {
 
-@CompileStatic
-public class NormalBlockRenderer implements IBlockRenderer {
-
-    protected static final float TEXTURE_PERCENTAGE = 0.25f;
-
-    private static Texture blockMap;
-
-    protected final float u, v;
-
-    private static boolean initialized;
-
-	public NormalBlockRenderer(int blockID) {
-        u = ((blockID%4)*TEXTURE_PERCENTAGE);
-        v = ((blockID/4)*TEXTURE_PERCENTAGE);
-	}
-
-    @Override
-    public void render(float x, float y, float z, boolean shouldRenderTop, boolean shouldRenderBottom, boolean shouldRenderLeft, boolean shouldRenderRight, boolean shouldRenderFront, boolean shouldRenderBack) {
-        if(!initialized) {
-            initialize();
-        }
-        float u2 = u+TEXTURE_PERCENTAGE-.001f;
-        float v2 = v+TEXTURE_PERCENTAGE-.001f;
-        if (shouldRenderTop) {
-            glBegin(GL_QUADS);
-            glNormal3f(0, 0, 1);
-            glTexCoord2f(u, v); glVertex3f(x, y, z+1);
-            glTexCoord2f(u, v2); glVertex3f(x+1, y, z+1);
-            glTexCoord2f(u2, v2); glVertex3f(x+1, y + 1, z+1);
-            glTexCoord2f(u2, v); glVertex3f(x, y + 1, z+1);
-            glEnd();
-        }
-        //left
-        if (shouldRenderLeft) {
-            glBegin(GL_QUADS);
-            glNormal3f(-1, 0, 0);
-            glTexCoord2f(u, v); glVertex3f(x, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x, y, z + 1);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x, y + 1, z);
-            glEnd();
-        }
-        if (shouldRenderRight) {
-            //right
-            glBegin(GL_QUADS);
-            glNormal3f(1, 0, 0);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x + 1, y + 1, z);
-            glTexCoord2f(u2, v2); glVertex3f(x + 1, y + 1, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y, z + 1);
-            glEnd();
-        }
-        if (shouldRenderFront) {
-            //front
-            glBegin(GL_QUADS);
-            glNormal3f(0, -1, 0);
-            glTexCoord2f(u, v); glVertex3f(x, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x + 1, y, z);
-            glTexCoord2f(u2, v2); glVertex3f(x + 1, y, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x, y, z + 1);
-            glEnd();
-        }
-        //back
-        if (shouldRenderBack) {
-            glBegin(GL_QUADS);
-            glNormal3f(0, 1, 0);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y + 1, z);
-            glTexCoord2f(u, v2); glVertex3f(x, y + 1, z);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z + 1);
-            glEnd();
-        }
-        //bottom
-        if(shouldRenderBottom) {
-            glBegin(GL_QUADS);
-            glNormal3f(0, 0, -1);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x, y, z);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z);
-            glEnd();
-        }
+    public WaterRenderer(int blockID) {
+        super(blockID);
     }
 
     @Override
@@ -128,7 +42,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 usedLightLevel = lightLevels[(int)x][(int)y][(int)z+1];
             }
             for(int i = 0; i < 4; i++) {
-                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 1.0f});
+                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.2f});
             }
         }
 
@@ -157,7 +71,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 usedLightLevel = lightLevels[(int)x-1][(int)y][(int)z];
             }
             for(int i = 0; i < 4; i++) {
-                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 1.0f});
+                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.2f});
             }
         }
 
@@ -186,7 +100,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 usedLightLevel = lightLevels[(int)x+1][(int)y][(int)z];
             }
             for(int i = 0; i < 4; i++) {
-                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 1.0f});
+                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }
         }
 
@@ -215,7 +129,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 usedLightLevel = lightLevels[(int)x][(int)y-1][(int)z];
             }
             for(int i = 0; i < 4; i++) {
-                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 1.0f});
+                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }
         }
 
@@ -244,7 +158,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 usedLightLevel = lightLevels[(int)x][(int)y+1][(int)z];
             }
             for(int i = 0; i < 4; i++) {
-                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 1.0f});
+                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }
         }
 
@@ -273,47 +187,9 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 usedLightLevel = lightLevels[(int)x][(int)y][(int)z-1];
             }
             for(int i = 0; i < 4; i++) {
-                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 1.0f});
+                colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }
         }
     }
 
-    @Override
-    public void render2d(float x, float y, float width) {
-        if(!initialized) {
-            initialize();
-        }
-        float u2 = u+TEXTURE_PERCENTAGE-.001f;
-        float v2 = v+TEXTURE_PERCENTAGE-.001f;
-        VoxelGame.getInstance().getTextureManager().bindTexture(blockMap.getTextureID());
-        glBegin(GL_QUADS);
-        glTexCoord2f(u, v);glVertex2f(x, y);
-        glTexCoord2f(u, v2);glVertex2f(x, y+width);
-        glTexCoord2f(u2, v2);glVertex2f(x+width, y+width);
-        glTexCoord2f(u2, v);glVertex2f(x+width, y);
-        glEnd();
-    }           
-
-    @Override
-    public void prerender() {
-        if(!initialized)initialize();
-        VoxelGame.getInstance().getTextureManager().bindTexture(blockMap.getTextureID());
-    }
-
-    private static void initialize() {
-        try {
-            blockMap = TextureLoader.getTexture("PNG", NormalBlockRenderer.class.getResourceAsStream("/textures/block/blockSheet.png"));
-            blockMap.setTextureFilter(GL_NEAREST);
-        }catch(IOException e) {
-            e.printStackTrace();
-        }
-        initialized = true;
-    }
-
-    public static Texture getBlockMap() {
-        if(blockMap == null) {
-            initialize();
-        }
-        return blockMap;
-    }
 }

@@ -124,10 +124,10 @@ public class World implements IWorld {
     }
 
     @Override
-    public void removeBlock(Vec3i Vec3i) {
+    public void removeBlock(final Vec3i position) {
         synchronized (this) {
-            final IChunk c = this.getChunkAtPosition(Vec3i);
-            c.removeBlock(Vec3i);
+            final IChunk c = this.getChunkAtPosition(position);
+            c.removeBlock(position);
             if(!server) {
                 VoxelGame.getInstance().addToGLQueue(new Runnable() {
                     @Override
@@ -135,12 +135,80 @@ public class World implements IWorld {
                         c.rerender();
                     }
                 });
+
+                if(Math.abs(position.x+(position.x<0?1:0)) % 16 == 15) {
+                    if(position.x < 0) {
+                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
+                            @Override
+                            public void run() {
+                                getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)).rerender();
+                            }
+                        });
+                    } else {
+                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
+                            @Override
+                            public void run() {
+                                getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)).rerender();
+                            }
+                        });
+                    }
+                } else if(Math.abs(position.x+(position.x<0?1:0)) % 16 == 0) {
+                    if(position.x < 0) {
+                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
+                            @Override
+                            public void run() {
+                                getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)).rerender();
+                            }
+                        });
+                    } else {
+                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
+                            @Override
+                            public void run() {
+                                getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)).rerender();
+                            }
+                        });
+                    }
+                }
+
+                if(Math.abs(position.z+(position.z<0?1:0)) % 16 == 15) {
+                    if(position.z < 0) {
+                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
+                            @Override
+                            public void run() {
+                                getChunkAtPosition(new Vec3i(position.x, position.y, position.z - 1)).rerender();
+                            }
+                        });
+                    } else {
+                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
+                            @Override
+                            public void run() {
+                                getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)).rerender();
+                            }
+                        });
+                    }
+                } else if(Math.abs(position.z+(position.z<0?1:0)) % 16 == 0) {
+                    if(position.z < 0) {
+                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
+                            @Override
+                            public void run() {
+                                getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)).rerender();
+                            }
+                        });
+                    } else {
+                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
+                            @Override
+                            public void run() {
+                                getChunkAtPosition(new Vec3i(position.x, position.y, position.z-1)).rerender();
+                            }
+                        });
+                    }
+                }
             }
         }
     }
 
     @Override
-    public void addBlock(Block block, Vec3i position) {
+    public void addBlock(Block block, final Vec3i position) {
         synchronized(this) {
             final IChunk c = this.getChunkAtPosition(position);
             c.addBlock(block, position);

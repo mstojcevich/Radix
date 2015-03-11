@@ -21,7 +21,7 @@ public class Chunk implements IChunk {
 
     private final Block[][][] blockList
 
-    private final transient IWorld parentWorld
+    private transient IWorld parentWorld
 
     private final int size
     private final int height
@@ -84,6 +84,12 @@ public class Chunk implements IChunk {
 
     @Override
     public void rerender() {
+        if(this.parentWorld == null) {
+            if(VoxelGame.instance != null) {
+                this.parentWorld = VoxelGame.instance.world
+            }
+        }
+
         if (USE_VBO) {
             if(vboVertexHandle == -1 || vboVertexHandle == 0) {
                 IntBuffer buffer = BufferUtils.createIntBuffer(4)
@@ -120,19 +126,43 @@ public class Chunk implements IChunk {
                             }
                             int zed = z
                             shouldRenderTop[x][y][z] = true
-                            if (z == size - 1)
-                                shouldRenderTop[x][y][z] = true
-                            else if (blockList[x][y][zed + 1] != null) {
-                                if(!blockList[x][y][zed+1].isTransparent() || blockList[x][y][z].isTransparent()) {
+                            if(z == size - 1) {
+                                Vec3i adjPos = new Vec3i(
+                                        x, y, 0)
+                                Vec3i askWorld = new Vec3i(startPosition.x, y, startPosition.z+size+1)
+                                IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
+                                if(adjChunk != null) {
+                                    Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
+                                    if(adjBlock != null) {
+                                        if(!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                            shouldRenderTop[x][y][z] = false
+                                            numVisibleSides--
+                                        }
+                                    }
+                                }
+                            } else if (blockList[x][y][zed + 1] != null) {
+                                if (!blockList[x][y][zed + 1].isTransparent() || blockList[x][y][z].isTransparent()) {
                                     shouldRenderTop[x][y][z] = false
                                     numVisibleSides--
                                 }
                             }
 
                             shouldRenderLeft[x][y][z] = true
-                            if (x == 0)
-                                shouldRenderLeft[x][y][z] = true
-                            else if (blockList[x - 1][y][z] != null) {
+                            if (x == 0) {
+                                Vec3i adjPos = new Vec3i(
+                                        size-1, y, z)
+                                Vec3i askWorld = new Vec3i(startPosition.x-1, y, startPosition.z)
+                                IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
+                                if(adjChunk != null) {
+                                    Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
+                                    if(adjBlock != null) {
+                                        if(!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                            shouldRenderLeft[x][y][z] = false
+                                            numVisibleSides--
+                                        }
+                                    }
+                                }
+                            } else if (blockList[x - 1][y][z] != null) {
                                 if(!blockList[x - 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
                                     shouldRenderLeft[x][y][z] = false
                                     numVisibleSides--
@@ -140,9 +170,21 @@ public class Chunk implements IChunk {
                             }
 
                             shouldRenderRight[x][y][z] = true
-                            if (x == size - 1)
-                                shouldRenderRight[x][y][z] = true
-                            else if (blockList[x + 1][y][z] != null) {
+                            if (x == size - 1) {
+                                Vec3i adjPos = new Vec3i(
+                                        0, y, z)
+                                Vec3i askWorld = new Vec3i(startPosition.x+size+1, y, startPosition.z)
+                                IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
+                                if(adjChunk != null) {
+                                    Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
+                                    if(adjBlock != null) {
+                                        if(!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                            shouldRenderRight[x][y][z] = false
+                                            numVisibleSides--
+                                        }
+                                    }
+                                }
+                            } else if (blockList[x + 1][y][z] != null) {
                                 if(!blockList[x + 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
                                     shouldRenderRight[x][y][z] = false
                                     numVisibleSides--
@@ -170,9 +212,21 @@ public class Chunk implements IChunk {
                             }
 
                             shouldRenderBottom[x][y][z] = true
-                            if (z == 0)
-                                shouldRenderBottom[x][y][z] = true
-                            else if (blockList[x][y][zed - 1] != null) {
+                            if (z == 0) {
+                                Vec3i adjPos = new Vec3i(
+                                        x, y, size-1)
+                                Vec3i askWorld = new Vec3i(startPosition.x, y, startPosition.z-1)
+                                IChunk adjChunk = parentWorld.getChunkAtPosition(askWorld)
+                                if(adjChunk != null) {
+                                    Block adjBlock = adjChunk.getBlockAtPosition(adjPos)
+                                    if(adjBlock != null) {
+                                        if(!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                            shouldRenderBottom[x][y][z] = false
+                                            numVisibleSides--
+                                        }
+                                    }
+                                }
+                            } else if (blockList[x][y][zed - 1] != null) {
                                 if(!blockList[x][y][zed-1].isTransparent() || blockList[x][y][z].isTransparent()) {
                                     shouldRenderBottom[x][y][z] = false
                                     numVisibleSides--
@@ -193,7 +247,7 @@ public class Chunk implements IChunk {
             FloatBuffer vertexPosData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
             FloatBuffer textureData = BufferUtils.createFloatBuffer(numVisibleSides*4*2)
             FloatBuffer normalData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
-            FloatBuffer colorData = BufferUtils.createFloatBuffer(numVisibleSides*4*3)
+            FloatBuffer colorData = BufferUtils.createFloatBuffer(numVisibleSides*4*4)
             for (int x = 0; x < size; x++) {
                 for (int z = 0; z < size; z++) {
                     boolean firstBlock = false
@@ -297,6 +351,9 @@ public class Chunk implements IChunk {
     public void render() {
         glPushMatrix();
 
+        glEnable(GL_ALPHA_TEST)
+        glEnable(GL_BLEND)
+
         VoxelGame.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap.getTextureID())
         if(USE_VBO) {
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
@@ -309,7 +366,7 @@ public class Chunk implements IChunk {
             glNormalPointer(GL_FLOAT, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
-            glColorPointer(3, GL_FLOAT, 0, 0)
+            glColorPointer(4, GL_FLOAT, 0, 0)
 
             glDrawArrays(GL_QUADS, 0, numVisibleSides*4)
         } else {

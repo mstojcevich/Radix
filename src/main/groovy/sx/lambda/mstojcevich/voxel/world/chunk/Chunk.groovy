@@ -69,11 +69,11 @@ public class Chunk implements IChunk {
         this.height = world.getHeight()
         this.blockList = new Block[size][height][size]
 
+        highestPoint = Math.max(highestPoint, world.getSeaLevel())
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
                 int distFromSeaLevel = world.getHeightAboveSeaLevel(startPosition.x + x, startPosition.z + z)
                 int yMax = world.getSeaLevel() + distFromSeaLevel
-                highestPoint = Math.max(highestPoint, world.getSeaLevel())
                 if(yMax < world.getSeaLevel()) {
                     for (int y = yMax; y < world.getSeaLevel(); y++) {
                         Block blockType = Block.WATER
@@ -92,6 +92,7 @@ public class Chunk implements IChunk {
                     if(y == world.getSeaLevel()-1 && y == yMax-1) {
                         blockCount++
                         blockList[x][y+1][z] = Block.SAND
+                        highestPoint = Math.max(highestPoint, y+1)
                     }
 
                     if(y == yMax-1) {
@@ -101,7 +102,7 @@ public class Chunk implements IChunk {
                     }
                     blockCount++
                     blockList[x][y][z] = blockType
-                    highestPoint = Math.max(highestPoint, y + 1)
+                    highestPoint = Math.max(highestPoint, y)
                 }
             }
         }

@@ -22,7 +22,7 @@ public class SimplexChunkGenerator implements ChunkGenerator {
 
     @Override
     public int generate(Vec3i startPosition, Block[][][] blocks) {
-        int highestPoint = 0;
+        int highestPoint = world.getSeaLevel();
         for (int x = 0; x < blocks.length; x++) {
             for (int z = 0; z < blocks.length; z++) {
                 int distFromSeaLevel = getHeightAboveSeaLevel(startPosition.x + x, startPosition.z + z);

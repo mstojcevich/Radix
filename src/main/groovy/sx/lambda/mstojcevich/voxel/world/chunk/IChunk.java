@@ -31,4 +31,6 @@ public interface IChunk extends Serializable {
 
     public float getLightLevel(int x, int y, int z);
 
+    public void renderWater();
+
 }

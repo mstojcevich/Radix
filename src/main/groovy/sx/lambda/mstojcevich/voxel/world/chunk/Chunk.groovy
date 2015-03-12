@@ -194,51 +194,51 @@ public class Chunk implements IChunk {
 
     @Override
     public void render() {
-        glPushMatrix();
-
-        VoxelGame.instance.shaderManager.setChunkOffset(startPosition.x, startPosition.y, startPosition.z)
-
         VoxelGame.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap.getTextureID())
         if(USE_VBO) {
-            glDisable(GL_BLEND)
+            if(vboVertexHandle > 0) {
+                glDisable(GL_BLEND)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
-            glVertexPointer(3, GL_FLOAT, 0, 0)
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
+                glVertexPointer(3, GL_FLOAT, 0, 0)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboTextureHandle)
-            glTexCoordPointer(2, GL_FLOAT, 0, 0)
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboTextureHandle)
+                glTexCoordPointer(2, GL_FLOAT, 0, 0)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
-            glNormalPointer(GL_FLOAT, 0, 0)
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
+                glNormalPointer(GL_FLOAT, 0, 0)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
-            glColorPointer(3, GL_FLOAT, 0, 0)
+                GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
+                glColorPointer(3, GL_FLOAT, 0, 0)
 
-            glDrawArrays(GL_QUADS, 0, numVisibleSides*4)
-
-            VoxelGame.instance.shaderManager.enableWave()
-            glEnable(GL_BLEND)
-            glPolygonOffset(1f, 0.7f)
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
-            glVertexPointer(3, GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboTextureHandle)
-            glTexCoordPointer(2, GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboNormalHandle)
-            glNormalPointer(GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboColorHandle)
-            glColorPointer(4, GL_FLOAT, 0, 0)
-
-            glDrawArrays(GL_QUADS, 0, liquidVisibleSides*4)
-            glDisable(GL_BLEND)
-            VoxelGame.instance.shaderManager.disableWave()
+                glDrawArrays(GL_QUADS, 0, numVisibleSides * 4)
+            }
         } else {
             glCallList(displayList)
         }
+    }
 
-        glPopMatrix();
+    public void renderWater() {
+        VoxelGame.instance.shaderManager.setChunkOffset(startPosition.x, startPosition.y, startPosition.z)
+
+        VoxelGame.instance.shaderManager.enableWave()
+        glEnable(GL_BLEND)
+        glPolygonOffset(1f, 0.7f)
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
+        glVertexPointer(3, GL_FLOAT, 0, 0)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboTextureHandle)
+        glTexCoordPointer(2, GL_FLOAT, 0, 0)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboNormalHandle)
+        glNormalPointer(GL_FLOAT, 0, 0)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboColorHandle)
+        glColorPointer(4, GL_FLOAT, 0, 0)
+
+        glDrawArrays(GL_QUADS, 0, liquidVisibleSides*4)
+        glDisable(GL_BLEND)
+        VoxelGame.instance.shaderManager.disableWave()
     }
 
     public Block getBlockAtPosition(Vec3i position) {

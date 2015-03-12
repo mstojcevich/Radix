@@ -1,6 +1,11 @@
 package sx.lambda.mstojcevich.voxel.world;
 
 import io.netty.util.internal.ConcurrentSet;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.ARBOcclusionQuery;
+import org.lwjgl.opengl.ARBOcclusionQuery2;
+import org.lwjgl.opengl.ARBVertexShader;
+import org.lwjgl.opengl.GL15;
 import sx.lambda.mstojcevich.voxel.VoxelGame;
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI;
 import sx.lambda.mstojcevich.voxel.api.events.worldgen.EventFinishChunkGen;
@@ -12,6 +17,8 @@ import sx.lambda.mstojcevich.voxel.world.chunk.Chunk;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 import sx.lambda.mstojcevich.voxel.world.generation.SimplexNoise;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -67,14 +74,107 @@ public class World implements IWorld {
     public void render() {
         if(!server) {
             long renderStartNS = System.nanoTime();
-            for (IChunk c : this.chunkList) {
-                if (VoxelGame.getInstance().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
-                    glPushMatrix();
-                    glTranslatef(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z);
-                    c.render();
-                    glPopMatrix();
+            IntBuffer ids = BufferUtils.createIntBuffer(this.chunkList.size());
+            ARBOcclusionQuery.glGenQueriesARB(ids);
+
+
+            glColorMask(false, false, false, false);
+            glDepthMask(false);
+            // TODO have an object that keeps track of what the GPU supports, check if it supports ARB_occlusion_query2 or has OpenGL 3.3
+
+            List<IChunk> distSortedChunks = new ArrayList<>(chunkList);
+            Collections.sort(distSortedChunks, new Comparator<IChunk>() {
+                @Override
+                public int compare(IChunk o1, IChunk o2) {
+                    return (int)VoxelGame.getInstance().getPlayer().getPosition().planeDistance(o1.getStartPosition().x,
+                            o1.getStartPosition().z) -
+                            (int)VoxelGame.getInstance().getPlayer().getPosition().planeDistance(o2.getStartPosition().x,
+                            o2.getStartPosition().z);
+                }
+            });
+
+            // https://www.opengl.org/registry/specs/ARB/occlusion_query.txt
+            Queue<IChunk> passedChunks = new ArrayDeque<>();
+            for (IChunk c : distSortedChunks) {
+                int queryId = ids.get();
+                ARBOcclusionQuery.glBeginQueryARB(ARBOcclusionQuery.GL_SAMPLES_PASSED_ARB, queryId);
+
+                int x = c.getStartPosition().x;
+                int y = c.getStartPosition().y;
+                int z = c.getStartPosition().z;
+                int x2 = x + CHUNK_SIZE;
+                float y2 = c.getHighestPoint();
+                int z2 = z + CHUNK_SIZE;
+
+                // TODO render this into a VBO on chunk rerender
+                glBegin(GL_QUADS);
+                glVertex3f(x, y, z);
+                glVertex3f(x, y, z2);
+                glVertex3f(x, y2, z2);
+                glVertex3f(x, y2, z);
+                glEnd();
+
+                glBegin(GL_QUADS);
+                glVertex3f(x, y, z);
+                glVertex3f(x, y, z2);
+                glVertex3f(x, y2, z2);
+                glVertex3f(x, y2, z);
+                glEnd();
+
+                glBegin(GL_QUADS);
+                glVertex3f(x2, y, z);
+                glVertex3f(x2, y2, z);
+                glVertex3f(x2, y2, z2);
+                glVertex3f(x2, y, z2);
+                glEnd();
+
+                glBegin(GL_QUADS);
+                glVertex3f(x, y, z);
+                glVertex3f(x2, y, z);
+                glVertex3f(x2, y, z2);
+                glVertex3f(x, y, z2);
+                glEnd();
+
+                glBegin(GL_QUADS);
+                glVertex3f(x2, y2, z);
+                glVertex3f(x, y2, z);
+                glVertex3f(x, y2, z2);
+                glVertex3f(x2, y2, z2);
+                glEnd();
+
+                glBegin(GL_QUADS);
+                glVertex3f(x2, y, z);
+                glVertex3f(x, y, z);
+                glVertex3f(x, y2, z);
+                glVertex3f(x2, y2, z);
+                glEnd();
+
+                ARBOcclusionQuery.glEndQueryARB(ARBOcclusionQuery.GL_SAMPLES_PASSED_ARB);
+                int result = ARBOcclusionQuery.glGetQueryObjectuiARB(queryId, ARBOcclusionQuery.GL_QUERY_RESULT_ARB);
+                if(result > 0) {
+                    passedChunks.add(c);
                 }
             }
+            glDepthMask(true);
+            glColorMask(true, true, true, true);
+
+            IChunk c;
+            while((c = passedChunks.poll()) != null) {
+                glPushMatrix();
+                glTranslatef(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z);
+                c.render();
+                glPopMatrix();
+            }
+
+            //TODO use the below code for GPUs that weren't supported by the occlusion check
+//            for (IChunk c : this.chunkList) {
+//                if (VoxelGame.getInstance().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
+//                    glPushMatrix();
+//                    glTranslatef(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z);
+//                    c.render();
+//                    glPopMatrix();
+//                }
+//            }
             if(VoxelGame.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
                 VoxelGame.getInstance().numChunkRenders = 0;
                 VoxelGame.getInstance().chunkRenderTimes = 0;

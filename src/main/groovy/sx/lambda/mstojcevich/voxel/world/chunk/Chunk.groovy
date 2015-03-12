@@ -216,8 +216,9 @@ public class Chunk implements IChunk {
 
             glDrawArrays(GL_QUADS, 0, numVisibleSides*4)
 
-            //VoxelGame.instance.shaderManager.enableWave()
-            //glEnable(GL_BLEND)
+            VoxelGame.instance.shaderManager.enableWave()
+            glEnable(GL_BLEND)
+            glPolygonOffset(1f, 0.7f)
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
             glVertexPointer(3, GL_FLOAT, 0, 0)
 
@@ -231,8 +232,8 @@ public class Chunk implements IChunk {
             glColorPointer(4, GL_FLOAT, 0, 0)
 
             glDrawArrays(GL_QUADS, 0, liquidVisibleSides*4)
-            //glDisable(GL_BLEND)
-            //VoxelGame.instance.shaderManager.disableWave()
+            glDisable(GL_BLEND)
+            VoxelGame.instance.shaderManager.disableWave()
         } else {
             glCallList(displayList)
         }
@@ -493,7 +494,6 @@ public class Chunk implements IChunk {
         int newVisSideCount = visibleSideCount
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
-                boolean firstBlock = false
                 for (int y = height - 1; y >= 0; y--) {
                     Block block = blockList[x][y][z]
                     if (!condition.call(block)) continue;

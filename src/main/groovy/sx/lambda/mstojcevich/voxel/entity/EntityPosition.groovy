@@ -57,6 +57,10 @@ public class EntityPosition implements Cloneable, Serializable {
         return Math.sqrt(Math.pow(pos2.x - x, 2) + Math.pow(pos2.z - z, 2))
     }
 
+    public float planeDistance(float xp, float zp) {
+        return Math.sqrt(Math.pow(xp - x, 2) + Math.pow(zp - z, 2))
+    }
+
     @Override
     //TODO Will this give any hash overlap?
     public int hashCode() {

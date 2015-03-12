@@ -59,7 +59,7 @@ public class VoxelGame {
 
     public static final String GAME_TITLE = "VoxelTest"
 
-    private static final int START_WIDTH = 320, START_HEIGHT = 240; //TODO Config - screen size
+    private static final int START_WIDTH = 1280, START_HEIGHT = 720; //TODO Config - screen size
 
     private int renderedFrames = 0;
 
@@ -285,6 +285,10 @@ public class VoxelGame {
 
         glEnable(GL_BLEND)
         int debugTextHeight = 0
+
+        String glInfoStr = "GL Info: " + glGetString(GL_RENDERER) + " (GL " + glGetString(GL_VERSION) + ")"
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(glInfoStr), debugTextHeight, glInfoStr)
+        debugTextHeight += debugTextRenderer.getLineHeight()
         String fpsStr = "FPS: $fps"
         debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr, Color.white)
         debugTextHeight += debugTextRenderer.getLineHeight()
@@ -307,7 +311,7 @@ public class VoxelGame {
                 posFormat.format(player.rotation.pitch))
         debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(headingStr), debugTextHeight, headingStr)
         debugTextHeight += debugTextRenderer.getLineHeight()
-        String threadsStr = "Active threads:" + Thread.activeCount()
+        String threadsStr = "Active threads: " + Thread.activeCount()
         debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
 
         glCallList hudDisplayList //TODO move to HUD GUI

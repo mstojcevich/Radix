@@ -46,6 +46,8 @@ public class World implements IWorld {
 
     private List<Entity> loadedEntities = new CopyOnWriteArrayList<>();
 
+    private Set<IChunk> chunksToRerender = Collections.newSetFromMap(new ConcurrentHashMap<IChunk, Boolean>());
+
     public World(boolean remote, boolean server) {
         this.remote = remote;
         this.server = server;
@@ -73,6 +75,11 @@ public class World implements IWorld {
 
     public void render() {
         if(!server) {
+            for(IChunk c : chunksToRerender) {
+                c.rerender();
+                chunksToRerender.remove(c);
+            }
+
             long renderStartNS = System.nanoTime();
             /*IntBuffer ids = BufferUtils.createIntBuffer(this.chunkList.size());
             ARBOcclusionQuery.glGenQueriesARB(ids);
@@ -249,78 +256,33 @@ public class World implements IWorld {
             final IChunk c = this.getChunkAtPosition(position);
             c.removeBlock(position);
             if(!server) {
-                VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                    @Override
-                    public void run() {
-                        c.rerender();
-                    }
-                });
+                rerenderChunk(c);
 
                 if(Math.abs(position.x+(position.x<0?1:0)) % 16 == 15) {
                     if(position.x < 0) {
-                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                            @Override
-                            public void run() {
-                                getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)).rerender();
-                            }
-                        });
+                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)));
                     } else {
-                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                            @Override
-                            public void run() {
-                                getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)).rerender();
-                            }
-                        });
+                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)));
                     }
                 } else if(Math.abs(position.x+(position.x<0?1:0)) % 16 == 0) {
                     if(position.x < 0) {
-                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                            @Override
-                            public void run() {
-                                getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)).rerender();
-                            }
-                        });
+                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)));
                     } else {
-                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                            @Override
-                            public void run() {
-                                getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)).rerender();
-                            }
-                        });
+                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)));
                     }
                 }
 
                 if(Math.abs(position.z+(position.z<0?1:0)) % 16 == 15) {
                     if(position.z < 0) {
-                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                            @Override
-                            public void run() {
-                                getChunkAtPosition(new Vec3i(position.x, position.y, position.z - 1)).rerender();
-                            }
-                        });
+                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z - 1)));
                     } else {
-                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                            @Override
-                            public void run() {
-                                getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)).rerender();
-                            }
-                        });
+                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)));
                     }
                 } else if(Math.abs(position.z+(position.z<0?1:0)) % 16 == 0) {
                     if(position.z < 0) {
-                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                            @Override
-                            public void run() {
-                                getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)).rerender();
-                            }
-                        });
+                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)));
                     } else {
-                        VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                            @Override
-                            public void run() {
-                                getChunkAtPosition(new Vec3i(position.x, position.y, position.z-1)).rerender();
-                            }
-                        });
+                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z-1)));
                     }
                 }
             }
@@ -333,12 +295,7 @@ public class World implements IWorld {
             final IChunk c = this.getChunkAtPosition(position);
             c.addBlock(block, position);
             if(!server) {
-                VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                    @Override
-                    public void run() {
-                        c.rerender();
-                    }
-                });
+                rerenderChunk(c);
             }
         }
     }
@@ -368,12 +325,7 @@ public class World implements IWorld {
         this.chunkMap.put(pos, chunk);
         this.chunkList.add(chunk);
         if(!server) {
-            VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                @Override
-                public void run() {
-                    chunk.rerender();
-                }
-            });
+            rerenderChunk(chunk);
         }
     }
 
@@ -409,12 +361,7 @@ public class World implements IWorld {
             this.chunkMap.put(pos, c);
             this.chunkList.add(c);
             if(!server) {
-                VoxelGame.getInstance().addToGLQueue(new Runnable() {
-                    @Override
-                    public void run() {
-                        c.rerender();
-                    }
-                });
+                rerenderChunk(c);
             }
             return c;
         } else {
@@ -424,6 +371,11 @@ public class World implements IWorld {
 
     public void addEntity(Entity e) {
         loadedEntities.add(e);
+    }
+
+    @Override
+    public void rerenderChunk(IChunk c) {
+        chunksToRerender.add(c);
     }
 
 }

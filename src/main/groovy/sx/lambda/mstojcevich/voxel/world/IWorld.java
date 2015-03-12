@@ -51,4 +51,5 @@ public interface IWorld {
 
     public void addEntity(Entity e);
 
+    void rerenderChunk(IChunk c);
 }

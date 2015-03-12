@@ -59,8 +59,6 @@ public class VoxelGame {
 
     public static final String GAME_TITLE = "VoxelTest"
 
-    private static final int START_WIDTH = 1280, START_HEIGHT = 720; //TODO Config - screen size
-
     private int renderedFrames = 0;
 
     private IWorld world
@@ -186,8 +184,9 @@ public class VoxelGame {
 
         Display.setTitle GAME_TITLE
 
-        Display.setDisplayMode(new DisplayMode(START_WIDTH, START_HEIGHT))
-
+        Display.setDisplayMode(new DisplayMode(
+                settingsManager.visualSettings.windowWidth,
+                settingsManager.visualSettings.windowHeight))
         Display.setResizable true
 
         Display.create()

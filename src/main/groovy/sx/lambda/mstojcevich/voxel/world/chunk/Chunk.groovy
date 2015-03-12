@@ -19,7 +19,7 @@ import static org.lwjgl.opengl.GL11.*
 @CompileStatic
 public class Chunk implements IChunk {
 
-    private final Block[][][] blockList
+    private Block[][][] blockList
 
     private transient IWorld parentWorld
 
@@ -49,6 +49,18 @@ public class Chunk implements IChunk {
     private transient int liquidVboColorHandle = -1
 
     float[][][] lightLevels
+
+    public Chunk(IWorld world, Vec3i startPosition, int[][][] ids) {
+        this.parentWorld = world
+        this.startPosition = startPosition
+        this.size = world.getChunkSize()
+        this.height = world.getHeight()
+
+        this.loadIdInts(ids)
+
+        lightLevels = new float[size][height][size]
+        calcLightLevels(lightLevels)
+    }
 
     public Chunk(IWorld world, Vec3i startPosition) {
         this.parentWorld = world
@@ -315,7 +327,19 @@ public class Chunk implements IChunk {
         VoxelGame.getInstance().addToGLQueue(new Runnable() {
             @Override
             public void run() {
-                glDeleteLists(displayList, 1);
+                if(Chunk.USE_VBO) {
+                    GL15.glDeleteBuffers(vboVertexHandle)
+                    GL15.glDeleteBuffers(vboColorHandle)
+                    GL15.glDeleteBuffers(vboNormalHandle)
+                    GL15.glDeleteBuffers(vboTextureHandle)
+
+                    GL15.glDeleteBuffers(liquidVboVertexHandle)
+                    GL15.glDeleteBuffers(liquidVboColorHandle)
+                    GL15.glDeleteBuffers(liquidVboNormalHandle)
+                    GL15.glDeleteBuffers(liquidVboTextureHandle)
+                } else {
+                    glDeleteLists(displayList, 1);
+                }
             }
         })
     }
@@ -661,6 +685,54 @@ public class Chunk implements IChunk {
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorVbo)
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, colorData, GL15.GL_STATIC_DRAW)
+    }
+
+    @Override
+    public int[][][] blocksToIdInt() {
+        blockCount = 0
+        int[][][] ints = new int[size][highestPoint+1][size]
+        for(int x = 0; x < size; x++) {
+            for(int y = 0; y <= highestPoint; y++) {
+                for(int z = 0; z < size; z++) {
+                    Block b = blockList[x][y][z]
+                    if(b == null) {
+                        ints[x][y][z] = -1
+                    } else {
+                        ints[x][y][z] = b.ID
+                    }
+                }
+            }
+        }
+        return ints
+    }
+
+    private void loadIdInts(int[][][] ints) {
+        int width = ints.length
+        int ht = ints[0].length
+        int length = ints[0][0].length
+        Block[][][] blocks = new Block[size][height][size]
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < ht; y++) {
+                for(int z = 0; z < length; z++) {
+                    int id = ints[x][y][z]
+                    if(id > -1) {
+                        for(Block b : Block.values()) {
+                            if(b.ID == id) {
+                                highestPoint = Math.max(highestPoint, y)
+                                blocks[x][y][z] = b
+                                if(b == Block.WATER) {
+                                    liquidBlockCount++
+                                } else {
+                                    blockCount++
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        this.blockList = blocks
     }
 
 }

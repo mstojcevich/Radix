@@ -5,6 +5,7 @@ import sx.lambda.mstojcevich.voxel.net.packet.ClientPacket;
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketAuthInfo;
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketClientInfo;
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketLeaving;
+import sx.lambda.mstojcevich.voxel.net.packet.client.PacketUnloadChunk;
 import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketBreakBlock;
 import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketHello;
 import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketPlaceBlock;
@@ -12,7 +13,11 @@ import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketPlayerPosition;
 
 @CompileStatic
 public enum ConnectionStage {
-    PREAUTH(PacketLeaving.class, PacketHello.class), AUTH(PacketLeaving.class, PacketAuthInfo.class), PLAY(PacketLeaving.class, PacketClientInfo.class, PacketPlayerPosition.class, PacketBreakBlock.class, PacketPlaceBlock.class);
+    PREAUTH(PacketLeaving.class, PacketHello.class),
+    AUTH(PacketLeaving.class, PacketAuthInfo.class),
+    PLAY(PacketLeaving.class, PacketClientInfo.class,
+            PacketPlayerPosition.class, PacketBreakBlock.class,
+            PacketPlaceBlock.class, PacketUnloadChunk.class);
 
     private final Class<? extends ClientPacket>[] receivablePackets;
 

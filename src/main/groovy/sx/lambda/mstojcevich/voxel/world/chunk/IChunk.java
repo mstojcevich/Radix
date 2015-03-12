@@ -10,27 +10,29 @@ public interface IChunk extends Serializable {
 	/**
 	 * Redraws all of the blocks in the chunk
 	 */
-	public void rerender();
+	void rerender();
 	
 	/**
 	 * Renders the chunk 
 	 */
-	public void render();
+	void render();
 	
-	public Block getBlockAtPosition(Vec3i position);
+	Block getBlockAtPosition(Vec3i position);
 
-    public void removeBlock(Vec3i Vec3i);
+    void removeBlock(Vec3i Vec3i);
 
-    public void addBlock(Block block, Vec3i position);
+    void addBlock(Block block, Vec3i position);
 
-    public void unload();
+    void unload();
 
-    public Vec3i getStartPosition();
+    Vec3i getStartPosition();
 
-    public float getHighestPoint();
+    float getHighestPoint();
 
-    public float getLightLevel(int x, int y, int z);
+    float getLightLevel(int x, int y, int z);
 
-    public void renderWater();
+    void renderWater();
+
+    int[][][] blocksToIdInt();
 
 }

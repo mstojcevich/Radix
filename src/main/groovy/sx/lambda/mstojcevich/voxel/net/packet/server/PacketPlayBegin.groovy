@@ -15,6 +15,6 @@ class PacketPlayBegin implements ServerPacket {
                 .setViewDistance(VoxelGame.instance.settingsManager.visualSettings.viewDistance)
                 .build()
         ctx.writeAndFlush(new PacketClientInfo(info))
-        VoxelGame.instance.setServerChanCtx(ctx);
+        VoxelGame.instance.setServerChanCtx(ctx)
     }
 }

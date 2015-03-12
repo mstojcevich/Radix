@@ -102,7 +102,7 @@ class VoxelGameServer {
     static void main(String[] args) {
         instance = new VoxelGameServer()
         VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
-        instance.start()
+        instance.start() 
     }
 
 }

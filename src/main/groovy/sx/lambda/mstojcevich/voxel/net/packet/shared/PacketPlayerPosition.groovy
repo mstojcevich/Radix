@@ -71,13 +71,21 @@ class PacketPlayerPosition implements SharedPacket {
 
     private void sendChunks(VoxelGameServer server, ChannelHandlerContext ctx, Player p, int viewDistance) {
         //TODO only send chunks that the client doesn't already have
+        ConnectedClient client = server.getClient(ctx)
         IChunk[] chunkList = server.getWorld().getChunksInRange(p.getPosition(), viewDistance)
         ctx.writeAndFlush(new PacketStartChunkGroup())
         for (IChunk c : chunkList) {
-            ctx.writeAndFlush(new PacketChunkData(c))
+            if (!client.hadChunks.contains(c)) {
+                ctx.writeAndFlush(new PacketChunkData(c))
+                client.hadChunks.add(c)
+            }
         }
         ctx.writeAndFlush(new PacketEndChunkGroup())
         server.getClient(ctx).lastChunkSendPos = p.getPosition().clone()
+
+        //gcHadChunks(server, client)
+
+        //TODO UNLOAD CHUNK PACKET. ASAP.
     }
 
 }

@@ -11,6 +11,7 @@ import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI;
 import sx.lambda.mstojcevich.voxel.api.events.worldgen.EventFinishChunkGen;
 import sx.lambda.mstojcevich.voxel.block.Block;
 import sx.lambda.mstojcevich.voxel.entity.Entity;
+import sx.lambda.mstojcevich.voxel.net.packet.client.PacketUnloadChunk;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition;
 import sx.lambda.mstojcevich.voxel.world.chunk.Chunk;
@@ -231,7 +232,8 @@ public class World implements IWorld {
         return (int)Math.round(100*this.noise.getNoise(x, z));
     }
 
-    private int getChunkPosition(float value) {
+    @Override
+    public int getChunkPosition(float value) {
         int subtraction = (int)(value%CHUNK_SIZE);
         if(value <= 0 && subtraction != 0) {
             subtraction = CHUNK_SIZE+subtraction;
@@ -343,6 +345,9 @@ public class World implements IWorld {
                 this.chunkList.remove(e.getValue());
                 this.chunkMap.get(b).unload();
                 this.chunkMap.remove(b);
+                if(remote) {
+                    VoxelGame.getInstance().getServerChanCtx().writeAndFlush(new PacketUnloadChunk(b));
+                }
             }
         }
     }

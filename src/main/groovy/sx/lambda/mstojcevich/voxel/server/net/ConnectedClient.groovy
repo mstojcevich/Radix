@@ -5,6 +5,9 @@ import io.netty.channel.ChannelHandlerContext
 import sx.lambda.mstojcevich.voxel.entity.player.Player
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketClientInfo
+import sx.lambda.mstojcevich.voxel.world.chunk.IChunk
+
+import java.util.concurrent.ConcurrentHashMap
 
 @CompileStatic
 class ConnectedClient {
@@ -14,6 +17,7 @@ class ConnectedClient {
     private EntityPosition lastChunkSendPos
     private PacketClientInfo.ClientInfo info
     private ChannelHandlerContext ctx
+    public final Set<IChunk> hadChunks = Collections.newSetFromMap(new ConcurrentHashMap<IChunk, Boolean>())
 
     ConnectedClient(ChannelHandlerContext ctx) {
         this.ctx = ctx
@@ -37,7 +41,7 @@ class ConnectedClient {
         this.lastChunkSendPos
     }
 
-    public PacketClientInfo.ClientInfo getInfo() { info }
+    public PacketClientInfo.ClientInfo getInfo() { this.info }
 
     public void setClientInfo(PacketClientInfo.ClientInfo info) { this.info = info }
 

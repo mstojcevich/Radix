@@ -82,10 +82,6 @@ class PacketPlayerPosition implements SharedPacket {
         }
         ctx.writeAndFlush(new PacketEndChunkGroup())
         server.getClient(ctx).lastChunkSendPos = p.getPosition().clone()
-
-        //gcHadChunks(server, client)
-
-        //TODO UNLOAD CHUNK PACKET. ASAP.
     }
 
 }

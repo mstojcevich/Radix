@@ -3,7 +3,8 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 
 group = 'groupId'
-version = '1.0-SNAPSHOT'
+def versionNum = '1.0'
+version = versionNum+'-SNAPSHOT'
 
 description = """"""
 
@@ -42,4 +43,20 @@ task runClient(type: JavaExec) {
     }
     main = "sx.lambda.mstojcevich.voxel.VoxelGame"
     classpath = sourceSets.main.runtimeClasspath
+}
+
+task jarWithLibs(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': project.name,
+                'Implementation-Version': version,
+                'Implementation-Vendor': 'Marcus Stojcevich',
+                'Specification-Title': project.name,
+                'Specification-Version': versionNum,
+                'Specification-Vendor': 'Marcus Stojcevich',
+                'Main-Class': 'sx.lambda.mstojcevich.voxel.VoxelGame'
+    }
+    baseName = project.name + '-full'
+
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }}
+    with jar
 }

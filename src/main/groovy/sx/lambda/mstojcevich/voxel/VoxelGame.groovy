@@ -44,7 +44,7 @@ import javax.vecmath.Vector3f
 import java.awt.Font
 import java.nio.FloatBuffer
 import java.text.DecimalFormat
-import java.util.concurrent.LinkedBlockingDeque
+import java.util.concurrent.ConcurrentLinkedDeque
 
 import static org.lwjgl.opengl.GL11.*
 
@@ -71,7 +71,7 @@ public class VoxelGame {
 
     private int hudDisplayList
 
-    private Queue<Runnable> glQueue = new LinkedBlockingDeque<>()
+    private Queue<Runnable> glQueue = new ConcurrentLinkedDeque<>()
 
     private GuiScreen currentScreen
 

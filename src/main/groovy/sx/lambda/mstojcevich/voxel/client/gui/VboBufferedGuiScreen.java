@@ -14,8 +14,8 @@ public abstract class VboBufferedGuiScreen implements GuiScreen {
     private int colorVbo;
     private int numVertices;
 
-    protected boolean initialized;
-    protected boolean renderedBefore;
+    private boolean initialized;
+    private boolean renderedBefore;
 
     @Override
     public void init() {
@@ -28,11 +28,8 @@ public abstract class VboBufferedGuiScreen implements GuiScreen {
     @Override
     public void render(boolean inGame) {
         if(!renderedBefore) {
-            if(!initialized) {
-                this.init();
-            }
-            rerender();
-            renderedBefore = true;
+            rerender(true);
+            renderedBefore = true; //just in case someone overrode rerender and didn't callback
         } else {
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexVbo);
             GL11.glVertexPointer(3, GL11.GL_FLOAT, 0, 0);
@@ -51,10 +48,20 @@ public abstract class VboBufferedGuiScreen implements GuiScreen {
         renderedBefore = false;
     }
 
-    protected abstract void rerender();
+    /**
+     * Rerenders to the display list
+     * Must be ran in an opengl context
+     * @param exec - Whether to execute the GL commands or just store in the list.
+     *      if unsure, choose false
+     */
+    public void rerender(boolean exec) {
+        if(!initialized) {
+            this.init();
+        }
+        renderedBefore = true;
+    }
 
     protected void renderVbo(FloatBuffer vertices, FloatBuffer colors) {
-        numVertices = vertices.capacity() / 3;
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexVbo);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertices, GL15.GL_STATIC_DRAW);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorVbo);

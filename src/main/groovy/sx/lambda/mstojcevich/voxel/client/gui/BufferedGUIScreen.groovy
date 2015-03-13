@@ -28,6 +28,13 @@ class BufferedGUIScreen implements GuiScreen {
         }
     }
 
+    @Override
+    void finish() {
+        GL11.glDeleteLists(displayList, 1)
+        initialized = false
+        renderedBefore = false
+    }
+
     /**
      * Rerenders to the display list
      * Must be ran in an opengl context
@@ -39,16 +46,6 @@ class BufferedGUIScreen implements GuiScreen {
             this.init()
         }
         renderedBefore = true
-    }
-
-    /**
-     * Deallocates the display list
-     * Must be ran in an opengl context
-     */
-    public void cleanup() {
-        GL11.glDeleteLists(displayList, 1)
-        initialized = false
-        renderedBefore = false
     }
 
 }

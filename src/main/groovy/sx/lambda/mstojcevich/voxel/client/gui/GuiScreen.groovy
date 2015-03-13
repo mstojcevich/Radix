@@ -5,12 +5,17 @@ public interface GuiScreen {
     /**
      * Initializes in an opengl context
      */
-    public void init()
+    void init()
 
     /**
      * Draws the screen
      * @param inGame Whether the screen is being drawn inside a world
      */
-    public void render(boolean inGame)
+    void render(boolean inGame)
+
+    /**
+     * Called after a screen is no longer active.
+     */
+    void finish()
 
 }

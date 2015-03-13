@@ -8,6 +8,8 @@ import sx.lambda.mstojcevich.voxel.api.events.render.EventChunkRender
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.VoxelGame
+import sx.lambda.mstojcevich.voxel.client.render.light.LightLevelCalculator
+import sx.lambda.mstojcevich.voxel.client.render.light.SunAndNeighborLLC
 import sx.lambda.mstojcevich.voxel.client.render.meshing.MeshResult
 import sx.lambda.mstojcevich.voxel.client.render.meshing.Mesher
 import sx.lambda.mstojcevich.voxel.client.render.meshing.PlainMesher
@@ -25,6 +27,7 @@ public class Chunk implements IChunk {
 
     private transient IWorld parentWorld
     private transient final Mesher mesher
+    private transient final LightLevelCalculator lightLevelCalculator
 
     private final int size
     private final int height
@@ -54,6 +57,8 @@ public class Chunk implements IChunk {
         this.size = world.getChunkSize()
         this.height = world.getHeight()
 
+        lightLevelCalculator = new SunAndNeighborLLC(this)
+
         if(VoxelGame.instance != null) { // We're a client
             mesher = new PlainMesher(this)
         } else {
@@ -63,7 +68,7 @@ public class Chunk implements IChunk {
         this.loadIdInts(ids)
 
         lightLevels = new float[size][height][size]
-        calcLightLevels(lightLevels)
+        lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
     }
 
     public Chunk(IWorld world, Vec3i startPosition) {
@@ -71,6 +76,8 @@ public class Chunk implements IChunk {
         this.startPosition = startPosition;
         this.size = world.getChunkSize()
         this.height = world.getHeight()
+
+        lightLevelCalculator = new SunAndNeighborLLC(this)
 
         if(VoxelGame.instance != null) { // We're a client
             mesher = new PlainMesher(this)
@@ -82,7 +89,7 @@ public class Chunk implements IChunk {
         highestPoint = world.chunkGen.generate(startPosition, blockList)
 
         lightLevels = new float[size][height][size]
-        calcLightLevels(lightLevels)
+        lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
     }
 
     @Override
@@ -110,8 +117,6 @@ public class Chunk implements IChunk {
             glEnableClientState(GL_TEXTURE_COORD_ARRAY)
             glEnableClientState(GL_COLOR_ARRAY)
         }
-
-        calcLightLevels(lightLevels)
 
         Block[][][] transparent = new Block[size][height][size]
         Block[][][] opaque = new Block[size][height][size]
@@ -281,112 +286,6 @@ public class Chunk implements IChunk {
     @Override
     float getLightLevel(int x, int y, int z) {
         return lightLevels[x][y][z];
-    }
-
-    private void calcLightLevels(float[][][] lightLevels) {
-        // First pass, sunlight
-        for (int x = 0; x < size; x++) {
-            for (int z = 0; z < size; z++) {
-                float lightLevel = 1.0f
-                boolean firstBlock = false
-                for (int y = height - 1; y >= 0; y--) {
-                    Block block = blockList[x][y][z]
-                    if (block != null) {
-                        if (!firstBlock) {
-                            firstBlock = true
-                        }
-                        lightLevels[x][y][z] = lightLevel
-                    } else if (!firstBlock) {
-                        lightLevels[x][y][z] = 1.0f
-                        lightLevel = 1.0f
-                    } else {
-                        lightLevels[x][y][z] = lightLevel
-                    }
-                    lightLevel *= 0.8f
-                }
-            }
-        }
-
-        // Second pass, neighbors
-        for(int i = 0; i < 2; i++) {
-            for (int x = 0; x < size; x++) {
-                for (int z = 0; z < size; z++) {
-                    for (int y = height - 1; y >= 0; y--) {
-                        if (blockList[x][y][z] == null) {
-                            float current = lightLevels[x][y][z]
-
-                            float brightestNeighbor = current
-
-                            if (x > 0) {
-                                if (blockList[x - 1][y][z] == null) {
-                                    brightestNeighbor = Math.max(brightestNeighbor, lightLevels[x - 1][y][z])
-                                }
-                            } else {
-                                int askx = startPosition.x - 1 - x
-                                int asky = startPosition.y
-                                int askz = startPosition.z
-                                Vec3i askWorld = new Vec3i(askx, asky, askz)
-                                IChunk chunk = parentWorld.getChunkAtPosition(askWorld)
-                                if (chunk != null) {
-                                    brightestNeighbor = Math.max(brightestNeighbor, chunk.getLightLevel(size - 1 - x, y, z))
-                                }
-                            }
-
-                            if (x < size - 1) {
-                                if (blockList[x + 1][y][z] == null) {
-                                    brightestNeighbor = Math.max(brightestNeighbor, lightLevels[x + 1][y][z])
-                                }
-                            } else {
-                                int askx = startPosition.x + size
-                                int asky = startPosition.y
-                                int askz = startPosition.z
-                                Vec3i askWorld = new Vec3i(askx, asky, askz)
-                                IChunk chunk = parentWorld.getChunkAtPosition(askWorld)
-                                if (chunk != null) {
-                                    brightestNeighbor = Math.max(brightestNeighbor, chunk.getLightLevel(x - (size - 1), y, z))
-                                }
-                            }
-
-                            if (z > 0) {
-                                if (blockList[x][y][z - 1] == null) {
-                                    brightestNeighbor = Math.max(brightestNeighbor, lightLevels[x][y][z - 1])
-                                }
-                            } else {
-                                int askx = startPosition.x
-                                int asky = startPosition.y
-                                int askz = startPosition.z - 1 - z
-                                Vec3i askWorld = new Vec3i(askx, asky, askz)
-                                IChunk chunk = parentWorld.getChunkAtPosition(askWorld)
-                                if (chunk != null) {
-                                    brightestNeighbor = Math.max(brightestNeighbor, chunk.getLightLevel(x, y, size - 1 - z))
-                                }
-                            }
-
-                            if (z < size - 1) {
-                                if (blockList[x][y][z + 1] == null) {
-                                    brightestNeighbor = Math.max(brightestNeighbor, lightLevels[x][y][z + 1])
-                                }
-                            } else {
-                                int askx = startPosition.x
-                                int asky = startPosition.y
-                                int askz = startPosition.z + size
-                                Vec3i askWorld = new Vec3i(askx, asky, askz)
-                                IChunk chunk = parentWorld.getChunkAtPosition(askWorld)
-                                if (chunk != null) {
-                                    brightestNeighbor = Math.max(brightestNeighbor, chunk.getLightLevel(x, y, z - (size - 1)))
-                                }
-                            }
-
-                            float targetBrightness = brightestNeighbor * 0.8
-                            if (targetBrightness > current) {
-                                lightLevels[x][y][z] = targetBrightness
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
     }
 
     @Override

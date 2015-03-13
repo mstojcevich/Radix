@@ -118,6 +118,8 @@ public class Chunk implements IChunk {
             glEnableClientState(GL_COLOR_ARRAY)
         }
 
+        lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
+
         Block[][][] transparent = new Block[size][height][size]
         Block[][][] opaque = new Block[size][height][size]
         eachBlock { Block it, int x, int y, int z ->

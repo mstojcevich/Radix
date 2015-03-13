@@ -2,6 +2,7 @@ package sx.lambda.mstojcevich.voxel.client.render.light;
 
 import sx.lambda.mstojcevich.voxel.VoxelGame;
 import sx.lambda.mstojcevich.voxel.block.Block;
+import sx.lambda.mstojcevich.voxel.server.VoxelGameServer;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.world.IWorld;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
@@ -19,7 +20,12 @@ public class SunAndNeighborLLC implements LightLevelCalculator {
 
     @Override
     public void calculateLightLevels(Block[][][] voxels, float[][][] lightLevels) {
-        IWorld world = VoxelGame.getInstance().getWorld();
+        IWorld world;
+        if(VoxelGame.getInstance() != null) {
+            world = VoxelGame.getInstance().getWorld();
+        } else {
+            world = VoxelGameServer.instance.getWorld();
+        }
 
         int size = voxels.length;
         int height = voxels[0].length;

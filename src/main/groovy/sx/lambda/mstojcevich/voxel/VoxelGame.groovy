@@ -16,6 +16,7 @@ import sx.lambda.mstojcevich.voxel.api.events.EventGameTick
 import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
 import sx.lambda.mstojcevich.voxel.client.gui.GuiScreen
 import sx.lambda.mstojcevich.voxel.client.gui.screens.IngameHUD
+import sx.lambda.mstojcevich.voxel.client.gui.screens.MainMenu
 import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketLeaving
 import sx.lambda.mstojcevich.voxel.render.Renderer
@@ -73,6 +74,7 @@ public class VoxelGame {
 
     private Queue<Runnable> glQueue = new ConcurrentLinkedDeque<>()
 
+    private MainMenu mainMenu = new MainMenu()
     private GuiScreen currentScreen
 
     private int fps
@@ -313,7 +315,14 @@ public class VoxelGame {
         String threadsStr = "Active threads: " + Thread.activeCount()
         debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
 
+        glEnable(GL_BLEND)
+        shaderManager.disableTexturing()
+        mainMenu.render(false)
+        shaderManager.enableTexturing()
+        glDisable(GL_BLEND)
+
         glCallList hudDisplayList //TODO move to HUD GUI
+
         currentScreen.render(true) //Render as ingame
 
         glPopMatrix()

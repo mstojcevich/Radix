@@ -16,6 +16,8 @@ import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition;
 import sx.lambda.mstojcevich.voxel.world.chunk.Chunk;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
+import sx.lambda.mstojcevich.voxel.world.generation.ChunkGenerator;
+import sx.lambda.mstojcevich.voxel.world.generation.SimplexChunkGenerator;
 import sx.lambda.mstojcevich.voxel.world.generation.SimplexNoise;
 
 import java.nio.FloatBuffer;
@@ -41,7 +43,7 @@ public class World implements IWorld {
 
     private static final float TERMINAL_VELOCITY = 56;
 
-    private final SimplexNoise noise;
+    private final ChunkGenerator chunkGen;
 
     private final boolean remote, server;
 
@@ -53,9 +55,9 @@ public class World implements IWorld {
         this.remote = remote;
         this.server = server;
         if(!remote) {
-            this.noise = new SimplexNoise(100, 0.05, new Random().nextInt());
+            this.chunkGen = new SimplexChunkGenerator(this, 100, new Random().nextInt());
         } else {
-            this.noise = null;
+            this.chunkGen = null;
         }
     }
 	
@@ -228,11 +230,6 @@ public class World implements IWorld {
     public int getSeaLevel() { return SEA_LEVEL; }
 
     @Override
-    public int getHeightAboveSeaLevel(int x, int z) {
-        return (int)Math.round(100*this.noise.getNoise(x, z));
-    }
-
-    @Override
     public int getChunkPosition(float value) {
         int subtraction = (int)(value%CHUNK_SIZE);
         if(value <= 0 && subtraction != 0) {
@@ -381,6 +378,11 @@ public class World implements IWorld {
     @Override
     public void rerenderChunk(IChunk c) {
         chunksToRerender.add(c);
+    }
+
+    @Override
+    public ChunkGenerator getChunkGen() {
+        return this.chunkGen;
     }
 
 }

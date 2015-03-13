@@ -5,6 +5,7 @@ import sx.lambda.mstojcevich.voxel.entity.Entity;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
+import sx.lambda.mstojcevich.voxel.world.generation.ChunkGenerator;
 
 import java.util.List;
 
@@ -21,8 +22,6 @@ public interface IWorld {
     public void loadChunks(EntityPosition playerPosition, int viewDistance);
 
     public int getSeaLevel();
-
-    public int getHeightAboveSeaLevel(int x, int y);
 
     /**
      * @return Gravity of the world in m/(s^2)
@@ -54,4 +53,6 @@ public interface IWorld {
     void rerenderChunk(IChunk c);
 
     int getChunkPosition(float value);
+
+    ChunkGenerator getChunkGen();
 }

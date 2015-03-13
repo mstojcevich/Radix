@@ -1,5 +1,7 @@
 package sx.lambda.mstojcevich.voxel.client.render.meshing;
 
+import org.lwjgl.opengl.GL15;
+
 import java.nio.FloatBuffer;
 
 /**
@@ -48,5 +50,19 @@ public class MeshResult {
 
     public int getColorCoordLength() {
         return this.alpha ? 4 : 3;
+    }
+
+    public void putInVBO(int vertexVbo, int colorVbo, int textureCoordVbo, int normalVbo) {
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexVbo);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, getVertices(), GL15.GL_STATIC_DRAW);
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, textureCoordVbo);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, getTextureCoords(), GL15.GL_STATIC_DRAW);
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, normalVbo);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, getNormals(), GL15.GL_STATIC_DRAW);
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, colorVbo);
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, getColors(), GL15.GL_STATIC_DRAW);
     }
 }

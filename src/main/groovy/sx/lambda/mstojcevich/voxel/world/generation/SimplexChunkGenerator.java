@@ -41,6 +41,7 @@ public class SimplexChunkGenerator implements ChunkGenerator {
 
                     if (y == world.getSeaLevel() - 1 && y == yMax - 1) {
                         blocks[x][y + 1][z] = Block.SAND;
+                        highestPoint = Math.max(highestPoint, y+1);
                     }
 
                     if (y == yMax - 1) {
@@ -49,7 +50,7 @@ public class SimplexChunkGenerator implements ChunkGenerator {
                         blockType = Block.DIRT;
                     }
                     blocks[x][y][z] = blockType;
-                    highestPoint = Math.max(highestPoint, y + 1);
+                    highestPoint = Math.max(highestPoint, y);
                 }
             }
         }

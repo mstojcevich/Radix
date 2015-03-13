@@ -1,5 +1,6 @@
 package sx.lambda.mstojcevich.voxel.world.chunk;
 
+import groovy.lang.Closure;
 import sx.lambda.mstojcevich.voxel.block.Block;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 
@@ -34,5 +35,7 @@ public interface IChunk extends Serializable {
     void renderWater();
 
     int[][][] blocksToIdInt();
+
+    void eachBlock(Closure action);
 
 }

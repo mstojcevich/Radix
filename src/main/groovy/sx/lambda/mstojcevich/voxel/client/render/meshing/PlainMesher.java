@@ -86,6 +86,7 @@ public class PlainMesher implements Mesher {
                     Block block = blockList[x][y][z];
                     if (block != null) {
                         shouldRenderTop[x][y][z] = true;
+                        visFaceCount++;
                         if (z == length - 1) {
                             Vec3i adjPos = new Vec3i(
                                     x, y, 0);
@@ -96,20 +97,19 @@ public class PlainMesher implements Mesher {
                                 if (adjBlock != null) {
                                     if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
                                         shouldRenderTop[x][y][z] = false;
-                                    } else {
-                                        visFaceCount++;
+                                        visFaceCount--;
                                     }
                                 }
                             }
                         } else if (blockList[x][y][z + 1] != null) {
                             if (!blockList[x][y][z + 1].isTransparent() || blockList[x][y][z].isTransparent()) {
                                 shouldRenderTop[x][y][z] = false;
-                            } else {
-                                visFaceCount++;
+                                visFaceCount--;
                             }
                         }
 
                         shouldRenderLeft[x][y][z] = true;
+                        visFaceCount++;
                         if (x == 0) {
                             Vec3i adjPos = new Vec3i(
                                     width - 1, y, z);
@@ -120,20 +120,19 @@ public class PlainMesher implements Mesher {
                                 if (adjBlock != null) {
                                     if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
                                         shouldRenderLeft[x][y][z] = false;
-                                    } else {
-                                        visFaceCount++;
+                                        visFaceCount--;
                                     }
                                 }
                             }
                         } else if (blockList[x - 1][y][z] != null) {
                             if (!blockList[x - 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
                                 shouldRenderLeft[x][y][z] = false;
-                            } else {
-                                visFaceCount++;
+                                visFaceCount--;
                             }
                         }
 
                         shouldRenderRight[x][y][z] = true;
+                        visFaceCount++;
                         if (x == width - 1) {
                             Vec3i adjPos = new Vec3i(
                                     0, y, z);
@@ -144,42 +143,41 @@ public class PlainMesher implements Mesher {
                                 if (adjBlock != null) {
                                     if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
                                         shouldRenderRight[x][y][z] = false;
-                                    } else {
-                                        visFaceCount++;
+                                        visFaceCount--;
                                     }
                                 }
                             }
                         } else if (blockList[x + 1][y][z] != null) {
                             if (!blockList[x + 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
                                 shouldRenderRight[x][y][z] = false;
-                            } else {
-                                visFaceCount++;
+                                visFaceCount--;
                             }
                         }
 
                         shouldRenderFront[x][y][z] = true;
+                        visFaceCount++;
                         if (y == 0)
                             shouldRenderFront[x][y][z] = true;
                         else if (blockList[x][y - 1][z] != null) {
                             if (!blockList[x][y - 1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
                                 shouldRenderFront[x][y][z] = false;
-                            } else {
-                                visFaceCount++;
+                                visFaceCount--;
                             }
                         }
 
                         shouldRenderBack[x][y][z] = true;
+                        visFaceCount++;
                         if (y == height - 1)
                             shouldRenderBack[x][y][z] = true;
                         else if (blockList[x][y + 1][z] != null) {
                             if (!blockList[x][y + 1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
                                 shouldRenderBack[x][y][z] = false;
-                            } else {
-                                visFaceCount++;
+                                visFaceCount--;
                             }
                         }
 
                         shouldRenderBottom[x][y][z] = true;
+                        visFaceCount++;
                         if (z == 0) {
                             Vec3i adjPos = new Vec3i(
                                     x, y, length - 1);
@@ -190,16 +188,14 @@ public class PlainMesher implements Mesher {
                                 if (adjBlock != null) {
                                     if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
                                         shouldRenderBottom[x][y][z] = false;
-                                    } else {
-                                        visFaceCount++;
+                                        visFaceCount--;
                                     }
                                 }
                             }
                         } else if (blockList[x][y][z - 1] != null) {
                             if (!blockList[x][y][z - 1].isTransparent() || blockList[x][y][z].isTransparent()) {
                                 shouldRenderBottom[x][y][z] = false;
-                            } else {
-                                visFaceCount++;
+                                visFaceCount--;
                             }
                         }
                     }

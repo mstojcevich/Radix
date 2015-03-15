@@ -20,6 +20,7 @@ import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketLeaving
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.settings.SettingsManager
+import sx.lambda.mstojcevich.voxel.shader.PostProcessShader
 import sx.lambda.mstojcevich.voxel.tasks.InputHandler
 import sx.lambda.mstojcevich.voxel.tasks.MovementHandler
 import sx.lambda.mstojcevich.voxel.tasks.RepeatedTask
@@ -91,6 +92,7 @@ public class VoxelGame {
     private Renderer renderer
 
     private ShaderProgram defaultShader
+    private PostProcessShader postProcessShader
 
     private final boolean remote;
     private String hostname
@@ -227,7 +229,8 @@ public class VoxelGame {
 
         glLightModel(GL_LIGHT_MODEL_AMBIENT, diffuseVec)
 
-        defaultShader = createShader("default")
+        defaultShader = createShader("default", ShaderProgram.class)
+        postProcessShader = createShader("post-process", PostProcessShader.class)
 
         getShaderManager().setShader(defaultShader)
     }
@@ -283,6 +286,9 @@ public class VoxelGame {
         prepare2D()
 
         glEnable(GL_BLEND)
+
+        renderer.draw2d()
+
         int debugTextHeight = 0
 
         String glInfoStr = "GL Info: " + glGetString(GL_RENDERER) + " (GL " + glGetString(GL_VERSION) + ")"
@@ -452,19 +458,20 @@ public class VoxelGame {
         this.renderer.init()
     }
 
-    private ShaderProgram createShader(String shaderName) {
+    public <T extends ShaderProgram> T createShader(String shaderName, Class<T> type) {
         String nameNoExt = "/shaders/$shaderName/$shaderName"
         String vertex = this.getClass().getResourceAsStream(nameNoExt + ".vert").getText()
         String fragment = this.getClass().getResourceAsStream(nameNoExt + ".frag").getText()
 
-        ShaderProgram program = new ShaderProgram(vertex, fragment);
+        Object[] args = [vertex, fragment]
+        ShaderProgram program = (ShaderProgram)type.newInstance(args);
 
         if(!program.getLog().isEmpty()) {
             System.err.println(program.getLog())
             return null
         }
 
-        return program
+        return (T)program
     }
 
     public boolean isRemote() {

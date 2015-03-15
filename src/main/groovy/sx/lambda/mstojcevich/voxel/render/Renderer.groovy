@@ -5,8 +5,10 @@ import groovy.transform.CompileStatic
 @CompileStatic
 public interface Renderer {
 
-    public void render()
+    void render()
 
-    public void init()
+    void init()
+
+    void draw2d();
 
 }

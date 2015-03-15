@@ -1,6 +1,7 @@
 package sx.lambda.mstojcevich.voxel.render.game
 
 import groovy.transform.CompileStatic
+import org.lwjgl.opengl.EXTFramebufferObject
 import org.lwjgl.util.glu.GLU
 import org.lwjgl.util.glu.Sphere
 import org.newdawn.slick.Color
@@ -10,6 +11,7 @@ import sx.lambda.mstojcevich.voxel.api.events.render.EventEntityRender
 import sx.lambda.mstojcevich.voxel.api.events.render.EventPostWorldRender
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.entity.Entity
+import sx.lambda.mstojcevich.voxel.util.gl.FrameBuffer
 
 import static org.lwjgl.opengl.GL11.*
 
@@ -18,6 +20,7 @@ class GameRenderer implements Renderer {
 
     private final VoxelGame game
     private int sphereList = -1
+    private FrameBuffer postProcessFbo;
 
     public GameRenderer(VoxelGame game) {
         this.game = game
@@ -34,6 +37,10 @@ class GameRenderer implements Renderer {
         renderEntities()
     }
 
+    void draw2d() {
+        //postProcessFbo.drawTexture(VoxelGame.instance.textureManager)
+    }
+
     @Override
     void init() {
         sphereList = glGenLists(1)
@@ -42,6 +49,8 @@ class GameRenderer implements Renderer {
         sp.setDrawStyle GLU.GLU_SILHOUETTE
         sp.draw(0.5f, 50, 50)
         glEndList()
+
+        postProcessFbo = new FrameBuffer()
     }
 
     private void prepareWorldRender() {

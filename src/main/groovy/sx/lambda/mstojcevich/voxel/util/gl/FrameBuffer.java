@@ -112,7 +112,7 @@ public class FrameBuffer {
 //        glTexCoord2f(1, 1);glVertex2f(Display.getWidth(), 0);
 //        glEnd();
 
-        int indices = 4*5; // 4 x XYZUV
+        int indices = 6*5; // 4 x XYZUV
         FloatBuffer vertexData = BufferUtils.createFloatBuffer(indices);
 
         float[] bottomRight = new float[]{width, height, 0, 1, 0};
@@ -120,7 +120,8 @@ public class FrameBuffer {
         float[] topLeft = new float[]{0, 0, 0, 0, 1};
         float[] topRight = new float[]{width, 0, 0, 1, 1};
 
-        vertexData.put(topLeft).put(bottomLeft).put(bottomRight).put(topRight);
+        vertexData.put(topLeft).put(bottomLeft).put(topRight);
+        vertexData.put(bottomRight).put(topRight).put(bottomLeft);
         vertexData.flip();
 
         glBindVertexArray(drawVaoId);
@@ -136,7 +137,7 @@ public class FrameBuffer {
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, TEXCOORD_FLOAT_COUNT, GL_FLOAT, false, VERTEX_SIZE_BYTES, byteOffset);
 
-        glDrawArrays(GL_QUADS, 0, indices);
+        glDrawArrays(GL_TRIANGLES, 0, indices);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 

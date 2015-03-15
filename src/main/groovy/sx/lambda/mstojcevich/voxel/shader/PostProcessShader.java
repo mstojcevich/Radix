@@ -7,16 +7,17 @@ public class PostProcessShader extends ShaderProgram {
 
     private int vCoordLoc = -1;
     private int fboTexCoordLoc = -1;
-    private int fboColorLoc = -1;
+    private int animTimeLoc = -1;
 
     public PostProcessShader(String vertex, String fragment) throws LWJGLException {
         super(vertex, fragment);
         vCoordLoc = getAttributeLocation("position");
-        fboColorLoc = getAttributeLocation("color");
         fboTexCoordLoc = getAttributeLocation("texCoord");
-        System.out.println(vCoordLoc);
-        System.out.println(fboColorLoc);
-        System.out.println(fboTexCoordLoc);
+        animTimeLoc = getUniformLocation("animTime");
+    }
+
+    public void setAnimTime(int ms) {
+        setUniformf(animTimeLoc, ms);
     }
 
 }

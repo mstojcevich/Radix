@@ -287,7 +287,12 @@ public class VoxelGame {
 
         glEnable(GL_BLEND)
 
-        renderer.draw2d()
+        if(settingsManager.visualSettings.postProcessEnabled) {
+            shaderManager.setShader(postProcessShader)
+            postProcessShader.setAnimTime((int) (System.currentTimeMillis() % 100000))
+            renderer.draw2d()
+            shaderManager.setShader(defaultShader)
+        }
 
         int debugTextHeight = 0
 
@@ -349,7 +354,9 @@ public class VoxelGame {
     }
 
     private void prepareNewFrame() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        if(!settingsManager.visualSettings.postProcessEnabled) {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        }
         glMatrixMode GL_PROJECTION //Currently altering projection matrix
         glLoadIdentity()
 

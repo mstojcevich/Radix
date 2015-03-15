@@ -29,16 +29,26 @@ class GameRenderer implements Renderer {
     @Override
     void render() {
         prepareWorldRender()
+        if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
+            postProcessFbo.bind()
+            glClearColor(0.2f, 0.4f, 1, 1)
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
         game.getWorld().render()
         VoxelGameAPI.instance.eventManager.push(new EventPostWorldRender())
         glPushMatrix()
         drawBlockSelection()
         glPopMatrix()
         renderEntities()
+        if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
+            postProcessFbo.unbind()
+        }
     }
 
     void draw2d() {
-        //postProcessFbo.drawTexture(VoxelGame.instance.textureManager)
+        if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
+            postProcessFbo.drawTexture(VoxelGame.instance.textureManager)
+        }
     }
 
     @Override
@@ -50,14 +60,15 @@ class GameRenderer implements Renderer {
         sp.draw(0.5f, 50, 50)
         glEndList()
 
-        postProcessFbo = new FrameBuffer()
+        if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
+            postProcessFbo = new FrameBuffer()
+        }
     }
 
     private void prepareWorldRender() {
         glRotatef(-game.getPlayer().getRotation().getPitch(), 1, 0, 0)
         glRotatef(game.getPlayer().getRotation().getYaw(), 0, 1, 0)
         glTranslatef(-game.getPlayer().getPosition().getX(), (float) -(game.getPlayer().getPosition().getY() + game.getPlayer().getEyeHeight()), -game.getPlayer().getPosition().getZ())
-        glLight(GL_LIGHT0, GL_POSITION, game.getLightPosition())
 
         if (game.shouldCalcFrustum()) {
             game.dontCalcFrustum()

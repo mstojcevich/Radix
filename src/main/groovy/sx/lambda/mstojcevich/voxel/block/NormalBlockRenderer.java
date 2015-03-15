@@ -27,74 +27,6 @@ public class NormalBlockRenderer implements IBlockRenderer {
 	}
 
     @Override
-    public void render(float x, float y, float z, boolean shouldRenderTop, boolean shouldRenderBottom, boolean shouldRenderLeft, boolean shouldRenderRight, boolean shouldRenderFront, boolean shouldRenderBack) {
-        if(!initialized) {
-            initialize();
-        }
-        float u2 = u+TEXTURE_PERCENTAGE-.001f;
-        float v2 = v+TEXTURE_PERCENTAGE-.001f;
-        if (shouldRenderTop) {
-            glBegin(GL_QUADS);
-            glNormal3f(0, 0, 1);
-            glTexCoord2f(u, v); glVertex3f(x, y, z+1);
-            glTexCoord2f(u, v2); glVertex3f(x+1, y, z+1);
-            glTexCoord2f(u2, v2); glVertex3f(x+1, y + 1, z+1);
-            glTexCoord2f(u2, v); glVertex3f(x, y + 1, z+1);
-            glEnd();
-        }
-        //left
-        if (shouldRenderLeft) {
-            glBegin(GL_QUADS);
-            glNormal3f(-1, 0, 0);
-            glTexCoord2f(u, v); glVertex3f(x, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x, y, z + 1);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x, y + 1, z);
-            glEnd();
-        }
-        if (shouldRenderRight) {
-            //right
-            glBegin(GL_QUADS);
-            glNormal3f(1, 0, 0);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x + 1, y + 1, z);
-            glTexCoord2f(u2, v2); glVertex3f(x + 1, y + 1, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y, z + 1);
-            glEnd();
-        }
-        if (shouldRenderFront) {
-            //front
-            glBegin(GL_QUADS);
-            glNormal3f(0, -1, 0);
-            glTexCoord2f(u, v); glVertex3f(x, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x + 1, y, z);
-            glTexCoord2f(u2, v2); glVertex3f(x + 1, y, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x, y, z + 1);
-            glEnd();
-        }
-        //back
-        if (shouldRenderBack) {
-            glBegin(GL_QUADS);
-            glNormal3f(0, 1, 0);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y + 1, z);
-            glTexCoord2f(u, v2); glVertex3f(x, y + 1, z);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z + 1);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z + 1);
-            glEnd();
-        }
-        //bottom
-        if(shouldRenderBottom) {
-            glBegin(GL_QUADS);
-            glNormal3f(0, 0, -1);
-            glTexCoord2f(u, v); glVertex3f(x + 1, y, z);
-            glTexCoord2f(u, v2); glVertex3f(x, y, z);
-            glTexCoord2f(u2, v2); glVertex3f(x, y + 1, z);
-            glTexCoord2f(u2, v); glVertex3f(x + 1, y + 1, z);
-            glEnd();
-        }
-    }
-
-    @Override
     public void renderVBO(float x, float y, float z, float[][][] lightLevels,
                           FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
@@ -124,7 +56,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, 0, 1
             });
             float usedLightLevel = 1.0f;
-            if(z+1 < lightLevels.length) { // TODO check the light level in a chunk over and use that one
+            if(z+1 < lightLevels.length) {
                 usedLightLevel = lightLevels[(int)x][(int)y][(int)z+1];
             }
             for(int i = 0; i < 4*3; i++) {
@@ -153,7 +85,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     -1, 0, 0,
             });
             float usedLightLevel = 1.0f;
-            if(x-1 > 0) { // TODO check the light level in a chunk over and use that one
+            if(x-1 > 0) {
                 usedLightLevel = lightLevels[(int)x-1][(int)y][(int)z];
             }
             for(int i = 0; i < 4*3; i++) {
@@ -182,7 +114,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     1, 0, 0,
             });
             float usedLightLevel = 1.0f;
-            if(x+1 < lightLevels.length) { // TODO check the light level in a chunk over and use that one
+            if(x+1 < lightLevels.length) {
                 usedLightLevel = lightLevels[(int)x+1][(int)y][(int)z];
             }
             for(int i = 0; i < 4*3; i++) {
@@ -211,7 +143,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, -1, 0,
             });
             float usedLightLevel = 1.0f;
-            if(y-1 > 0) { // TODO check the light level in a chunk over and use that one
+            if(y-1 > 0) {
                 usedLightLevel = lightLevels[(int)x][(int)y-1][(int)z];
             }
             for(int i = 0; i < 4*3; i++) {
@@ -240,7 +172,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, 1, 0,
             });
             float usedLightLevel = 1.0f;
-            if(y+1 < lightLevels[0].length) { // TODO check the light level in a chunk over and use that one
+            if(y+1 < lightLevels[0].length) {
                 usedLightLevel = lightLevels[(int)x][(int)y+1][(int)z];
             }
             for(int i = 0; i < 4*3; i++) {
@@ -269,7 +201,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, 0, -1,
             });
             float usedLightLevel = 1.0f;
-            if(z-1 > 0) { // TODO check the light level in a chunk over and use that one
+            if(z-1 > 0) {
                 usedLightLevel = lightLevels[(int)x][(int)y][(int)z-1];
             }
             for(int i = 0; i < 4*3; i++) {
@@ -292,12 +224,6 @@ public class NormalBlockRenderer implements IBlockRenderer {
         glTexCoord2f(u2, v2);glVertex2f(x+width, y+width);
         glTexCoord2f(u2, v);glVertex2f(x+width, y);
         glEnd();
-    }           
-
-    @Override
-    public void prerender() {
-        if(!initialized)initialize();
-        VoxelGame.getInstance().getTextureManager().bindTexture(blockMap.getTextureID());
     }
 
     private static void initialize() {

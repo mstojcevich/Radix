@@ -29,6 +29,8 @@ public class FrameBuffer {
 
     private int renderBuffer, drawVaoId, drawVboId;
 
+    boolean firstTime = true;
+
     public FrameBuffer() {
         width = Display.getWidth();
         height = Display.getHeight();
@@ -123,7 +125,11 @@ public class FrameBuffer {
 
         glBindVertexArray(drawVaoId);
         glBindBuffer(GL_ARRAY_BUFFER, drawVboId);
-        glBufferData(GL_ARRAY_BUFFER, vertexData, GL_DYNAMIC_DRAW);
+        if(firstTime) {
+            glBufferData(GL_ARRAY_BUFFER, vertexData, GL_DYNAMIC_DRAW);
+        } else {
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertexData);
+        }
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, POSITION_FLOAT_COUNT, GL_FLOAT, false, VERTEX_SIZE_BYTES, 0);
         int byteOffset = FLOAT_SIZE_BYTES*POSITION_FLOAT_COUNT;
@@ -133,6 +139,8 @@ public class FrameBuffer {
         glDrawArrays(GL_QUADS, 0, indices);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+
+        firstTime = false;
     }
 
 }

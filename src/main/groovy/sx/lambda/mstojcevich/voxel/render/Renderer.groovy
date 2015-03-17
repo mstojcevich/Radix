@@ -9,6 +9,8 @@ public interface Renderer {
 
     void init()
 
-    void draw2d();
+    void draw2d()
+
+    void cleanup()
 
 }

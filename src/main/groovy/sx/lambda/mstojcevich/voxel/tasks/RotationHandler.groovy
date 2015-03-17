@@ -24,18 +24,22 @@ class RotationHandler implements RepeatedTask {
         try {
             final float mouseSensitivity = 0.05f //TODO Config - allow changeable mouse sensitivity
             while (!game.isDone()) {
-                if (Mouse.isInsideWindow() && Display.isActive()) {
-                    float deltaYaw = (float) Mouse.getDX() * mouseSensitivity
-                    float deltaPitch = (float) Mouse.getDY() * mouseSensitivity
-                    float newPitch = Math.abs(game.getPlayer().getRotation().getPitch() + deltaPitch)
-                    if (newPitch > 90) {
-                        deltaPitch = 0
+                if(game.world == null) {
+                    sleep(1000)
+                } else {
+                    if (Mouse.isInsideWindow() && Display.isActive()) {
+                        float deltaYaw = (float) Mouse.getDX() * mouseSensitivity
+                        float deltaPitch = (float) Mouse.getDY() * mouseSensitivity
+                        float newPitch = Math.abs(game.getPlayer().getRotation().getPitch() + deltaPitch)
+                        if (newPitch > 90) {
+                            deltaPitch = 0
+                        }
+                        game.getPlayer().getRotation().offset(deltaPitch, deltaYaw)
+                        game.updateSelectedBlock()
+                        game.calculateFrustum()
                     }
-                    game.getPlayer().getRotation().offset(deltaPitch, deltaYaw)
-                    game.updateSelectedBlock()
-                    game.calculateFrustum()
+                    sleep(10)
                 }
-                sleep(10)
             }
         } catch(Exception e) {
             VoxelGame.instance.handleCriticalException(e)

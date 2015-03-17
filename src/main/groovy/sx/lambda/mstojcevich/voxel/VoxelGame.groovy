@@ -16,6 +16,7 @@ import sx.lambda.mstojcevich.voxel.api.events.EventGameTick
 import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
 import sx.lambda.mstojcevich.voxel.client.gui.GuiScreen
 import sx.lambda.mstojcevich.voxel.client.gui.screens.IngameHUD
+import sx.lambda.mstojcevich.voxel.client.gui.screens.MainMenu
 import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketLeaving
 import sx.lambda.mstojcevich.voxel.render.Renderer
@@ -74,11 +75,12 @@ public class VoxelGame {
 
     private Queue<Runnable> glQueue = new ConcurrentLinkedDeque<>()
 
+    private MainMenu mainMenu = new MainMenu()
     private GuiScreen currentScreen
 
     private int fps
-    public int chunkRenderTimes = 0
-    public int numChunkRenders = 0
+    public int chunkRenderTimes = 0 // TODO move to World
+    public int numChunkRenders = 0 // TODO move to World
 
     private TextureManager textureManager = new TextureManager()
     private ShaderManager shaderManager = new ShaderManager()
@@ -98,8 +100,6 @@ public class VoxelGame {
     private String hostname
     private short port
     private ChannelHandlerContext serverChanCtx;
-
-    private UnicodeFont debugTextRenderer;
 
     private RepeatedTask[] handlers = [
         new WorldLoader(this),
@@ -127,10 +127,7 @@ public class VoxelGame {
         settingsManager = new SettingsManager()
         setupWindow();
         this.setupOGL();
-        debugTextRenderer = new UnicodeFont(new Font(Font.MONOSPACED, Font.PLAIN, 16))
-        debugTextRenderer.effects.add(new ColorEffect(java.awt.Color.WHITE))
-        debugTextRenderer.addAsciiGlyphs()
-        debugTextRenderer.loadGlyphs()
+
         world = new World(remote, false)
         player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
         player.init()
@@ -287,42 +284,17 @@ public class VoxelGame {
 
         glEnable(GL_BLEND)
 
-        if(settingsManager.visualSettings.postProcessEnabled) {
-            shaderManager.setShader(postProcessShader)
-            postProcessShader.setAnimTime((int) (System.currentTimeMillis() % 100000))
+        if(renderer != null) {
             renderer.draw2d()
-            shaderManager.setShader(defaultShader)
         }
 
-        int debugTextHeight = 0
-
-        String glInfoStr = "GL Info: " + glGetString(GL_RENDERER) + " (GL " + glGetString(GL_VERSION) + ")"
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(glInfoStr), debugTextHeight, glInfoStr)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        String fpsStr = "FPS: $fps"
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr, Color.white)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        int acrt = 0
-        if(numChunkRenders > 0) {
-            acrt = (int)(chunkRenderTimes/numChunkRenders)
-        }
-        String lcrtStr = "AWRT: $acrt ns"
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(lcrtStr), debugTextHeight, lcrtStr, Color.white)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        DecimalFormat posFormat = new DecimalFormat("#.00");
-        String coordsStr = String.format("(x,y,z): %s,%s,%s",
-                posFormat.format(player.position.x),
-                posFormat.format(player.position.y),
-                posFormat.format(player.position.z))
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(coordsStr), debugTextHeight, coordsStr)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        String headingStr = String.format("(yaw,pitch): %s,%s",
-                posFormat.format(player.rotation.yaw),
-                posFormat.format(player.rotation.pitch))
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(headingStr), debugTextHeight, headingStr)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        String threadsStr = "Active threads: " + Thread.activeCount()
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
+//        shaderManager.disableTexturing()
+//        glDisableClientState(GL_NORMAL_ARRAY)
+//        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
+//        mainMenu.render(true)
+//        glEnableClientState(GL_NORMAL_ARRAY)
+//        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
+//        shaderManager.enableTexturing()
 
         glCallList hudDisplayList //TODO move to HUD GUI
         currentScreen.render(true) //Render as ingame
@@ -495,6 +467,22 @@ public class VoxelGame {
         Mouse.setGrabbed false
         JOptionPane.showMessageDialog(null, "$GAME_TITLE crashed. $ex", "$GAME_TITLE crashed", JOptionPane.ERROR_MESSAGE)
     }
+
+    public GuiScreen getCurrentScreen() { currentScreen }
+
+    public void enablePostProcessShader() {
+        if(settingsManager.visualSettings.postProcessEnabled) {
+            shaderManager.setShader(postProcessShader)
+        }
+    }
+
+    public void enableDefaultShader() {
+        shaderManager.setShader(defaultShader)
+    }
+
+    public PostProcessShader getPostProcessShader() { postProcessShader }
+
+    public int getFps() { fps }
 
     //TODO move frustum calc, light pos, etc into GameRenderer
 

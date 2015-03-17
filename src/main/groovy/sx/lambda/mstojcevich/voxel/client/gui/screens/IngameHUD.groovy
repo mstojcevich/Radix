@@ -54,6 +54,9 @@ class IngameHUD extends BufferedGUIScreen {
     }
 
     @Override
+    void onMouseClick(int clickType) {}
+
+    @Override
     public void init() {
         super.init()
         this.icons = TextureLoader.getTexture("PNG", IngameHUD.class.getResourceAsStream("/textures/gui/icons.png"))

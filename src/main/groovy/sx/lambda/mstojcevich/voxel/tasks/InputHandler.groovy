@@ -38,19 +38,23 @@ class InputHandler implements RepeatedTask {
                         int key = getEventKey()
                         switch (key) {
                             case KEY_SPACE:
-                                if (game.getPlayer().onGround) {
-                                    game.getPlayer().setYVelocity(0.11f)
-                                    game.getPlayer().setOnGround(false)
+                                if(game.world != null) {
+                                    if (game.getPlayer().onGround) {
+                                        game.getPlayer().setYVelocity(0.11f)
+                                        game.getPlayer().setOnGround(false)
+                                    }
                                 }
                                 break;
                             case KEY_UP:
-                                game.getPlayer().setItemInHand Block.values()[(game.getPlayer().getItemInHand().ordinal() + 1) % Block.values().size()]
-                                game.addToGLQueue(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        game.rerenderHud()
-                                    }
-                                })
+                                if(game.world != null) {
+                                    game.getPlayer().setItemInHand Block.values()[(game.getPlayer().getItemInHand().ordinal() + 1) % Block.values().size()]
+                                    game.addToGLQueue(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            game.rerenderHud()
+                                        }
+                                    })
+                                }
                                 break;
                             case KEY_ESCAPE:
                                 game.startShutdown()
@@ -64,31 +68,36 @@ class InputHandler implements RepeatedTask {
                 while (Mouse.next()) {
                     if (Mouse.getEventButtonState()) {
                         int button = Mouse.getEventButton()
+                        game.currentScreen.onMouseClick(button)
                         switch (button) {
                             case 0:
-                                if (game.getSelectedBlock() != null) {
-                                    if (game.isRemote() && game.serverChanCtx != null) {
-                                        game.serverChanCtx.writeAndFlush(new PacketBreakBlock(
-                                                game.getSelectedBlock()))
-                                    } else {
-                                        game.getWorld().removeBlock(game.getSelectedBlock())
+                                if(game.world != null) {
+                                    if (game.getSelectedBlock() != null) {
+                                        if (game.isRemote() && game.serverChanCtx != null) {
+                                            game.serverChanCtx.writeAndFlush(new PacketBreakBlock(
+                                                    game.getSelectedBlock()))
+                                        } else {
+                                            game.getWorld().removeBlock(game.getSelectedBlock())
+                                        }
                                     }
                                 }
                                 break;
                             case 1:
-                                if (game.getNextPlacePos() != null) {
-                                    if (game.isRemote() && game.serverChanCtx != null) {
-                                        game.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
-                                                game.getNextPlacePos(),
-                                                game.getPlayer().getItemInHand()
-                                        ));
-                                    } else {
-                                        game.getWorld().addBlock(game.getPlayer().getItemInHand(), game.getNextPlacePos())
+                                if(game.world != null) {
+                                    if (game.getNextPlacePos() != null) {
+                                        if (game.isRemote() && game.serverChanCtx != null) {
+                                            game.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
+                                                    game.getNextPlacePos(),
+                                                    game.getPlayer().getItemInHand()
+                                            ));
+                                        } else {
+                                            game.getWorld().addBlock(game.getPlayer().getItemInHand(), game.getNextPlacePos())
+                                        }
                                     }
                                 }
                                 break
                             default:
-                                break;
+                                break
                         }
                     }
                 }

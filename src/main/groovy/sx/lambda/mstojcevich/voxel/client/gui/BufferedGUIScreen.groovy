@@ -35,6 +35,9 @@ class BufferedGUIScreen implements GuiScreen {
         renderedBefore = false
     }
 
+    @Override
+    void onMouseClick(int button) {}
+
     /**
      * Rerenders to the display list
      * Must be ran in an opengl context

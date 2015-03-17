@@ -80,7 +80,7 @@ public class FrameBuffer {
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     }
 
-    private void cleanup() {
+    public void cleanup() {
         if(id > -1) {
             glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
             glDeleteFramebuffersEXT(id);

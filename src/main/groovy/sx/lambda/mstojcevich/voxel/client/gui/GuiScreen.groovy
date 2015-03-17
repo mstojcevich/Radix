@@ -18,4 +18,6 @@ public interface GuiScreen {
      */
     void finish()
 
+    void onMouseClick(int button)
+
 }

@@ -1,10 +1,13 @@
 package sx.lambda.mstojcevich.voxel.render.game
 
 import groovy.transform.CompileStatic
+import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.EXTFramebufferObject
 import org.lwjgl.util.glu.GLU
 import org.lwjgl.util.glu.Sphere
 import org.newdawn.slick.Color
+import org.newdawn.slick.UnicodeFont
+import org.newdawn.slick.font.effects.ColorEffect
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.api.events.render.EventEntityRender
@@ -12,6 +15,9 @@ import sx.lambda.mstojcevich.voxel.api.events.render.EventPostWorldRender
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.entity.Entity
 import sx.lambda.mstojcevich.voxel.util.gl.FrameBuffer
+
+import java.awt.Font
+import java.text.DecimalFormat
 
 import static org.lwjgl.opengl.GL11.*
 
@@ -21,6 +27,8 @@ class GameRenderer implements Renderer {
     private final VoxelGame game
     private int sphereList = -1
     private FrameBuffer postProcessFbo;
+    private UnicodeFont debugTextRenderer;
+
 
     public GameRenderer(VoxelGame game) {
         this.game = game
@@ -47,8 +55,46 @@ class GameRenderer implements Renderer {
 
     void draw2d() {
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
+            game.enablePostProcessShader()
+            game.postProcessShader.setAnimTime((int) (System.currentTimeMillis() % 100000))
             postProcessFbo.drawTexture(VoxelGame.instance.textureManager)
+            game.enableDefaultShader()
         }
+
+        int debugTextHeight = 0
+
+        String glInfoStr = "GL Info: " + glGetString(GL_RENDERER) + " (GL " + glGetString(GL_VERSION) + ")"
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(glInfoStr), debugTextHeight, glInfoStr)
+        debugTextHeight += debugTextRenderer.getLineHeight()
+        String fpsStr = "FPS: $game.fps"
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr, Color.white)
+        debugTextHeight += debugTextRenderer.getLineHeight()
+        int acrt = 0
+        if(game.numChunkRenders > 0) {
+            acrt = (int)(game.numChunkRenders/game.numChunkRenders)
+        }
+        String lcrtStr = "AWRT: $acrt ns"
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(lcrtStr), debugTextHeight, lcrtStr, Color.white)
+        debugTextHeight += debugTextRenderer.getLineHeight()
+        DecimalFormat posFormat = new DecimalFormat("#.00");
+        String coordsStr = String.format("(x,y,z): %s,%s,%s",
+                posFormat.format(game.player.position.x),
+                posFormat.format(game.player.position.y),
+                posFormat.format(game.player.position.z))
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(coordsStr), debugTextHeight, coordsStr)
+        debugTextHeight += debugTextRenderer.getLineHeight()
+        String headingStr = String.format("(yaw,pitch): %s,%s",
+                posFormat.format(game.player.rotation.yaw),
+                posFormat.format(game.player.rotation.pitch))
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(headingStr), debugTextHeight, headingStr)
+        debugTextHeight += debugTextRenderer.getLineHeight()
+        String threadsStr = "Active threads: " + Thread.activeCount()
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
+    }
+
+    @Override
+    void cleanup() {
+        postProcessFbo.cleanup()
     }
 
     @Override
@@ -59,6 +105,11 @@ class GameRenderer implements Renderer {
         sp.setDrawStyle GLU.GLU_SILHOUETTE
         sp.draw(0.5f, 50, 50)
         glEndList()
+
+        debugTextRenderer = new UnicodeFont(new Font(Font.MONOSPACED, Font.PLAIN, 16))
+        debugTextRenderer.effects.add(new ColorEffect(java.awt.Color.WHITE))
+        debugTextRenderer.addAsciiGlyphs()
+        debugTextRenderer.loadGlyphs()
 
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
             postProcessFbo = new FrameBuffer()

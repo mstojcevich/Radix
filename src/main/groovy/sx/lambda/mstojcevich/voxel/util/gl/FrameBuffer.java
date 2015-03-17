@@ -18,7 +18,7 @@ import static org.lwjgl.opengl.GL20.*;
 public class FrameBuffer {
 
     private static final int FLOAT_SIZE_BYTES = 4;
-    private static final int POSITION_FLOAT_COUNT = 3;
+    private static final int POSITION_FLOAT_COUNT = 2;
     private static final int TEXCOORD_FLOAT_COUNT = 2;
     private static final int FLOATS_PER_VERTEX = POSITION_FLOAT_COUNT+TEXCOORD_FLOAT_COUNT;
     private static final int VERTEX_SIZE_BYTES = FLOATS_PER_VERTEX*FLOAT_SIZE_BYTES;
@@ -112,13 +112,13 @@ public class FrameBuffer {
 //        glTexCoord2f(1, 1);glVertex2f(Display.getWidth(), 0);
 //        glEnd();
 
-        int indices = 6*5; // 4 x XYZUV
+        int indices = 6*4; // 4 x XYUV
         FloatBuffer vertexData = BufferUtils.createFloatBuffer(indices);
 
-        float[] bottomRight = new float[]{width, height, 0, 1, 0};
-        float[] bottomLeft = new float[]{0, height, 0, 0, 0};
-        float[] topLeft = new float[]{0, 0, 0, 0, 1};
-        float[] topRight = new float[]{width, 0, 0, 1, 1};
+        float[] bottomRight = new float[]{width, height, 1, 0};
+        float[] bottomLeft = new float[]{0, height, 0, 0};
+        float[] topLeft = new float[]{0, 0, 0, 1};
+        float[] topRight = new float[]{width, 0, 1, 1};
 
         vertexData.put(topLeft).put(bottomLeft).put(topRight);
         vertexData.put(bottomRight).put(topRight).put(bottomLeft);

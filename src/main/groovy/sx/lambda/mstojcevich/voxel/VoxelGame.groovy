@@ -8,11 +8,8 @@ import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.DisplayMode
 import org.lwjgl.util.glu.GLU
-import org.newdawn.slick.Color
-import org.newdawn.slick.UnicodeFont
-import org.newdawn.slick.font.effects.ColorEffect
+
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
-import sx.lambda.mstojcevich.voxel.api.events.EventGameTick
 import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
 import sx.lambda.mstojcevich.voxel.client.gui.GuiScreen
 import sx.lambda.mstojcevich.voxel.client.gui.screens.IngameHUD
@@ -52,6 +49,8 @@ import static org.lwjgl.opengl.GL11.*
 @CompileStatic
 public class VoxelGame {
 
+    // TODO CALCULATE FRUSTUM ON WORLD JOIN
+
     public static final boolean DEBUG = false
 
     private static VoxelGame theGame
@@ -70,11 +69,10 @@ public class VoxelGame {
 
     private synchronized Vec3i selectedBlock, selectedNextPlace
 
-    private int hudDisplayList
-
     private Queue<Runnable> glQueue = new ConcurrentLinkedDeque<>()
 
     private MainMenu mainMenu = new MainMenu()
+    private IngameHUD hud = new IngameHUD()
     private GuiScreen currentScreen
 
     private int fps
@@ -83,10 +81,6 @@ public class VoxelGame {
 
     private TextureManager textureManager = new TextureManager()
     private ShaderManager shaderManager = new ShaderManager()
-
-    private Frustum frustum = new Frustum()
-
-    private boolean calcFrustum
 
     private FloatBuffer lightPosition
 
@@ -99,6 +93,8 @@ public class VoxelGame {
     private String hostname
     private short port
     private ChannelHandlerContext serverChanCtx;
+
+    private GameRenderer gameRenderer
 
     private RepeatedTask[] handlers = [
         new WorldLoader(this),
@@ -128,6 +124,7 @@ public class VoxelGame {
         setupWindow();
         this.setupOGL();
 
+        this.setRenderer(gameRenderer = new GameRenderer(this))
         world = new World(remote, false)
         player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
         player.init()
@@ -135,9 +132,6 @@ public class VoxelGame {
         currentScreen = new IngameHUD()
         currentScreen.init()
         this.startHandlers()
-        this.setRenderer(new GameRenderer(this))
-        this.hudDisplayList = glGenLists(1)
-        rerenderHud()
         if(remote) {
             new Thread("Client Connection") {
                 @Override
@@ -189,8 +183,6 @@ public class VoxelGame {
 
         glMatrixMode GL_PROJECTION //Currently altering projection matrix
         glLoadIdentity()
-
-        frustum.calculateFrustum()
 
         glMatrixMode GL_MODELVIEW //Currently altering modelview matrix
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
@@ -279,7 +271,6 @@ public class VoxelGame {
 //        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
 //        shaderManager.enableTexturing()
 
-        glCallList hudDisplayList //TODO move to HUD GUI
         currentScreen.render(true) //Render as ingame
 
         glPopMatrix()
@@ -376,13 +367,6 @@ public class VoxelGame {
         theGame
     }
 
-    public void rerenderHud() {
-        if(player == null || world == null)return
-        glNewList(hudDisplayList, GL_COMPILE)
-        player.getItemInHand().getRenderer().render2d(0, 0, 20)
-        glEndList()
-    }
-
     public IWorld getWorld() { world }
 
     public Player getPlayer() { player }
@@ -390,8 +374,6 @@ public class VoxelGame {
     public TextureManager getTextureManager() { textureManager }
 
     public ShaderManager getShaderManager() { shaderManager }
-
-    public Frustum getFrustum() { frustum }
 
     public boolean isDone() { done }
 
@@ -404,14 +386,6 @@ public class VoxelGame {
     public void startShutdown() {
         done = true
     }
-
-    public void calculateFrustum() {
-        this.calcFrustum = true
-    }
-
-    public boolean shouldCalcFrustum() { calcFrustum }
-
-    public void dontCalcFrustum() { calcFrustum = false } //TODO remove this when frustum stuff is in GameRenderer
 
     public FloatBuffer getLightPosition() { lightPosition }
 
@@ -466,6 +440,10 @@ public class VoxelGame {
     public PostProcessShader getPostProcessShader() { postProcessShader }
 
     public int getFps() { fps }
+
+    public IngameHUD getHud() { this.hud }
+
+    public GameRenderer getGameRenderer() { this.gameRenderer }
 
     //TODO move frustum calc, light pos, etc into GameRenderer
 

@@ -13,6 +13,7 @@ import sx.lambda.mstojcevich.voxel.api.events.render.EventEntityRender
 import sx.lambda.mstojcevich.voxel.api.events.render.EventPostWorldRender
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.entity.Entity
+import sx.lambda.mstojcevich.voxel.util.Frustum
 import sx.lambda.mstojcevich.voxel.util.gl.FrameBuffer
 import java.awt.Font
 import java.text.DecimalFormat
@@ -28,6 +29,9 @@ class GameRenderer implements Renderer {
     private UnicodeFont debugTextRenderer
 
     private boolean initted
+
+    private Frustum frustum = new Frustum()
+    private boolean calcFrustum
 
     public GameRenderer(VoxelGame game) {
         this.game = game
@@ -130,9 +134,9 @@ class GameRenderer implements Renderer {
         glRotatef(game.getPlayer().getRotation().getYaw(), 0, 1, 0)
         glTranslatef(-game.getPlayer().getPosition().getX(), (float) -(game.getPlayer().getPosition().getY() + game.getPlayer().getEyeHeight()), -game.getPlayer().getPosition().getZ())
 
-        if (game.shouldCalcFrustum()) {
-            game.dontCalcFrustum()
-            game.getFrustum().calculateFrustum()
+        if (shouldCalcFrustum()) {
+            calcFrustum = false
+            frustum.calculateFrustum() // TODO do this on another thread?
         }
     }
 
@@ -171,5 +175,13 @@ class GameRenderer implements Renderer {
         VoxelGame.instance.shaderManager.enableLighting()
         VoxelGame.instance.shaderManager.enableTexturing()
     }
+
+    public void calculateFrustum() {
+        this.calcFrustum = true
+    }
+
+    public boolean shouldCalcFrustum() { calcFrustum }
+
+    public Frustum getFrustum() { frustum }
 
 }

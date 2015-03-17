@@ -190,7 +190,7 @@ public class World implements IWorld {
             */
 
             for (IChunk c : this.chunkList) {
-                if (VoxelGame.getInstance().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
+                if (VoxelGame.getInstance().getGameRenderer().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
                     glPushMatrix();
                     glTranslatef(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z);
                     c.render();
@@ -198,7 +198,7 @@ public class World implements IWorld {
                 }
             }
             for (IChunk c : this.chunkList) {
-                if (VoxelGame.getInstance().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
+                if (VoxelGame.getInstance().getGameRenderer().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
                     glPushMatrix();
                     glTranslatef(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z);
                     c.renderWater();

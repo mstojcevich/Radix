@@ -131,7 +131,6 @@ class MovementHandler implements RepeatedTask {
                             player.setYVelocity(world.applyGravity(player.getYVelocity(), moveDiffMS));
                         }
                         player.updateMovement();
-                        game.calculateFrustum()
                     }
 
                     if (!(player.position.equals(lastPosition))) {

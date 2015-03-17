@@ -51,7 +51,7 @@ class InputHandler implements RepeatedTask {
                                     game.addToGLQueue(new Runnable() {
                                         @Override
                                         public void run() {
-                                            game.rerenderHud()
+                                            game.hud.rerender(false)
                                         }
                                     })
                                 }

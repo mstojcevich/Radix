@@ -1,5 +1,6 @@
 package sx.lambda.mstojcevich.voxel.client.gui.screens
 
+import groovy.transform.CompileStatic
 import org.lwjgl.opengl.Display
 import org.newdawn.slick.opengl.Texture
 import org.newdawn.slick.opengl.TextureLoader
@@ -9,6 +10,7 @@ import sx.lambda.mstojcevich.voxel.block.Block
 import static org.lwjgl.opengl.GL11.*
 import sx.lambda.mstojcevich.voxel.client.gui.BufferedGUIScreen
 
+@CompileStatic
 class IngameHUD extends BufferedGUIScreen {
 
     private Texture icons
@@ -20,13 +22,14 @@ class IngameHUD extends BufferedGUIScreen {
         super.rerender(exec)
 
         glNewList(displayList, exec ? GL_COMPILE_AND_EXECUTE : GL_COMPILE)
-
-
+        VoxelGame.instance.player.itemInHand.renderer.render2d(0, 0, 20)
         glEndList()
     }
 
     @Override
     public void render(boolean inGame) {
+        super.render(inGame)
+
         glEnable(GL_BLEND)
 
         Block blockInHead = VoxelGame.instance.player.getBlockInHead(VoxelGame.instance.world)
@@ -43,10 +46,10 @@ class IngameHUD extends BufferedGUIScreen {
             }
         }
 
-        float centerX = Display.getWidth()/2f
-        float centerY = Display.getHeight()/2f
+        float centerX = Display.getWidth()/2f as float
+        float centerY = Display.getHeight()/2f as float
         float crosshairSize = 32
-        float halfCrosshairSize = crosshairSize/2f
+        float halfCrosshairSize = crosshairSize/2f as float
         glBlendFunc(775, 769)
         this.drawTexture(0, (int)Math.round(centerX-halfCrosshairSize), (int)Math.round(centerY-halfCrosshairSize), (int)Math.round(centerX+halfCrosshairSize), (int)Math.round(centerY+halfCrosshairSize))
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)

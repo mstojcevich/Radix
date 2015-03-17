@@ -22,6 +22,7 @@ import sx.lambda.mstojcevich.voxel.net.packet.client.PacketLeaving
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.settings.SettingsManager
 import sx.lambda.mstojcevich.voxel.shader.PostProcessShader
+import sx.lambda.mstojcevich.voxel.tasks.EntityUpdater
 import sx.lambda.mstojcevich.voxel.tasks.InputHandler
 import sx.lambda.mstojcevich.voxel.tasks.MovementHandler
 import sx.lambda.mstojcevich.voxel.tasks.RepeatedTask
@@ -43,9 +44,7 @@ import sx.lambda.mstojcevich.voxel.util.gl.ShaderProgram
 
 import javax.swing.JOptionPane
 import javax.vecmath.Vector3f
-import java.awt.Font
 import java.nio.FloatBuffer
-import java.text.DecimalFormat
 import java.util.concurrent.ConcurrentLinkedDeque
 
 import static org.lwjgl.opengl.GL11.*
@@ -105,7 +104,8 @@ public class VoxelGame {
         new WorldLoader(this),
         new InputHandler(this),
         new MovementHandler(this),
-        new RotationHandler(this)
+        new RotationHandler(this),
+        new EntityUpdater(this)
     ]
 
     public static void main(String[] args) throws Exception {
@@ -149,23 +149,6 @@ public class VoxelGame {
         if(!remote) {
             world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())
         }
-
-        new Thread("Entity Update") {
-            @Override
-            public void run() {
-                try {
-                    while (!done) {
-                        player.onUpdate()
-
-                        VoxelGameAPI.instance.eventManager.push(new EventGameTick(world))
-
-                        sleep(50l);
-                    }
-                } catch(Exception ex) {
-                    handleCriticalException(ex)
-                }
-            }
-        }.start()
 
         VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
 

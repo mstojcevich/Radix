@@ -2,7 +2,6 @@ package sx.lambda.mstojcevich.voxel.render.game
 
 import groovy.transform.CompileStatic
 import org.lwjgl.opengl.Display
-import org.lwjgl.opengl.EXTFramebufferObject
 import org.lwjgl.util.glu.GLU
 import org.lwjgl.util.glu.Sphere
 import org.newdawn.slick.Color
@@ -15,7 +14,6 @@ import sx.lambda.mstojcevich.voxel.api.events.render.EventPostWorldRender
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.entity.Entity
 import sx.lambda.mstojcevich.voxel.util.gl.FrameBuffer
-
 import java.awt.Font
 import java.text.DecimalFormat
 

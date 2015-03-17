@@ -26,9 +26,8 @@ class GameRenderer implements Renderer {
 
     private final VoxelGame game
     private int sphereList = -1
-    private FrameBuffer postProcessFbo;
-    private UnicodeFont debugTextRenderer;
-
+    private FrameBuffer postProcessFbo
+    private UnicodeFont debugTextRenderer
 
     public GameRenderer(VoxelGame game) {
         this.game = game
@@ -95,6 +94,8 @@ class GameRenderer implements Renderer {
     @Override
     void cleanup() {
         postProcessFbo.cleanup()
+        debugTextRenderer.destroy()
+        glDeleteLists(sphereList, 0)
     }
 
     @Override

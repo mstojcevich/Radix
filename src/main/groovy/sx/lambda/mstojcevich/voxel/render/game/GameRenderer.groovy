@@ -29,12 +29,16 @@ class GameRenderer implements Renderer {
     private FrameBuffer postProcessFbo
     private UnicodeFont debugTextRenderer
 
+    private boolean initted
+
     public GameRenderer(VoxelGame game) {
         this.game = game
     }
 
     @Override
     void render() {
+        if(!initted)init()
+
         prepareWorldRender()
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
             postProcessFbo.bind()
@@ -53,6 +57,8 @@ class GameRenderer implements Renderer {
     }
 
     void draw2d() {
+        if(!initted)init()
+
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
             game.enablePostProcessShader()
             game.postProcessShader.setAnimTime((int) (System.currentTimeMillis() % 100000))
@@ -96,10 +102,14 @@ class GameRenderer implements Renderer {
         postProcessFbo.cleanup()
         debugTextRenderer.destroy()
         glDeleteLists(sphereList, 0)
+
+        initted = false
     }
 
     @Override
     void init() {
+        initted = true
+
         sphereList = glGenLists(1)
         glNewList(sphereList, GL_COMPILE)
         Sphere sp = new Sphere()

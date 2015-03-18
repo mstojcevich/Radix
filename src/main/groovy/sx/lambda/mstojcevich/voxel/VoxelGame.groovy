@@ -70,8 +70,8 @@ public class VoxelGame {
 
     private Queue<Runnable> glQueue = new ConcurrentLinkedDeque<>()
 
-    private MainMenu mainMenu = new MainMenu()
-    private IngameHUD hud = new IngameHUD()
+    private MainMenu mainMenu
+    private IngameHUD hud
     private GuiScreen currentScreen
 
     private int fps
@@ -125,9 +125,12 @@ public class VoxelGame {
 
         gameRenderer = new GameRenderer(this)
         hud = new IngameHUD()
+        mainMenu = new MainMenu()
+        setCurrentScreen(mainMenu)
 
-        enterWorld(hostname, port);
+        currentScreen = mainMenu
 
+        this.startHandlers()
         this.run()
     }
 
@@ -145,11 +148,9 @@ public class VoxelGame {
         Display.setDisplayMode(new DisplayMode(
                 settingsManager.visualSettings.windowWidth,
                 settingsManager.visualSettings.windowHeight))
-        Display.setResizable true
+        Display.setResizable false
 
         Display.create()
-
-        Mouse.setGrabbed true
     }
 
     private void setupOGL() {
@@ -247,14 +248,6 @@ public class VoxelGame {
             }
         }
 
-//        shaderManager.disableTexturing()
-//        glDisableClientState(GL_NORMAL_ARRAY)
-//        glDisableClientState(GL_TEXTURE_COORD_ARRAY)
-//        mainMenu.render(true)
-//        glEnableClientState(GL_NORMAL_ARRAY)
-//        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
-//        shaderManager.enableTexturing()
-
         synchronized (currentScreen) {
             currentScreen.render(true)
         }
@@ -293,7 +286,10 @@ public class VoxelGame {
         glLoadIdentity()
 
         float camNear = 0.1f
-        float camFar = settingsManager.visualSettings.viewDistance * world.getChunkSize()
+        float camFar = 0f
+        if(world != null) {
+            camFar = settingsManager.visualSettings.viewDistance * world.chunkSize
+        }
         GLU.gluPerspective(100, (float) Display.getWidth() / Display.getHeight(), camNear, camFar)
         shaderManager.onPerspective(camNear, camFar)
         //Set up camera
@@ -468,7 +464,6 @@ public class VoxelGame {
         player.init()
         world.addEntity(player)
         setCurrentScreen(hud)
-        this.startHandlers()
 
         if(!remote) {
             world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())
@@ -487,6 +482,12 @@ public class VoxelGame {
                 currentScreen = screen
                 screen.init()
             }
+        }
+
+        if(screen == hud) {
+            Mouse.setGrabbed true
+        } else {
+            Mouse.setGrabbed false
         }
     }
 

@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import org.lwjgl.BufferUtils
 import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.Display
+import org.lwjgl.opengl.GL11
 import org.newdawn.slick.UnicodeFont
 import org.newdawn.slick.font.effects.ColorEffect
 import sx.lambda.mstojcevich.voxel.VoxelGame
@@ -72,6 +73,11 @@ public class MainMenu extends VboBufferedGuiScreen {
 
     @Override
     public void render(boolean ingame) {
+        VoxelGame.instance.shaderManager.disableTexturing()
+        GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY)
+        GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY)
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
+
         super.render(ingame)
 
         VoxelGame.instance.shaderManager.enableTexturing()
@@ -79,6 +85,10 @@ public class MainMenu extends VboBufferedGuiScreen {
             b.drawLabel()
         }
         VoxelGame.instance.shaderManager.disableTexturing()
+
+        GL11.glEnableClientState(GL11.GL_NORMAL_ARRAY)
+        GL11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY)
+        VoxelGame.instance.shaderManager.enableTexturing()
     }
 
     @Override

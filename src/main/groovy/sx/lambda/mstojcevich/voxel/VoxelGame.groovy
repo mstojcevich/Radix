@@ -419,7 +419,7 @@ public class VoxelGame {
     public GameRenderer getGameRenderer() { this.gameRenderer }
 
     public void enterRemoteWorld(String hostname, short port) {
-        enterWorld(new World(remote, false), true)
+        enterWorld(new World(true, false), true)
 
         new Thread("Client Connection") {
             @Override

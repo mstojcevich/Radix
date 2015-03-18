@@ -1,7 +1,6 @@
 package sx.lambda.mstojcevich.voxel.tasks
 
 import groovy.transform.CompileStatic
-import org.lwjgl.input.Keyboard
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition

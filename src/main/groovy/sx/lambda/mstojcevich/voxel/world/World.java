@@ -428,7 +428,6 @@ public class World implements IWorld {
                     Block bl = negXNeighborChunk.getBlockAtPosition(negXNeighborPos);
                     if(bl == null) {
                         if(negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z) < nextLL) {
-                            System.out.println("Setting the light level for the block on the left to " + nextLL);
                             negXNeighborChunk.setSunlight(posXNeighborPos.x, posXNeighborPos.y, negXNeighborPos.z, nextLL);
                             sunlightQueue.add(negXNeighborPos);
                             changedChunks.add(negXNeighborChunk);

@@ -24,7 +24,7 @@ class RotationHandler implements RepeatedTask {
         try {
             final float mouseSensitivity = 0.05f //TODO Config - allow changeable mouse sensitivity
             while (!game.isDone()) {
-                if(game.world == null) {
+                if(game.world == null || game.player == null) {
                     sleep(1000)
                 } else {
                     if (Mouse.isInsideWindow() && Display.isActive()) {

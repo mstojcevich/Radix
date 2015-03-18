@@ -82,8 +82,6 @@ public class VoxelGame {
     private TextureManager textureManager = new TextureManager()
     private ShaderManager shaderManager = new ShaderManager()
 
-    private FloatBuffer lightPosition
-
     private Renderer renderer
 
     private ShaderProgram defaultShader
@@ -161,9 +159,6 @@ public class VoxelGame {
         glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
         glEnable GL_CULL_FACE
         glFrontFace GL_CCW
-
-        lightPosition = BufferUtils.createFloatBuffer(4)
-        lightPosition.put(0).put(256).put(0).put(1).flip()
 
         glEnable GL_LIGHTING
         glEnable GL_LIGHT0
@@ -358,8 +353,6 @@ public class VoxelGame {
     public void startShutdown() {
         done = true
     }
-
-    public FloatBuffer getLightPosition() { lightPosition }
 
     private void setRenderer(Renderer renderer) {
         if(renderer == null) {

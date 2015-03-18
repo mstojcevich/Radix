@@ -250,7 +250,9 @@ public class VoxelGame {
 //        glEnableClientState(GL_TEXTURE_COORD_ARRAY)
 //        shaderManager.enableTexturing()
 
-        currentScreen.render(true) //Render as ingame
+        synchronized (currentScreen) {
+            currentScreen.render(true)
+        }
 
         glPopMatrix()
         glPopAttrib()
@@ -443,8 +445,7 @@ public class VoxelGame {
         player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
         player.init()
         world.addEntity(player)
-        currentScreen = new IngameHUD()
-        currentScreen.init()
+        setCurrentScreen(hud = new IngameHUD())
         this.startHandlers()
 
         if(!remote) {
@@ -452,6 +453,19 @@ public class VoxelGame {
         }
 
         VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
+    }
+
+    private void setCurrentScreen(GuiScreen screen) {
+        if(currentScreen == null) {
+            currentScreen = screen
+            screen.init()
+        } else if(currentScreen != screen) {
+            synchronized (currentScreen) {
+                currentScreen.finish()
+                currentScreen = screen
+                screen.init()
+            }
+        }
     }
 
     //TODO move frustum calc, light pos, etc into GameRenderer

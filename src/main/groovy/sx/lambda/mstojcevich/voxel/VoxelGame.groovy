@@ -160,15 +160,6 @@ public class VoxelGame {
         glEnable GL_CULL_FACE
         glFrontFace GL_CCW
 
-        glEnable GL_LIGHTING
-        glEnable GL_LIGHT0
-
-        FloatBuffer diffuseVec = BufferUtils.createFloatBuffer(4)
-        diffuseVec.put(2, 2, 2, 1.0f)
-        diffuseVec.flip()
-
-        glLightModel(GL_LIGHT_MODEL_AMBIENT, diffuseVec)
-
         defaultShader = createShader("default", ShaderProgram.class)
         postProcessShader = createShader("post-process", PostProcessShader.class)
 

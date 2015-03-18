@@ -55,4 +55,8 @@ public interface IWorld {
     int getChunkPosition(float value);
 
     ChunkGenerator getChunkGen();
+
+    void addToSunlightQueue(Vec3i block);
+
+    void processLightQueue();
 }

@@ -46,16 +46,30 @@ public class Chunk implements IChunk {
     private transient int liquidVboNormalHandle = -1
     private transient int liquidVboColorHandle = -1
 
-    int opaqueVertexCount = 0
-    int transparentVertexCount = 0
+    private transient int opaqueVertexCount = 0
+    private transient int transparentVertexCount = 0
 
-    float[][][] lightLevels
+    private transient float[][][] lightLevels
+    private transient int[][][] sunlightLevels
+    private transient boolean sunlightChanging
+    private transient boolean sunlightChanged
+
+    /**
+     * Map of light levels (integers 0-16) to brightness multipliers
+     */
+    private final float[] lightLevelMap = new float[17]
 
     public Chunk(IWorld world, Vec3i startPosition, int[][][] ids) {
         this.parentWorld = world
         this.startPosition = startPosition
         this.size = world.getChunkSize()
         this.height = world.getHeight()
+
+        for(int i = 0; i < 17; i++) {
+            int reduction = 16-i
+            lightLevelMap[i] = Math.pow(0.8, reduction) as float
+        }
+        sunlightLevels = new int[size][height][size]
 
         lightLevelCalculator = new SunAndNeighborLLC(this)
 
@@ -68,7 +82,7 @@ public class Chunk implements IChunk {
         this.loadIdInts(ids)
 
         lightLevels = new float[size][height][size]
-        lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
+        //lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
     }
 
     public Chunk(IWorld world, Vec3i startPosition) {
@@ -76,6 +90,12 @@ public class Chunk implements IChunk {
         this.startPosition = startPosition;
         this.size = world.getChunkSize()
         this.height = world.getHeight()
+
+        for(int i = 0; i < 17; i++) {
+            int reduction = 16-i
+            lightLevelMap[i] = Math.pow(0.8, reduction) as float
+        }
+        sunlightLevels = new int[size][height][size]
 
         lightLevelCalculator = new SunAndNeighborLLC(this)
 
@@ -89,7 +109,6 @@ public class Chunk implements IChunk {
         highestPoint = world.chunkGen.generate(startPosition, blockList)
 
         lightLevels = new float[size][height][size]
-        lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
     }
 
     @Override
@@ -118,7 +137,17 @@ public class Chunk implements IChunk {
             glEnableClientState(GL_COLOR_ARRAY)
         }
 
-        lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
+        if(sunlightChanged && !sunlightChanging) {
+            for(int x = 0; x < size; x++) {
+                for (int y = 0; y < height; y++) {
+                    for (int z = 0; z < size; z++) {
+                        lightLevels[x][y][z] = lightLevelMap[sunlightLevels[x][y][z]]
+                    }
+                }
+            }
+        }
+
+        //lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
 
         Block[][][] transparent = new Block[size][height][size]
         Block[][][] opaque = new Block[size][height][size]
@@ -237,6 +266,78 @@ public class Chunk implements IChunk {
         if (y > height - 1) return
 
         blockList[x][y][z] = null
+
+        addNeighborsToSunlightQueue(x, y, z)
+
+    }
+
+    private void addNeighborsToSunlightQueue(int x, int y, int z) { // X Y and Z are relative coords, not world coords
+        Vec3i pos = new Vec3i(startPosition.x + x, startPosition.y + y, startPosition.z + z)
+        Vec3i negXNeighborPos = pos.translate(-1,0,0);
+        Vec3i posXNeighborPos = pos.translate(1,0,0);
+        Vec3i negZNeighborPos = pos.translate(0,0,-1);
+        Vec3i posZNeighborPos = pos.translate(0,0,1);
+        Vec3i posYNeighborPos = pos.translate(0,1,0);
+        IChunk negXNeighborChunk = parentWorld.getChunkAtPosition(negXNeighborPos);
+        IChunk posXNeighborChunk = parentWorld.getChunkAtPosition(posXNeighborPos);
+        IChunk negZNeighborChunk = parentWorld.getChunkAtPosition(negZNeighborPos);
+        IChunk posZNeighborChunk = parentWorld.getChunkAtPosition(posZNeighborPos);
+
+        if(negXNeighborChunk != null) {
+            int negXSunlight = negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z)
+            if(negXSunlight > 1) {
+                Block bl = negXNeighborChunk.getBlockAtPosition(negXNeighborPos);
+                if (bl == null) {
+                    parentWorld.addToSunlightQueue(negXNeighborPos)
+                } else if (bl.isTransparent()) {
+                    parentWorld.addToSunlightQueue(negXNeighborPos)
+                }
+            }
+        }
+        if(posXNeighborChunk != null) {
+            int posXSunlight = posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z)
+            if(posXSunlight > 1) {
+                Block bl = posXNeighborChunk.getBlockAtPosition(posXNeighborPos);
+                if (bl == null) {
+                    parentWorld.addToSunlightQueue(posXNeighborPos)
+                } else if (bl.isTransparent()) {
+                    parentWorld.addToSunlightQueue(posXNeighborPos)
+                }
+            }
+        }
+        if(negZNeighborChunk != null) {
+            int negZSunlight = negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z)
+            if(negZSunlight > 1) {
+                Block bl = negZNeighborChunk.getBlockAtPosition(negZNeighborPos);
+                if (bl == null) {
+                    parentWorld.addToSunlightQueue(negZNeighborPos)
+                } else if (bl.isTransparent()) {
+                    parentWorld.addToSunlightQueue(negZNeighborPos)
+                }
+            }
+        }
+        if(posZNeighborChunk != null) {
+            int posZSunlight = posZNeighborChunk.getSunlight(posZNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z)
+            if(posZSunlight > 1) {
+                Block bl = posZNeighborChunk.getBlockAtPosition(posZNeighborPos);
+                if (bl == null) {
+                    parentWorld.addToSunlightQueue(posZNeighborPos)
+                } else if (bl.isTransparent()) {
+                    parentWorld.addToSunlightQueue(posZNeighborPos)
+                }
+            }
+        }
+
+        if(y < height-1) {
+            Block posYBlock = blockList[x][y+1][z]
+            if(getSunlight(x, y+1, z) > 1) {
+                if (posYBlock == null) {
+                    parentWorld.addToSunlightQueue(posYNeighborPos)
+                } else if (blockList[x][y + 1][z].isTransparent()) {
+                    parentWorld.addToSunlightQueue(posYNeighborPos)
+                }
+            }
+        }
     }
 
     @Override
@@ -330,6 +431,54 @@ public class Chunk implements IChunk {
         }
 
         this.blockList = blocks
+    }
+
+    private void setupSunlighting() {
+        sunlightLevels = new int[size][height][size]
+        for(int x = 0; x < size; x++) {
+            for(int z = 0; z < size; z++) {
+                sunlightLevels[x][height-1][z] = 16
+                parentWorld.addToSunlightQueue(new Vec3i(x, height-1, z))
+            }
+        }
+    }
+
+    @Override
+    public void setSunlight(int x, int y, int z, int level) {
+        x %= size
+        z %= size
+        if (x < 0) {
+            x += size
+        }
+        if (z < 0) {
+            z += size
+        }
+
+        sunlightLevels[x][y][z] = level
+
+        sunlightChanging = true
+        sunlightChanged = true
+    }
+
+    @Override
+    public int getSunlight(int x, int y, int z) {
+        x %= size
+        z %= size
+        if (x < 0) {
+            x += size
+        }
+        if (z < 0) {
+            z += size
+        }
+        if(y > height-1 || y < 0) {
+            return -1
+        }
+        return sunlightLevels[x][y][z]
+    }
+
+    @Override
+    public void finishChangingSunlight() {
+        sunlightChanging = false
     }
 
 }

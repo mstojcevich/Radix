@@ -169,6 +169,10 @@ public class Vec3i implements Serializable
         return true;
     }
 
+    public Vec3i translate(int x, int y, int z) {
+        return new Vec3i(this.x + x, this.y + y, this.z + z);
+    }
+
 
 
     @Override

@@ -38,4 +38,9 @@ public interface IChunk extends Serializable {
 
     void eachBlock(Closure action);
 
+    void setSunlight(int x, int y, int z, int level);
+    int getSunlight(int x, int y, int z);
+
+    public void finishChangingSunlight();
+
 }

@@ -23,7 +23,7 @@ class EntityUpdater implements RepeatedTask {
     void run() {
         try {
             while (!game.done) {
-                if (game.world != null) {
+                if (game.world != null && game.player != null) {
                     game.player.onUpdate() // TODO update the rest of the entities
                     VoxelGameAPI.instance.eventManager.push(new EventGameTick(game.world))
                     sleep(50)

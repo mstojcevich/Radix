@@ -14,7 +14,10 @@ import sx.lambda.mstojcevich.voxel.api.events.render.EventPostWorldRender
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.entity.Entity
 import sx.lambda.mstojcevich.voxel.util.Frustum
+import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.util.gl.FrameBuffer
+import sx.lambda.mstojcevich.voxel.world.chunk.IChunk
+
 import java.awt.Font
 import java.text.DecimalFormat
 
@@ -90,11 +93,25 @@ class GameRenderer implements Renderer {
                 posFormat.format(game.player.position.z))
         debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(coordsStr), debugTextHeight, coordsStr)
         debugTextHeight += debugTextRenderer.getLineHeight()
+        String chunk = String.format("Chunk (x,z): %s,%s",
+                game.world.getChunkPosition(game.player.position.x),
+                game.world.getChunkPosition(game.player.position.z))
+        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(chunk), debugTextHeight, chunk)
+        debugTextHeight += debugTextRenderer.getLineHeight()
         String headingStr = String.format("(yaw,pitch): %s,%s",
                 posFormat.format(game.player.rotation.yaw),
                 posFormat.format(game.player.rotation.pitch))
         debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(headingStr), debugTextHeight, headingStr)
         debugTextHeight += debugTextRenderer.getLineHeight()
+
+        Vec3i playerPosVec = new Vec3i(game.player.position.x as int, game.player.position.y as int, game.player.position.z as int)
+        IChunk playerChunk =  game.world.getChunkAtPosition(playerPosVec)
+        if(playerChunk != null) {
+            String llStr = String.format("Light Level @ Feet: " + playerChunk.getSunlight(playerPosVec.x, playerPosVec.y, playerPosVec.z))
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(llStr), debugTextHeight, llStr)
+            debugTextHeight += debugTextRenderer.getLineHeight()
+        }
+
         String threadsStr = "Active threads: " + Thread.activeCount()
         debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
     }

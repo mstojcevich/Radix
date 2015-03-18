@@ -57,6 +57,7 @@ class PacketAuthInfo implements ClientPacket {
         ctx.writeAndFlush(new PacketStartChunkGroup())
         for (IChunk c : chunkList) {
             ctx.writeAndFlush(new PacketChunkData(c))
+            server.getClient(ctx).hadChunks.add(c)
         }
         ctx.writeAndFlush(new PacketEndChunkGroup())
         ctx.writeAndFlush(new PacketPlayerPosition(cp.getPosition()))

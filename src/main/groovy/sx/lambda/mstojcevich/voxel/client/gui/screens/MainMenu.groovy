@@ -9,6 +9,7 @@ import org.newdawn.slick.UnicodeFont
 import org.newdawn.slick.font.effects.ColorEffect
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.client.gui.VboBufferedGuiScreen
+import sx.lambda.mstojcevich.voxel.world.World
 
 import java.awt.Color
 import java.awt.Font
@@ -28,10 +29,18 @@ public class MainMenu extends VboBufferedGuiScreen {
 
     public MainMenu() {
         buttons = [
-                new MainMenuButton(this, "Singleplayer", {println("Singleplayer pressed!")}, TARGET_BUTTON_SIZE),
-                new MainMenuButton(this, "Multiplayer", {println("Multiplayer pressed!")}, TARGET_BUTTON_SIZE),
+                new MainMenuButton(this, "Singleplayer", enterSingleplayer, TARGET_BUTTON_SIZE),
+                new MainMenuButton(this, "Multiplayer", enterMultiplayer, TARGET_BUTTON_SIZE),
                 new MainMenuButton(this, "Settings", {println("Settings pressed!")}, TARGET_BUTTON_SIZE),
         ]
+    }
+
+    private Closure enterMultiplayer = {
+        VoxelGame.instance.enterRemoteWorld("127.0.0.1", (short)31173)
+    }
+
+    private Closure enterSingleplayer = {
+        VoxelGame.instance.enterLocalWorld(new World(false, false))
     }
 
     private void resize() {

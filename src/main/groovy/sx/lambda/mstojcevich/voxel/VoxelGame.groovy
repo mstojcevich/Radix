@@ -1,5 +1,6 @@
 package sx.lambda.mstojcevich.voxel
 
+import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
 import org.lwjgl.BufferUtils
@@ -88,9 +89,8 @@ public class VoxelGame {
     private ShaderProgram defaultShader
     private PostProcessShader postProcessShader
 
-    private boolean remote;
-    private String hostname
-    private short port
+    private boolean remote
+
     private ChannelHandlerContext serverChanCtx;
 
     private GameRenderer gameRenderer
@@ -104,18 +104,8 @@ public class VoxelGame {
     ]
 
     public static void main(String[] args) throws Exception {
-        theGame = new VoxelGame("127.0.0.1", (short)31173);
+        theGame = new VoxelGame();
         theGame.start();
-    }
-
-    VoxelGame() {
-        remote = false
-    }
-
-    VoxelGame(String hostname, short port) {
-        remote = true
-        this.hostname = hostname
-        this.port = port
     }
 
     private void start() throws LWJGLException {
@@ -444,10 +434,8 @@ public class VoxelGame {
 
     public GameRenderer getGameRenderer() { this.gameRenderer }
 
-    private void enterWorld(String hostname, short port) {
-        remote = true
-
-        enterWorld(new World(remote, false))
+    public void enterRemoteWorld(String hostname, short port) {
+        enterWorld(new World(remote, false), true)
 
         new Thread("Client Connection") {
             @Override
@@ -457,19 +445,35 @@ public class VoxelGame {
         }.start()
     }
 
-    private void enterWorld(IWorld world) {
-        this.setRenderer(gameRenderer)
-        this.world = world
-        player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
-        player.init()
-        world.addEntity(player)
-        setCurrentScreen(hud)
+    public void enterLocalWorld(IWorld world) {
+        enterWorld(world, false)
+    }
 
-        if(!remote) {
-            world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())
-        }
+    public void exitWorld() {
+        // TODO implement
+    }
 
-        VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
+    private void enterWorld(IWorld world, boolean remote) {
+        glQueue.add(new Runnable() { // A lot of the init methods require GL context
+            @Override
+            @CompileDynamic // Using VoxelGame.this causes the static compile checker to freak out
+            void run() {
+                VoxelGame.this.remote = remote
+
+                setRenderer(gameRenderer)
+                VoxelGame.this.world = world
+                player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
+                player.init()
+                world.addEntity(player)
+                setCurrentScreen(hud)
+
+                if(!remote) {
+                    world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())
+                }
+
+                VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
+            }
+        })
     }
 
     private void setCurrentScreen(GuiScreen screen) {

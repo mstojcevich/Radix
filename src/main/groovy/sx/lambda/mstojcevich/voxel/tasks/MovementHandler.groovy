@@ -30,7 +30,7 @@ class MovementHandler implements RepeatedTask {
         try {
             long lastMoveCheckMS = System.currentTimeMillis()
             while (!game.isDone()) {
-                if (game.world == null) {
+                if (game.world == null || game.player == null) {
                     sleep(1000)
                     lastMoveCheckMS = System.currentTimeMillis()
                 } else {

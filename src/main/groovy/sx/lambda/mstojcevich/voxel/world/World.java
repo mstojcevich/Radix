@@ -55,7 +55,7 @@ public class World implements IWorld {
         this.remote = remote;
         this.server = server;
         if(!remote) {
-            this.chunkGen = new SimplexChunkGenerator(this, 100, new Random().nextInt());
+            this.chunkGen = new SimplexChunkGenerator(this, 200, new Random().nextInt());
         } else {
             this.chunkGen = null;
         }

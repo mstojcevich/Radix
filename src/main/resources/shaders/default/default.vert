@@ -11,7 +11,7 @@ void main() {
         vec4 pos = gl_Vertex;
 
         float waveLength = 1.0;
-        float waveTime = 0.005;
+        float waveTime = 0.002;
         float waveHeight = 0.1;
 
         pos.y -= 0.2;

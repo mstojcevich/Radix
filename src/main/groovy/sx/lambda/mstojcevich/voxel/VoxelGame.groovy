@@ -224,11 +224,11 @@ public class VoxelGame {
         runQueuedOGL()
 
         if(renderer != null) {
-            glPushMatrix()
-
-            renderer.render()
-
-            glPopMatrix()
+            synchronized (renderer) {
+                glPushMatrix()
+                renderer.render()
+                glPopMatrix()
+            }
         }
 
         //2D starts here
@@ -239,7 +239,9 @@ public class VoxelGame {
         glEnable(GL_BLEND)
 
         if(renderer != null) {
-            renderer.draw2d()
+            synchronized (renderer) {
+                renderer.draw2d()
+            }
         }
 
 //        shaderManager.disableTexturing()
@@ -371,8 +373,25 @@ public class VoxelGame {
     public FloatBuffer getLightPosition() { lightPosition }
 
     private void setRenderer(Renderer renderer) {
-        this.renderer = renderer
-        this.renderer.init()
+        if(renderer == null) {
+            if(this.renderer != null) {
+                synchronized (this.renderer) {
+                    this.renderer.cleanup()
+                    this.renderer = null
+                }
+            } else {
+                this.renderer = null
+            }
+        } else if(this.renderer == null) {
+            this.renderer = renderer
+            this.renderer.init()
+        } else if(this.renderer != renderer) {
+            synchronized (this.renderer) {
+                this.renderer.cleanup()
+                this.renderer = renderer
+                this.renderer.init()
+            }
+        }
     }
 
     public <T extends ShaderProgram> T createShader(String shaderName, Class<T> type) {

@@ -123,6 +123,9 @@ public class VoxelGame {
         setupWindow();
         this.setupOGL();
 
+        gameRenderer = new GameRenderer(this)
+        hud = new IngameHUD()
+
         enterWorld(hostname, port);
 
         this.run()
@@ -459,12 +462,12 @@ public class VoxelGame {
     }
 
     private void enterWorld(IWorld world) {
-        this.setRenderer(gameRenderer = new GameRenderer(this))
+        this.setRenderer(gameRenderer)
         this.world = world
         player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
         player.init()
         world.addEntity(player)
-        setCurrentScreen(hud = new IngameHUD())
+        setCurrentScreen(hud)
         this.startHandlers()
 
         if(!remote) {

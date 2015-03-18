@@ -23,7 +23,6 @@ import sx.lambda.mstojcevich.voxel.tasks.EntityUpdater
 import sx.lambda.mstojcevich.voxel.tasks.InputHandler
 import sx.lambda.mstojcevich.voxel.tasks.MovementHandler
 import sx.lambda.mstojcevich.voxel.tasks.RepeatedTask
-import sx.lambda.mstojcevich.voxel.util.Frustum
 import sx.lambda.mstojcevich.voxel.world.IWorld
 import sx.lambda.mstojcevich.voxel.world.World
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk
@@ -89,7 +88,7 @@ public class VoxelGame {
     private ShaderProgram defaultShader
     private PostProcessShader postProcessShader
 
-    private final boolean remote;
+    private boolean remote;
     private String hostname
     private short port
     private ChannelHandlerContext serverChanCtx;
@@ -124,27 +123,7 @@ public class VoxelGame {
         setupWindow();
         this.setupOGL();
 
-        this.setRenderer(gameRenderer = new GameRenderer(this))
-        world = new World(remote, false)
-        player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
-        player.init()
-        world.addEntity(player)
-        currentScreen = new IngameHUD()
-        currentScreen.init()
-        this.startHandlers()
-        if(remote) {
-            new Thread("Client Connection") {
-                @Override
-                public void run() {
-                    new ClientConnection(hostname, port).start()
-                }
-            }.start()
-        }
-        if(!remote) {
-            world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())
-        }
-
-        VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
+        enterWorld(hostname, port);
 
         this.run()
     }
@@ -444,6 +423,36 @@ public class VoxelGame {
     public IngameHUD getHud() { this.hud }
 
     public GameRenderer getGameRenderer() { this.gameRenderer }
+
+    private void enterWorld(String hostname, short port) {
+        remote = true
+
+        enterWorld(new World(remote, false))
+
+        new Thread("Client Connection") {
+            @Override
+            public void run() {
+                new ClientConnection(hostname, port).start()
+            }
+        }.start()
+    }
+
+    private void enterWorld(IWorld world) {
+        this.setRenderer(gameRenderer = new GameRenderer(this))
+        this.world = world
+        player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
+        player.init()
+        world.addEntity(player)
+        currentScreen = new IngameHUD()
+        currentScreen.init()
+        this.startHandlers()
+
+        if(!remote) {
+            world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())
+        }
+
+        VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
+    }
 
     //TODO move frustum calc, light pos, etc into GameRenderer
 

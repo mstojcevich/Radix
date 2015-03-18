@@ -99,12 +99,12 @@ public abstract class VboBufferedGuiScreen implements GuiScreen {
         vertices.flip();
 
         float [] cls = new float[]{
-                0, 0, 0, 1,
-                1, 0, 0, 1,
-                0, 0, 0, 1,
-                1, 0, 0, 1,
-                0, 0, 0, 1,
-                1, 0, 0, 1,
+                0.4f, 0.4f, 0.4f, 1,
+                0.25f, 0.25f, 0.25f, 1,
+                0.4f, 0.4f, 0.4f, 1,
+                0.25f, 0.25f, 0.25f, 1,
+                0.4f, 0.4f, 0.4f, 1,
+                0.25f, 0.25f, 0.25f, 1,
         };
         colors.put(cls);
         colors.flip();

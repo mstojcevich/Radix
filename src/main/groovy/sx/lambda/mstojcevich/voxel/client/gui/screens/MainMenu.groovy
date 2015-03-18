@@ -20,7 +20,7 @@ import java.nio.FloatBuffer
 public class MainMenu extends VboBufferedGuiScreen {
 
     private static final int VERTICES_PER_BUTTON = 6
-    private static final int TARGET_BUTTON_SIZE = 100
+    private static final int TARGET_BUTTON_SIZE = 150
     private static final int BUTTON_SPACING = 4
 
     private final MainMenuButton[] buttons
@@ -59,7 +59,7 @@ public class MainMenu extends VboBufferedGuiScreen {
     @Override
     public void init() {
         buttonFont = new UnicodeFont(new Font(Font.SANS_SERIF, Font.BOLD, 16))
-        buttonFont.effects.add(new ColorEffect(Color.white))
+        buttonFont.effects.add(new ColorEffect(new Color(1, 1, 1, 0.7f)))
         buttonFont.addAsciiGlyphs()
         buttonFont.loadGlyphs()
         resize()
@@ -162,12 +162,12 @@ public class MainMenu extends VboBufferedGuiScreen {
             vertexBuffer.put(bottomRight).put(topRight).put(bottomLeft);
 
             float[] colors = [
-                    1, 1, 1, 0.6f,
-                    1, 1, 1, 0.4f,
-                    1, 1, 1, 0.6f,
-                    1, 1, 1, 0.4f,
-                    1, 1, 1, 0.6f,
-                    1, 1, 1, 0.4f
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f
             ] as float[]
             colorBuffer.put(colors)
         }

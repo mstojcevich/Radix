@@ -4,6 +4,8 @@ import groovy.transform.CompileStatic;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import sx.lambda.mstojcevich.voxel.VoxelGame;
+import sx.lambda.mstojcevich.voxel.util.Vec3i;
+import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -27,13 +29,16 @@ public class NormalBlockRenderer implements IBlockRenderer {
 	}
 
     @Override
-    public void renderVBO(float x, float y, float z, float[][][] lightLevels,
+    public void renderVBO(IChunk chunk, float x, float y, float z, float[][][] lightLevels,
                           FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,
                           boolean shouldRenderFront, boolean shouldRenderBack) {
         float u2 = u+TEXTURE_PERCENTAGE-.001f;
         float v2 = v+TEXTURE_PERCENTAGE-.001f;
+
+        int worldX = chunk.getStartPosition().x + (int)x;
+        int worldZ = chunk.getStartPosition().z + (int)z;
 
         if(shouldRenderTop) {
             vertexBuffer.put(new float[]{
@@ -55,10 +60,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, 0, 1,
                     0, 0, 1
             });
-            float usedLightLevel = 1.0f;
-            if(z+1 < lightLevels.length) {
-                usedLightLevel = lightLevels[(int)x][(int)y][(int)z+1];
-            }
+            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, (int)y, worldZ+1));
             for(int i = 0; i < 4*3; i++) {
                 colorBuffer.put(usedLightLevel);
             }
@@ -84,10 +86,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     -1, 0, 0,
                     -1, 0, 0,
             });
-            float usedLightLevel = 1.0f;
-            if(x-1 > 0) {
-                usedLightLevel = lightLevels[(int)x-1][(int)y][(int)z];
-            }
+            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX-1, (int)y, worldZ));
             for(int i = 0; i < 4*3; i++) {
                 colorBuffer.put(usedLightLevel);
             }
@@ -113,10 +112,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     1, 0, 0,
                     1, 0, 0,
             });
-            float usedLightLevel = 1.0f;
-            if(x+1 < lightLevels.length) {
-                usedLightLevel = lightLevels[(int)x+1][(int)y][(int)z];
-            }
+            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX + 1, (int)y, worldZ));
             for(int i = 0; i < 4*3; i++) {
                 colorBuffer.put(usedLightLevel);
             }
@@ -200,10 +196,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     0, 0, -1,
                     0, 0, -1,
             });
-            float usedLightLevel = 1.0f;
-            if(z-1 > 0) {
-                usedLightLevel = lightLevels[(int)x][(int)y][(int)z-1];
-            }
+            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, (int)y, worldZ-1));
             for(int i = 0; i < 4*3; i++) {
                 colorBuffer.put(usedLightLevel);
             }

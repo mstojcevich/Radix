@@ -530,4 +530,13 @@ public class World implements IWorld {
         }
     }
 
+    @Override
+    public float getLightLevel(Vec3i pos) {
+        IChunk chunk = getChunkAtPosition(pos);
+        if(chunk == null) {
+            return 1;
+        }
+        return chunk.getLightLevel(pos.x, pos.y, pos.z);
+    }
+
 }

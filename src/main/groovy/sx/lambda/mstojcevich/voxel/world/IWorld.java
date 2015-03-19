@@ -59,4 +59,6 @@ public interface IWorld {
     void addToSunlightQueue(Vec3i block);
 
     void processLightQueue();
+
+    float getLightLevel(Vec3i pos);
 }

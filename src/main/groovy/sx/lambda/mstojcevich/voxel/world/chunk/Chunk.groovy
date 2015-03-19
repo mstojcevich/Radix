@@ -388,6 +388,18 @@ public class Chunk implements IChunk {
 
     @Override
     float getLightLevel(int x, int y, int z) {
+        x %= size
+        z %= size
+        if (x < 0) {
+            x += size
+        }
+        if (z < 0) {
+            z += size
+        }
+        if(y > height-1 || y < 0) {
+            return 1
+        }
+
         return lightLevels[x][y][z];
     }
 
@@ -481,4 +493,8 @@ public class Chunk implements IChunk {
         sunlightChanging = false
     }
 
+    @Override
+    IWorld getWorld() {
+        return this.parentWorld
+    }
 }

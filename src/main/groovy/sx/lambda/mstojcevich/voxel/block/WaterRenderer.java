@@ -1,5 +1,7 @@
 package sx.lambda.mstojcevich.voxel.block;
 
+import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
+
 import java.nio.FloatBuffer;
 
 public class WaterRenderer extends NormalBlockRenderer {
@@ -9,7 +11,7 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderVBO(float x, float y, float z, float[][][] lightLevels,
+    public void renderVBO(IChunk c, float x, float y, float z, float[][][] lightLevels,
                           FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,

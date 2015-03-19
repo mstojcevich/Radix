@@ -83,6 +83,8 @@ public class Chunk implements IChunk {
 
         lightLevels = new float[size][height][size]
         //lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
+
+        setupSunlighting()
     }
 
     public Chunk(IWorld world, Vec3i startPosition) {
@@ -109,6 +111,8 @@ public class Chunk implements IChunk {
         highestPoint = world.chunkGen.generate(startPosition, blockList)
 
         lightLevels = new float[size][height][size]
+
+        setupSunlighting()
     }
 
     @Override
@@ -137,7 +141,7 @@ public class Chunk implements IChunk {
             glEnableClientState(GL_COLOR_ARRAY)
         }
 
-        if(sunlightChanged && !sunlightChanging) {
+        if(sunlightChanged) {
             for(int x = 0; x < size; x++) {
                 for (int y = 0; y < height; y++) {
                     for (int z = 0; z < size; z++) {
@@ -145,6 +149,7 @@ public class Chunk implements IChunk {
                     }
                 }
             }
+            sunlightChanged = false
         }
 
         //lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
@@ -177,6 +182,10 @@ public class Chunk implements IChunk {
 
     @Override
     public void render() {
+        if(sunlightChanged && !sunlightChanging) {
+            rerender()
+        }
+
         VoxelGame.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap.getTextureID())
         if(vboVertexHandle > 0) {
             glDisable(GL_BLEND)
@@ -450,7 +459,7 @@ public class Chunk implements IChunk {
         for(int x = 0; x < size; x++) {
             for(int z = 0; z < size; z++) {
                 sunlightLevels[x][height-1][z] = 16
-                parentWorld.addToSunlightQueue(new Vec3i(x, height-1, z))
+                parentWorld.addToSunlightQueue(new Vec3i(startPosition.x+x, height-1, startPosition.z+z as int))
             }
         }
     }

@@ -440,15 +440,14 @@ public class VoxelGame {
     }
 
     private void enterWorld(IWorld world, boolean remote) {
+        this.world = world
+        this.remote = remote
+        player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
         glQueue.add(new Runnable() { // A lot of the init methods require GL context
             @Override
             @CompileDynamic // Using VoxelGame.this causes the static compile checker to freak out
             void run() {
-                VoxelGame.this.remote = remote
-
                 setRenderer(gameRenderer)
-                VoxelGame.this.world = world
-                player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0))
                 player.init()
                 world.addEntity(player)
                 setCurrentScreen(hud)

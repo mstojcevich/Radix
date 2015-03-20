@@ -380,6 +380,7 @@ public class World implements IWorld {
                 addToSunlightQueue(new Vec3i(c.getStartPosition().x + x, WORLD_HEIGHT-1, c.getStartPosition().z + z));
             }
         }
+        c.finishChangingSunlight();
     }
 
     public void addEntity(Entity e) {

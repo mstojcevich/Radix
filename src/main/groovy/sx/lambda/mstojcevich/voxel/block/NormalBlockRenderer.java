@@ -5,7 +5,6 @@ import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import sx.lambda.mstojcevich.voxel.VoxelGame;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
-import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
 import java.io.IOException;
@@ -205,13 +204,19 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void render2d(SpriteBatcher batcher, int x, int y, int width) {
+    public void render2d(float x, float y, float width) {
         if(!initialized) {
             initialize();
         }
         float u2 = u+TEXTURE_PERCENTAGE-.001f;
         float v2 = v+TEXTURE_PERCENTAGE-.001f;
-        batcher.drawTexturedRect(x, y, x+width, y+width, u, v, u2, v2);
+        VoxelGame.getInstance().getTextureManager().bindTexture(blockMap.getTextureID());
+        glBegin(GL_QUADS);
+        glTexCoord2f(u, v);glVertex2f(x, y);
+        glTexCoord2f(u, v2);glVertex2f(x, y+width);
+        glTexCoord2f(u2, v2);glVertex2f(x+width, y+width);
+        glTexCoord2f(u2, v);glVertex2f(x+width, y);
+        glEnd();
     }
 
     private static void initialize() {

@@ -412,7 +412,7 @@ public class World implements IWorld {
             Queue<IChunk> changedChunks = new LinkedBlockingDeque<>();
             Vec3i pos;
             while((pos = sunlightQueue.poll()) != null) {
-                IChunk posChunk = getChunkAtPosition(pos);  // TODO this is sometimes null. Look into later.
+                IChunk posChunk = getChunkAtPosition(pos);
                 int ll = posChunk.getSunlight(pos.x, pos.y, pos.z);
                 int nextLL = ll-1;
 

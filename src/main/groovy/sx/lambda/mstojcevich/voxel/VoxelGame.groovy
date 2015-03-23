@@ -19,7 +19,6 @@ import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketLeaving
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.settings.SettingsManager
-import sx.lambda.mstojcevich.voxel.shader.GuiShader
 import sx.lambda.mstojcevich.voxel.shader.PostProcessShader
 import sx.lambda.mstojcevich.voxel.tasks.EntityUpdater
 import sx.lambda.mstojcevich.voxel.tasks.InputHandler
@@ -88,7 +87,6 @@ public class VoxelGame {
 
     private ShaderProgram defaultShader
     private PostProcessShader postProcessShader
-    private GuiShader guiShader
 
     private boolean remote
 
@@ -166,7 +164,6 @@ public class VoxelGame {
 
         defaultShader = createShader("default", ShaderProgram.class)
         postProcessShader = createShader("post-process", PostProcessShader.class)
-        guiShader = createShader("gui", GuiShader.class)
 
         getShaderManager().setShader(defaultShader)
     }
@@ -229,11 +226,9 @@ public class VoxelGame {
             }
         }
 
-        enableGuiShader()
         synchronized (currentScreen) {
             currentScreen.render(true)
         }
-        enableDefaultShader()
 
         glPopMatrix()
         glPopAttrib()
@@ -417,13 +412,7 @@ public class VoxelGame {
         shaderManager.setShader(defaultShader)
     }
 
-    public void enableGuiShader() {
-        shaderManager.setShader(guiShader)
-    }
-
     public PostProcessShader getPostProcessShader() { postProcessShader }
-
-    public GuiShader getGuiShader() { guiShader }
 
     public int getFps() { fps }
 

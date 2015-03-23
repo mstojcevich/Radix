@@ -23,8 +23,6 @@ public class MainMenu extends VboBufferedGuiScreen {
     private static final int TARGET_BUTTON_SIZE = 150
     private static final int BUTTON_SPACING = 4
 
-    private static final int PARTS_PER_VERTEX = 6 // XYRGBA
-
     private final MainMenuButton[] buttons
 
     private UnicodeFont buttonFont
@@ -72,12 +70,14 @@ public class MainMenu extends VboBufferedGuiScreen {
     @Override
     protected void rerender() {
         int numVertices = buttons.length*VERTICES_PER_BUTTON
-        FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(numVertices*PARTS_PER_VERTEX)
+        FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(numVertices*2)
+        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(numVertices*4)
         for(MainMenuButton button : buttons) {
-            button.render(vertexBuffer)
+            button.render(vertexBuffer, colorBuffer)
         }
         vertexBuffer.flip()
-        renderVbo(vertexBuffer)
+        colorBuffer.flip()
+        renderVbo(vertexBuffer, colorBuffer)
     }
 
     @Override
@@ -148,18 +148,28 @@ public class MainMenu extends VboBufferedGuiScreen {
             textStartY = bounds.y+(bounds.height/2.0f - buttonFont.getHeight(title)/2.0f) as float
         }
 
-        private void render(FloatBuffer vertexBuffer) {
+        private void render(FloatBuffer vertexBuffer, FloatBuffer colorBuffer) {
             float x1 = bounds.x as float
             float x2 = bounds.x+bounds.width as float
             float y1 = bounds.y as float
             float y2 = bounds.y+bounds.height as float
-            float[] bottomRight = [x2, y2, 0.2f, 0.2f, 0.2f, 0.7f] as float[]
-            float[] bottomLeft = [x1, y2, 0.2f, 0.2f, 0.2f, 0.7f] as float[]
-            float[] topLeft = [x1, y1, 0.2f, 0.2f, 0.2f, 0.7f] as float[]
-            float[] topRight = [x2, y1, 0.2f, 0.2f, 0.2f, 0.7f] as float[]
+            float[] bottomRight = [x2, y2] as float[]
+            float[] bottomLeft = [x1, y2] as float[]
+            float[] topLeft = [x1, y1] as float[]
+            float[] topRight = [x2, y1] as float[]
 
             vertexBuffer.put(topLeft).put(bottomLeft).put(topRight);
             vertexBuffer.put(bottomRight).put(topRight).put(bottomLeft);
+
+            float[] colors = [
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f,
+                    0.2f, 0.2f, 0.2f, 0.7f
+            ] as float[]
+            colorBuffer.put(colors)
         }
 
         void drawLabel() {

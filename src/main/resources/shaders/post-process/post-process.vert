@@ -3,8 +3,9 @@ attribute vec2 texCoord;
 
 varying vec3 vPosition;
 varying vec2 vTexCoord;
+uniform float animTime;
 
-uniform sampler2D texture;
+uniform sampler2D fboTexture;
 
 void main() {
     vPosition = position;

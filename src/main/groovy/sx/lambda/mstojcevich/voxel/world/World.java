@@ -46,6 +46,7 @@ public class World implements IWorld {
     private Set<IChunk> chunksToRerender = Collections.newSetFromMap(new ConcurrentHashMap<IChunk, Boolean>());
 
     private Queue<Vec3i> sunlightQueue = new ConcurrentLinkedQueue<>();
+    private Queue<Vec3i> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
 
     public World(boolean remote, boolean server) {
         this.remote = remote;
@@ -303,14 +304,20 @@ public class World implements IWorld {
     }
 
     @Override
+    public void addToSunlightRemovalQueue(Vec3i block) {
+        sunlightRemovalQueue.add(block);
+    }
+
+    @Override
     public void processLightQueue() {
+        processLightRemovalQueue();
+
         if(!sunlightQueue.isEmpty()) {
             Queue<IChunk> changedChunks = new LinkedBlockingDeque<>();
             Vec3i pos;
             while((pos = sunlightQueue.poll()) != null) {
                 IChunk posChunk = getChunkAtPosition(pos);
                 if(posChunk == null) {
-                    System.err.println("posChunk is null. WTF?");
                     continue;
                 }
                 int ll = posChunk.getSunlight(pos.x, pos.y, pos.z);
@@ -423,6 +430,119 @@ public class World implements IWorld {
                         }
                     }
                 }
+            }
+            IChunk changedChunk;
+            while((changedChunk = changedChunks.poll()) != null) {
+                changedChunk.finishChangingSunlight();
+            }
+        }
+    }
+
+    private void processLightRemovalQueue() {
+        if(!sunlightRemovalQueue.isEmpty()) {
+            Queue<IChunk> changedChunks = new LinkedBlockingDeque<>();
+            Vec3i pos;
+            while((pos = sunlightRemovalQueue.poll()) != null) {
+                IChunk posChunk = getChunkAtPosition(pos);
+                if(posChunk == null) {
+                    continue;
+                }
+                int ll = posChunk.getSunlight(pos.x, pos.y, pos.z);
+
+                Vec3i negXNeighborPos = pos.translate(-1,0,0);
+                Vec3i posXNeighborPos = pos.translate(1,0,0);
+                Vec3i negZNeighborPos = pos.translate(0,0,-1);
+                Vec3i posZNeighborPos = pos.translate(0,0,1);
+                IChunk negXNeighborChunk = getChunkAtPosition(negXNeighborPos);
+                IChunk posXNeighborChunk = getChunkAtPosition(posXNeighborPos);
+                IChunk negZNeighborChunk = getChunkAtPosition(negZNeighborPos);
+                IChunk posZNeighborChunk = getChunkAtPosition(posZNeighborPos);
+
+                if(negXNeighborChunk != null) {
+                    Block bl = negXNeighborChunk.getBlockAtPosition(negXNeighborPos);
+                    int bll = negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z);
+                    if(bll < ll && bll != 0) {
+                        if (bl == null) {
+                            sunlightRemovalQueue.add(negXNeighborPos);
+                        } else if (bl.isTransparent()) {
+                            sunlightRemovalQueue.add(negXNeighborPos);
+                        }
+                    } else if(bll > ll) {
+                        if (bl == null) {
+                            sunlightQueue.add(negXNeighborPos);
+                        } else if (bl.isTransparent()) {
+                            sunlightQueue.add(negXNeighborPos);
+                        }
+                    }
+                }
+                if(posXNeighborChunk != null) {
+                    Block bl = posXNeighborChunk.getBlockAtPosition(posXNeighborPos);
+                    int bll = posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z);
+                    if(bll < ll && bll != 0) {
+                        if (bl == null) {
+                            sunlightRemovalQueue.add(posXNeighborPos);
+                        } else if (bl.isTransparent()) {
+                            sunlightRemovalQueue.add(posXNeighborPos);
+                        }
+                    } else if(bll > ll) {
+                        if (bl == null) {
+                            sunlightQueue.add(posXNeighborPos);
+                        } else if (bl.isTransparent()) {
+                            sunlightQueue.add(posXNeighborPos);
+                        }
+                    }
+                }
+                if(negZNeighborChunk != null) {
+                    Block bl = negZNeighborChunk.getBlockAtPosition(negZNeighborPos);
+                    int bll = negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z);
+                    if(bll < ll && bll != 0) {
+                        if (bl == null) {
+                            sunlightRemovalQueue.add(negZNeighborPos);
+                        } else if (bl.isTransparent()) {
+                            sunlightRemovalQueue.add(negZNeighborPos);
+                        }
+                    } else if(bll > ll) {
+                        if (bl == null) {
+                            sunlightQueue.add(negZNeighborPos);
+                        } else if (bl.isTransparent()) {
+                            sunlightQueue.add(negZNeighborPos);
+                        }
+                    }
+                }
+                if(posZNeighborChunk != null) {
+                    Block bl = posZNeighborChunk.getBlockAtPosition(posZNeighborPos);
+                    int bll = posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z);
+                    if(bll < ll && bll != 0) {
+                        if (bl == null) {
+                            sunlightRemovalQueue.add(posZNeighborPos);
+                        } else if (bl.isTransparent()) {
+                            sunlightRemovalQueue.add(posZNeighborPos);
+                        }
+                    } else if(bll > ll) {
+                        if (bl == null) {
+                            sunlightQueue.add(posZNeighborPos);
+                        } else if (bl.isTransparent()) {
+                            sunlightQueue.add(posZNeighborPos);
+                        }
+                    }
+                }
+
+                if(pos.y > 0) {
+                    Vec3i negYPos = pos.translate(0, -1, 0);
+                    Block negYBlock = posChunk.getBlockAtPosition(negYPos);
+                    if(negYBlock == null) {
+                        if(posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) != 0) {
+                            sunlightRemovalQueue.add(negYPos);
+                        }
+                    } else if(negYBlock.isTransparent()) {
+                        if(posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) != 0) {
+                            sunlightRemovalQueue.add(negYPos);
+                        }
+                    }
+                }
+
+                posChunk.setSunlight(pos.x, pos.y, pos.z, 0);
+                changedChunks.add(posChunk);
             }
             IChunk changedChunk;
             while((changedChunk = changedChunks.poll()) != null) {

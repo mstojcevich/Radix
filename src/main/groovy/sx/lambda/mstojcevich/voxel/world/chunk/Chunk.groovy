@@ -367,6 +367,8 @@ public class Chunk implements IChunk {
         if (block != null) {
             highestPoint = Math.max(highestPoint, y)
         }
+
+        world.addToSunlightRemovalQueue(new Vec3i(x + startPosition.x, y + startPosition.y, z + startPosition.z))
     }
 
     @Override

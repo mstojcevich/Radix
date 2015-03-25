@@ -57,6 +57,7 @@ public interface IWorld {
     ChunkGenerator getChunkGen();
 
     void addToSunlightQueue(Vec3i block);
+    void addToSunlightRemovalQueue(Vec3i block);
 
     void processLightQueue();
 

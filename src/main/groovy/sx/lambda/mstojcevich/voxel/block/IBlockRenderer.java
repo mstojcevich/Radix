@@ -1,5 +1,6 @@
 package sx.lambda.mstojcevich.voxel.block;
 
+import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
 import java.nio.FloatBuffer;
@@ -12,6 +13,6 @@ public interface IBlockRenderer {
                    boolean shouldRenderLeft, boolean shouldRenderRight,
                    boolean shouldRenderFront, boolean shouldRenderBack);
 
-    public void render2d(float x, float y, float width);
+    public void render2d(SpriteBatcher batcher, int x, int y, int width);
 
 }

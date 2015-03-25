@@ -114,6 +114,11 @@ class GameRenderer implements Renderer {
 
         String threadsStr = "Active threads: " + Thread.activeCount()
         debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
+
+        // Let the texture manager know that we've switched textures
+        // drawString binds its own texture and TextureManager still thinks we're on our last texture we used.
+        // This manually forces TextureManager to think we're on a different texture
+        game.textureManager.bindTexture(0)
     }
 
     @Override

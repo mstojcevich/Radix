@@ -413,11 +413,11 @@ public class World implements IWorld {
             Vec3i pos;
             while((pos = sunlightQueue.poll()) != null) {
                 IChunk posChunk = getChunkAtPosition(pos);
-                int ll = posChunk.getSunlight(pos.x, pos.y, pos.z);
                 if(posChunk == null) {
                     System.err.println("posChunk is null. WTF?");
                     continue;
                 }
+                int ll = posChunk.getSunlight(pos.x, pos.y, pos.z);
                 int nextLL = ll-1;
 
                 Vec3i negXNeighborPos = pos.translate(-1,0,0);

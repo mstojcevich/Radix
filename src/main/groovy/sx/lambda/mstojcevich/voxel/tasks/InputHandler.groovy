@@ -1,6 +1,7 @@
 package sx.lambda.mstojcevich.voxel.tasks
 
 import groovy.transform.CompileStatic
+import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketBreakBlock
@@ -65,7 +66,7 @@ class InputHandler implements RepeatedTask {
 
                     }
                 }
-                while (Mouse.next()) {
+                while (Mouse.isCreated() && Mouse.next()) {
                     if (Mouse.getEventButtonState()) {
                         int button = Mouse.getEventButton()
                         game.currentScreen.onMouseClick(button)
@@ -101,8 +102,10 @@ class InputHandler implements RepeatedTask {
                         }
                     }
                 }
-                if(isKeyDown(KEY_SPACE) && game.player.getBlockInFeet(game.world) == Block.WATER) {
-                    game.player.setYVelocity(0.02f);
+                if(Keyboard.isCreated()) {
+                    if (isKeyDown(KEY_SPACE) && game.player.getBlockInFeet(game.world) == Block.WATER) {
+                        game.player.setYVelocity(0.02f);
+                    }
                 }
                 sleep(10)
             }

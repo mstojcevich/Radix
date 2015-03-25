@@ -34,6 +34,7 @@ public class MainMenu extends VboBufferedGuiScreen {
                 new MainMenuButton(this, "Singleplayer", enterSingleplayer, TARGET_BUTTON_SIZE),
                 new MainMenuButton(this, "Multiplayer", enterMultiplayer, TARGET_BUTTON_SIZE),
                 new MainMenuButton(this, "Settings", {println("Settings pressed!")}, TARGET_BUTTON_SIZE),
+                new MainMenuButton(this, "Quit Game", {VoxelGame.instance.startShutdown()}, TARGET_BUTTON_SIZE),
         ]
     }
 

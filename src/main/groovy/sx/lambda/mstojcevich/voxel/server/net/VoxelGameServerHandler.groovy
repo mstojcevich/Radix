@@ -52,7 +52,6 @@ class VoxelGameServerHandler extends ChannelHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        //TODO remove clients on a clean disconnect as well
         server.rmClient(ctx);
         cause.printStackTrace()
         ctx.close()

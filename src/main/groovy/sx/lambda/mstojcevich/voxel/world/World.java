@@ -115,7 +115,6 @@ public class World implements IWorld {
     @Override
     public void loadChunks(EntityPosition playerPosition, int viewDistance) {
         if(!remote) { //don't gen chunks if we're not local
-            //TODO Make sure all of these values apply to the chunkGC check
             this.getChunksInRange(playerPosition, viewDistance);
         }
 

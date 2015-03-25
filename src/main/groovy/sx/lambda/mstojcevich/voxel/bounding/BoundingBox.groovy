@@ -54,7 +54,6 @@ class BoundingBox {
     }
 
     @Override
-    //TODO Will this give any hash overlap?
     public int hashCode() {
         float hashCode = 1;
         hashCode = hashCode*2 + this.x;

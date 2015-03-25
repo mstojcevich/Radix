@@ -8,8 +8,6 @@ import sx.lambda.mstojcevich.voxel.api.events.render.EventChunkRender
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.VoxelGame
-import sx.lambda.mstojcevich.voxel.client.render.light.LightLevelCalculator
-import sx.lambda.mstojcevich.voxel.client.render.light.SunAndNeighborLLC
 import sx.lambda.mstojcevich.voxel.client.render.meshing.MeshResult
 import sx.lambda.mstojcevich.voxel.client.render.meshing.Mesher
 import sx.lambda.mstojcevich.voxel.client.render.meshing.PlainMesher
@@ -27,7 +25,6 @@ public class Chunk implements IChunk {
 
     private transient IWorld parentWorld
     private transient final Mesher mesher
-    private transient final LightLevelCalculator lightLevelCalculator
 
     private final int size
     private final int height
@@ -71,8 +68,6 @@ public class Chunk implements IChunk {
         }
         sunlightLevels = new int[size][height][size]
 
-        lightLevelCalculator = new SunAndNeighborLLC(this)
-
         if(VoxelGame.instance != null) { // We're a client
             mesher = new PlainMesher(this)
         } else {
@@ -82,7 +77,6 @@ public class Chunk implements IChunk {
         this.loadIdInts(ids)
 
         lightLevels = new float[size][height][size]
-        //lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
 
         setupSunlighting()
     }
@@ -98,8 +92,6 @@ public class Chunk implements IChunk {
             lightLevelMap[i] = Math.pow(0.8, reduction) as float
         }
         sunlightLevels = new int[size][height][size]
-
-        lightLevelCalculator = new SunAndNeighborLLC(this)
 
         if(VoxelGame.instance != null) { // We're a client
             mesher = new PlainMesher(this)
@@ -151,8 +143,6 @@ public class Chunk implements IChunk {
             }
             sunlightChanged = false
         }
-
-        //lightLevelCalculator.calculateLightLevels(blockList, lightLevels)
 
         Block[][][] transparent = new Block[size][height][size]
         Block[][][] opaque = new Block[size][height][size]

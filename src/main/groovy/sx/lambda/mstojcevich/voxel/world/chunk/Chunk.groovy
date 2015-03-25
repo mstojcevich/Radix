@@ -276,7 +276,7 @@ public class Chunk implements IChunk {
 
         blockList[x][y][z] = null
 
-        addNeighborsToSunlightQueue(x, y, z)
+        this.addNeighborsToSunlightQueue(x, y, z)
 
     }
 
@@ -326,7 +326,7 @@ public class Chunk implements IChunk {
             }
         }
         if(posZNeighborChunk != null) {
-            int posZSunlight = posZNeighborChunk.getSunlight(posZNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z)
+            int posZSunlight = posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z)
             if(posZSunlight > 1) {
                 Block bl = posZNeighborChunk.getBlockAtPosition(posZNeighborPos);
                 if (bl == null) {

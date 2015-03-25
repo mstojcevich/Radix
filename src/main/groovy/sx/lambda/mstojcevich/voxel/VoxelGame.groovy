@@ -371,8 +371,8 @@ public class VoxelGame {
 
     public <T extends ShaderProgram> T createShader(String shaderName, Class<T> type) {
         String nameNoExt = "/shaders/$shaderName/$shaderName"
-        String vertex = this.getClass().getResourceAsStream(nameNoExt + ".vert").getText()
-        String fragment = this.getClass().getResourceAsStream(nameNoExt + ".frag").getText()
+        String vertex = this.getClass().getResourceAsStream(nameNoExt + ".vert.glsl").getText()
+        String fragment = this.getClass().getResourceAsStream(nameNoExt + ".frag.glsl").getText()
 
         Object[] args = [vertex, fragment]
         ShaderProgram program = (ShaderProgram)type.newInstance(args);

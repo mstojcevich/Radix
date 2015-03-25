@@ -466,7 +466,7 @@ public class World implements IWorld {
                         } else if (bl.isTransparent()) {
                             sunlightRemovalQueue.add(negXNeighborPos);
                         }
-                    } else if(bll > ll) {
+                    } else if(bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(negXNeighborPos);
                         } else if (bl.isTransparent()) {
@@ -483,7 +483,7 @@ public class World implements IWorld {
                         } else if (bl.isTransparent()) {
                             sunlightRemovalQueue.add(posXNeighborPos);
                         }
-                    } else if(bll > ll) {
+                    } else if(bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(posXNeighborPos);
                         } else if (bl.isTransparent()) {
@@ -500,7 +500,7 @@ public class World implements IWorld {
                         } else if (bl.isTransparent()) {
                             sunlightRemovalQueue.add(negZNeighborPos);
                         }
-                    } else if(bll > ll) {
+                    } else if(bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(negZNeighborPos);
                         } else if (bl.isTransparent()) {
@@ -517,7 +517,7 @@ public class World implements IWorld {
                         } else if (bl.isTransparent()) {
                             sunlightRemovalQueue.add(posZNeighborPos);
                         }
-                    } else if(bll > ll) {
+                    } else if(bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(posZNeighborPos);
                         } else if (bl.isTransparent()) {

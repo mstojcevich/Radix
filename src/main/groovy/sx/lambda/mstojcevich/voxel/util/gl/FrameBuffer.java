@@ -104,14 +104,6 @@ public class FrameBuffer {
     public void drawTexture(TextureManager tm) {
         tm.bindTexture(texture);
 
-//        glColor4f(1, 1, 1, 1);
-//        glBegin(GL_QUADS);
-//        glTexCoord2f(0, 1);glVertex2f(0, 0);
-//        glTexCoord2f(0, 0);glVertex2f(0, Display.getHeight());
-//        glTexCoord2f(1, 0);glVertex2f(Display.getWidth(), Display.getHeight());
-//        glTexCoord2f(1, 1);glVertex2f(Display.getWidth(), 0);
-//        glEnd();
-
         int indices = 6*4; // 4 x XYUV
         FloatBuffer vertexData = BufferUtils.createFloatBuffer(indices);
 

@@ -231,7 +231,7 @@ public class World implements IWorld {
     @Override
     public int getChunkPosition(float value) {
         int subtraction = (int)(value%CHUNK_SIZE);
-        if(value <= 0 && subtraction != 0) {
+        if(value < 0 && subtraction != 0) {
             subtraction = CHUNK_SIZE+subtraction;
         }
         return (int)(value-subtraction);
@@ -304,8 +304,8 @@ public class World implements IWorld {
         int playerChunkX = getChunkPosition(epos.getX());
         int playerChunkZ = getChunkPosition(epos.getZ());
         int range = viewDistance*CHUNK_SIZE;
-        for (int x = playerChunkX - range; x <= playerChunkX + range; x += CHUNK_SIZE) {
-            for (int z = playerChunkZ - range; z <= playerChunkZ + range; z += CHUNK_SIZE) {
+        for (int x = playerChunkX - range; x < playerChunkX + range; x += CHUNK_SIZE) {
+            for (int z = playerChunkZ - range; z < playerChunkZ + range; z += CHUNK_SIZE) {
                 chunkList.add(loadChunk(x, z));
             }
         }
@@ -432,13 +432,13 @@ public class World implements IWorld {
                 if(negXNeighborChunk != null) {
                     Block bl = negXNeighborChunk.getBlockAtPosition(negXNeighborPos);
                     if(bl == null) {
-                        if(negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z) <= nextLL) {
+                        if(negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z) < nextLL) {
                             negXNeighborChunk.setSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z, nextLL);
                             sunlightQueue.add(negXNeighborPos);
                             changedChunks.add(negXNeighborChunk);
                         }
                     } else if(bl.isTransparent()) {
-                        if(negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z) <= nextLL) {
+                        if(negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z) < nextLL) {
                             negXNeighborChunk.setSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z, nextLL);
                             sunlightQueue.add(negXNeighborPos);
                             changedChunks.add(negXNeighborChunk);
@@ -448,13 +448,13 @@ public class World implements IWorld {
                 if(posXNeighborChunk != null) {
                     Block bl = posXNeighborChunk.getBlockAtPosition(posXNeighborPos);
                     if(bl == null) {
-                        if(posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z) <= nextLL) {
+                        if(posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z) < nextLL) {
                             posXNeighborChunk.setSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z, nextLL);
                             sunlightQueue.add(posXNeighborPos);
                             changedChunks.add(posXNeighborChunk);
                         }
                     } else if(bl.isTransparent()) {
-                        if(posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z) <= nextLL) {
+                        if(posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z) < nextLL) {
                             posXNeighborChunk.setSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z, nextLL);
                             sunlightQueue.add(posXNeighborPos);
                             changedChunks.add(posXNeighborChunk);
@@ -464,13 +464,13 @@ public class World implements IWorld {
                 if(negZNeighborChunk != null) {
                     Block bl = negZNeighborChunk.getBlockAtPosition(negZNeighborPos);
                     if(bl == null) {
-                        if(negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z) <= nextLL) {
+                        if(negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z) < nextLL) {
                             negZNeighborChunk.setSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z, nextLL);
                             sunlightQueue.add(negZNeighborPos);
                             changedChunks.add(negZNeighborChunk);
                         }
                     } else if(bl.isTransparent()) {
-                        if(negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z) <= nextLL) {
+                        if(negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z) < nextLL) {
                             negZNeighborChunk.setSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z, nextLL);
                             sunlightQueue.add(negZNeighborPos);
                             changedChunks.add(negZNeighborChunk);
@@ -480,13 +480,13 @@ public class World implements IWorld {
                 if(posZNeighborChunk != null) {
                     Block bl = posZNeighborChunk.getBlockAtPosition(posZNeighborPos);
                     if(bl == null) {
-                        if(posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z) <= nextLL) {
+                        if(posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z) < nextLL) {
                             posZNeighborChunk.setSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z, nextLL);
                             sunlightQueue.add(posZNeighborPos);
                             changedChunks.add(posZNeighborChunk);
                         }
                     } else if(bl.isTransparent()) {
-                        if(posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z) <= nextLL) {
+                        if(posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z) < nextLL) {
                             posZNeighborChunk.setSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z, nextLL);
                             sunlightQueue.add(posZNeighborPos);
                             changedChunks.add(posZNeighborChunk);

@@ -465,9 +465,11 @@ public class VoxelGame {
                 setRenderer(null)
                 world.cleanup()
                 if(remote) {
-                    serverChanCtx.writeAndFlush(new PacketLeaving("Leaving"))
-                    serverChanCtx.disconnect()
-
+                    if(serverChanCtx != null) {
+                        serverChanCtx.writeAndFlush(new PacketLeaving("Leaving"))
+                        serverChanCtx.disconnect()
+                        serverChanCtx = null
+                    }
                 }
                 world = null
                 remote = false

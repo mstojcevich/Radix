@@ -145,35 +145,37 @@ public class World implements IWorld {
     public void removeBlock(final Vec3i position) {
         synchronized (this) {
             final IChunk c = this.getChunkAtPosition(position);
-            c.removeBlock(position);
-            if(!server) {
-                rerenderChunk(c);
+            if (c != null) {
+                c.removeBlock(position);
+                if (!server) {
+                    rerenderChunk(c);
 
-                if(Math.abs(position.x+(position.x<0?1:0)) % 16 == 15) {
-                    if(position.x < 0) {
-                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)));
-                    } else {
-                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)));
+                    if (Math.abs(position.x + (position.x < 0 ? 1 : 0)) % 16 == 15) {
+                        if (position.x < 0) {
+                            rerenderChunk(getChunkAtPosition(new Vec3i(position.x - 1, position.y, position.z)));
+                        } else {
+                            rerenderChunk(getChunkAtPosition(new Vec3i(position.x + 1, position.y, position.z)));
+                        }
+                    } else if (Math.abs(position.x + (position.x < 0 ? 1 : 0)) % 16 == 0) {
+                        if (position.x < 0) {
+                            rerenderChunk(getChunkAtPosition(new Vec3i(position.x + 1, position.y, position.z)));
+                        } else {
+                            rerenderChunk(getChunkAtPosition(new Vec3i(position.x - 1, position.y, position.z)));
+                        }
                     }
-                } else if(Math.abs(position.x+(position.x<0?1:0)) % 16 == 0) {
-                    if(position.x < 0) {
-                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x+1, position.y, position.z)));
-                    } else {
-                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x-1, position.y, position.z)));
-                    }
-                }
 
-                if(Math.abs(position.z+(position.z<0?1:0)) % 16 == 15) {
-                    if(position.z < 0) {
-                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z - 1)));
-                    } else {
-                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)));
-                    }
-                } else if(Math.abs(position.z+(position.z<0?1:0)) % 16 == 0) {
-                    if(position.z < 0) {
-                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z+1)));
-                    } else {
-                        rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z-1)));
+                    if (Math.abs(position.z + (position.z < 0 ? 1 : 0)) % 16 == 15) {
+                        if (position.z < 0) {
+                            rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z - 1)));
+                        } else {
+                            rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z + 1)));
+                        }
+                    } else if (Math.abs(position.z + (position.z < 0 ? 1 : 0)) % 16 == 0) {
+                        if (position.z < 0) {
+                            rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z + 1)));
+                        } else {
+                            rerenderChunk(getChunkAtPosition(new Vec3i(position.x, position.y, position.z - 1)));
+                        }
                     }
                 }
             }

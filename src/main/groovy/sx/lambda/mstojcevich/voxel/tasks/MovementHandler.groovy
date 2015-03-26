@@ -161,12 +161,21 @@ class MovementHandler implements RepeatedTask {
         if (newChunk2 == null) return true
         if (newChunk == null) return true
         Block block1 = newChunk.getBlockAtPosition(newPosition);
-        Block block2 = newChunk.getBlockAtPosition(newPosition);
-        if(block1 != null || block2 != null) {
-            return block1.isSolid() && block2.isSolid();
-        } else {
-            return false;
+        Block block2 = newChunk2.getBlockAtPosition(newPosition2);
+
+        boolean passed = true
+        if(block1 != null) {
+            if(block1.isSolid()) {
+                passed = false
+            }
         }
+        if(block2 != null) {
+            if(block2.isSolid()) {
+                passed = false
+            }
+        }
+
+        return !passed
     }
 
 }

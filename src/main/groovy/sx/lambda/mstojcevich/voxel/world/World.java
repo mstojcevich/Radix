@@ -75,9 +75,6 @@ public class World implements IWorld {
 
     public void render() {
         if(!server) {
-            if(!chunksToRerender.isEmpty()) {
-                processLightQueue();
-            }
             for(IChunk c : chunksToRerender) {
                 c.rerender();
                 chunksToRerender.remove(c);

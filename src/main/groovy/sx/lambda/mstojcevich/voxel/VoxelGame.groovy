@@ -476,11 +476,13 @@ public class VoxelGame {
                 transitionAnimation.init()
                 setCurrentScreen(hud)
 
+
                 if(!remote) {
                     world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())
                 }
 
                 VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
+                // Delays are somewhere in this function. Above here.
             }
         })
     }

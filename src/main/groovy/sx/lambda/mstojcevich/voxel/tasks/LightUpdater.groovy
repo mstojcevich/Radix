@@ -24,10 +24,10 @@ class LightUpdater implements RepeatedTask {
     void run() {
         try {
             while (!game.isDone()) {
-//                if (game.world != null) {
-//                    game.world.processLightQueue()
-//                } TODO right now this does nothing
-                sleep(1000)
+                if (game.world != null) {
+                    game.world.processLightQueue()
+                }
+                sleep(100)
             }
         } catch (Exception e) {
             game.handleCriticalException(e)

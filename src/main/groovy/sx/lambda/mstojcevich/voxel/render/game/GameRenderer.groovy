@@ -31,7 +31,7 @@ class GameRenderer implements Renderer {
     private FrameBuffer postProcessFbo
     private UnicodeFont debugTextRenderer
 
-    private boolean initted
+    private boolean initted, fontRenderReady
 
     private Frustum frustum = new Frustum()
     private boolean calcFrustum
@@ -71,54 +71,56 @@ class GameRenderer implements Renderer {
             game.enableDefaultShader()
         }
 
-        int debugTextHeight = 0
+        if(fontRenderReady) {
+            int debugTextHeight = 0
 
-        String glInfoStr = "GL Info: " + glGetString(GL_RENDERER) + " (GL " + glGetString(GL_VERSION) + ")"
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(glInfoStr), debugTextHeight, glInfoStr)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        String fpsStr = "FPS: $game.fps"
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr, Color.white)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        int acrt = 0
-        if(game.numChunkRenders > 0) {
-            acrt = (int)(game.numChunkRenders/game.numChunkRenders)
-        }
-        String lcrtStr = "AWRT: $acrt ns"
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(lcrtStr), debugTextHeight, lcrtStr, Color.white)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        DecimalFormat posFormat = new DecimalFormat("#.00");
-        String coordsStr = String.format("(x,y,z): %s,%s,%s",
-                posFormat.format(game.player.position.x),
-                posFormat.format(game.player.position.y),
-                posFormat.format(game.player.position.z))
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(coordsStr), debugTextHeight, coordsStr)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        String chunk = String.format("Chunk (x,z): %s,%s",
-                game.world.getChunkPosition(game.player.position.x),
-                game.world.getChunkPosition(game.player.position.z))
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(chunk), debugTextHeight, chunk)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-        String headingStr = String.format("(yaw,pitch): %s,%s",
-                posFormat.format(game.player.rotation.yaw),
-                posFormat.format(game.player.rotation.pitch))
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(headingStr), debugTextHeight, headingStr)
-        debugTextHeight += debugTextRenderer.getLineHeight()
-
-        Vec3i playerPosVec = new Vec3i(game.player.position.x as int, game.player.position.y as int, game.player.position.z as int)
-        IChunk playerChunk =  game.world.getChunkAtPosition(playerPosVec)
-        if(playerChunk != null) {
-            String llStr = String.format("Light Level @ Feet: " + playerChunk.getSunlight(playerPosVec.x, playerPosVec.y, playerPosVec.z))
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(llStr), debugTextHeight, llStr)
+            String glInfoStr = "GL Info: " + glGetString(GL_RENDERER) + " (GL " + glGetString(GL_VERSION) + ")"
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(glInfoStr), debugTextHeight, glInfoStr)
             debugTextHeight += debugTextRenderer.getLineHeight()
+            String fpsStr = "FPS: $game.fps"
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr, Color.white)
+            debugTextHeight += debugTextRenderer.getLineHeight()
+            int acrt = 0
+            if (game.numChunkRenders > 0) {
+                acrt = (int) (game.numChunkRenders / game.numChunkRenders)
+            }
+            String lcrtStr = "AWRT: $acrt ns"
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(lcrtStr), debugTextHeight, lcrtStr, Color.white)
+            debugTextHeight += debugTextRenderer.getLineHeight()
+            DecimalFormat posFormat = new DecimalFormat("#.00");
+            String coordsStr = String.format("(x,y,z): %s,%s,%s",
+                    posFormat.format(game.player.position.x),
+                    posFormat.format(game.player.position.y),
+                    posFormat.format(game.player.position.z))
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(coordsStr), debugTextHeight, coordsStr)
+            debugTextHeight += debugTextRenderer.getLineHeight()
+            String chunk = String.format("Chunk (x,z): %s,%s",
+                    game.world.getChunkPosition(game.player.position.x),
+                    game.world.getChunkPosition(game.player.position.z))
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(chunk), debugTextHeight, chunk)
+            debugTextHeight += debugTextRenderer.getLineHeight()
+            String headingStr = String.format("(yaw,pitch): %s,%s",
+                    posFormat.format(game.player.rotation.yaw),
+                    posFormat.format(game.player.rotation.pitch))
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(headingStr), debugTextHeight, headingStr)
+            debugTextHeight += debugTextRenderer.getLineHeight()
+
+            Vec3i playerPosVec = new Vec3i(game.player.position.x as int, game.player.position.y as int, game.player.position.z as int)
+            IChunk playerChunk = game.world.getChunkAtPosition(playerPosVec)
+            if (playerChunk != null) {
+                String llStr = String.format("Light Level @ Feet: " + playerChunk.getSunlight(playerPosVec.x, playerPosVec.y, playerPosVec.z))
+                debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(llStr), debugTextHeight, llStr)
+                debugTextHeight += debugTextRenderer.getLineHeight()
+            }
+
+            String threadsStr = "Active threads: " + Thread.activeCount()
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
+
+            // Let the texture manager know that we've switched textures
+            // drawString binds its own texture and TextureManager still thinks we're on our last texture we used.
+            // This manually forces TextureManager to think we're on a different texture
+            game.textureManager.bindTexture(0)
         }
-
-        String threadsStr = "Active threads: " + Thread.activeCount()
-        debugTextRenderer.drawString(Display.getWidth()-debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
-
-        // Let the texture manager know that we've switched textures
-        // drawString binds its own texture and TextureManager still thinks we're on our last texture we used.
-        // This manually forces TextureManager to think we're on a different texture
-        game.textureManager.bindTexture(0)
     }
 
     @Override
@@ -141,10 +143,23 @@ class GameRenderer implements Renderer {
         sp.draw(0.5f, 50, 50)
         glEndList()
 
-        debugTextRenderer = new UnicodeFont(new Font(Font.MONOSPACED, Font.PLAIN, 16))
-        debugTextRenderer.effects.add(new ColorEffect(java.awt.Color.WHITE))
-        debugTextRenderer.addAsciiGlyphs()
-        debugTextRenderer.loadGlyphs()
+        // THIS IS SLOW!!!
+        new Thread() {
+            @Override
+            public void run() {
+                debugTextRenderer = new UnicodeFont(new Font(Font.MONOSPACED, Font.PLAIN, 16))
+                debugTextRenderer.effects.add(new ColorEffect(java.awt.Color.WHITE))
+                debugTextRenderer.addNeheGlyphs()
+                game.addToGLQueue(new Runnable() {
+                    @Override
+                    void run() {
+                        debugTextRenderer.loadGlyphs()
+                        fontRenderReady = true
+                    }
+                })
+            }
+        }.start()
+
 
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
             postProcessFbo = new FrameBuffer()

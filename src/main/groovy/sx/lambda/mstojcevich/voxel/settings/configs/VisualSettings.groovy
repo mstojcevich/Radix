@@ -17,7 +17,7 @@ class VisualSettings implements Serializable {
     private boolean fullscreen = false
     private int maxFPS = VoxelGame.DEBUG ? 10 : 0 //Save my battery life pls
     private int windowWidth = 640, windowHeight = 480
-    private boolean postProcess = false
+    private boolean postProcess = true
 
     public int getViewDistance() { viewDistance }
 

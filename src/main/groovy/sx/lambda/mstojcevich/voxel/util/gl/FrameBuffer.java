@@ -101,16 +101,16 @@ public class FrameBuffer {
         }
     }
 
-    public void drawTexture(TextureManager tm) {
+    public void drawTexture(TextureManager tm, int x, int y, int w, int h, int positionAttrib, int textureAttrib) {
         tm.bindTexture(texture);
 
         int indices = 6*4; // 4 x XYUV
         FloatBuffer vertexData = BufferUtils.createFloatBuffer(indices);
 
-        float[] bottomRight = new float[]{width, height, 1, 0};
-        float[] bottomLeft = new float[]{0, height, 0, 0};
-        float[] topLeft = new float[]{0, 0, 0, 1};
-        float[] topRight = new float[]{width, 0, 1, 1};
+        float[] bottomRight = new float[]{x+w, y+h, 1, 0};
+        float[] bottomLeft = new float[]{x, y+h, 0, 0};
+        float[] topLeft = new float[]{x, y, 0, 1};
+        float[] topRight = new float[]{x+w, y, 1, 1};
 
         vertexData.put(topLeft).put(bottomLeft).put(topRight);
         vertexData.put(bottomRight).put(topRight).put(bottomLeft);
@@ -123,17 +123,21 @@ public class FrameBuffer {
         } else {
             glBufferSubData(GL_ARRAY_BUFFER, 0, vertexData);
         }
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, POSITION_FLOAT_COUNT, GL_FLOAT, false, VERTEX_SIZE_BYTES, 0);
+        glEnableVertexAttribArray(positionAttrib);
+        glVertexAttribPointer(positionAttrib, POSITION_FLOAT_COUNT, GL_FLOAT, false, VERTEX_SIZE_BYTES, 0);
         int byteOffset = FLOAT_SIZE_BYTES*POSITION_FLOAT_COUNT;
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, TEXCOORD_FLOAT_COUNT, GL_FLOAT, false, VERTEX_SIZE_BYTES, byteOffset);
+        glEnableVertexAttribArray(textureAttrib);
+        glVertexAttribPointer(textureAttrib, TEXCOORD_FLOAT_COUNT, GL_FLOAT, false, VERTEX_SIZE_BYTES, byteOffset);
 
         glDrawArrays(GL_TRIANGLES, 0, indices);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
         firstTime = false;
+    }
+
+    public void drawTexture(TextureManager tm, int positionAttrib, int textureAttrib) {
+        drawTexture(tm, 0, 0, width, height, positionAttrib, textureAttrib);
     }
 
 }

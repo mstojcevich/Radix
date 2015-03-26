@@ -20,4 +20,12 @@ public class PostProcessShader extends ShaderProgram {
         setUniformf(animTimeLoc, ms);
     }
 
+    public int getPositionAttrib() {
+        return vCoordLoc;
+    }
+
+    public int getTexCoordAttrib() {
+        return fboTexCoordLoc;
+    }
+
 }

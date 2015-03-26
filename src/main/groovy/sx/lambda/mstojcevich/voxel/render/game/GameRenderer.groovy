@@ -67,7 +67,7 @@ class GameRenderer implements Renderer {
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
             game.enablePostProcessShader()
             game.postProcessShader.setAnimTime((int) (System.currentTimeMillis() % 100000))
-            postProcessFbo.drawTexture(VoxelGame.instance.textureManager)
+            postProcessFbo.drawTexture(VoxelGame.instance.textureManager, game.getPostProcessShader().getPositionAttrib(), game.getPostProcessShader().getTexCoordAttrib())
             game.enableDefaultShader()
         }
 

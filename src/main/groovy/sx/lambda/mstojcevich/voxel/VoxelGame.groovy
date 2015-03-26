@@ -15,6 +15,8 @@ import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
 import sx.lambda.mstojcevich.voxel.client.gui.GuiScreen
 import sx.lambda.mstojcevich.voxel.client.gui.screens.IngameHUD
 import sx.lambda.mstojcevich.voxel.client.gui.screens.MainMenu
+import sx.lambda.mstojcevich.voxel.client.gui.transition.SlideUpAnimation
+import sx.lambda.mstojcevich.voxel.client.gui.transition.TransitionAnimation
 import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketLeaving
 import sx.lambda.mstojcevich.voxel.render.Renderer
@@ -89,6 +91,8 @@ public class VoxelGame {
     private ShaderProgram defaultShader
     private PostProcessShader postProcessShader
     private GuiShader guiShader
+
+    private TransitionAnimation transitionAnimation
 
     private boolean remote
 
@@ -232,6 +236,13 @@ public class VoxelGame {
         synchronized (currentScreen) {
             enableGuiShader()
             currentScreen.render(true)
+            if(transitionAnimation != null) {
+                transitionAnimation.render()
+                if(transitionAnimation.isFinished()) {
+                    transitionAnimation.finish()
+                    transitionAnimation = null
+                }
+            }
             enableDefaultShader()
         }
 
@@ -461,6 +472,8 @@ public class VoxelGame {
                 setRenderer(gameRenderer)
                 player.init()
                 world.addEntity(player)
+                transitionAnimation = new SlideUpAnimation(currentScreen, 1000)
+                transitionAnimation.init()
                 setCurrentScreen(hud)
 
                 if(!remote) {

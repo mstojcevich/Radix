@@ -75,6 +75,9 @@ public class World implements IWorld {
 
     public void render() {
         if(!server) {
+            if(!chunksToRerender.isEmpty()) {
+                processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
+            }
             for(IChunk c : chunksToRerender) {
                 c.rerender();
                 chunksToRerender.remove(c);

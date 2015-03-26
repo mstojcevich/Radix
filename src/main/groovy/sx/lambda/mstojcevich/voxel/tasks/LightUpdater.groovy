@@ -24,10 +24,10 @@ class LightUpdater implements RepeatedTask {
     void run() {
         try {
             while (!game.isDone()) {
-                if (game.world != null) {
-                    game.world.processLightQueue()
-                }
-                sleep(100)
+//                if (game.world != null) {
+//                    game.world.processLightQueue()
+//                } Caused random dark spots. Investigation should be done later.
+                sleep(1000)
             }
         } catch (Exception e) {
             game.handleCriticalException(e)

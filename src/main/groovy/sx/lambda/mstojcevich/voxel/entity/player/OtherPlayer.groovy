@@ -3,6 +3,7 @@ package sx.lambda.mstojcevich.voxel.entity.player
 import groovy.transform.CompileStatic
 import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition
+import sx.lambda.mstojcevich.voxel.tasks.MovementHandler
 
 /**
  * Other player connected to the same server
@@ -18,6 +19,6 @@ class OtherPlayer extends Player {
     void onUpdate(){}
 
     @Override
-    void updateMovement(){}
+    void updateMovement(MovementHandler handler){}
 
 }

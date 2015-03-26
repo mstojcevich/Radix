@@ -2,6 +2,7 @@ package sx.lambda.mstojcevich.voxel.entity
 
 import groovy.transform.CompileStatic
 import sx.lambda.mstojcevich.voxel.block.Block
+import sx.lambda.mstojcevich.voxel.tasks.MovementHandler
 import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.util.gl.ObjModel
 import sx.lambda.mstojcevich.voxel.world.IWorld
@@ -33,11 +34,15 @@ public abstract class LivingEntity extends Entity implements Serializable {
 
     public boolean isOnGround() { this.onGround }
 
-    public void updateMovement(){
+    public void updateMovement(MovementHandler handler){
         if(this.onGround) {
             this.yVelocity = Math.max(this.yVelocity, 0)
         }
-        this.getPosition().offset(0, this.yVelocity, 0)
+        if(!handler.checkCollision(this, 0, yVelocity, 0)) {
+            this.getPosition().offset(0, this.yVelocity, 0)
+        } else {
+            yVelocity = 0
+        }
     }
 
     public void setYVelocity(float velocity) {

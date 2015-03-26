@@ -3,7 +3,9 @@ package sx.lambda.mstojcevich.voxel.tasks
 import groovy.transform.CompileStatic
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.block.Block
+import sx.lambda.mstojcevich.voxel.entity.Entity
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition
+import sx.lambda.mstojcevich.voxel.entity.LivingEntity
 import sx.lambda.mstojcevich.voxel.entity.player.Player
 import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.world.IWorld
@@ -56,7 +58,7 @@ class MovementHandler implements RepeatedTask {
                             deltaY = 0
                         }
 
-                        if (!checkCollision(deltaX, deltaY, deltaZ)) {
+                        if (!checkCollision(player, deltaX, deltaY, deltaZ)) {
                             player.getPosition().offset(deltaX, deltaY, deltaZ)
                         }
                     }
@@ -76,7 +78,7 @@ class MovementHandler implements RepeatedTask {
                             deltaY = 0
                         }
 
-                        if (!checkCollision(deltaX, deltaY, deltaZ)) {
+                        if (!checkCollision(player, deltaX, deltaY, deltaZ)) {
                             player.getPosition().offset(deltaX, deltaY, deltaZ)
                         }
                     }
@@ -88,7 +90,7 @@ class MovementHandler implements RepeatedTask {
                         deltaX = (float) (-Math.sin(Math.toRadians(yaw - 90)) * movementMultiplier)
                         deltaZ = (float) (Math.cos(Math.toRadians(yaw - 90)) * movementMultiplier)
 
-                        if (!checkCollision(deltaX, 0, deltaZ)) {
+                        if (!checkCollision(player, deltaX, 0, deltaZ)) {
                             player.getPosition().offset(deltaX, 0, deltaZ)
                         }
                     }
@@ -100,7 +102,7 @@ class MovementHandler implements RepeatedTask {
                         deltaX = (float) (-Math.sin(Math.toRadians(yaw + 90)) * movementMultiplier)
                         deltaZ = (float) (Math.cos(Math.toRadians(yaw + 90)) * movementMultiplier)
 
-                        if (!checkCollision(deltaX, 0, deltaZ)) {
+                        if (!checkCollision(player, deltaX, 0, deltaZ)) {
                             player.getPosition().offset(deltaX, 0, deltaZ)
                         }
                     }
@@ -129,7 +131,7 @@ class MovementHandler implements RepeatedTask {
                         } else {
                             player.setYVelocity(world.applyGravity(player.getYVelocity(), moveDiffMS));
                         }
-                        player.updateMovement();
+                        player.updateMovement(this);
                     }
 
                     if (!(player.position.equals(lastPosition))) {
@@ -145,16 +147,16 @@ class MovementHandler implements RepeatedTask {
         }
     }
 
-    private boolean checkCollision(float deltaX, float deltaY, float deltaZ) {
+    public boolean checkCollision(LivingEntity e, float deltaX, float deltaY, float deltaZ) {
         Vec3i newPosition = new Vec3i(
-                (int) Math.floor(game.getPlayer().getPosition().getX() + deltaX),
-                (int) Math.floor(game.getPlayer().getPosition().getY() - 0.1 + deltaY),
-                (int) Math.floor(game.getPlayer().getPosition().getZ() + deltaZ)
+                (int) Math.floor(e.getPosition().getX() + deltaX),
+                (int) Math.floor(e.getPosition().getY() - 0.1 + deltaY),
+                (int) Math.floor(e.getPosition().getZ() + deltaZ)
         );
         Vec3i newPosition2 = new Vec3i(
-                (int) Math.floor(game.getPlayer().getPosition().getX() + deltaX),
-                (int) Math.floor(game.getPlayer().getPosition().getY() + game.getPlayer().getHeight() - 0.1 + deltaY),
-                (int) Math.floor(game.getPlayer().getPosition().getZ() + deltaZ)
+                (int) Math.floor(e.getPosition().getX() + deltaX),
+                (int) Math.floor(e.getPosition().getY() + e.getHeight() - 0.1 + deltaY),
+                (int) Math.floor(e.getPosition().getZ() + deltaZ)
         );
         IChunk newChunk = game.getWorld().getChunkAtPosition(newPosition);
         IChunk newChunk2 = game.getWorld().getChunkAtPosition(newPosition2);

@@ -82,7 +82,7 @@ class GameRenderer implements Renderer {
             debugTextHeight += debugTextRenderer.getLineHeight()
             int acrt = 0
             if (game.numChunkRenders > 0) {
-                acrt = (int) (game.numChunkRenders / game.numChunkRenders)
+                acrt = (int) (game.chunkRenderTimes / game.numChunkRenders)
             }
             String lcrtStr = "AWRT: $acrt ns"
             debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(lcrtStr), debugTextHeight, lcrtStr, Color.white)
@@ -105,7 +105,7 @@ class GameRenderer implements Renderer {
             debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(headingStr), debugTextHeight, headingStr)
             debugTextHeight += debugTextRenderer.getLineHeight()
 
-            Vec3i playerPosVec = new Vec3i(game.player.position.x as int, game.player.position.y as int, game.player.position.z as int)
+            Vec3i playerPosVec = new Vec3i(Math.floor(game.player.position.x) as int, Math.floor(game.player.position.y) as int, Math.floor(game.player.position.z) as int)
             IChunk playerChunk = game.world.getChunkAtPosition(playerPosVec)
             if (playerChunk != null) {
                 String llStr = String.format("Light Level @ Feet: " + playerChunk.getSunlight(playerPosVec.x, playerPosVec.y, playerPosVec.z))

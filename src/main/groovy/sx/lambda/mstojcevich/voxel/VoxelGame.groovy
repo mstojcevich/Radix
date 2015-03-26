@@ -457,7 +457,24 @@ public class VoxelGame {
     }
 
     public void exitWorld() {
-        // TODO implement
+
+        addToGLQueue(new Runnable() {
+            @Override
+            void run() {
+                setCurrentScreen(mainMenu)
+                setRenderer(null)
+                world.cleanup()
+                if(remote) {
+                    serverChanCtx.writeAndFlush(new PacketLeaving("Leaving"))
+                    serverChanCtx.disconnect()
+
+                }
+                world = null
+                remote = false
+                player = null
+            }
+        })
+
     }
 
     private void enterWorld(IWorld world, boolean remote) {
@@ -474,7 +491,6 @@ public class VoxelGame {
                 transitionAnimation = new SlideUpAnimation(currentScreen, 1000)
                 transitionAnimation.init()
                 setCurrentScreen(hud)
-
 
                 if(!remote) {
                     world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance())

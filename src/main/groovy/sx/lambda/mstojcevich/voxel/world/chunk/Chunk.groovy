@@ -51,6 +51,8 @@ public class Chunk implements IChunk {
     private transient boolean sunlightChanging
     private transient boolean sunlightChanged
 
+    private boolean setup, cleanedUp
+
     /**
      * Map of light levels (integers 0-16) to brightness multipliers
      */
@@ -109,6 +111,7 @@ public class Chunk implements IChunk {
 
     @Override
     public void rerender() {
+        if(cleanedUp)return;
         if(this.parentWorld == null) {
             if(VoxelGame.instance != null) { // We're a client
                 this.parentWorld = VoxelGame.instance.world
@@ -131,6 +134,8 @@ public class Chunk implements IChunk {
             glEnableClientState(GL_VERTEX_ARRAY)
             glEnableClientState(GL_TEXTURE_COORD_ARRAY)
             glEnableClientState(GL_COLOR_ARRAY)
+
+            setup = true
         }
 
         if(sunlightChanged) {
@@ -172,6 +177,7 @@ public class Chunk implements IChunk {
 
     @Override
     public void render() {
+        if(cleanedUp)return;
         if(sunlightChanged && !sunlightChanging) {
             rerender()
         }
@@ -209,6 +215,7 @@ public class Chunk implements IChunk {
     }
 
     public void renderWater() {
+        if(cleanedUp)return;
         if(liquidVboVertexHandle > 0) {
             VoxelGame.instance.shaderManager.setChunkOffset(startPosition.x, startPosition.y, startPosition.z)
 
@@ -362,24 +369,6 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    void unload() {
-        VoxelGame.getInstance().addToGLQueue(new Runnable() {
-            @Override
-            public void run() {
-                GL15.glDeleteBuffers(vboVertexHandle)
-                GL15.glDeleteBuffers(vboColorHandle)
-                GL15.glDeleteBuffers(vboNormalHandle)
-                GL15.glDeleteBuffers(vboTextureHandle)
-
-                GL15.glDeleteBuffers(liquidVboVertexHandle)
-                GL15.glDeleteBuffers(liquidVboColorHandle)
-                GL15.glDeleteBuffers(liquidVboNormalHandle)
-                GL15.glDeleteBuffers(liquidVboTextureHandle)
-            }
-        })
-    }
-
-    @Override
     public Vec3i getStartPosition() {
         this.startPosition
     }
@@ -497,5 +486,20 @@ public class Chunk implements IChunk {
     @Override
     IWorld getWorld() {
         return this.parentWorld
+    }
+
+    @Override
+    void cleanup() {
+        if(setup) {
+            GL15.glDeleteBuffers(vboVertexHandle)
+            GL15.glDeleteBuffers(vboTextureHandle)
+            GL15.glDeleteBuffers(vboColorHandle)
+            GL15.glDeleteBuffers(vboNormalHandle)
+            GL15.glDeleteBuffers(liquidVboVertexHandle)
+            GL15.glDeleteBuffers(liquidVboTextureHandle)
+            GL15.glDeleteBuffers(liquidVboColorHandle)
+            GL15.glDeleteBuffers(liquidVboNormalHandle)
+        }
+        cleanedUp = true
     }
 }

@@ -79,6 +79,7 @@ public abstract class VboBufferedGuiScreen implements GuiScreen {
         glDeleteBuffers(backgroundVertexVbo);
         initialized = false;
         renderedBefore = false;
+        renderedBgBefore = false;
     }
 
     protected abstract void rerender();

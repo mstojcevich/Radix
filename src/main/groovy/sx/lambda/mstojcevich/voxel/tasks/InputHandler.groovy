@@ -58,7 +58,9 @@ class InputHandler implements RepeatedTask {
                                 }
                                 break;
                             case KEY_ESCAPE:
-                                game.startShutdown()
+                                if(game.getWorld() != null) {
+                                    game.exitWorld()
+                                }
                                 break
                             default:
                                 break;

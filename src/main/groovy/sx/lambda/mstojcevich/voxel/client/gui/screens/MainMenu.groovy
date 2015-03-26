@@ -68,10 +68,10 @@ public class MainMenu extends VboBufferedGuiScreen {
             public void run() {
                 buttonFont = new UnicodeFont(new Font(Font.SANS_SERIF, Font.BOLD, 16))
                 buttonFont.effects.add(new ColorEffect(new Color(1, 1, 1, 0.7f)))
-                buttonFont.addNeheGlyphs()
                 VoxelGame.instance.addToGLQueue(new Runnable() {
                     @Override
                     void run() {
+                        buttonFont.addNeheGlyphs()
                         buttonFont.loadGlyphs()
                         fontReady = true
                     }

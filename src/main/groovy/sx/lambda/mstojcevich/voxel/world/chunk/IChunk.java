@@ -25,8 +25,6 @@ public interface IChunk extends Serializable {
 
     void addBlock(Block block, Vec3i position);
 
-    void unload();
-
     Vec3i getStartPosition();
 
     float getHighestPoint();
@@ -45,5 +43,7 @@ public interface IChunk extends Serializable {
     public void finishChangingSunlight();
 
     public IWorld getWorld();
+
+    public void cleanup();
 
 }

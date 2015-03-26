@@ -62,4 +62,6 @@ public interface IWorld {
     void processLightQueue();
 
     float getLightLevel(Vec3i pos);
+
+    void cleanup();
 }

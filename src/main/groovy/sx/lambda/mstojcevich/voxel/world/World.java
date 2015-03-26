@@ -229,16 +229,22 @@ public class World implements IWorld {
         int playerChunkX = getChunkPosition(playerPosition.getX());
         int playerChunkZ = getChunkPosition(playerPosition.getZ());
 
-        for(Map.Entry<Vec3i, IChunk> e : this.chunkMap.entrySet()) {
+        for(final Map.Entry<Vec3i, IChunk> e : this.chunkMap.entrySet()) {
             Vec3i b = e.getKey();
             if(Math.abs(b.x - playerChunkX) > range
                     || Math.abs(b.z - playerChunkZ) > range) {
                 this.chunkList.remove(e.getValue());
-                this.chunkMap.get(b).unload();
+                VoxelGame.getInstance().addToGLQueue(new Runnable() {
+                    @Override
+                    public void run() {
+                        e.getValue().cleanup();
+                    }
+                });
                 this.chunkMap.remove(b);
                 if(remote) {
                     VoxelGame.getInstance().getServerChanCtx().writeAndFlush(new PacketUnloadChunk(b));
                 }
+
             }
         }
     }
@@ -554,6 +560,13 @@ public class World implements IWorld {
             return 1;
         }
         return chunk.getLightLevel(pos.x, pos.y, pos.z);
+    }
+
+    @Override
+    public void cleanup() {
+        for(IChunk c : chunkList) {
+            c.cleanup();
+        }
     }
 
 }

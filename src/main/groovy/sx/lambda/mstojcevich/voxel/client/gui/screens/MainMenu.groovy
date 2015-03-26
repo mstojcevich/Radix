@@ -29,6 +29,8 @@ public class MainMenu extends VboBufferedGuiScreen {
 
     private UnicodeFont buttonFont
 
+    private boolean fontReady
+
     public MainMenu() {
         buttons = [
                 new MainMenuButton(this, "Singleplayer", enterSingleplayer, TARGET_BUTTON_SIZE),
@@ -61,10 +63,21 @@ public class MainMenu extends VboBufferedGuiScreen {
 
     @Override
     public void init() {
-        buttonFont = new UnicodeFont(new Font(Font.SANS_SERIF, Font.BOLD, 16))
-        buttonFont.effects.add(new ColorEffect(new Color(1, 1, 1, 0.7f)))
-        buttonFont.addAsciiGlyphs()
-        buttonFont.loadGlyphs()
+        new Thread("Main Menu Font Loading") {
+            @Override
+            public void run() {
+                buttonFont = new UnicodeFont(new Font(Font.SANS_SERIF, Font.BOLD, 16))
+                buttonFont.effects.add(new ColorEffect(new Color(1, 1, 1, 0.7f)))
+                buttonFont.addNeheGlyphs()
+                VoxelGame.instance.addToGLQueue(new Runnable() {
+                    @Override
+                    void run() {
+                        buttonFont.loadGlyphs()
+                        fontReady = true
+                    }
+                })
+            }
+        }.start()
         resize()
 
         super.init()
@@ -92,8 +105,10 @@ public class MainMenu extends VboBufferedGuiScreen {
 
         VoxelGame.instance.enableDefaultShader()
         VoxelGame.instance.shaderManager.enableTexturing()
-        for(MainMenuButton b : buttons) {
-            b.drawLabel()
+        if(fontReady) {
+            for (MainMenuButton b : buttons) {
+                b.drawLabel()
+            }
         }
         VoxelGame.instance.shaderManager.disableTexturing()
         VoxelGame.instance.enableGuiShader()
@@ -122,7 +137,6 @@ public class MainMenu extends VboBufferedGuiScreen {
         private final Closure onClick
         private final MainMenu parent
         private final Rectangle bounds
-        private float textStartX, textStartY
 
         MainMenuButton(MainMenu parent, String title, Closure onClick, int size) {
             this.parent = parent
@@ -141,14 +155,10 @@ public class MainMenu extends VboBufferedGuiScreen {
 
         void setSize(int size) {
             this.bounds.setSize(size, size)
-            textStartX = bounds.x+(bounds.width/2.0f - buttonFont.getWidth(title)/2.0f) as float
-            textStartY = bounds.y+(bounds.height/2.0f - buttonFont.getHeight(title)/2.0f) as float
         }
 
         void setPosition(int x, int y) {
             this.bounds.setLocation(x, y)
-            textStartX = bounds.x+(bounds.width/2.0f - buttonFont.getWidth(title)/2.0f) as float
-            textStartY = bounds.y+(bounds.height/2.0f - buttonFont.getHeight(title)/2.0f) as float
         }
 
         private void render(FloatBuffer vertexBuffer) {
@@ -166,6 +176,8 @@ public class MainMenu extends VboBufferedGuiScreen {
         }
 
         void drawLabel() {
+            int textStartX = bounds.x+(bounds.width/2.0f - buttonFont.getWidth(title)/2.0f) as int
+            int textStartY = bounds.y+(bounds.height/2.0f - buttonFont.getHeight(title)/2.0f) as int
             buttonFont.drawString(textStartX, textStartY, title)
         }
     }

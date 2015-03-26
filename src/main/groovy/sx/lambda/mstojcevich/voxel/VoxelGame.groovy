@@ -3,7 +3,6 @@ package sx.lambda.mstojcevich.voxel
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
-import org.lwjgl.BufferUtils
 import org.lwjgl.LWJGLException
 import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.Display

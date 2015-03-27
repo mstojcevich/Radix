@@ -61,16 +61,20 @@ public class MainMenu extends VboBufferedGuiScreen {
 
     @Override
     public void init() {
-        new Thread("Main Menu Font Loading") {
-            @Override
-            public void run() {
-                buttonFont = new FontRenderer(new Font(Font.SANS_SERIF, Font.BOLD, 16), true)
-                fontReady = true
-            }
-        }.start()
-        resize()
+        if(!initialized) {
+            new Thread("Main Menu Font Loading") {
+                @Override
+                public void run() {
+                    buttonFont = new FontRenderer(new Font(Font.SANS_SERIF, Font.BOLD, 16), true)
+                    fontReady = true
+                }
+            }.start()
+            resize()
 
-        super.init()
+            super.init()
+
+            initialized = true
+        }
     }
 
     @Override

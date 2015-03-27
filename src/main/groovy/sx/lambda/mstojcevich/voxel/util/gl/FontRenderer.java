@@ -1,10 +1,6 @@
 package sx.lambda.mstojcevich.voxel.util.gl;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
@@ -12,9 +8,9 @@ import java.awt.image.DataBufferInt;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.awt.GraphicsEnvironment;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -29,7 +25,7 @@ public class FontRenderer {
             ALIGN_RIGHT = 1,
             ALIGN_CENTER = 2;
     /** Array that holds necessary information about the font characters */
-    private IntObject[] charArray = new IntObject[256];
+    private IntObject[] charArray = new IntObject[128];
 
     /** Map of user defined font characters (Character <-> IntObject) */
     private Map customChars = new HashMap();
@@ -106,50 +102,10 @@ public class FontRenderer {
             correctR = 0;
         }
     }
-    private BufferedImage getFontImage(char ch) {
-        // Create a temporary image to extract the character's size
-        BufferedImage tempfontImage = new BufferedImage(1, 1,
-                BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = (Graphics2D) tempfontImage.getGraphics();
-        if (antiAlias == true) {
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
-        }
-        g.setFont(font);
-        fontMetrics = g.getFontMetrics();
-        int charwidth = fontMetrics.charWidth(ch)+8;
-
-        if (charwidth <= 0) {
-            charwidth = 7;
-        }
-        int charheight = fontMetrics.getHeight()+3;
-        if (charheight <= 0) {
-            charheight = fontSize;
-        }
-
-        // Create another image holding the character we are creating
-        BufferedImage fontImage;
-        fontImage = new BufferedImage(charwidth, charheight,
-                BufferedImage.TYPE_INT_ARGB);
-        Graphics2D gt = (Graphics2D) fontImage.getGraphics();
-        if (antiAlias == true) {
-            gt.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
-        }
-        gt.setFont(font);
-
-        gt.setColor(Color.WHITE);
-        int charx = 3;
-        int chary = 1;
-        gt.drawString(String.valueOf(ch), (charx), (chary)
-                + fontMetrics.getAscent());
-
-        return fontImage;
-
-    }
 
     private void createSet( char[] customCharsArray ) {
-        // If there are custom chars then I expand the font texture twice       
+        System.out.println("Font creating");
+        // If there are custom chars then I expand the font texture twice
         if  (customCharsArray != null && customCharsArray.length > 0) {
             textureWidth *= 2;
         }
@@ -165,23 +121,37 @@ public class FontRenderer {
             g.setColor(new Color(0,0,0,1));
             g.fillRect(0,0,textureWidth,textureHeight);
 
+            if(antiAlias) {
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON);
+            }
+            g.setFont(font);
+            g.setColor(Color.WHITE);
+
+            fontMetrics = g.getFontMetrics();
+
             int rowHeight = 0;
             int positionX = 0;
             int positionY = 0;
 
             int customCharsLength = ( customCharsArray != null ) ? customCharsArray.length : 0;
-
             for (int i = 32; i < 128 + customCharsLength; i++) {
-
-                // get 0-255 characters and then custom characters
+                // get 0-128 characters and then custom characters
                 char ch = ( i < 128 ) ? (char) i : customCharsArray[i-128];
 
-                BufferedImage fontImage = getFontImage(ch);
+                int charwidth = fontMetrics.charWidth(ch)+8;
+                if (charwidth <= 0) {
+                    charwidth = 7;
+                }
+                int charheight = fontMetrics.getHeight()+3;
+                if (charheight <= 0) {
+                    charheight = fontSize;
+                }
 
                 IntObject newIntObject = new IntObject();
 
-                newIntObject.width = fontImage.getWidth();
-                newIntObject.height = fontImage.getHeight();
+                newIntObject.width = charwidth;
+                newIntObject.height = charheight;
 
                 if (positionX + newIntObject.width >= textureWidth) {
                     positionX = 0;
@@ -201,23 +171,21 @@ public class FontRenderer {
                     rowHeight = newIntObject.height;
                 }
 
-                // Draw it here
-                g.drawImage(fontImage, positionX, positionY, null);
+                g.drawString(String.valueOf(ch), positionX, positionY + fontMetrics.getAscent());
 
                 positionX += newIntObject.width;
 
-                if( i < 256 ) { // standard characters
+                if( i < 128 ) { // standard characters
                     charArray[i] = newIntObject;
                 } else { // custom characters
                     customChars.put( new Character( ch ), newIntObject );
                 }
-
-                fontImage = null;
             }
         } catch (Exception e) {
             System.err.println("Failed to create font.");
             e.printStackTrace();
         }
+        System.out.println("Font ready");
     }
 
     private void drawQuad(int drawX, int drawY, int drawX2, int drawY2,
@@ -241,7 +209,7 @@ public class FontRenderer {
         int currentChar = 0;
         for (int i = 0; i < whatchars.length(); i++) {
             currentChar = whatchars.charAt(i);
-            if (currentChar < 256) {
+            if (currentChar < 128) {
                 intObject = charArray[currentChar];
             } else {
                 intObject = (IntObject)customChars.get( new Character( (char) currentChar ) );
@@ -313,7 +281,7 @@ public class FontRenderer {
                 for (int l = startIndex; l <= endIndex; l++) {
                     charCurrent = whatchars.charAt(l);
                     if (charCurrent == '\n') break;
-                    if (charCurrent < 256) {
+                    if (charCurrent < 128) {
                         intObject = charArray[charCurrent];
                     } else {
                         intObject = (IntObject)customChars.get( new Character( (char) charCurrent ) );

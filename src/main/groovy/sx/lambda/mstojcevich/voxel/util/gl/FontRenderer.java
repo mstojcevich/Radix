@@ -104,7 +104,6 @@ public class FontRenderer {
     }
 
     private void createSet( char[] customCharsArray ) {
-        System.out.println("Font creating");
         // If there are custom chars then I expand the font texture twice
         if  (customCharsArray != null && customCharsArray.length > 0) {
             textureWidth *= 2;
@@ -185,7 +184,6 @@ public class FontRenderer {
             System.err.println("Failed to create font.");
             e.printStackTrace();
         }
-        System.out.println("Font ready");
     }
 
     private void drawQuad(int drawX, int drawY, int drawX2, int drawY2,

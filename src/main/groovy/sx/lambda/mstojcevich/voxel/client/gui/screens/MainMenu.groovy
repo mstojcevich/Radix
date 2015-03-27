@@ -65,7 +65,8 @@ public class MainMenu extends VboBufferedGuiScreen {
             new Thread("Main Menu Font Loading") {
                 @Override
                 public void run() {
-                    buttonFont = new FontRenderer(new Font(Font.SANS_SERIF, Font.BOLD, 16), true)
+                    InputStream is = MainMenu.class.getResourceAsStream("/fonts/LiberationSans-Regular.ttf")
+                    buttonFont = new FontRenderer(Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(16f), true)
                     fontReady = true
                 }
             }.start()

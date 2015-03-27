@@ -153,7 +153,7 @@ class GameRenderer implements Renderer {
             @Override
             public void run() {
                 InputStream is = GameRenderer.class.getResourceAsStream("/fonts/LiberationMono-Bold.ttf")
-                debugTextRenderer = new FontRenderer(Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(16f), true)
+                debugTextRenderer = new FontRenderer(Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(12f), true)
                 fontRenderReady = true
             }
         }.start()

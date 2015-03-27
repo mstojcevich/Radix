@@ -15,6 +15,7 @@ import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.entity.Entity
 import sx.lambda.mstojcevich.voxel.util.Frustum
 import sx.lambda.mstojcevich.voxel.util.Vec3i
+import sx.lambda.mstojcevich.voxel.util.gl.FontRenderer
 import sx.lambda.mstojcevich.voxel.util.gl.FrameBuffer
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk
 
@@ -29,7 +30,7 @@ class GameRenderer implements Renderer {
     private final VoxelGame game
     private int sphereList = -1
     private FrameBuffer postProcessFbo
-    private UnicodeFont debugTextRenderer
+    private FontRenderer debugTextRenderer
 
     private boolean initted, fontRenderReady
 
@@ -68,8 +69,11 @@ class GameRenderer implements Renderer {
             game.enablePostProcessShader()
             game.postProcessShader.setAnimTime((int) (System.currentTimeMillis() % 100000))
             postProcessFbo.drawTexture(VoxelGame.instance.textureManager, game.getPostProcessShader().getPositionAttrib(), game.getPostProcessShader().getTexCoordAttrib())
-            game.enableDefaultShader()
         }
+
+        game.enableGuiShader()
+        game.getGuiShader().disableColors()
+        game.getGuiShader().enableTexturing()
 
         if(fontRenderReady) {
             int debugTextHeight = 0
@@ -78,14 +82,14 @@ class GameRenderer implements Renderer {
             debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(glInfoStr), debugTextHeight, glInfoStr)
             debugTextHeight += debugTextRenderer.getLineHeight()
             String fpsStr = "FPS: $game.fps"
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr, Color.white)
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr)
             debugTextHeight += debugTextRenderer.getLineHeight()
             int acrt = 0
             if (game.numChunkRenders > 0) {
                 acrt = (int) (game.chunkRenderTimes / game.numChunkRenders)
             }
             String lcrtStr = "AWRT: $acrt ns"
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(lcrtStr), debugTextHeight, lcrtStr, Color.white)
+            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(lcrtStr), debugTextHeight, lcrtStr)
             debugTextHeight += debugTextRenderer.getLineHeight()
             DecimalFormat posFormat = new DecimalFormat("#.00");
             String coordsStr = String.format("(x,y,z): %s,%s,%s",
@@ -143,20 +147,11 @@ class GameRenderer implements Renderer {
         sp.draw(0.5f, 50, 50)
         glEndList()
 
-        // THIS IS SLOW!!!
         new Thread() {
             @Override
             public void run() {
-                debugTextRenderer = new UnicodeFont(new Font(Font.MONOSPACED, Font.PLAIN, 16))
-                debugTextRenderer.effects.add(new ColorEffect(java.awt.Color.WHITE))
-                debugTextRenderer.addNeheGlyphs()
-                game.addToGLQueue(new Runnable() {
-                    @Override
-                    void run() {
-                        debugTextRenderer.loadGlyphs()
-                        fontRenderReady = true
-                    }
-                })
+                debugTextRenderer = new FontRenderer(new Font(Font.MONOSPACED, Font.BOLD, 16), true)
+                fontRenderReady = true
             }
         }.start()
 

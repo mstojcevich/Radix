@@ -5,13 +5,11 @@ import org.lwjgl.BufferUtils
 import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.GL11
-import org.newdawn.slick.UnicodeFont
-import org.newdawn.slick.font.effects.ColorEffect
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.client.gui.VboBufferedGuiScreen
+import sx.lambda.mstojcevich.voxel.util.gl.FontRenderer
 import sx.lambda.mstojcevich.voxel.world.World
 
-import java.awt.Color
 import java.awt.Font
 import java.awt.Rectangle
 import java.nio.FloatBuffer
@@ -27,7 +25,7 @@ public class MainMenu extends VboBufferedGuiScreen {
 
     private final MainMenuButton[] buttons
 
-    private UnicodeFont buttonFont
+    private FontRenderer buttonFont
 
     private boolean fontReady
 
@@ -66,16 +64,8 @@ public class MainMenu extends VboBufferedGuiScreen {
         new Thread("Main Menu Font Loading") {
             @Override
             public void run() {
-                buttonFont = new UnicodeFont(new Font(Font.SANS_SERIF, Font.BOLD, 16))
-                buttonFont.effects.add(new ColorEffect(new Color(1, 1, 1, 0.7f)))
-                VoxelGame.instance.addToGLQueue(new Runnable() {
-                    @Override
-                    void run() {
-                        buttonFont.addNeheGlyphs()
-                        buttonFont.loadGlyphs()
-                        fontReady = true
-                    }
-                })
+                buttonFont = new FontRenderer(new Font(Font.SANS_SERIF, Font.BOLD, 16), true)
+                fontReady = true
             }
         }.start()
         resize()
@@ -96,26 +86,24 @@ public class MainMenu extends VboBufferedGuiScreen {
 
     @Override
     public void render(boolean ingame) {
-        VoxelGame.instance.shaderManager.disableTexturing()
         GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY)
         GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY)
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
 
         super.render(ingame)
 
-        VoxelGame.instance.enableDefaultShader()
-        VoxelGame.instance.shaderManager.enableTexturing()
+        VoxelGame.instance.guiShader.enableTexturing()
+        VoxelGame.instance.guiShader.disableColors()
         if(fontReady) {
             for (MainMenuButton b : buttons) {
                 b.drawLabel()
             }
         }
-        VoxelGame.instance.shaderManager.disableTexturing()
-        VoxelGame.instance.enableGuiShader()
+        VoxelGame.instance.guiShader.enableColors()
+        VoxelGame.instance.guiShader.disableTexturing()
 
         GL11.glEnableClientState(GL11.GL_NORMAL_ARRAY)
         GL11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY)
-        VoxelGame.instance.shaderManager.enableTexturing()
     }
 
     @Override
@@ -178,7 +166,7 @@ public class MainMenu extends VboBufferedGuiScreen {
         void drawLabel() {
             int textStartX = bounds.x+(bounds.width/2.0f - buttonFont.getWidth(title)/2.0f) as int
             int textStartY = bounds.y+(bounds.height/2.0f - buttonFont.getHeight(title)/2.0f) as int
-            buttonFont.drawString(textStartX, textStartY, title)
+            buttonFont.drawString(textStartX, textStartY, title, 1, 1)
         }
     }
 }

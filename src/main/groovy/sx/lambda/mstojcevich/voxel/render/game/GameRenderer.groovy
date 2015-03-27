@@ -79,46 +79,46 @@ class GameRenderer implements Renderer {
             int debugTextHeight = 0
 
             String glInfoStr = "GL Info: " + glGetString(GL_RENDERER) + " (GL " + glGetString(GL_VERSION) + ")"
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(glInfoStr), debugTextHeight, glInfoStr)
+            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, glInfoStr, 1, 1, FontRenderer.ALIGN_RIGHT)
             debugTextHeight += debugTextRenderer.getLineHeight()
             String fpsStr = "FPS: $game.fps"
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(fpsStr), debugTextHeight, fpsStr)
+            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, fpsStr, 1, 1, FontRenderer.ALIGN_RIGHT)
             debugTextHeight += debugTextRenderer.getLineHeight()
             int acrt = 0
             if (game.numChunkRenders > 0) {
                 acrt = (int) (game.chunkRenderTimes / game.numChunkRenders)
             }
             String lcrtStr = "AWRT: $acrt ns"
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(lcrtStr), debugTextHeight, lcrtStr)
+            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, lcrtStr, 1, 1, FontRenderer.ALIGN_RIGHT)
             debugTextHeight += debugTextRenderer.getLineHeight()
             DecimalFormat posFormat = new DecimalFormat("#.00");
             String coordsStr = String.format("(x,y,z): %s,%s,%s",
                     posFormat.format(game.player.position.x),
                     posFormat.format(game.player.position.y),
                     posFormat.format(game.player.position.z))
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(coordsStr), debugTextHeight, coordsStr)
+            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, coordsStr, 1, 1, FontRenderer.ALIGN_RIGHT)
             debugTextHeight += debugTextRenderer.getLineHeight()
             String chunk = String.format("Chunk (x,z): %s,%s",
                     game.world.getChunkPosition(game.player.position.x),
                     game.world.getChunkPosition(game.player.position.z))
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(chunk), debugTextHeight, chunk)
+            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, chunk, 1, 1, FontRenderer.ALIGN_RIGHT)
             debugTextHeight += debugTextRenderer.getLineHeight()
             String headingStr = String.format("(yaw,pitch): %s,%s",
                     posFormat.format(game.player.rotation.yaw),
                     posFormat.format(game.player.rotation.pitch))
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(headingStr), debugTextHeight, headingStr)
+            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, headingStr, 1, 1, FontRenderer.ALIGN_RIGHT)
             debugTextHeight += debugTextRenderer.getLineHeight()
 
             Vec3i playerPosVec = new Vec3i(Math.floor(game.player.position.x) as int, Math.floor(game.player.position.y) as int, Math.floor(game.player.position.z) as int)
             IChunk playerChunk = game.world.getChunkAtPosition(playerPosVec)
             if (playerChunk != null) {
                 String llStr = String.format("Light Level @ Feet: " + playerChunk.getSunlight(playerPosVec.x, playerPosVec.y, playerPosVec.z))
-                debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(llStr), debugTextHeight, llStr)
+                debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, llStr, 1, 1, FontRenderer.ALIGN_RIGHT)
                 debugTextHeight += debugTextRenderer.getLineHeight()
             }
 
             String threadsStr = "Active threads: " + Thread.activeCount()
-            debugTextRenderer.drawString(Display.getWidth() - debugTextRenderer.getWidth(threadsStr), debugTextHeight, threadsStr)
+            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, threadsStr, 1, 1, FontRenderer.ALIGN_RIGHT)
 
             // Let the texture manager know that we've switched textures
             // drawString binds its own texture and TextureManager still thinks we're on our last texture we used.

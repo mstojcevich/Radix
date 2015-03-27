@@ -129,7 +129,9 @@ class GameRenderer implements Renderer {
 
     @Override
     void cleanup() {
-        postProcessFbo.cleanup()
+        if(postProcessFbo != null) {
+            postProcessFbo.cleanup()
+        }
         debugTextRenderer.destroy()
         glDeleteLists(sphereList, 0)
 

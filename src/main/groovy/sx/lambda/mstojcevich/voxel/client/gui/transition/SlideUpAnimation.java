@@ -37,7 +37,6 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
         GL11.glOrtho(0, Display.getWidth(), Display.getHeight(), 0, -1, 1);
         GL11.glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
-        glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_BLEND);
         currentScreen.render(false);

@@ -2,12 +2,11 @@ package sx.lambda.mstojcevich.voxel.client.gui.screens
 
 import groovy.transform.CompileStatic
 import org.lwjgl.opengl.Display
-import org.newdawn.slick.opengl.Texture
-import org.newdawn.slick.opengl.TextureLoader
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher
+import sx.lambda.mstojcevich.voxel.util.gl.TextureLoader
 
 import static org.lwjgl.opengl.GL11.*
 import sx.lambda.mstojcevich.voxel.client.gui.BufferedGUIScreen
@@ -17,7 +16,7 @@ class IngameHUD extends BufferedGUIScreen {
 
     private SpriteBatcher guiBatcher
     private SpriteBatcher blockBatcher
-    private Texture icons
+    private int icons
 
     private final float TEXTURE_PERCENT = 0.05f
 
@@ -50,7 +49,7 @@ class IngameHUD extends BufferedGUIScreen {
 
         VoxelGame.instance.player.itemInHand.renderer.render2d(blockBatcher, 0, 0, 50);
 
-        blockBatcher.render(NormalBlockRenderer.blockMap.textureID)
+        blockBatcher.render(NormalBlockRenderer.blockMap)
 
         // Draw crosshair (after guiBatcher render because it needs to render with its own blending mode
         float centerX = Display.getWidth()/2f as float
@@ -59,7 +58,7 @@ class IngameHUD extends BufferedGUIScreen {
         float halfCrosshairSize = crosshairSize/2f as float
         glBlendFunc(775, 769)
         this.drawTexture(0, (int)Math.round(centerX-halfCrosshairSize), (int)Math.round(centerY-halfCrosshairSize), (int)Math.round(centerX+halfCrosshairSize), (int)Math.round(centerY+halfCrosshairSize))
-        guiBatcher.render(icons.getTextureID())
+        guiBatcher.render(icons)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glDisable(GL_BLEND)
     }
@@ -70,8 +69,7 @@ class IngameHUD extends BufferedGUIScreen {
     @Override
     public void init() {
         super.init()
-        this.icons = TextureLoader.getTexture("PNG", IngameHUD.class.getResourceAsStream("/textures/gui/icons.png"))
-        this.icons.setTextureFilter(GL_NEAREST)
+        this.icons = TextureLoader.loadTexture(IngameHUD.class.getResourceAsStream("/textures/gui/icons.png"), VoxelGame.instance.textureManager)
         this.guiBatcher = new SpriteBatcher(VoxelGame.instance.textureManager)
         this.guiBatcher.init()
         this.blockBatcher = new SpriteBatcher(VoxelGame.instance.textureManager)

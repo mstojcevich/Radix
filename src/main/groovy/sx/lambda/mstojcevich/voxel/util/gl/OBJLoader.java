@@ -90,8 +90,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
-import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
+import sx.lambda.mstojcevich.voxel.VoxelGame;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -324,9 +323,9 @@ class OBJLoader {
                         parseMaterial.diffuseColour[1] = Float.valueOf(rgb[2]);
                         parseMaterial.diffuseColour[2] = Float.valueOf(rgb[3]);
                     } else if (materialLine.startsWith("map_Kd")) {
-                        parseMaterial.texture = TextureLoader.getTexture("PNG",
+                        parseMaterial.texture = TextureLoader.loadTexture(
                                 new FileInputStream(new File(f.getParentFile().getAbsolutePath() + "/" + materialLine
-                                        .split(" ")[1])));
+                                        .split(" ")[1])), VoxelGame.getInstance().getTextureManager());
                     } else {
                         System.err.println("[MTL] Unknown Line: " + materialLine);
                     }
@@ -460,7 +459,7 @@ class OBJLoader {
             public float[] ambientColour = {0.2f, 0.2f, 0.2f};
             public float[] diffuseColour = {0.3f, 1, 1};
             public float[] specularColour = {1, 1, 1};
-            public Texture texture;
+            public int texture;
         }
 
         /** @author Oskar */

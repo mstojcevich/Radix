@@ -1,24 +1,20 @@
 package sx.lambda.mstojcevich.voxel.block;
 
 import groovy.transform.CompileStatic;
-import org.newdawn.slick.opengl.Texture;
-import org.newdawn.slick.opengl.TextureLoader;
 import sx.lambda.mstojcevich.voxel.VoxelGame;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher;
+import sx.lambda.mstojcevich.voxel.util.gl.TextureLoader;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
-import java.io.IOException;
 import java.nio.FloatBuffer;
-
-import static org.lwjgl.opengl.GL11.*;
 
 @CompileStatic
 public class NormalBlockRenderer implements IBlockRenderer {
 
     protected static final float TEXTURE_PERCENTAGE = 0.25f;
 
-    private static Texture blockMap;
+    private static int blockMap;
 
     protected final float u, v;
 
@@ -215,17 +211,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     private static void initialize() {
-        try {
-            blockMap = TextureLoader.getTexture("PNG", NormalBlockRenderer.class.getResourceAsStream("/textures/block/blockSheet.png"));
-            blockMap.setTextureFilter(GL_NEAREST);
-        }catch(IOException e) {
-            e.printStackTrace();
-        }
+        blockMap = TextureLoader.loadTexture(NormalBlockRenderer.class.getResourceAsStream("/textures/block/blockSheet.png"), VoxelGame.getInstance().getTextureManager());
         initialized = true;
     }
 
-    public static Texture getBlockMap() {
-        if(blockMap == null) {
+    public static int getBlockMap() {
+        if(blockMap == 0) {
             initialize();
         }
         return blockMap;

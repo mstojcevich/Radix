@@ -4,9 +4,6 @@ import groovy.transform.CompileStatic
 import org.lwjgl.opengl.Display
 import org.lwjgl.util.glu.GLU
 import org.lwjgl.util.glu.Sphere
-import org.newdawn.slick.Color
-import org.newdawn.slick.UnicodeFont
-import org.newdawn.slick.font.effects.ColorEffect
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.api.events.render.EventEntityRender
@@ -19,6 +16,7 @@ import sx.lambda.mstojcevich.voxel.util.gl.FontRenderer
 import sx.lambda.mstojcevich.voxel.util.gl.FrameBuffer
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk
 
+import java.awt.Color
 import java.awt.Font
 import java.text.DecimalFormat
 
@@ -184,8 +182,8 @@ class GameRenderer implements Renderer {
                 glTranslatef((float) (game.getSelectedBlock().x + 0.5f), (float) (game.getSelectedBlock().y + 0.5f), (float) (game.getSelectedBlock().z + 0.5f))
                 glRotatef((float) ((System.currentTimeMillis() % 720) / 2f), 1, 1, 1)
                 try {
-                    Color incr = new Color(java.awt.Color.HSBtoRGB((float)((((int)(System.currentTimeMillis()*0.1)) % 360) / 360.0f), 1, 1));
-                    glColor3f(incr.r, incr.g, incr.b)
+                    Color incr = new Color(Color.HSBtoRGB((float)((((int)(System.currentTimeMillis()*0.1)) % 360) / 360.0f), 1, 1));
+                    glColor3f(incr.getRed()/255.0f as float, incr.getGreen()/255.0f as float, incr.getBlue()/255.0f as float)
                 } catch (Exception e) {
                     e.printStackTrace()
                 }

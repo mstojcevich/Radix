@@ -182,7 +182,7 @@ public class Chunk implements IChunk {
             rerender()
         }
 
-        VoxelGame.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap.getTextureID())
+        VoxelGame.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap)
         if(vboVertexHandle > 0) {
             glDisable(GL_BLEND)
 

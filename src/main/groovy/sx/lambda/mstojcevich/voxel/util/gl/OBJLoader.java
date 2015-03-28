@@ -110,58 +110,6 @@ class OBJLoader {
         return m;
     }
 
-    public static int createTexturedDisplayList(Model m) {
-        int displayList = glGenLists(1);
-        glNewList(displayList, GL_COMPILE);
-        {
-            glBegin(GL_TRIANGLES);
-            for (Model.Face face : m.getFaces()) {
-                if (face.hasTextureCoordinates()) {
-                    glMaterial(GL_FRONT, GL_DIFFUSE, BufferTools.asFlippedFloatBuffer(face.getMaterial()
-                            .diffuseColour[0], face.getMaterial().diffuseColour[1],
-                            face.getMaterial().diffuseColour[2], 1));
-                    glMaterial(GL_FRONT, GL_AMBIENT, BufferTools.asFlippedFloatBuffer(face.getMaterial()
-                            .ambientColour[0], face.getMaterial().ambientColour[1],
-                            face.getMaterial().ambientColour[2], 1));
-                    glMaterialf(GL_FRONT, GL_SHININESS, face.getMaterial().specularCoefficient);
-                }
-                if (face.hasNormals()) {
-                    Vector3f n1 = m.getNormals().get(face.getNormalIndices()[0] - 1);
-                    glNormal3f(n1.x, n1.y, n1.z);
-                }
-                if (face.hasTextureCoordinates()) {
-                    Vector2f t1 = m.getTextureCoordinates().get(face.getTextureCoordinateIndices()[0] - 1);
-                    glTexCoord2f(t1.x, t1.y);
-                }
-                Vector3f v1 = m.getVertices().get(face.getVertexIndices()[0] - 1);
-                glVertex3f(v1.x, v1.y, v1.z);
-                if (face.hasNormals()) {
-                    Vector3f n2 = m.getNormals().get(face.getNormalIndices()[1] - 1);
-                    glNormal3f(n2.x, n2.y, n2.z);
-                }
-                if (face.hasTextureCoordinates()) {
-                    Vector2f t2 = m.getTextureCoordinates().get(face.getTextureCoordinateIndices()[1] - 1);
-                    glTexCoord2f(t2.x, t2.y);
-                }
-                Vector3f v2 = m.getVertices().get(face.getVertexIndices()[1] - 1);
-                glVertex3f(v2.x, v2.y, v2.z);
-                if (face.hasNormals()) {
-                    Vector3f n3 = m.getNormals().get(face.getNormalIndices()[2] - 1);
-                    glNormal3f(n3.x, n3.y, n3.z);
-                }
-                if (face.hasTextureCoordinates()) {
-                    Vector2f t3 = m.getTextureCoordinates().get(face.getTextureCoordinateIndices()[2] - 1);
-                    glTexCoord2f(t3.x, t3.y);
-                }
-                Vector3f v3 = m.getVertices().get(face.getVertexIndices()[2] - 1);
-                glVertex3f(v3.x, v3.y, v3.z);
-            }
-            glEnd();
-        }
-        glEndList();
-        return displayList;
-    }
-
     public static Model loadTexturedModel(File f) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(f));
         Model m = new Model();

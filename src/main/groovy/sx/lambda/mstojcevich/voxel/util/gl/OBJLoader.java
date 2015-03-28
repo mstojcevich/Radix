@@ -1,89 +1,3 @@
-//package pw.lambda.mstojcevich.voxel.util.gl
-//
-//import groovy.transform.CompileStatic
-//
-//import javax.vecmath.Vector3f
-//
-//import static org.lwjgl.opengl.GL11.*
-//
-//@CompileStatic
-//class Model {
-//
-//    private Vector3f[] vertices
-//    private Vector3f[] faces
-//    private final int displayList
-//
-//    Model(BufferedReader reader) {
-//        displayList = glGenLists 1
-//
-//    }
-//
-//    private void loadObject(BufferedReader reader) {
-//        List<Vector3f> vertexList = new ArrayList<>();
-//        List<Vector3f> faceList = new ArrayList<>();
-//
-//        String curLine
-//        while((curLine = reader.readLine()) != null) {
-//            if(curLine.startsWith('v ')) {
-//                String[] points = curLine.split(' ')
-//                Vector3f vertex = new Vector3f()
-//                vertex.x = Float.parseFloat(points[1].trim())
-//                vertex.y = Float.parseFloat(points[2].trim())
-//                vertex.z = Float.parseFloat(points[3].trim())
-//                vertexList.add(vertex);
-//            } else if(curLine.startsWith('f ')) {
-//                String[] points = curLine.split(' ')
-//                Vector3f face = new Vector3f()
-//                face.x = Float.parseFloat(points[1].trim())
-//                face.y = Float.parseFloat(points[2].trim())
-//                face.z = Float.parseFloat(points[3].trim())
-//                faceList.add(face)
-//            }
-//        }
-//
-//        vertices = vertexList.toArray(new Vector3f[vertexList.size()])
-//        faces = faceList.toArray(new Vector3f[faceList.size()])
-//    }
-//
-//    private void initRender() {
-//        glNewList(displayList, GL_COMPILE)
-//        glBegin GL_TRIANGLES
-//        for(Vector3f face : faces) {
-//            Vector3f v1 = vertices[]
-//        }
-//    }
-//
-//}
-
-/*
- * Copyright (c) 2013, Oskar Veerhoek
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * The views and conclusions contained in the software and documentation are those
- * of the authors and should not be interpreted as representing official policies,
- * either expressed or implied, of the FreeBSD Project.
- */
-
 package sx.lambda.mstojcevich.voxel.util.gl;
 
 import org.lwjgl.BufferUtils;
@@ -107,39 +21,6 @@ import static org.lwjgl.opengl.GL15.*;
  */
 class OBJLoader {
 
-    public static int createDisplayList(Model m) {
-        int displayList = glGenLists(1);
-        glNewList(displayList, GL_COMPILE);
-        {
-            glMaterialf(GL_FRONT, GL_SHININESS, 120);
-            glColor3f(0.4f, 0.27f, 0.17f);
-            glBegin(GL_TRIANGLES);
-            for (Model.Face face : m.getFaces()) {
-                if (face.hasNormals()) {
-                    Vector3f n1 = m.getNormals().get(face.getNormalIndices()[0] - 1);
-                    glNormal3f(n1.x, n1.y, n1.z);
-                }
-                Vector3f v1 = m.getVertices().get(face.getVertexIndices()[0] - 1);
-                glVertex3f(v1.x, v1.y, v1.z);
-                if (face.hasNormals()) {
-                    Vector3f n2 = m.getNormals().get(face.getNormalIndices()[1] - 1);
-                    glNormal3f(n2.x, n2.y, n2.z);
-                }
-                Vector3f v2 = m.getVertices().get(face.getVertexIndices()[1] - 1);
-                glVertex3f(v2.x, v2.y, v2.z);
-                if (face.hasNormals()) {
-                    Vector3f n3 = m.getNormals().get(face.getNormalIndices()[2] - 1);
-                    glNormal3f(n3.x, n3.y, n3.z);
-                }
-                Vector3f v3 = m.getVertices().get(face.getVertexIndices()[2] - 1);
-                glVertex3f(v3.x, v3.y, v3.z);
-            }
-            glEnd();
-        }
-        glEndList();
-        return displayList;
-    }
-
     private static FloatBuffer reserveData(int size) {
         return BufferUtils.createFloatBuffer(size);
     }
@@ -158,9 +39,11 @@ class OBJLoader {
             vertices.put(asFloats(model.getVertices().get(face.getVertexIndices()[0] - 1)));
             vertices.put(asFloats(model.getVertices().get(face.getVertexIndices()[1] - 1)));
             vertices.put(asFloats(model.getVertices().get(face.getVertexIndices()[2] - 1)));
-            normals.put(asFloats(model.getNormals().get(face.getNormalIndices()[0] - 1)));
-            normals.put(asFloats(model.getNormals().get(face.getNormalIndices()[1] - 1)));
-            normals.put(asFloats(model.getNormals().get(face.getNormalIndices()[2] - 1)));
+            if(model.hasNormals()) {
+                normals.put(asFloats(model.getNormals().get(face.getNormalIndices()[0] - 1)));
+                normals.put(asFloats(model.getNormals().get(face.getNormalIndices()[1] - 1)));
+                normals.put(asFloats(model.getNormals().get(face.getNormalIndices()[2] - 1)));
+            }
         }
         vertices.flip();
         normals.flip();

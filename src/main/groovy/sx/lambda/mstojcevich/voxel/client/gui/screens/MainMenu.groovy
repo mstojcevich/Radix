@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.client.gui.VboBufferedGuiScreen
 import sx.lambda.mstojcevich.voxel.util.gl.FontRenderer
+import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher.StaticRender
 import sx.lambda.mstojcevich.voxel.world.World
 
 import java.awt.Font
@@ -131,6 +132,8 @@ public class MainMenu extends VboBufferedGuiScreen {
         private final MainMenu parent
         private final Rectangle bounds
 
+        private StaticRender labelRender
+
         MainMenuButton(MainMenu parent, String title, Closure onClick, int size) {
             this.parent = parent
             this.title = title
@@ -148,10 +151,16 @@ public class MainMenu extends VboBufferedGuiScreen {
 
         void setSize(int size) {
             this.bounds.setSize(size, size)
+            if(buttonFont != null) {
+                rerenderLabel()
+            }
         }
 
         void setPosition(int x, int y) {
             this.bounds.setLocation(x, y)
+            if(buttonFont != null) {
+                rerenderLabel()
+            }
         }
 
         private void render(FloatBuffer vertexBuffer) {
@@ -169,9 +178,22 @@ public class MainMenu extends VboBufferedGuiScreen {
         }
 
         void drawLabel() {
+            if(buttonFont != null) {
+                if (labelRender == null) {
+                    rerenderLabel()
+                }
+
+                labelRender.render()
+            }
+        }
+
+        void rerenderLabel() {
+            if(labelRender != null) {
+                labelRender.destroy()
+            }
             int textStartX = bounds.x+(bounds.width/2.0f - buttonFont.getWidth(title)/2.0f) as int
             int textStartY = bounds.y+(bounds.height/2.0f - buttonFont.getHeight(title)/2.0f) as int
-            buttonFont.drawString(textStartX, textStartY, title, 1, 1)
+            labelRender = buttonFont.drawStringStatic(textStartX, textStartY, title, FontRenderer.ALIGN_LEFT)
         }
     }
 }

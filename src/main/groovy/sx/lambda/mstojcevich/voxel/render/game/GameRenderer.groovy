@@ -14,6 +14,7 @@ import sx.lambda.mstojcevich.voxel.util.Frustum
 import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.util.gl.FontRenderer
 import sx.lambda.mstojcevich.voxel.util.gl.FrameBuffer
+import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher.StaticRender
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk
 
 import java.awt.Color
@@ -34,6 +35,14 @@ class GameRenderer implements Renderer {
 
     private Frustum frustum = new Frustum()
     private boolean calcFrustum
+
+    // The dynamic static renders
+    private StaticRender fpsRender, positionRender, headingRender, chunkposRender, awrtRender, lightlevelRender, activeThreadsRender
+
+    // The 100% never-changing static renders
+    private StaticRender glInfoRender
+
+    private long frameCounter
 
     public GameRenderer(VoxelGame game) {
         this.game = game
@@ -63,6 +72,10 @@ class GameRenderer implements Renderer {
     void draw2d() {
         if(!initted)init()
 
+        if(System.currentTimeMillis() % 1000 == 0) { // Rerender the dynamic texts every second
+            createDynamicRenderers()
+        }
+
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
             game.enablePostProcessShader()
             game.postProcessShader.setAnimTime((int) (System.currentTimeMillis() % 100000))
@@ -74,49 +87,31 @@ class GameRenderer implements Renderer {
         game.getGuiShader().enableTexturing()
 
         if(fontRenderReady) {
-            int debugTextHeight = 0
-
-            String glInfoStr = "GL Info: " + glGetString(GL_RENDERER) + " (GL " + glGetString(GL_VERSION) + ")"
-            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, glInfoStr, 1, 1, FontRenderer.ALIGN_RIGHT)
-            debugTextHeight += debugTextRenderer.getLineHeight()
-            String fpsStr = "FPS: $game.fps"
-            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, fpsStr, 1, 1, FontRenderer.ALIGN_RIGHT)
-            debugTextHeight += debugTextRenderer.getLineHeight()
-            int acrt = 0
-            if (game.numChunkRenders > 0) {
-                acrt = (int) (game.chunkRenderTimes / game.numChunkRenders)
-            }
-            String lcrtStr = "AWRT: $acrt ns"
-            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, lcrtStr, 1, 1, FontRenderer.ALIGN_RIGHT)
-            debugTextHeight += debugTextRenderer.getLineHeight()
-            DecimalFormat posFormat = new DecimalFormat("#.00");
-            String coordsStr = String.format("(x,y,z): %s,%s,%s",
-                    posFormat.format(game.player.position.x),
-                    posFormat.format(game.player.position.y),
-                    posFormat.format(game.player.position.z))
-            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, coordsStr, 1, 1, FontRenderer.ALIGN_RIGHT)
-            debugTextHeight += debugTextRenderer.getLineHeight()
-            String chunk = String.format("Chunk (x,z): %s,%s",
-                    game.world.getChunkPosition(game.player.position.x),
-                    game.world.getChunkPosition(game.player.position.z))
-            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, chunk, 1, 1, FontRenderer.ALIGN_RIGHT)
-            debugTextHeight += debugTextRenderer.getLineHeight()
-            String headingStr = String.format("(yaw,pitch): %s,%s",
-                    posFormat.format(game.player.rotation.yaw),
-                    posFormat.format(game.player.rotation.pitch))
-            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, headingStr, 1, 1, FontRenderer.ALIGN_RIGHT)
-            debugTextHeight += debugTextRenderer.getLineHeight()
-
-            Vec3i playerPosVec = new Vec3i(Math.floor(game.player.position.x) as int, Math.floor(game.player.position.y) as int, Math.floor(game.player.position.z) as int)
-            IChunk playerChunk = game.world.getChunkAtPosition(playerPosVec)
-            if (playerChunk != null) {
-                String llStr = String.format("Light Level @ Feet: " + playerChunk.getSunlight(playerPosVec.x, playerPosVec.y, playerPosVec.z))
-                debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, llStr, 1, 1, FontRenderer.ALIGN_RIGHT)
-                debugTextHeight += debugTextRenderer.getLineHeight()
+            if(glInfoRender != null) {
+                glInfoRender.render()
             }
 
-            String threadsStr = "Active threads: " + Thread.activeCount()
-            debugTextRenderer.drawString(Display.getWidth(), debugTextHeight, threadsStr, 1, 1, FontRenderer.ALIGN_RIGHT)
+            if(fpsRender != null) {
+                fpsRender.render()
+            }
+            if(positionRender != null) {
+                positionRender.render()
+            }
+            if(headingRender != null) {
+                headingRender.render()
+            }
+            if(chunkposRender != null) {
+                chunkposRender.render()
+            }
+            if(awrtRender != null) {
+                awrtRender.render()
+            }
+            if(lightlevelRender != null) {
+                lightlevelRender.render()
+            }
+            if(activeThreadsRender != null) {
+                activeThreadsRender.render()
+            }
 
             // Let the texture manager know that we've switched textures
             // drawString binds its own texture and TextureManager still thinks we're on our last texture we used.
@@ -132,6 +127,8 @@ class GameRenderer implements Renderer {
         }
         debugTextRenderer.destroy()
         glDeleteLists(sphereList, 0)
+        glInfoRender.destroy()
+        glInfoRender = null
 
         initted = false
     }
@@ -152,10 +149,16 @@ class GameRenderer implements Renderer {
             public void run() {
                 InputStream is = GameRenderer.class.getResourceAsStream("/fonts/LiberationMono-Bold.ttf")
                 debugTextRenderer = new FontRenderer(Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(12f), true)
+                VoxelGame.instance.addToGLQueue(new Runnable() {
+                    @Override
+                    void run() {
+                        String glInfoStr = "GL Info: " + glGetString(GL_RENDERER) + " (GL " + glGetString(GL_VERSION) + ")"
+                        glInfoRender = debugTextRenderer.drawStringStatic(Display.getWidth(), 2, glInfoStr, FontRenderer.ALIGN_RIGHT)
+                    }
+                })
                 fontRenderReady = true
             }
         }.start()
-
 
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
             postProcessFbo = new FrameBuffer()
@@ -216,5 +219,88 @@ class GameRenderer implements Renderer {
     public boolean shouldCalcFrustum() { calcFrustum }
 
     public Frustum getFrustum() { frustum }
+
+    private void destroyDynamicRenderers() {
+        if(fpsRender != null) {
+            fpsRender.destroy()
+            fpsRender = null
+        }
+        if(positionRender != null) {
+            positionRender.destroy()
+            positionRender = null
+        }
+        if(headingRender != null) {
+            headingRender.destroy()
+            headingRender = null
+        }
+        if(chunkposRender != null) {
+            chunkposRender.destroy()
+            chunkposRender = null
+        }
+        if(awrtRender != null) {
+            awrtRender.destroy()
+            awrtRender = null
+        }
+        if(lightlevelRender != null) {
+            lightlevelRender.destroy()
+            lightlevelRender = null
+        }
+        if(activeThreadsRender != null) {
+            activeThreadsRender.destroy()
+            activeThreadsRender = null
+        }
+    }
+
+    private void createDynamicRenderers() {
+        destroyDynamicRenderers()
+
+        if(fontRenderReady) {
+            int currentHeight = 2 + debugTextRenderer.getLineHeight() * 1
+            // There is 1 text not part of the dynamic texts, offset to make room
+
+            String fpsStr = "FPS: $game.fps"
+            fpsRender = debugTextRenderer.drawStringStatic(Display.getWidth(), currentHeight, fpsStr, FontRenderer.ALIGN_RIGHT)
+            currentHeight += debugTextRenderer.getLineHeight()
+
+            int acrt = 0
+            if (game.numChunkRenders > 0) {
+                acrt = (int) (game.chunkRenderTimes / game.numChunkRenders)
+            }
+            String lcrtStr = "AWRT: $acrt ns"
+            awrtRender = debugTextRenderer.drawStringStatic(Display.getWidth(), currentHeight, lcrtStr, FontRenderer.ALIGN_RIGHT)
+            currentHeight += debugTextRenderer.getLineHeight()
+
+            DecimalFormat posFormat = new DecimalFormat("#.00");
+            String coordsStr = String.format("(x,y,z): %s,%s,%s",
+                    posFormat.format(game.player.position.x),
+                    posFormat.format(game.player.position.y),
+                    posFormat.format(game.player.position.z))
+            positionRender = debugTextRenderer.drawStringStatic(Display.getWidth(), currentHeight, coordsStr, FontRenderer.ALIGN_RIGHT)
+            currentHeight += debugTextRenderer.getLineHeight()
+
+            String chunk = String.format("Chunk (x,z): %s,%s",
+                    game.world.getChunkPosition(game.player.position.x),
+                    game.world.getChunkPosition(game.player.position.z))
+            chunkposRender = debugTextRenderer.drawStringStatic(Display.getWidth(), currentHeight, chunk, FontRenderer.ALIGN_RIGHT)
+            currentHeight += debugTextRenderer.getLineHeight()
+
+            String headingStr = String.format("(yaw,pitch): %s,%s",
+                    posFormat.format(game.player.rotation.yaw),
+                    posFormat.format(game.player.rotation.pitch))
+            headingRender = debugTextRenderer.drawStringStatic(Display.getWidth(), currentHeight, headingStr, FontRenderer.ALIGN_RIGHT)
+            currentHeight += debugTextRenderer.getLineHeight()
+
+            Vec3i playerPosVec = new Vec3i(Math.floor(game.player.position.x) as int, Math.floor(game.player.position.y) as int, Math.floor(game.player.position.z) as int)
+            IChunk playerChunk = game.world.getChunkAtPosition(playerPosVec)
+            if (playerChunk != null) {
+                String llStr = String.format("Light Level @ Feet: " + playerChunk.getSunlight(playerPosVec.x, playerPosVec.y, playerPosVec.z))
+                lightlevelRender = debugTextRenderer.drawStringStatic(Display.getWidth(), currentHeight, llStr, FontRenderer.ALIGN_RIGHT)
+                currentHeight += debugTextRenderer.getLineHeight()
+            }
+
+            String threadsStr = "Active threads: " + Thread.activeCount()
+            activeThreadsRender = debugTextRenderer.drawStringStatic(Display.getWidth(), currentHeight, threadsStr, FontRenderer.ALIGN_RIGHT)
+        }
+    }
 
 }

@@ -448,4 +448,103 @@ public class FontRenderer {
             this.initialized = true;
         }
     }
+
+    public SpriteBatcher.StaticRender drawStringStatic(int x, int y,
+                           String whatchars, int startIndex, int endIndex,
+                           float scaleX, float scaleY,
+                           int format
+    ) {
+        if(!this.initialized)init();
+
+        IntObject intObject = null;
+        int charCurrent;
+
+
+        int totalwidth = 0;
+        int i = startIndex, d, c;
+        int startY = 0;
+
+
+
+        switch (format) {
+            case ALIGN_RIGHT: {
+                d = -1;
+                c = correctR;
+
+                while (i < endIndex) {
+                    if (whatchars.charAt(i) == '\n') startY -= fontHeight;
+                    i++;
+                }
+                break;
+            }
+            case ALIGN_CENTER: {
+                for (int l = startIndex; l <= endIndex; l++) {
+                    charCurrent = whatchars.charAt(l);
+                    if (charCurrent == '\n') break;
+                    if (charCurrent < 128) {
+                        intObject = charArray[charCurrent];
+                    } else {
+                        intObject = (IntObject)customChars.get( new Character( (char) charCurrent ) );
+                    }
+                    totalwidth += intObject.width-correctL;
+                }
+                totalwidth /= -2;
+            }
+            case ALIGN_LEFT:
+            default: {
+                d = 1;
+                c = correctL;
+                break;
+            }
+
+        }
+
+        while (i >= startIndex && i <= endIndex) {
+
+            charCurrent = whatchars.charAt(i);
+            if (charCurrent < 256) {
+                intObject = charArray[charCurrent];
+            } else {
+                intObject = (IntObject)customChars.get( new Character( (char) charCurrent ) );
+            }
+
+            if( intObject != null ) {
+                if (d < 0) totalwidth += (intObject.width-c) * d;
+                if (charCurrent == '\n') {
+                    startY -= fontHeight * d;
+                    totalwidth = 0;
+                    if (format == ALIGN_CENTER) {
+                        for (int l = i+1; l <= endIndex; l++) {
+                            charCurrent = whatchars.charAt(l);
+                            if (charCurrent == '\n') break;
+                            if (charCurrent < 256) {
+                                intObject = charArray[charCurrent];
+                            } else {
+                                intObject = (IntObject)customChars.get( new Character( (char) charCurrent ) );
+                            }
+                            totalwidth += intObject.width-correctL;
+                        }
+                        totalwidth /= -2;
+                    }
+                    //if center get next lines total width/2;
+                }
+                else {
+                    drawQuad((int)(totalwidth * scaleX + x),
+                            (int)((startY + intObject.height) * scaleY + y),
+                            (int)((totalwidth + intObject.width) * scaleX + x), (int)(startY * scaleY + y),
+                            intObject.storedX,
+                            intObject.storedY, intObject.storedX + intObject.width,
+                            intObject.storedY + intObject.height);
+                    if (d > 0) totalwidth += (intObject.width-c) * d ;
+                }
+                i += d;
+
+            }
+        }
+        return batcher.renderStatic(fontTextureID);
+    }
+
+    public SpriteBatcher.StaticRender drawStringStatic(int x, int y, String s, int alignment) {
+        return this.drawStringStatic(x, y, s, 0, s.length()-1, 1, 1, alignment);
+    }
 }

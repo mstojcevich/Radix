@@ -122,10 +122,87 @@ public class SpriteBatcher {
 
         numIndices = 0; // The draw is done, the queue is empty, we're starting fresh
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
         glDisableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getPositionAttrib());
         glDisableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getTexCoordAttrib());
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    public StaticRender renderStatic(int textureID) {
+        int vbo = glGenBuffers();
+        int vao = glGenVertexArrays();
+
+        FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(vertexDrawQueue.size()*PARTS_PER_VERTEX*VERTICES_PER_RECT);
+        float[] vertex;
+        while((vertex = vertexDrawQueue.poll()) != null) {
+            verticesBuffer.put(vertex);
+        }
+        verticesBuffer.flip();
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, VBO_MODE);
+
+        glBindVertexArray(vao);
+        glEnableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getPositionAttrib());
+        glVertexAttribPointer(VoxelGame.getInstance().getGuiShader().getPositionAttrib(), POSITION_FLOAT_COUNT, GL_FLOAT, false, VERTEX_SIZE_BYTES, 0);
+        int byteOffset = FLOAT_SIZE_BYTES*POSITION_FLOAT_COUNT; // we added positions
+        glEnableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getTexCoordAttrib());
+        glVertexAttribPointer(VoxelGame.getInstance().getGuiShader().getTexCoordAttrib(), TEXCOORD_FLOAT_COUNT, GL_FLOAT, false, VERTEX_SIZE_BYTES, byteOffset);
+
+        int indiciesUsed = numIndices;
+        numIndices = 0; // The draw is done, the queue is empty, we're starting fresh
+
+        glDisableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getPositionAttrib());
+        glDisableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getTexCoordAttrib());
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        return new VboStaticRender(vbo, vao, textureID, textureManager, indiciesUsed);
+    }
+
+    public static interface StaticRender {
+        void render();
+
+        void destroy();
+    }
+
+    private static class VboStaticRender implements StaticRender {
+        private final int vboID, vaoID, textureID;
+        private final int numVertices;
+        private final TextureManager manager;
+
+        public VboStaticRender(int vboID, int vaoID, int textureID, TextureManager manager, int numVertices) {
+            this.vboID = vboID;
+            this.vaoID = vaoID;
+            this.textureID = textureID;
+            this.manager = manager;
+            this.numVertices = numVertices;
+        }
+
+        @Override
+        public void render() {
+            manager.bindTexture(textureID);
+
+            glBindVertexArray(vaoID);
+            glEnableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getPositionAttrib());
+            glEnableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getTexCoordAttrib());
+
+            glDrawArrays(GL_TRIANGLES, 0, numVertices);
+
+            glDisableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getPositionAttrib());
+            glDisableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getTexCoordAttrib());
+
+            glBindVertexArray(0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+        }
+
+        @Override
+        public void destroy() {
+            glDeleteBuffers(vboID);
+            glDeleteVertexArrays(vaoID);
+        }
     }
 
 }

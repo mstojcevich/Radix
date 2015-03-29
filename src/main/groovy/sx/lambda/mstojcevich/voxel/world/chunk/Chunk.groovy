@@ -460,6 +460,31 @@ public class Chunk implements IChunk {
 
         sunlightChanging = true
         sunlightChanged = true
+
+        if(x == 0) {
+            IChunk xMinNeighbor = world.getChunkAtPosition(startPosition.translate(-1, 0, 0))
+            if(xMinNeighbor != null) {
+                world.rerenderChunk(xMinNeighbor)
+            }
+        }
+        if(x == size-1) {
+            IChunk xPlNeighbor = world.getChunkAtPosition(startPosition.translate(1, 0, 0))
+            if(xPlNeighbor != null) {
+                world.rerenderChunk(xPlNeighbor)
+            }
+        }
+        if(z == 0) {
+            IChunk zMinNeighbor = world.getChunkAtPosition(startPosition.translate(0, 0, -1))
+            if(zMinNeighbor != null) {
+                world.rerenderChunk(zMinNeighbor)
+            }
+        }
+        if(z == size-1) {
+            IChunk zPlNeighbor = world.getChunkAtPosition(startPosition.translate(0, 0, 1))
+            if(zPlNeighbor != null) {
+                world.rerenderChunk(zPlNeighbor)
+            }
+        }
     }
 
     @Override

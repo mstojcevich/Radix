@@ -2,6 +2,7 @@ package sx.lambda.mstojcevich.voxel.client.render.meshing;
 
 import org.lwjgl.opengl.GL15;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 /**
@@ -9,7 +10,7 @@ import java.nio.FloatBuffer;
  */
 public class MeshResult {
 
-    private final FloatBuffer vertices;
+    private final ByteBuffer vertices;
     private final FloatBuffer colors;
     private final FloatBuffer normals;
     private final FloatBuffer textureCoords;
@@ -24,7 +25,7 @@ public class MeshResult {
      * @param normals Flipped FloatBuffer representing mesh vertex normals
      * @param textureCoords Flipped FloatBuffer representing vertex texture coordinates
      */
-    public MeshResult(FloatBuffer vertices, FloatBuffer colors, boolean alpha, FloatBuffer normals, FloatBuffer textureCoords) {
+    public MeshResult(ByteBuffer vertices, FloatBuffer colors, boolean alpha, FloatBuffer normals, FloatBuffer textureCoords) {
         this.vertices = vertices;
         this.colors = colors;
         this.normals = normals;
@@ -32,7 +33,7 @@ public class MeshResult {
         this.alpha = alpha;
     }
 
-    public FloatBuffer getVertices() {
+    public ByteBuffer getVertices() {
         return this.vertices;
     }
 

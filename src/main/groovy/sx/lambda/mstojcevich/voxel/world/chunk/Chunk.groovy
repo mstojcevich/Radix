@@ -187,7 +187,7 @@ public class Chunk implements IChunk {
             glDisable(GL_BLEND)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
-            glVertexPointer(3, GL_FLOAT, 0, 0)
+            glVertexPointer(3, GL_BYTE, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboTextureHandle)
             glTexCoordPointer(2, GL_FLOAT, 0, 0)
@@ -223,7 +223,7 @@ public class Chunk implements IChunk {
             glEnable(GL_BLEND)
             glPolygonOffset(1f, 0.7f)
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
-            glVertexPointer(3, GL_FLOAT, 0, 0)
+            glVertexPointer(3, GL_BYTE, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboTextureHandle)
             glTexCoordPointer(2, GL_FLOAT, 0, 0)

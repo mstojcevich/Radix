@@ -404,6 +404,24 @@ public class World implements IWorld {
                     }
                 }
 
+                if(pos.y < WORLD_HEIGHT - 2) {
+                    Vec3i posYPos = pos.translate(0, 1, 0);
+                    Block posYBlock = posChunk.getBlockAtPosition(posYPos);
+                    if(posYBlock == null) {
+                        if(nextLL > posChunk.getSunlight(posYPos.x, posYPos.y, posYPos.z)) {
+                            posChunk.setSunlight(posYPos.x, posYPos.y, posYPos.z, nextLL);
+                            sunlightQueue.add(posYPos);
+                            changedChunks.add(posChunk);
+                        }
+                    } else if(posYBlock.isTransparent()) {
+                        if(nextLL > posChunk.getSunlight(posYPos.x, posYPos.y, posYPos.z)) {
+                            posChunk.setSunlight(posYPos.x, posYPos.y, posYPos.z, nextLL);
+                            sunlightQueue.add(posYPos);
+                            changedChunks.add(posChunk);
+                        }
+                    }
+                }
+
                 if(pos.y > 0) {
                     Vec3i negYPos = pos.translate(0, -1, 0);
                     Block negYBlock = posChunk.getBlockAtPosition(negYPos);

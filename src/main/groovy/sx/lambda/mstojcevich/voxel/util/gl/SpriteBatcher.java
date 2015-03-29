@@ -141,7 +141,7 @@ public class SpriteBatcher {
         verticesBuffer.flip();
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, VBO_MODE);
+        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
 
         glBindVertexArray(vao);
         glEnableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getPositionAttrib());

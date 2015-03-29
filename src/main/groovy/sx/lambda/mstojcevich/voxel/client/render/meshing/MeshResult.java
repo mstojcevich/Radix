@@ -12,7 +12,7 @@ public class MeshResult {
 
     private final ByteBuffer vertices;
     private final FloatBuffer colors;
-    private final ByteBuffer normals;
+    private final FloatBuffer normals;
     private final FloatBuffer textureCoords;
 
     private final boolean alpha;
@@ -25,7 +25,7 @@ public class MeshResult {
      * @param normals Flipped FloatBuffer representing mesh vertex normals
      * @param textureCoords Flipped FloatBuffer representing vertex texture coordinates
      */
-    public MeshResult(ByteBuffer vertices, FloatBuffer colors, boolean alpha, ByteBuffer normals, FloatBuffer textureCoords) {
+    public MeshResult(ByteBuffer vertices, FloatBuffer colors, boolean alpha, FloatBuffer normals, FloatBuffer textureCoords) {
         this.vertices = vertices;
         this.colors = colors;
         this.normals = normals;
@@ -45,7 +45,7 @@ public class MeshResult {
         return this.textureCoords;
     }
 
-    public ByteBuffer getNormals() {
+    public FloatBuffer getNormals() {
         return this.normals;
     }
 

@@ -226,7 +226,7 @@ public class PlainMesher implements Mesher {
                             float[][][] lightLevels, int visibleSideCount) {
         ByteBuffer vertexPosData = BufferUtils.createByteBuffer(visibleSideCount * 4 * 3);
         FloatBuffer textureData = BufferUtils.createFloatBuffer(visibleSideCount*4*2);
-        ByteBuffer normalData = BufferUtils.createByteBuffer(visibleSideCount*4*3);
+        FloatBuffer normalData = BufferUtils.createFloatBuffer(visibleSideCount*4*3);
         FloatBuffer colorData = BufferUtils.createFloatBuffer(visibleSideCount*4*(useAlpha ? 4 : 3));
 
         int width = blockList.length;

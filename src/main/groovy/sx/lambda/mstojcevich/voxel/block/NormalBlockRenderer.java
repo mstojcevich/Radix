@@ -28,7 +28,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
 
     @Override
     public void renderVBO(IChunk chunk, byte x, byte y, byte z, float[][][] lightLevels,
-                          ByteBuffer vertexBuffer, FloatBuffer textureBuffer, ByteBuffer normalBuffer, FloatBuffer colorBuffer,
+                          ByteBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,
                           boolean shouldRenderFront, boolean shouldRenderBack) {
@@ -52,7 +52,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new byte[]{
+            normalBuffer.put(new float[]{
                     0, 0, 1,
                     0, 0, 1,
                     0, 0, 1,
@@ -78,7 +78,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new byte[]{
+            normalBuffer.put(new float[]{
                     -1, 0, 0,
                     -1, 0, 0,
                     -1, 0, 0,
@@ -104,7 +104,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new byte[]{
+            normalBuffer.put(new float[]{
                     1, 0, 0,
                     1, 0, 0,
                     1, 0, 0,
@@ -130,7 +130,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new byte[]{
+            normalBuffer.put(new float[]{
                     0, -1, 0,
                     0, -1, 0,
                     0, -1, 0,
@@ -159,7 +159,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new byte[]{
+            normalBuffer.put(new float[]{
                     0, 1, 0,
                     0, 1, 0,
                     0, 1, 0,
@@ -188,7 +188,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new byte[]{
+            normalBuffer.put(new float[]{
                     0, 0, -1,
                     0, 0, -1,
                     0, 0, -1,

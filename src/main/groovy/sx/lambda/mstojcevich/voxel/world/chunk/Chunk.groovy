@@ -193,7 +193,7 @@ public class Chunk implements IChunk {
             glTexCoordPointer(2, GL_FLOAT, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
-            glNormalPointer(GL_FLOAT, 0, 0)
+            glNormalPointer(GL_BYTE, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
             glColorPointer(3, GL_FLOAT, 0, 0)
@@ -229,7 +229,7 @@ public class Chunk implements IChunk {
             glTexCoordPointer(2, GL_FLOAT, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboNormalHandle)
-            glNormalPointer(GL_FLOAT, 0, 0)
+            glNormalPointer(GL_BYTE, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboColorHandle)
             glColorPointer(4, GL_FLOAT, 0, 0)

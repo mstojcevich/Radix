@@ -15,7 +15,7 @@ public class WaterRenderer extends NormalBlockRenderer {
 
     @Override
     public void renderVBO(IChunk chunk, byte x, byte y, byte z, float[][][] lightLevels,
-                          ByteBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
+                          ByteBuffer vertexBuffer, FloatBuffer textureBuffer, ByteBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,
                           boolean shouldRenderFront, boolean shouldRenderBack) {
@@ -39,7 +39,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new float[]{
+            normalBuffer.put(new byte[]{
                     0, 0, 1,
                     0, 0, 1,
                     0, 0, 1,
@@ -65,7 +65,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new float[]{
+            normalBuffer.put(new byte[]{
                     -1, 0, 0,
                     -1, 0, 0,
                     -1, 0, 0,
@@ -91,7 +91,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new float[]{
+            normalBuffer.put(new byte[]{
                     1, 0, 0,
                     1, 0, 0,
                     1, 0, 0,
@@ -117,7 +117,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new float[]{
+            normalBuffer.put(new byte[]{
                     0, -1, 0,
                     0, -1, 0,
                     0, -1, 0,
@@ -146,7 +146,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new float[]{
+            normalBuffer.put(new byte[]{
                     0, 1, 0,
                     0, 1, 0,
                     0, 1, 0,
@@ -175,7 +175,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                     u2, v2,
                     u2, v,
             });
-            normalBuffer.put(new float[]{
+            normalBuffer.put(new byte[]{
                     0, 0, -1,
                     0, 0, -1,
                     0, 0, -1,

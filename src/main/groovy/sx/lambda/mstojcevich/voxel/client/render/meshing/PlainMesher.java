@@ -7,7 +7,6 @@ import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.world.IWorld;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 /**
@@ -224,7 +223,7 @@ public class PlainMesher implements Mesher {
                             boolean[][][] shouldRenderLeft, boolean[][][] shouldRenderRight,
                             boolean[][][] shouldRenderFront, boolean[][][] shouldRenderBack,
                             float[][][] lightLevels, int visibleSideCount) {
-        ByteBuffer vertexPosData = BufferUtils.createByteBuffer(visibleSideCount * 4 * 3);
+        FloatBuffer vertexPosData = BufferUtils.createFloatBuffer(visibleSideCount * 4 * 3);
         FloatBuffer textureData = BufferUtils.createFloatBuffer(visibleSideCount*4*2);
         FloatBuffer normalData = BufferUtils.createFloatBuffer(visibleSideCount*4*3);
         FloatBuffer colorData = BufferUtils.createFloatBuffer(visibleSideCount*4*(useAlpha ? 4 : 3));
@@ -241,7 +240,7 @@ public class PlainMesher implements Mesher {
                         if(!firstBlock) {
                             firstBlock = true;
                         }
-                        block.getRenderer().renderVBO(chunk, (byte)x, (byte)y, (byte)z, lightLevels,
+                        block.getRenderer().renderVBO(chunk, x, y, z, lightLevels,
                                 vertexPosData, textureData, normalData, colorData,
                                 shouldRenderTop[x][y][z], shouldRenderBottom[x][y][z],
                                 shouldRenderLeft[x][y][z], shouldRenderRight[x][y][z],

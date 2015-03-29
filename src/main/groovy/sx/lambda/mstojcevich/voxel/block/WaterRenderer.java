@@ -1,9 +1,7 @@
 package sx.lambda.mstojcevich.voxel.block;
 
-import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 public class WaterRenderer extends NormalBlockRenderer {
@@ -12,26 +10,22 @@ public class WaterRenderer extends NormalBlockRenderer {
         super(blockID);
     }
 
-
     @Override
-    public void renderVBO(IChunk chunk, byte x, byte y, byte z, float[][][] lightLevels,
-                          ByteBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
+    public void renderVBO(IChunk c, float x, float y, float z, float[][][] lightLevels,
+                          FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,
                           boolean shouldRenderFront, boolean shouldRenderBack) {
         float u2 = u+TEXTURE_PERCENTAGE-.001f;
         float v2 = v+TEXTURE_PERCENTAGE-.001f;
 
-        int worldX = chunk.getStartPosition().x + (int)x;
-        int worldZ = chunk.getStartPosition().z + (int)z;
-
         if(shouldRenderTop) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Top
-                    x, y, (byte) (z + 1),
-                    (byte) (x + 1), y, (byte) (z + 1),
-                    (byte) (x + 1), (byte) (y + 1), (byte) (z + 1),
-                    x, (byte) (y + 1), (byte) (z + 1),
+                    x, y, z + 1,
+                    x + 1, y, z + 1,
+                    x + 1, y + 1, z + 1,
+                    x, y + 1, z + 1,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -45,19 +39,22 @@ public class WaterRenderer extends NormalBlockRenderer {
                     0, 0, 1,
                     0, 0, 1
             });
-            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, (int)y, worldZ+1));
+            float usedLightLevel = 1.0f;
+            if(z+1 < lightLevels.length) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x][(int)y][(int)z+1];
+            }
             for(int i = 0; i < 4; i++) {
                 colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }
         }
 
         if(shouldRenderLeft) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Left
                     x, y, z,
-                    x, y, (byte) (z + 1),
-                    x, (byte) (y + 1), (byte) (z + 1),
-                    x, (byte) (y + 1), z,
+                    x, y, z + 1,
+                    x, y + 1, z + 1,
+                    x, y + 1, z,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -71,19 +68,22 @@ public class WaterRenderer extends NormalBlockRenderer {
                     -1, 0, 0,
                     -1, 0, 0,
             });
-            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX-1, (int)y, worldZ));
+            float usedLightLevel = 1.0f;
+            if(x-1 > 0) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x-1][(int)y][(int)z];
+            }
             for(int i = 0; i < 4; i++) {
                 colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }
         }
 
         if(shouldRenderRight) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Right
-                    (byte) (x + 1), y, z,
-                    (byte) (x + 1), (byte) (y + 1), z,
-                    (byte) (x + 1), (byte) (y + 1), (byte) (z + 1),
-                    (byte) (x + 1), y, (byte) (z + 1),
+                    x + 1, y, z,
+                    x + 1, y + 1, z,
+                    x + 1, y + 1, z + 1,
+                    x + 1, y, z + 1,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -97,19 +97,22 @@ public class WaterRenderer extends NormalBlockRenderer {
                     1, 0, 0,
                     1, 0, 0,
             });
-            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX + 1, (int)y, worldZ));
+            float usedLightLevel = 1.0f;
+            if(x+1 < lightLevels.length) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x+1][(int)y][(int)z];
+            }
             for(int i = 0; i < 4; i++) {
                 colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }
         }
 
         if(shouldRenderFront) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Front
                     x, y, z,
-                    (byte) (x + 1), y, z,
-                    (byte) (x + 1), y, (byte) (z + 1),
-                    x, y, (byte) (z + 1),
+                    x + 1, y, z,
+                    x + 1, y, z + 1,
+                    x, y, z + 1,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -124,7 +127,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                     0, -1, 0,
             });
             float usedLightLevel = 1.0f;
-            if(y-1 > 0) {
+            if(y-1 > 0) { // TODO check the light level in a chunk over and use that one
                 usedLightLevel = lightLevels[(int)x][(int)y-1][(int)z];
             }
             for(int i = 0; i < 4; i++) {
@@ -133,12 +136,12 @@ public class WaterRenderer extends NormalBlockRenderer {
         }
 
         if(shouldRenderBack) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Back
-                    (byte) (x + 1), (byte) (y + 1), z,
-                    x, (byte) (y + 1), z,
-                    x, (byte) (y + 1), (byte) (z + 1),
-                    (byte) (x + 1), (byte) (y + 1), (byte) (z + 1),
+                    x + 1, y + 1, z,
+                    x, y + 1, z,
+                    x, y + 1, z + 1,
+                    x + 1, y + 1, z + 1,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -153,7 +156,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                     0, 1, 0,
             });
             float usedLightLevel = 1.0f;
-            if(y+1 < lightLevels[0].length) {
+            if(y+1 < lightLevels[0].length) { // TODO check the light level in a chunk over and use that one
                 usedLightLevel = lightLevels[(int)x][(int)y+1][(int)z];
             }
             for(int i = 0; i < 4; i++) {
@@ -162,12 +165,12 @@ public class WaterRenderer extends NormalBlockRenderer {
         }
 
         if(shouldRenderBottom) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Bottom
-                    (byte) (x + 1), y, z,
+                    x + 1, y, z,
                     x, y, z,
-                    x, (byte) (y + 1), z,
-                    (byte) (x + 1), (byte) (y + 1), z
+                    x, y + 1, z,
+                    x + 1, y + 1, z
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -181,7 +184,10 @@ public class WaterRenderer extends NormalBlockRenderer {
                     0, 0, -1,
                     0, 0, -1,
             });
-            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, (int)y, worldZ-1));
+            float usedLightLevel = 1.0f;
+            if(z-1 > 0) { // TODO check the light level in a chunk over and use that one
+                usedLightLevel = lightLevels[(int)x][(int)y][(int)z-1];
+            }
             for(int i = 0; i < 4; i++) {
                 colorBuffer.put(new float[]{usedLightLevel, usedLightLevel, usedLightLevel, 0.6f});
             }

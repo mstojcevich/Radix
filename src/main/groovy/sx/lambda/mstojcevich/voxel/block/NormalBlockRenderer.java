@@ -7,7 +7,6 @@ import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher;
 import sx.lambda.mstojcevich.voxel.util.gl.TextureLoader;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 @CompileStatic
@@ -27,8 +26,8 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderVBO(IChunk chunk, byte x, byte y, byte z, float[][][] lightLevels,
-                          ByteBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
+    public void renderVBO(IChunk chunk, float x, float y, float z, float[][][] lightLevels,
+                          FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,
                           boolean shouldRenderFront, boolean shouldRenderBack) {
@@ -39,12 +38,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
         int worldZ = chunk.getStartPosition().z + (int)z;
 
         if(shouldRenderTop) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Top
-                    x, y, (byte) (z + 1),
-                    (byte) (x + 1), y, (byte) (z + 1),
-                    (byte) (x + 1), (byte) (y + 1), (byte) (z + 1),
-                    x, (byte) (y + 1), (byte) (z + 1),
+                    x, y, z + 1,
+                    x + 1, y, z + 1,
+                    x + 1, y + 1, z + 1,
+                    x, y + 1, z + 1,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -65,12 +64,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
         }
 
         if(shouldRenderLeft) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Left
                     x, y, z,
-                    x, y, (byte) (z + 1),
-                    x, (byte) (y + 1), (byte) (z + 1),
-                    x, (byte) (y + 1), z,
+                    x, y, z + 1,
+                    x, y + 1, z + 1,
+                    x, y + 1, z,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -91,12 +90,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
         }
 
         if(shouldRenderRight) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Right
-                    (byte) (x + 1), y, z,
-                    (byte) (x + 1), (byte) (y + 1), z,
-                    (byte) (x + 1), (byte) (y + 1), (byte) (z + 1),
-                    (byte) (x + 1), y, (byte) (z + 1),
+                    x + 1, y, z,
+                    x + 1, y + 1, z,
+                    x + 1, y + 1, z + 1,
+                    x + 1, y, z + 1,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -117,12 +116,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
         }
 
         if(shouldRenderFront) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Front
                     x, y, z,
-                    (byte) (x + 1), y, z,
-                    (byte) (x + 1), y, (byte) (z + 1),
-                    x, y, (byte) (z + 1),
+                    x + 1, y, z,
+                    x + 1, y, z + 1,
+                    x, y, z + 1,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -146,12 +145,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
         }
 
         if(shouldRenderBack) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Back
-                    (byte) (x + 1), (byte) (y + 1), z,
-                    x, (byte) (y + 1), z,
-                    x, (byte) (y + 1), (byte) (z + 1),
-                    (byte) (x + 1), (byte) (y + 1), (byte) (z + 1),
+                    x + 1, y + 1, z,
+                    x, y + 1, z,
+                    x, y + 1, z + 1,
+                    x + 1, y + 1, z + 1,
             });
             textureBuffer.put(new float[]{
                     u, v,
@@ -175,12 +174,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
         }
 
         if(shouldRenderBottom) {
-            vertexBuffer.put(new byte[]{
+            vertexBuffer.put(new float[]{
                     // Bottom
-                    (byte) (x + 1), y, z,
+                    x + 1, y, z,
                     x, y, z,
-                    x, (byte) (y + 1), z,
-                    (byte) (x + 1), (byte) (y + 1), z
+                    x, y + 1, z,
+                    x + 1, y + 1, z
             });
             textureBuffer.put(new float[]{
                     u, v,

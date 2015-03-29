@@ -138,16 +138,7 @@ public class Chunk implements IChunk {
             setup = true
         }
 
-        if(sunlightChanged) {
-            for(int x = 0; x < size; x++) {
-                for (int y = 0; y < height; y++) {
-                    for (int z = 0; z < size; z++) {
-                        lightLevels[x][y][z] = lightLevelMap[sunlightLevels[x][y][z]]
-                    }
-                }
-            }
-            sunlightChanged = false
-        }
+        sunlightChanged = false
 
         Block[][][] transparent = new Block[size][height][size]
         Block[][][] opaque = new Block[size][height][size]
@@ -457,6 +448,7 @@ public class Chunk implements IChunk {
         }
 
         sunlightLevels[x][y][z] = level
+        lightLevels[x][y][z] = lightLevelMap[level]
 
         sunlightChanging = true
         sunlightChanged = true

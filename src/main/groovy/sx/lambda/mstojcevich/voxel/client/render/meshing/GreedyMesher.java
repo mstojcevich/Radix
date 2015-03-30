@@ -1,6 +1,7 @@
 package sx.lambda.mstojcevich.voxel.client.render.meshing;
 
 import sx.lambda.mstojcevich.voxel.block.Block;
+import sx.lambda.mstojcevich.voxel.block.Side;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
@@ -13,8 +14,6 @@ public class GreedyMesher implements Mesher {
     private final IChunk chunk;
     private boolean useAlpha;
 
-    private static enum Side { TOP, BOTTOM, WEST, EAST, NORTH, SOUTH }
-
     /**
      * @param chunk Chunk to mesh
      */
@@ -25,6 +24,11 @@ public class GreedyMesher implements Mesher {
 
     @Override
     public MeshResult meshVoxels(Block[][][] voxels, float[][][] lightLevels) {
+        // TODO use the light level of the transparent/null neighbor block, not the light level of the block itself. The light level will be 0 otherwise!
+        // XXX
+        // TODO
+        // XXX
+
         List<Face> faces = new ArrayList<Face>();
 
         // Top, bottom
@@ -73,7 +77,7 @@ public class GreedyMesher implements Mesher {
             float[][] eastLightLevels = new float[voxels[0][0].length][voxels[0].length];
             for(int z = 0; z < voxels[0][0].length; z++) {
                 for(int y = 0; y < voxels[0].length; y++) {
-                    Vec3i westNeighborPos = chunk.getStartPosition().translate(x, y, z);
+                    Vec3i westNeighborPos = chunk.getStartPosition().translate(x-1, y, z);
                     IChunk westNeighborChunk = chunk.getWorld().getChunkAtPosition(westNeighborPos);
                     if(westNeighborChunk != null) {
                         Block westNeighborBlk = westNeighborChunk.getBlockAtPosition(westNeighborPos);
@@ -89,7 +93,7 @@ public class GreedyMesher implements Mesher {
                         westLightLevels[z][y] = lightLevels[x][y][z];
                     }
 
-                    Vec3i eastNeighborPos = chunk.getStartPosition().translate(x, y, z);
+                    Vec3i eastNeighborPos = chunk.getStartPosition().translate(x+1, y, z);
                     IChunk eastNeighborChunk = chunk.getWorld().getChunkAtPosition(eastNeighborPos);
                     if(eastNeighborChunk != null) {
                         Block eastNeighborBlk = eastNeighborChunk.getBlockAtPosition(eastNeighborPos);
@@ -111,6 +115,52 @@ public class GreedyMesher implements Mesher {
             greedy(faces, Side.WEST, westBlocks, westLightLevels, x);
         }
 
+        // North, south
+        for(int z = 0; z < voxels[0][0].length; z++) {
+            Block[][] northBlocks = new Block[voxels.length][voxels[0].length];
+            float[][] northLightLevels = new float[voxels.length][voxels[0].length];
+            Block[][] southBlocks = new Block[voxels.length][voxels[0].length];
+            float[][] southLightLevels = new float[voxels.length][voxels[0].length];
+            for(int x = 0; x < voxels.length; x++) {
+                for(int y = 0; y < voxels[0].length; y++) {
+                    Vec3i northNeighborPos = chunk.getStartPosition().translate(x, y, z+1);
+                    Vec3i southNeighborPos = chunk.getStartPosition().translate(x, y, z-1);
+                    IChunk northNeighborChunk = chunk.getWorld().getChunkAtPosition(northNeighborPos);
+                    IChunk southNeighborChunk = chunk.getWorld().getChunkAtPosition(southNeighborPos);
+
+                    if(northNeighborChunk != null) {
+                        Block northNeighborBlock = northNeighborChunk.getBlockAtPosition(northNeighborPos);
+                        if(northNeighborBlock == null) {
+                            northBlocks[x][y] = voxels[x][y][z];
+                            northLightLevels[x][y] = lightLevels[x][y][z];
+                        } else if(northNeighborBlock.isTransparent()) {
+                            northBlocks[x][y] = voxels[x][y][z];
+                            northLightLevels[x][y] = lightLevels[x][y][z];
+                        }
+                    } else {
+                        northBlocks[x][y] = voxels[x][y][z];
+                        northLightLevels[x][y] = lightLevels[x][y][z];
+                    }
+
+                    if(southNeighborChunk != null) {
+                        Block southNeighborBlock = southNeighborChunk.getBlockAtPosition(southNeighborPos);
+                        if(southNeighborBlock == null) {
+                            southBlocks[x][y] = voxels[x][y][z];
+                            southLightLevels[x][y] = lightLevels[x][y][z];
+                        } else if(southNeighborBlock.isTransparent()) {
+                            southBlocks[x][y] = voxels[x][y][z];
+                            southLightLevels[x][y] = lightLevels[x][y][z];
+                        }
+                    } else {
+                        southBlocks[x][y] = voxels[x][y][z];
+                        southLightLevels[x][y] = lightLevels[x][y][z];
+                    }
+                }
+            }
+
+            greedy(faces, Side.NORTH, northBlocks, northLightLevels, z);
+            greedy(faces, Side.SOUTH, southBlocks, southLightLevels, z);
+        }
 
         return null;
     }

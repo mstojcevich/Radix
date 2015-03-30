@@ -1,6 +1,7 @@
 package sx.lambda.mstojcevich.voxel.client.render.meshing;
 
 import sx.lambda.mstojcevich.voxel.block.Block;
+import sx.lambda.mstojcevich.voxel.block.IBlockRenderer;
 import sx.lambda.mstojcevich.voxel.block.Side;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
@@ -245,7 +246,28 @@ public class GreedyMesher implements Mesher {
         }
 
         public void render(FloatBuffer positions, FloatBuffer colors, FloatBuffer normals, FloatBuffer texCoords) {
+            IBlockRenderer renderer = block.getRenderer();
 
+            switch(side) {
+                case TOP:
+                    renderer.renderTop(x1, x2, y1, y2, z, lightLevel, positions, texCoords, normals, colors);
+                    break;
+                case BOTTOM:
+                    renderer.renderBottom(x1, x2, y1, y2, z - 1, lightLevel, positions, texCoords, normals, colors);
+                    break;
+                case NORTH:
+                    renderer.renderNorth(x1, x2, y1, y2, z, lightLevel, positions, texCoords, normals, colors);
+                    break;
+                case SOUTH:
+                    renderer.renderSouth(x1, x2, y1, y2, z - 1, lightLevel, positions, texCoords, normals, colors);
+                    break;
+                case EAST:
+                    renderer.renderEast(x1, x2, y1, y2, z, lightLevel, positions, texCoords, normals, colors);
+                    break;
+                case WEST:
+                    renderer.renderWest(x1, x2, y1, y2, z - 1, lightLevel, positions, texCoords, normals, colors);
+                    break;
+            }
         }
     }
 }

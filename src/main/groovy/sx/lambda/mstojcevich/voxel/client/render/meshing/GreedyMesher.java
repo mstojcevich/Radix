@@ -1,6 +1,7 @@
 package sx.lambda.mstojcevich.voxel.client.render.meshing;
 
 import sx.lambda.mstojcevich.voxel.block.Block;
+import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
 import java.nio.FloatBuffer;
@@ -38,6 +39,9 @@ public class GreedyMesher implements Mesher {
                         if(voxels[x][y+1][z] == null) {
                             topBlocks[x][z] = voxels[x][y][z];
                             topLightLevels[x][z] = lightLevels[x][y][z];
+                        } else if(voxels[x][y+1][z].isTransparent()) {
+                            topBlocks[x][z] = voxels[x][y][z];
+                            topLightLevels[x][z] = lightLevels[x][y][z];
                         }
                     } else {
                         topBlocks[x][z] = voxels[x][y][z];
@@ -47,6 +51,9 @@ public class GreedyMesher implements Mesher {
                         if(voxels[x][y-1][z] == null) {
                             btmBlocks[x][z] = voxels[x][y][z];
                             btmLightLevels[x][z] = lightLevels[x][y][z];
+                        } else if(voxels[x][y-1][z].isTransparent()) {
+                            btmBlocks[x][z] = voxels[x][y][z];
+                            btmLightLevels[x][z] = lightLevels[x][y][z];
                         }
                     } else {
                         btmBlocks[x][z] = voxels[x][y][z];
@@ -54,8 +61,8 @@ public class GreedyMesher implements Mesher {
                     }
                 }
             }
-            greedy(faces, Side.TOP, topBlocks, topLightLevels);
-            greedy(faces, Side.BOTTOM, btmBlocks, btmLightLevels);
+            greedy(faces, Side.TOP, topBlocks, topLightLevels, y);
+            greedy(faces, Side.BOTTOM, btmBlocks, btmLightLevels, y);
         }
 
         // East, west
@@ -66,9 +73,42 @@ public class GreedyMesher implements Mesher {
             float[][] eastLightLevels = new float[voxels[0][0].length][voxels[0].length];
             for(int z = 0; z < voxels[0][0].length; z++) {
                 for(int y = 0; y < voxels[0].length; y++) {
+                    Vec3i westNeighborPos = chunk.getStartPosition().translate(x, y, z);
+                    IChunk westNeighborChunk = chunk.getWorld().getChunkAtPosition(westNeighborPos);
+                    if(westNeighborChunk != null) {
+                        Block westNeighborBlk = westNeighborChunk.getBlockAtPosition(westNeighborPos);
+                        if(westNeighborBlk == null) {
+                            westBlocks[z][y] = voxels[x][y][z];
+                            westLightLevels[z][y] = lightLevels[x][y][z];
+                        } else if(westNeighborBlk.isTransparent()) {
+                            westBlocks[z][y] = voxels[x][y][z];
+                            westLightLevels[z][y] = lightLevels[x][y][z];
+                        }
+                    } else {
+                        westBlocks[z][y] = voxels[x][y][z];
+                        westLightLevels[z][y] = lightLevels[x][y][z];
+                    }
 
+                    Vec3i eastNeighborPos = chunk.getStartPosition().translate(x, y, z);
+                    IChunk eastNeighborChunk = chunk.getWorld().getChunkAtPosition(eastNeighborPos);
+                    if(eastNeighborChunk != null) {
+                        Block eastNeighborBlk = eastNeighborChunk.getBlockAtPosition(eastNeighborPos);
+                        if(eastNeighborBlk == null) {
+                            eastBlocks[z][y] = voxels[x][y][z];
+                            eastLightLevels[z][y] = lightLevels[x][y][z];
+                        } else if(eastNeighborBlk.isTransparent()) {
+                            eastBlocks[z][y] = voxels[x][y][z];
+                            eastLightLevels[z][y] = lightLevels[x][y][z];
+                        }
+                    } else {
+                        eastBlocks[z][y] = voxels[x][y][z];
+                        eastLightLevels[z][y] = lightLevels[x][y][z];
+                    }
                 }
             }
+
+            greedy(faces, Side.EAST, eastBlocks, eastLightLevels, x);
+            greedy(faces, Side.WEST, westBlocks, westLightLevels, x);
         }
 
 
@@ -81,8 +121,9 @@ public class GreedyMesher implements Mesher {
      * @param side Side being meshed
      * @param blks Blocks on the plane
      * @param lls Light levels of the blocks
+     * @param z Depth on the plane
      */
-    private void greedy(List<Face> outputList, Side side, Block[][] blks, float lls[][]) {
+    private void greedy(List<Face> outputList, Side side, Block[][] blks, float lls[][], int z) {
         int width = blks.length;
         int height = blks[0].length;
         boolean[][] used = new boolean[blks.length][blks[0].length];
@@ -126,7 +167,7 @@ public class GreedyMesher implements Mesher {
                             break;
                         }
                     }
-                    outputList.add(new Face(side, blk, ll, startX, startY, endX, endY));
+                    outputList.add(new Face(side, blk, ll, startX, startY, endX, endY, z));
                 }
             }
         }
@@ -144,15 +185,16 @@ public class GreedyMesher implements Mesher {
 
     private static class Face {
         private final Side side;
-        private final int x1, y1, x2, y2;
+        private final int x1, y1, x2, y2, z;
         private final Block block;
         private final float lightLevel;
 
-        public Face(Side side, Block block, float lightLevel, int startX, int startY, int endX, int endY) {
+        public Face(Side side, Block block, float lightLevel, int startX, int startY, int endX, int endY, int z) {
             this.block = block;
             this.lightLevel = lightLevel;
             this.x1 = startX; this.y1 = startY;
             this.x2 = endX; this.y2 = endY;
+            this.z = z;
             this.side = side;
         }
 

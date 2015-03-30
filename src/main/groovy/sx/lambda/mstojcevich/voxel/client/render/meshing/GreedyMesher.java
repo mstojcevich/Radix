@@ -114,7 +114,13 @@ public class GreedyMesher implements Mesher {
                                         allPassed = false;
                                     }
                                 }
-                                if(!allPassed)break;
+                                if(allPassed) {
+                                    for(int lx = startX; lx < endX; lx++) {
+                                        used[lx][endY] = true;
+                                    }
+                                } else {
+                                    break;
+                                }
                                 endY++;
                             }
                             break;

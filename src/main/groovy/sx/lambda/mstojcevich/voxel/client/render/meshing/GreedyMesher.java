@@ -24,12 +24,8 @@ public class GreedyMesher implements Mesher {
 
     @Override
     public MeshResult meshVoxels(Block[][][] voxels, float[][][] lightLevels) {
-        // TODO use the light level of the transparent/null neighbor block, not the light level of the block itself. The light level will be 0 otherwise!
-        // XXX
-        // TODO
-        // XXX
 
-        List<Face> faces = new ArrayList<Face>();
+        List<Face> faces = new ArrayList<>();
 
         // Top, bottom
         for(int y = 0; y < voxels[0].length; y++) {
@@ -42,26 +38,26 @@ public class GreedyMesher implements Mesher {
                     if(y < voxels[0].length-1) {
                         if(voxels[x][y+1][z] == null) {
                             topBlocks[x][z] = voxels[x][y][z];
-                            topLightLevels[x][z] = lightLevels[x][y][z];
+                            topLightLevels[x][z] = lightLevels[x][y+1][z];
                         } else if(voxels[x][y+1][z].isTransparent()) {
                             topBlocks[x][z] = voxels[x][y][z];
-                            topLightLevels[x][z] = lightLevels[x][y][z];
+                            topLightLevels[x][z] = lightLevels[x][y+1][z];
                         }
                     } else {
                         topBlocks[x][z] = voxels[x][y][z];
-                        topLightLevels[x][z] = lightLevels[x][y][z];
+                        topLightLevels[x][z] = 1;
                     }
                     if(y > 0) {
                         if(voxels[x][y-1][z] == null) {
                             btmBlocks[x][z] = voxels[x][y][z];
-                            btmLightLevels[x][z] = lightLevels[x][y][z];
+                            btmLightLevels[x][z] = lightLevels[x][y-1][z];
                         } else if(voxels[x][y-1][z].isTransparent()) {
                             btmBlocks[x][z] = voxels[x][y][z];
-                            btmLightLevels[x][z] = lightLevels[x][y][z];
+                            btmLightLevels[x][z] = lightLevels[x][y-1][z];
                         }
                     } else {
                         btmBlocks[x][z] = voxels[x][y][z];
-                        btmLightLevels[x][z] = lightLevels[x][y][z];
+                        btmLightLevels[x][z] = 1;
                     }
                 }
             }
@@ -99,14 +95,14 @@ public class GreedyMesher implements Mesher {
                         Block eastNeighborBlk = eastNeighborChunk.getBlockAtPosition(eastNeighborPos);
                         if(eastNeighborBlk == null) {
                             eastBlocks[z][y] = voxels[x][y][z];
-                            eastLightLevels[z][y] = lightLevels[x][y][z];
+                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborPos.x, eastNeighborPos.y, eastNeighborPos.z);
                         } else if(eastNeighborBlk.isTransparent()) {
                             eastBlocks[z][y] = voxels[x][y][z];
-                            eastLightLevels[z][y] = lightLevels[x][y][z];
+                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborPos.x, eastNeighborPos.y, eastNeighborPos.z);
                         }
                     } else {
                         eastBlocks[z][y] = voxels[x][y][z];
-                        eastLightLevels[z][y] = lightLevels[x][y][z];
+                        eastLightLevels[z][y] = 1;
                     }
                 }
             }
@@ -132,28 +128,28 @@ public class GreedyMesher implements Mesher {
                         Block northNeighborBlock = northNeighborChunk.getBlockAtPosition(northNeighborPos);
                         if(northNeighborBlock == null) {
                             northBlocks[x][y] = voxels[x][y][z];
-                            northLightLevels[x][y] = lightLevels[x][y][z];
+                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(northNeighborPos.x, northNeighborPos.y, northNeighborPos.z);
                         } else if(northNeighborBlock.isTransparent()) {
                             northBlocks[x][y] = voxels[x][y][z];
-                            northLightLevels[x][y] = lightLevels[x][y][z];
+                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(northNeighborPos.x, northNeighborPos.y, northNeighborPos.z);
                         }
                     } else {
                         northBlocks[x][y] = voxels[x][y][z];
-                        northLightLevels[x][y] = lightLevels[x][y][z];
+                        northLightLevels[x][y] = 1;
                     }
 
                     if(southNeighborChunk != null) {
                         Block southNeighborBlock = southNeighborChunk.getBlockAtPosition(southNeighborPos);
                         if(southNeighborBlock == null) {
                             southBlocks[x][y] = voxels[x][y][z];
-                            southLightLevels[x][y] = lightLevels[x][y][z];
+                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(southNeighborPos.x, southNeighborPos.y, southNeighborPos.z);
                         } else if(southNeighborBlock.isTransparent()) {
                             southBlocks[x][y] = voxels[x][y][z];
-                            southLightLevels[x][y] = lightLevels[x][y][z];
+                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(southNeighborPos.x, southNeighborPos.y, southNeighborPos.z);
                         }
                     } else {
                         southBlocks[x][y] = voxels[x][y][z];
-                        southLightLevels[x][y] = lightLevels[x][y][z];
+                        southLightLevels[x][y] = 1;
                     }
                 }
             }

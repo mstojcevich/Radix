@@ -13,6 +13,19 @@ public interface IBlockRenderer {
                    boolean shouldRenderLeft, boolean shouldRenderRight,
                    boolean shouldRenderFront, boolean shouldRenderBack);
 
-    public void render2d(SpriteBatcher batcher, int x, int y, int width);
+    void render2d(SpriteBatcher batcher, int x, int y, int width);
+
+    void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel,
+                     FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer);
+    void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel,
+                     FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer);
+    void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel,
+                     FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer);
+    void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel,
+                     FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer);
+    void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel,
+                     FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer);
+    void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel,
+                     FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer);
 
 }

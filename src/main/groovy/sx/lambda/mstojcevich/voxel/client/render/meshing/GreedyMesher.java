@@ -250,22 +250,22 @@ public class GreedyMesher implements Mesher {
 
             switch(side) {
                 case TOP:
-                    renderer.renderTop(x1, x2, y1, y2, z, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderTop(x1, y1, x2, y2, z, lightLevel, positions, texCoords, normals, colors);
                     break;
                 case BOTTOM:
-                    renderer.renderBottom(x1, x2, y1, y2, z - 1, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderBottom(x1, y1, x2, y2, z - 1, lightLevel, positions, texCoords, normals, colors);
                     break;
                 case NORTH:
-                    renderer.renderNorth(x1, x2, y1, y2, z, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderNorth(x1, y1, x2, y2, z, lightLevel, positions, texCoords, normals, colors);
                     break;
                 case SOUTH:
-                    renderer.renderSouth(x1, x2, y1, y2, z - 1, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderSouth(x1, y1, x2, y2, z - 1, lightLevel, positions, texCoords, normals, colors);
                     break;
                 case EAST:
-                    renderer.renderEast(x1, x2, y1, y2, z, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderEast(x1, y1, x2, y2, z, lightLevel, positions, texCoords, normals, colors);
                     break;
                 case WEST:
-                    renderer.renderWest(x1, x2, y1, y2, z - 1, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderWest(x1, y1, x2, y2, z - 1, lightLevel, positions, texCoords, normals, colors);
                     break;
             }
         }

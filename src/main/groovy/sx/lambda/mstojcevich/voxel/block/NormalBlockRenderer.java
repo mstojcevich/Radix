@@ -212,38 +212,185 @@ public class NormalBlockRenderer implements IBlockRenderer {
 
     @Override
     public void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
-        //TODO implement
+        // POSITIVE Z
 
+        float u2 = u+TEXTURE_PERCENTAGE-.001f;
+        float v2 = v+TEXTURE_PERCENTAGE-.001f;
+
+        posBuffer.put(new float[] {
+                x1, y1, z,
+                x2, y1, z,
+                x2, y2, z,
+                x1, y2, z,
+        });
+        texBuffer.put(new float[] {
+                u, v,
+                u, v2,
+                u2, v2,
+                u2, v,
+        });
+        normBuffer.put(new float[]{
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1
+        });
+        for(int i = 0; i < 4*3; i++) {
+            colorBuffer.put(lightLevel);
+        }
     }
 
     @Override
     public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
-        //TODO implement
+        // NEGATIVE Z
 
+        float u2 = u+TEXTURE_PERCENTAGE-.001f;
+        float v2 = v+TEXTURE_PERCENTAGE-.001f;
+
+        posBuffer.put(new float[]{
+                // Bottom
+                x2, y1, z,
+                x1, y1, z,
+                x1, y2, z,
+                x2, y2, z
+        });
+        texBuffer.put(new float[]{
+                u, v,
+                u, v2,
+                u2, v2,
+                u2, v,
+        });
+        normBuffer.put(new float[]{
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+                0, 0, -1,
+        });
+        for(int i = 0; i < 4*3; i++) {
+            colorBuffer.put(lightLevel);
+        }
     }
 
     @Override
     public void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
-        //TODO implement
+        // NEGATIVE X
 
+        float u2 = u+TEXTURE_PERCENTAGE - .001f;
+        float v2 = v + TEXTURE_PERCENTAGE - .001f;
+
+        posBuffer.put(new float[]{
+                x, y1, z1,
+                x, y1, z2,
+                x, y2, z2,
+                x, y2, z1,
+        });
+        texBuffer.put(new float[]{
+                u, v,
+                u, v2,
+                u2, v2,
+                u2, v,
+        });
+        normBuffer.put(new float[]{
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+                -1, 0, 0,
+        });
+        for(int i = 0; i < 4*3; i++) {
+            colorBuffer.put(lightLevel);
+        }
     }
 
     @Override
     public void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
-        //TODO implement
+        // POSITIVE X
 
+        float u2 = u+TEXTURE_PERCENTAGE - .001f;
+        float v2 = v + TEXTURE_PERCENTAGE - .001f;
+
+        posBuffer.put(new float[]{
+                x, y1, z1,
+                x, y2, z1,
+                x, y2, z2,
+                x, y1, z2,
+        });
+        texBuffer.put(new float[]{
+                u, v,
+                u, v2,
+                u2, v2,
+                u2, v,
+        });
+        normBuffer.put(new float[]{
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+        });
+        for(int i = 0; i < 4*3; i++) {
+            colorBuffer.put(lightLevel);
+        }
     }
 
     @Override
     public void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
-        //TODO implement
+        // POSITIVE Y
 
+        float u2 = u+TEXTURE_PERCENTAGE - .001f;
+        float v2 = v + TEXTURE_PERCENTAGE - .001f;
+
+        posBuffer.put(new float[]{
+                // Back
+                x2, y, z1,
+                x1, y, z1,
+                x1, y, z2,
+                x2, y, z2,
+        });
+        texBuffer.put(new float[]{
+                u, v,
+                u, v2,
+                u2, v2,
+                u2, v,
+        });
+        normBuffer.put(new float[]{
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+        });
+        for(int i = 0; i < 4*3; i++) {
+            colorBuffer.put(lightLevel);
+        }
     }
 
     @Override
     public void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
-        //TODO implement
+        // NEGATIVE Y
 
+        float u2 = u+TEXTURE_PERCENTAGE - .001f;
+        float v2 = v + TEXTURE_PERCENTAGE - .001f;
+
+        posBuffer.put(new float[]{
+                // Front
+                x1, y, z1,
+                x2, y, z1,
+                x2, y, z2,
+                x1, y, z2,
+        });
+        texBuffer.put(new float[]{
+                u, v,
+                u, v2,
+                u2, v2,
+                u2, v,
+        });
+        normBuffer.put(new float[]{
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+                0, -1, 0,
+        });
+        for(int i = 0; i < 4*3; i++) {
+            colorBuffer.put(lightLevel);
+        }
     }
 
     private static void initialize() {

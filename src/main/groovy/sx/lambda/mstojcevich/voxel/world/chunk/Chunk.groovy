@@ -73,7 +73,7 @@ public class Chunk implements IChunk {
         sunlightLevels = new int[size][height][size]
 
         if(VoxelGame.instance != null) { // We're a client
-            mesher = new GreedyMesher(this)
+            mesher = new PlainMesher(this)
         } else {
             mesher = null
         }
@@ -98,7 +98,7 @@ public class Chunk implements IChunk {
         sunlightLevels = new int[size][height][size]
 
         if(VoxelGame.instance != null) { // We're a client
-            mesher = new GreedyMesher(this)
+            mesher = new PlainMesher(this)
         } else {
             mesher = null
         }

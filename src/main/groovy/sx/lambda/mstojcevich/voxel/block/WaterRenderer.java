@@ -11,7 +11,7 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderVBO(IChunk c, float x, float y, float z, float[][][] lightLevels,
+    public void renderVBO(IChunk c, int x, int y, int z, float[][][] lightLevels,
                           FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,

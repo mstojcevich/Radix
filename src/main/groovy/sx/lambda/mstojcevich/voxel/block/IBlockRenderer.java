@@ -7,7 +7,7 @@ import java.nio.FloatBuffer;
 
 public interface IBlockRenderer {
 
-    void renderVBO(IChunk chunk, float x, float y, float z, float[][][] lightLevels,
+    void renderVBO(IChunk chunk, int x, int y, int z, float[][][] lightLevels,
                    FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                    boolean shouldRenderTop, boolean shouldRenderBottom,
                    boolean shouldRenderLeft, boolean shouldRenderRight,

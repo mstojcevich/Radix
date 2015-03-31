@@ -26,177 +26,48 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderVBO(IChunk chunk, float x, float y, float z, float[][][] lightLevels,
+    public void renderVBO(IChunk chunk, int x, int y, int z, float[][][] lightLevels,
                           FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,
                           boolean shouldRenderFront, boolean shouldRenderBack) {
-        float u2 = u+TEXTURE_PERCENTAGE-.001f;
-        float v2 = v+TEXTURE_PERCENTAGE-.001f;
-
         int worldX = chunk.getStartPosition().x + (int)x;
         int worldZ = chunk.getStartPosition().z + (int)z;
 
         if(shouldRenderTop) {
-            vertexBuffer.put(new float[]{
-                    // Top
-                    x, y, z + 1,
-                    x + 1, y, z + 1,
-                    x + 1, y + 1, z + 1,
-                    x, y + 1, z + 1,
-            });
-            textureBuffer.put(new float[]{
-                    u, v,
-                    u, v2,
-                    u2, v2,
-                    u2, v,
-            });
-            normalBuffer.put(new float[]{
-                    0, 0, 1,
-                    0, 0, 1,
-                    0, 0, 1,
-                    0, 0, 1
-            });
-            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, (int)y, worldZ+1));
-            for(int i = 0; i < 4*3; i++) {
-                colorBuffer.put(usedLightLevel);
-            }
+            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, y, worldZ+1));
+            renderNorth(x, y, x+1, y+1, z+1, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
         }
 
         if(shouldRenderLeft) {
-            vertexBuffer.put(new float[]{
-                    // Left
-                    x, y, z,
-                    x, y, z + 1,
-                    x, y + 1, z + 1,
-                    x, y + 1, z,
-            });
-            textureBuffer.put(new float[]{
-                    u, v,
-                    u, v2,
-                    u2, v2,
-                    u2, v,
-            });
-            normalBuffer.put(new float[]{
-                    -1, 0, 0,
-                    -1, 0, 0,
-                    -1, 0, 0,
-                    -1, 0, 0,
-            });
-            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX-1, (int)y, worldZ));
-            for(int i = 0; i < 4*3; i++) {
-                colorBuffer.put(usedLightLevel);
-            }
+            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX-1, y, worldZ));
+            renderWest(z, y, z+1, y+1, x, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
         }
 
         if(shouldRenderRight) {
-            vertexBuffer.put(new float[]{
-                    // Right
-                    x + 1, y, z,
-                    x + 1, y + 1, z,
-                    x + 1, y + 1, z + 1,
-                    x + 1, y, z + 1,
-            });
-            textureBuffer.put(new float[]{
-                    u, v,
-                    u, v2,
-                    u2, v2,
-                    u2, v,
-            });
-            normalBuffer.put(new float[]{
-                    1, 0, 0,
-                    1, 0, 0,
-                    1, 0, 0,
-                    1, 0, 0,
-            });
-            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX + 1, (int)y, worldZ));
-            for(int i = 0; i < 4*3; i++) {
-                colorBuffer.put(usedLightLevel);
-            }
+            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX + 1, y, worldZ));
+            renderEast(z, y, z+1, y+1, x+1, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
         }
 
         if(shouldRenderFront) {
-            vertexBuffer.put(new float[]{
-                    // Front
-                    x, y, z,
-                    x + 1, y, z,
-                    x + 1, y, z + 1,
-                    x, y, z + 1,
-            });
-            textureBuffer.put(new float[]{
-                    u, v,
-                    u, v2,
-                    u2, v2,
-                    u2, v,
-            });
-            normalBuffer.put(new float[]{
-                    0, -1, 0,
-                    0, -1, 0,
-                    0, -1, 0,
-                    0, -1, 0,
-            });
             float usedLightLevel = 1.0f;
             if(y-1 > 0) {
-                usedLightLevel = lightLevels[(int)x][(int)y-1][(int)z];
+                usedLightLevel = lightLevels[x][y-1][z];
             }
-            for(int i = 0; i < 4*3; i++) {
-                colorBuffer.put(usedLightLevel);
-            }
+            renderBottom(x, z, x+1, z+1, y, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
         }
 
         if(shouldRenderBack) {
-            vertexBuffer.put(new float[]{
-                    // Back
-                    x + 1, y + 1, z,
-                    x, y + 1, z,
-                    x, y + 1, z + 1,
-                    x + 1, y + 1, z + 1,
-            });
-            textureBuffer.put(new float[]{
-                    u, v,
-                    u, v2,
-                    u2, v2,
-                    u2, v,
-            });
-            normalBuffer.put(new float[]{
-                    0, 1, 0,
-                    0, 1, 0,
-                    0, 1, 0,
-                    0, 1, 0,
-            });
             float usedLightLevel = 1.0f;
             if(y+1 < lightLevels[0].length) {
-                usedLightLevel = lightLevels[(int)x][(int)y+1][(int)z];
+                usedLightLevel = lightLevels[x][y+1][z];
             }
-            for(int i = 0; i < 4*3; i++) {
-                colorBuffer.put(usedLightLevel);
-            }
+            renderTop(x, z, x+1, z+1, y+1, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
         }
 
         if(shouldRenderBottom) {
-            vertexBuffer.put(new float[]{
-                    // Bottom
-                    x + 1, y, z,
-                    x, y, z,
-                    x, y + 1, z,
-                    x + 1, y + 1, z
-            });
-            textureBuffer.put(new float[]{
-                    u, v,
-                    u, v2,
-                    u2, v2,
-                    u2, v,
-            });
-            normalBuffer.put(new float[]{
-                    0, 0, -1,
-                    0, 0, -1,
-                    0, 0, -1,
-                    0, 0, -1,
-            });
-            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, (int)y, worldZ-1));
-            for(int i = 0; i < 4*3; i++) {
-                colorBuffer.put(usedLightLevel);
-            }
+            float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, y, worldZ-1));
+            renderSouth(x, y, x+1, y+1, z, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
         }
     }
 

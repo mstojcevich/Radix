@@ -1,5 +1,6 @@
 package sx.lambda.mstojcevich.voxel.client.render.meshing;
 
+import org.lwjgl.BufferUtils;
 import sx.lambda.mstojcevich.voxel.block.Block;
 import sx.lambda.mstojcevich.voxel.block.IBlockRenderer;
 import sx.lambda.mstojcevich.voxel.block.Side;
@@ -159,7 +160,15 @@ public class GreedyMesher implements Mesher {
             greedy(faces, Side.SOUTH, southBlocks, southLightLevels, z);
         }
 
-        return null;
+        FloatBuffer posBuffer = BufferUtils.createFloatBuffer(faces.size()*4*3);
+        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(faces.size()*4*4);
+        FloatBuffer normalBuffer = BufferUtils.createFloatBuffer(faces.size()*4*3);
+        FloatBuffer texCoordBuffer = BufferUtils.createFloatBuffer(faces.size()*4*2);
+        for(Face f : faces) {
+            f.render(posBuffer, colorBuffer, normalBuffer, texCoordBuffer);
+        }
+
+        return new MeshResult(posBuffer, colorBuffer, useAlpha, normalBuffer, texCoordBuffer);
     }
 
     /**

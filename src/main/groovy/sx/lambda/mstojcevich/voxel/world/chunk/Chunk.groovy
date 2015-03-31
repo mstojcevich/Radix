@@ -2,12 +2,14 @@ package sx.lambda.mstojcevich.voxel.world.chunk
 
 import groovy.transform.CompileStatic
 import org.lwjgl.BufferUtils
+import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL15
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.api.events.render.EventChunkRender
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.VoxelGame
+import sx.lambda.mstojcevich.voxel.client.render.meshing.GreedyMesher
 import sx.lambda.mstojcevich.voxel.client.render.meshing.MeshResult
 import sx.lambda.mstojcevich.voxel.client.render.meshing.Mesher
 import sx.lambda.mstojcevich.voxel.client.render.meshing.PlainMesher
@@ -71,7 +73,7 @@ public class Chunk implements IChunk {
         sunlightLevels = new int[size][height][size]
 
         if(VoxelGame.instance != null) { // We're a client
-            mesher = new PlainMesher(this)
+            mesher = new GreedyMesher(this)
         } else {
             mesher = null
         }
@@ -96,7 +98,7 @@ public class Chunk implements IChunk {
         sunlightLevels = new int[size][height][size]
 
         if(VoxelGame.instance != null) { // We're a client
-            mesher = new PlainMesher(this)
+            mesher = new GreedyMesher(this)
         } else {
             mesher = null
         }

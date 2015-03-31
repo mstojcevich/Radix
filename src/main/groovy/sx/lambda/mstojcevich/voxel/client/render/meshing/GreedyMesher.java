@@ -203,9 +203,9 @@ public class GreedyMesher implements Mesher {
                         }
                         Block newBlk = blks[newX][y];
                         float newll = lls[newX][y];
-                        if(newBlk == blk && newll == ll && !used[x][y]) {
+                        if(newBlk == blk && newll == ll && !used[newX][y]) {
                             endX++;
-                            used[x][y] = true;
+                            used[newX][y] = true;
                         } else {
                             while(true) {
                                 if(endY == height)break;

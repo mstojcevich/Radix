@@ -1,7 +1,11 @@
-varying vec3 normal;
-varying vec3 position;
-varying vec4 color;
-varying float blockId;
+# version 130
+
+in vec3 normal;
+in vec3 position;
+in vec4 color;
+in float blockId;
+
+out vec4 fragColor;
 
 uniform sampler2D normalTexture;
 
@@ -88,16 +92,16 @@ vec3 gamma(vec3 color){
 void main() {
     vec2 uvMult = fract(vec2(dot(normal.zxy, position),
                            dot(normal.yzx, position)));
-    vec2 uvStart = vec2(float(mod(int(blockId), blocksPerRow))*uPerBlock, float(int(blockId) / (blocksPerRow))*vPerBlock);
+    vec2 uvStart = vec2(mod(blockId, float(blocksPerRow))*uPerBlock, float(int(round(blockId) / float(blocksPerRow)))*vPerBlock);
     vec2 tc = uvStart+vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
 
-    gl_FragColor = color;
+    fragColor = color;
     if(enableTexturing > 0) {
-        gl_FragColor *= texture2D(normalTexture, tc);
+        fragColor *= texture2D(normalTexture, tc);
     }
     if(enableLighting > 0) {
         vec3 light = gamma(sh_light(normal, beach));
         vec4 fouredLight = vec4(light.r, light.g, light.b, 1.0);
-        gl_FragColor *= fouredLight;
+        fragColor *= fouredLight;
     }
 }

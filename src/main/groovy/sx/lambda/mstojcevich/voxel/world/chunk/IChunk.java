@@ -33,7 +33,7 @@ public interface IChunk extends Serializable {
 
     void renderWater();
 
-    int[][][] blocksToIdInt();
+    int[] blocksToIdInt();
 
     void eachBlock(Closure action);
 

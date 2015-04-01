@@ -163,14 +163,16 @@ public class GreedyMesher implements Mesher {
         FloatBuffer posBuffer = BufferUtils.createFloatBuffer(faces.size()*4*3);
         FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(faces.size()*4*(useAlpha?4:3));
         FloatBuffer normalBuffer = BufferUtils.createFloatBuffer(faces.size()*4*3);
+        FloatBuffer blockIdBuffer = BufferUtils.createFloatBuffer(faces.size()*4);
         for(Face f : faces) {
-            f.render(posBuffer, colorBuffer, normalBuffer);
+            f.render(posBuffer, colorBuffer, normalBuffer, blockIdBuffer);
         }
         posBuffer.flip();
         colorBuffer.flip();
         normalBuffer.flip();
+        blockIdBuffer.flip();
 
-        return new MeshResult(posBuffer, colorBuffer, useAlpha, normalBuffer);
+        return new MeshResult(posBuffer, colorBuffer, useAlpha, normalBuffer, blockIdBuffer);
     }
 
     /**
@@ -256,27 +258,27 @@ public class GreedyMesher implements Mesher {
             this.side = side;
         }
 
-        public void render(FloatBuffer positions, FloatBuffer colors, FloatBuffer normals) {
+        public void render(FloatBuffer positions, FloatBuffer colors, FloatBuffer normals, FloatBuffer blockIds) {
             IBlockRenderer renderer = block.getRenderer();
 
             switch(side) {
                 case TOP:
-                    renderer.renderTop(x1, y1, x2, y2, z+1, lightLevel, positions, normals, colors);
+                    renderer.renderTop(x1, y1, x2, y2, z+1, lightLevel, positions, normals, colors, blockIds);
                     break;
                 case BOTTOM:
-                    renderer.renderBottom(x1, y1, x2, y2, z, lightLevel, positions, normals, colors);
+                    renderer.renderBottom(x1, y1, x2, y2, z, lightLevel, positions, normals, colors, blockIds);
                     break;
                 case NORTH:
-                    renderer.renderNorth(x1, y1, x2, y2, z+1, lightLevel, positions, normals, colors);
+                    renderer.renderNorth(x1, y1, x2, y2, z+1, lightLevel, positions, normals, colors, blockIds);
                     break;
                 case SOUTH:
-                    renderer.renderSouth(x1, y1, x2, y2, z, lightLevel, positions, normals, colors);
+                    renderer.renderSouth(x1, y1, x2, y2, z, lightLevel, positions, normals, colors, blockIds);
                     break;
                 case EAST:
-                    renderer.renderEast(x1, y1, x2, y2, z+1, lightLevel, positions, normals, colors);
+                    renderer.renderEast(x1, y1, x2, y2, z+1, lightLevel, positions, normals, colors, blockIds);
                     break;
                 case WEST:
-                    renderer.renderWest(x1, y1, x2, y2, z, lightLevel, positions, normals, colors);
+                    renderer.renderWest(x1, y1, x2, y2, z, lightLevel, positions, normals, colors, blockIds);
                     break;
             }
         }

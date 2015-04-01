@@ -226,6 +226,7 @@ public class PlainMesher implements Mesher {
         FloatBuffer vertexPosData = BufferUtils.createFloatBuffer(visibleSideCount * 4 * 3);
         FloatBuffer normalData = BufferUtils.createFloatBuffer(visibleSideCount*4*3);
         FloatBuffer colorData = BufferUtils.createFloatBuffer(visibleSideCount*4*(useAlpha ? 4 : 3));
+        FloatBuffer idData = BufferUtils.createFloatBuffer(visibleSideCount*4);
 
         int width = blockList.length;
         int height = blockList[0].length;
@@ -240,7 +241,7 @@ public class PlainMesher implements Mesher {
                             firstBlock = true;
                         }
                         block.getRenderer().renderVBO(chunk, x, y, z, lightLevels,
-                                vertexPosData, normalData, colorData,
+                                vertexPosData, normalData, colorData, idData,
                                 shouldRenderTop[x][y][z], shouldRenderBottom[x][y][z],
                                 shouldRenderLeft[x][y][z], shouldRenderRight[x][y][z],
                                 shouldRenderFront[x][y][z], shouldRenderBack[x][y][z]);
@@ -251,8 +252,9 @@ public class PlainMesher implements Mesher {
         vertexPosData.flip();
         normalData.flip();
         colorData.flip();
+        idData.flip();
 
-        return new MeshResult(vertexPosData, colorData, useAlpha, normalData);
+        return new MeshResult(vertexPosData, colorData, useAlpha, normalData, idData);
     }
 
 }

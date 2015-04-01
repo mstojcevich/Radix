@@ -9,7 +9,7 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // POSITIVE Z
 
         posBuffer.put(new float[] {
@@ -30,10 +30,13 @@ public class WaterRenderer extends NormalBlockRenderer {
             }
             colorBuffer.put(0.6f);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // NEGATIVE Z
 
         posBuffer.put(new float[]{
@@ -55,10 +58,13 @@ public class WaterRenderer extends NormalBlockRenderer {
             }
             colorBuffer.put(0.6f);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // NEGATIVE X
 
         posBuffer.put(new float[]{
@@ -79,10 +85,13 @@ public class WaterRenderer extends NormalBlockRenderer {
             }
             colorBuffer.put(0.6f);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // POSITIVE X
 
         posBuffer.put(new float[]{
@@ -103,10 +112,13 @@ public class WaterRenderer extends NormalBlockRenderer {
             }
             colorBuffer.put(0.6f);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // POSITIVE Y
 
         posBuffer.put(new float[]{
@@ -128,10 +140,13 @@ public class WaterRenderer extends NormalBlockRenderer {
             }
             colorBuffer.put(0.6f);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // NEGATIVE Y
 
         posBuffer.put(new float[]{
@@ -152,6 +167,9 @@ public class WaterRenderer extends NormalBlockRenderer {
                 colorBuffer.put(lightLevel);
             }
             colorBuffer.put(0.6f);
+        }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
         }
     }
 

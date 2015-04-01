@@ -1,5 +1,3 @@
-# version 130
-
 varying vec3 normal;
 varying vec3 position;
 varying vec4 color;
@@ -90,7 +88,7 @@ vec3 gamma(vec3 color){
 void main() {
     vec2 uvMult = fract(vec2(dot(normal.zxy, position),
                            dot(normal.yzx, position)));
-    vec2 uvStart = vec2(float(mod(int(blockId), blocksPerRow+1))*uPerBlock, float(int(blockId) / (blocksPerRow+1))*vPerBlock);
+    vec2 uvStart = vec2(float(mod(int(blockId), blocksPerRow))*uPerBlock, float(int(blockId) / (blocksPerRow))*vPerBlock);
     vec2 tc = uvStart+vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
 
     gl_FragColor = color;

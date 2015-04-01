@@ -110,4 +110,8 @@ class ShaderManager {
         }
     }
 
+    public int getBlockIdAttr() {
+        return blockIdAttr
+    }
+
 }

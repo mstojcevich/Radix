@@ -240,7 +240,9 @@ public class PlainMesher implements Mesher {
                         if(!firstBlock) {
                             firstBlock = true;
                         }
-                        block.getRenderer().renderVBO(chunk, x, y, z, lightLevels,
+                        block.getRenderer().renderVBO(chunk,
+                                x+chunk.getStartPosition().x, y+chunk.getStartPosition().y, z+chunk.getStartPosition().z,
+                                lightLevels,
                                 vertexPosData, normalData, colorData, idData,
                                 shouldRenderTop[x][y][z], shouldRenderBottom[x][y][z],
                                 shouldRenderLeft[x][y][z], shouldRenderRight[x][y][z],

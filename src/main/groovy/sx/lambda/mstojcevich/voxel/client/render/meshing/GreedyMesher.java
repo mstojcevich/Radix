@@ -63,8 +63,8 @@ public class GreedyMesher implements Mesher {
                     }
                 }
             }
-            greedy(faces, Side.TOP, topBlocks, topLightLevels, y);
-            greedy(faces, Side.BOTTOM, btmBlocks, btmLightLevels, y);
+            greedy(faces, Side.TOP, topBlocks, topLightLevels, y+chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
+            greedy(faces, Side.BOTTOM, btmBlocks, btmLightLevels, y+chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
         }
 
         // East, west
@@ -109,8 +109,8 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.EAST, eastBlocks, eastLightLevels, x);
-            greedy(faces, Side.WEST, westBlocks, westLightLevels, x);
+            greedy(faces, Side.EAST, eastBlocks, eastLightLevels, x+chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.WEST, westBlocks, westLightLevels, x+chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
         }
 
         // North, south
@@ -156,8 +156,8 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.NORTH, northBlocks, northLightLevels, z);
-            greedy(faces, Side.SOUTH, southBlocks, southLightLevels, z);
+            greedy(faces, Side.NORTH, northBlocks, northLightLevels, z+chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
+            greedy(faces, Side.SOUTH, southBlocks, southLightLevels, z+chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
         }
 
         FloatBuffer posBuffer = BufferUtils.createFloatBuffer(faces.size()*4*3);
@@ -183,7 +183,7 @@ public class GreedyMesher implements Mesher {
      * @param lls Light levels of the blocks
      * @param z Depth on the plane
      */
-    private void greedy(List<Face> outputList, Side side, Block[][] blks, float lls[][], int z) {
+    private void greedy(List<Face> outputList, Side side, Block[][] blks, float lls[][], int z, int offsetX, int offsetY) {
         int width = blks.length;
         int height = blks[0].length;
         boolean[][] used = new boolean[blks.length][blks[0].length];
@@ -227,7 +227,7 @@ public class GreedyMesher implements Mesher {
                             break;
                         }
                     }
-                    outputList.add(new Face(side, blk, ll, startX, startY, endX, endY, z));
+                    outputList.add(new Face(side, blk, ll, startX+offsetX, startY+offsetY, endX+offsetX, endY+offsetY, z));
                 }
             }
         }

@@ -39,7 +39,6 @@ class ObjModel {
             if(!m.hasNormals()) {
                 glEnableClientState(GL_NORMAL_ARRAY)
             }
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY)
             glEnableClientState(GL_COLOR_ARRAY)
         }
     }

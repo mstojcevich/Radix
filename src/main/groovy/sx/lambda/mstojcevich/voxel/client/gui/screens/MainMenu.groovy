@@ -109,7 +109,6 @@ public class MainMenu extends VboBufferedGuiScreen {
         VoxelGame.instance.guiShader.disableTexturing()
 
         GL11.glEnableClientState(GL11.GL_NORMAL_ARRAY)
-        GL11.glEnableClientState(GL11.GL_TEXTURE_COORD_ARRAY)
     }
 
     @Override

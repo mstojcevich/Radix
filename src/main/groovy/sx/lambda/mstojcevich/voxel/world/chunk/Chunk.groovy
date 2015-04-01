@@ -2,7 +2,6 @@ package sx.lambda.mstojcevich.voxel.world.chunk
 
 import groovy.transform.CompileStatic
 import org.lwjgl.BufferUtils
-import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL15
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.api.events.render.EventChunkRender
@@ -12,7 +11,6 @@ import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.client.render.meshing.GreedyMesher
 import sx.lambda.mstojcevich.voxel.client.render.meshing.MeshResult
 import sx.lambda.mstojcevich.voxel.client.render.meshing.Mesher
-import sx.lambda.mstojcevich.voxel.client.render.meshing.PlainMesher
 import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.world.IWorld
 
@@ -121,20 +119,17 @@ public class Chunk implements IChunk {
         }
 
         if(vboVertexHandle == -1 || vboVertexHandle == 0) {
-            IntBuffer buffer = BufferUtils.createIntBuffer(8)
+            IntBuffer buffer = BufferUtils.createIntBuffer(6)
             GL15.glGenBuffers(buffer)
             vboVertexHandle = buffer.get(0)
-            vboTextureHandle = buffer.get(1)
-            vboNormalHandle = buffer.get(2)
-            vboColorHandle = buffer.get(3)
-            liquidVboVertexHandle = buffer.get(4)
-            liquidVboTextureHandle = buffer.get(5)
-            liquidVboNormalHandle = buffer.get(6)
-            liquidVboColorHandle = buffer.get(7)
+            vboNormalHandle = buffer.get(1)
+            vboColorHandle = buffer.get(2)
+            liquidVboVertexHandle = buffer.get(3)
+            liquidVboNormalHandle = buffer.get(4)
+            liquidVboColorHandle = buffer.get(5)
 
             glEnableClientState(GL_NORMAL_ARRAY)
             glEnableClientState(GL_VERTEX_ARRAY)
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY)
             glEnableClientState(GL_COLOR_ARRAY)
 
             setup = true
@@ -160,8 +155,8 @@ public class Chunk implements IChunk {
         opaqueVertexCount = (int)(opaqueResult.vertices.capacity()/3)
         transparentVertexCount = (int)(transparentResult.vertices.capacity()/3)
 
-        opaqueResult.putInVBO(vboVertexHandle, vboColorHandle, vboTextureHandle, vboNormalHandle)
-        transparentResult.putInVBO(liquidVboVertexHandle, liquidVboColorHandle, liquidVboTextureHandle, liquidVboNormalHandle)
+        opaqueResult.putInVBO(vboVertexHandle, vboColorHandle, vboNormalHandle)
+        transparentResult.putInVBO(liquidVboVertexHandle, liquidVboColorHandle, liquidVboNormalHandle)
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
 
@@ -217,9 +212,6 @@ public class Chunk implements IChunk {
             glPolygonOffset(1f, 0.7f)
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
             glVertexPointer(3, GL_FLOAT, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboTextureHandle)
-            glTexCoordPointer(2, GL_FLOAT, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboNormalHandle)
             glNormalPointer(GL_FLOAT, 0, 0)

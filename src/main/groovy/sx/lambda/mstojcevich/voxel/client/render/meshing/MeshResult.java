@@ -12,7 +12,6 @@ public class MeshResult {
     private final FloatBuffer vertices;
     private final FloatBuffer colors;
     private final FloatBuffer normals;
-    private final FloatBuffer textureCoords;
 
     private final boolean alpha;
 
@@ -24,11 +23,10 @@ public class MeshResult {
      * @param normals Flipped FloatBuffer representing mesh vertex normals
      * @param textureCoords Flipped FloatBuffer representing vertex texture coordinates
      */
-    public MeshResult(FloatBuffer vertices, FloatBuffer colors, boolean alpha, FloatBuffer normals, FloatBuffer textureCoords) {
+    public MeshResult(FloatBuffer vertices, FloatBuffer colors, boolean alpha, FloatBuffer normals) {
         this.vertices = vertices;
         this.colors = colors;
         this.normals = normals;
-        this.textureCoords = textureCoords;
         this.alpha = alpha;
     }
 
@@ -40,10 +38,6 @@ public class MeshResult {
         return this.colors;
     }
 
-    public FloatBuffer getTextureCoords() {
-        return this.textureCoords;
-    }
-
     public FloatBuffer getNormals() {
         return this.normals;
     }
@@ -52,12 +46,9 @@ public class MeshResult {
         return this.alpha ? 4 : 3;
     }
 
-    public void putInVBO(int vertexVbo, int colorVbo, int textureCoordVbo, int normalVbo) {
+    public void putInVBO(int vertexVbo, int colorVbo, int normalVbo) {
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexVbo);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, getVertices(), GL15.GL_STATIC_DRAW);
-
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, textureCoordVbo);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, getTextureCoords(), GL15.GL_STATIC_DRAW);
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, normalVbo);
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, getNormals(), GL15.GL_STATIC_DRAW);

@@ -8,6 +8,7 @@ import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -163,16 +164,16 @@ public class GreedyMesher implements Mesher {
         FloatBuffer posBuffer = BufferUtils.createFloatBuffer(faces.size()*4*3);
         FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(faces.size()*4*(useAlpha?4:3));
         FloatBuffer normalBuffer = BufferUtils.createFloatBuffer(faces.size()*4*3);
-        FloatBuffer texCoordBuffer = BufferUtils.createFloatBuffer(faces.size()*4*2);
+        IntBuffer idBuffer = BufferUtils.createIntBuffer(faces.size()*4);
         for(Face f : faces) {
-            f.render(posBuffer, colorBuffer, normalBuffer, texCoordBuffer);
+            f.render(posBuffer, colorBuffer, normalBuffer, idBuffer);
         }
         posBuffer.flip();
         colorBuffer.flip();
         normalBuffer.flip();
-        texCoordBuffer.flip();
+        idBuffer.flip();
 
-        return new MeshResult(posBuffer, colorBuffer, useAlpha, normalBuffer, texCoordBuffer);
+        return new MeshResult(posBuffer, colorBuffer, useAlpha, normalBuffer, idBuffer);
     }
 
     /**
@@ -258,27 +259,27 @@ public class GreedyMesher implements Mesher {
             this.side = side;
         }
 
-        public void render(FloatBuffer positions, FloatBuffer colors, FloatBuffer normals, FloatBuffer texCoords) {
+        public void render(FloatBuffer positions, FloatBuffer colors, FloatBuffer normals, IntBuffer idBuffer) {
             IBlockRenderer renderer = block.getRenderer();
 
             switch(side) {
                 case TOP:
-                    renderer.renderTop(x1, y1, x2, y2, z+1, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderTop(x1, y1, x2, y2, z+1, lightLevel, positions, idBuffer, normals, colors);
                     break;
                 case BOTTOM:
-                    renderer.renderBottom(x1, y1, x2, y2, z, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderBottom(x1, y1, x2, y2, z, lightLevel, positions, idBuffer, normals, colors);
                     break;
                 case NORTH:
-                    renderer.renderNorth(x1, y1, x2, y2, z+1, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderNorth(x1, y1, x2, y2, z+1, lightLevel, positions, idBuffer, normals, colors);
                     break;
                 case SOUTH:
-                    renderer.renderSouth(x1, y1, x2, y2, z, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderSouth(x1, y1, x2, y2, z, lightLevel, positions, idBuffer, normals, colors);
                     break;
                 case EAST:
-                    renderer.renderEast(x1, y1, x2, y2, z+1, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderEast(x1, y1, x2, y2, z+1, lightLevel, positions, idBuffer, normals, colors);
                     break;
                 case WEST:
-                    renderer.renderWest(x1, y1, x2, y2, z, lightLevel, positions, texCoords, normals, colors);
+                    renderer.renderWest(x1, y1, x2, y2, z, lightLevel, positions, idBuffer, normals, colors);
                     break;
             }
         }

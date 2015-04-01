@@ -3,6 +3,7 @@ package sx.lambda.mstojcevich.voxel.block;
 import sx.lambda.mstojcevich.voxel.world.chunk.IChunk;
 
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 public class WaterRenderer extends NormalBlockRenderer {
 
@@ -11,11 +12,8 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, IntBuffer idBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
         // POSITIVE Z
-
-        float u2 = u+TEXTURE_PERCENTAGE-.001f;
-        float v2 = v+TEXTURE_PERCENTAGE-.001f;
 
         posBuffer.put(new float[] {
                 x1, y1, z,
@@ -23,11 +21,8 @@ public class WaterRenderer extends NormalBlockRenderer {
                 x2, y2, z,
                 x1, y2, z,
         });
-        texBuffer.put(new float[] {
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
+        idBuffer.put(new int[]{
+                blockID, blockID, blockID, blockID
         });
         normBuffer.put(new float[]{
                 0, 0, 1,
@@ -44,11 +39,8 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, IntBuffer idBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
         // NEGATIVE Z
-
-        float u2 = u+TEXTURE_PERCENTAGE-.001f;
-        float v2 = v+TEXTURE_PERCENTAGE-.001f;
 
         posBuffer.put(new float[]{
                 // Bottom
@@ -57,11 +49,8 @@ public class WaterRenderer extends NormalBlockRenderer {
                 x1, y2, z,
                 x2, y2, z
         });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
+        idBuffer.put(new int[]{
+                blockID, blockID, blockID, blockID
         });
         normBuffer.put(new float[]{
                 0, 0, -1,
@@ -69,7 +58,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 0, 0, -1,
                 0, 0, -1,
         });
-        for(int j = 0; j < 4; j++) {
+        for(int j = 0; j < 3; j++) {
             for (int i = 0; i < 3; i++) {
                 colorBuffer.put(lightLevel);
             }
@@ -78,23 +67,17 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, IntBuffer idBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
         // NEGATIVE X
 
-        float u2 = u+TEXTURE_PERCENTAGE - .001f;
-        float v2 = v + TEXTURE_PERCENTAGE - .001f;
-
         posBuffer.put(new float[]{
                 x, y1, z1,
                 x, y1, z2,
                 x, y2, z2,
                 x, y2, z1,
         });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
+        idBuffer.put(new int[]{
+                blockID, blockID, blockID, blockID
         });
         normBuffer.put(new float[]{
                 -1, 0, 0,
@@ -102,7 +85,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 -1, 0, 0,
                 -1, 0, 0,
         });
-        for(int j = 0; j < 4; j++) {
+        for(int j = 0; j < 3; j++) {
             for (int i = 0; i < 3; i++) {
                 colorBuffer.put(lightLevel);
             }
@@ -111,23 +94,17 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, IntBuffer idBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
         // POSITIVE X
 
-        float u2 = u+TEXTURE_PERCENTAGE - .001f;
-        float v2 = v + TEXTURE_PERCENTAGE - .001f;
-
         posBuffer.put(new float[]{
                 x, y1, z1,
                 x, y2, z1,
                 x, y2, z2,
                 x, y1, z2,
         });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
+        idBuffer.put(new int[]{
+                blockID, blockID, blockID, blockID
         });
         normBuffer.put(new float[]{
                 1, 0, 0,
@@ -135,7 +112,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 1, 0, 0,
                 1, 0, 0,
         });
-        for(int j = 0; j < 4; j++) {
+        for(int j = 0; j < 3; j++) {
             for (int i = 0; i < 3; i++) {
                 colorBuffer.put(lightLevel);
             }
@@ -144,11 +121,8 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, IntBuffer idBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
         // POSITIVE Y
-
-        float u2 = u+TEXTURE_PERCENTAGE - .001f;
-        float v2 = v + TEXTURE_PERCENTAGE - .001f;
 
         posBuffer.put(new float[]{
                 // Back
@@ -157,11 +131,8 @@ public class WaterRenderer extends NormalBlockRenderer {
                 x1, y, z2,
                 x2, y, z2,
         });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
+        idBuffer.put(new int[]{
+                blockID, blockID, blockID, blockID
         });
         normBuffer.put(new float[]{
                 0, 1, 0,
@@ -169,7 +140,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 0, 1, 0,
                 0, 1, 0,
         });
-        for(int j = 0; j < 4; j++) {
+        for(int j = 0; j < 3; j++) {
             for (int i = 0; i < 3; i++) {
                 colorBuffer.put(lightLevel);
             }
@@ -178,11 +149,8 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, IntBuffer idBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
         // NEGATIVE Y
-
-        float u2 = u+TEXTURE_PERCENTAGE - .001f;
-        float v2 = v + TEXTURE_PERCENTAGE - .001f;
 
         posBuffer.put(new float[]{
                 // Front
@@ -191,11 +159,8 @@ public class WaterRenderer extends NormalBlockRenderer {
                 x2, y, z2,
                 x1, y, z2,
         });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
+        idBuffer.put(new int[]{
+                blockID, blockID, blockID, blockID
         });
         normBuffer.put(new float[]{
                 0, -1, 0,
@@ -203,7 +168,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 0, -1, 0,
                 0, -1, 0,
         });
-        for(int j = 0; j < 4; j++) {
+        for(int j = 0; j < 3; j++) {
             for (int i = 0; i < 3; i++) {
                 colorBuffer.put(lightLevel);
             }

@@ -17,6 +17,7 @@ class ShaderManager {
     private int animTimeLoc = -1
     private int enableWaveLoc = -1
     private int chunkOffsetLoc = -1
+    private int blockIdAttr = -1
 
     private ShaderProgram currentProgram
 
@@ -34,6 +35,7 @@ class ShaderManager {
             this.animTimeLoc = currentProgram.getUniformLocation("animTime")
             this.enableWaveLoc = currentProgram.getUniformLocation("enableWave")
             this.chunkOffsetLoc = currentProgram.getUniformLocation("chunkOffset")
+            this.blockIdAttr = currentProgram.getAttributeLocation("blockIdAttr")
 
             updateScreenSize()
         }

@@ -1,12 +1,19 @@
-uniform sampler2D texSampler;
 varying vec3 normal;
-varying vec2 texCoord;
-uniform vec3 chunkOffset;
+varying vec3 position;
+varying vec4 color;
+varying float blockId;
 
+uniform sampler2D texSampler;
+uniform vec3 chunkOffset;
 uniform int animTime;
 uniform int enableWave;
 
+attribute float blockIdAttr;
+
 void main() {
+    blockId = blockIdAttr;
+    color = gl_Color;
+    position = gl_Vertex.xyz;
     if(enableWave > 0) {
         vec4 pos = gl_Vertex;
 
@@ -25,5 +32,4 @@ void main() {
     }
     gl_FrontColor = gl_Color;
     normal = gl_Normal;
-    texCoord = gl_MultiTexCoord0.xy;
 }

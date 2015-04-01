@@ -61,7 +61,7 @@ public class Chunk implements IChunk {
      */
     private final float[] lightLevelMap = new float[17]
 
-    public Chunk(IWorld world, Vec3i startPosition, int[] ids) {
+    public Chunk(IWorld world, Vec3i startPosition, int[][][] ids) {
         this.parentWorld = world
         this.startPosition = startPosition
         this.size = world.getChunkSize()
@@ -391,17 +391,16 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public int[] blocksToIdInt() {
-        int[] ints = new int[size*highestPoint+1*size]
+    public int[][][] blocksToIdInt() {
+        int[][][] ints = new int[size][highestPoint+1][size]
         for(int x = 0; x < size; x++) {
             for(int y = 0; y <= highestPoint; y++) {
                 for(int z = 0; z < size; z++) {
-                    int index = x*height*size + y*size + z;
                     Block b = blockList[x][y][z]
                     if(b == null) {
-                        ints[index] = -1
+                        ints[x][y][z] = -1
                     } else {
-                        ints[index] = b.ID
+                        ints[x][y][z] = b.ID
                     }
                 }
             }
@@ -409,18 +408,22 @@ public class Chunk implements IChunk {
         return ints
     }
 
-    private void loadIdInts(int[] ints) {
+    private void loadIdInts(int[][][] ints) {
+        int width = ints.length
+        int ht = ints[0].length
+        int length = ints[0][0].length
         Block[][][] blocks = new Block[size][height][size]
-        for(int t = 0; t < ints.length; t++) {
-            int z = t % size;
-            int y = (t / size) % height;
-            int x = t / (height * size);
-            int id = ints[t]
-            if(id > -1) {
-                for (Block b : Block.values()) {
-                    if (b.ID == id) {
-                        highestPoint = Math.max(highestPoint, y)
-                        blocks[x][y][z] = b
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < ht; y++) {
+                for(int z = 0; z < length; z++) {
+                    int id = ints[x][y][z]
+                    if(id > -1) {
+                        for(Block b : Block.values()) {
+                            if(b.ID == id) {
+                                highestPoint = Math.max(highestPoint, y)
+                                blocks[x][y][z] = b
+                            }
+                        }
                     }
                 }
             }

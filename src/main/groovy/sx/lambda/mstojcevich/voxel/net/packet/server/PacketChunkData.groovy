@@ -11,7 +11,7 @@ import sx.lambda.mstojcevich.voxel.world.chunk.IChunk
 @CompileStatic
 class PacketChunkData implements ServerPacket {
 
-    private final int[] ids
+    private final int[][][] ids
     private final int x, y, z
 
     public PacketChunkData(IChunk chunk) {

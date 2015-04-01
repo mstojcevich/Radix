@@ -17,11 +17,6 @@ class ShaderManager {
     private int animTimeLoc = -1
     private int enableWaveLoc = -1
     private int chunkOffsetLoc = -1
-    private int blocksPerTexMapRowLoc = -1
-    private int texMapBlockWidthLoc = -1
-    private int texMapWidthLoc = -1
-    private int texMapHeightLoc = -1
-    private int blockIdAttrLoc = -1
 
     private ShaderProgram currentProgram
 
@@ -39,11 +34,6 @@ class ShaderManager {
             this.animTimeLoc = currentProgram.getUniformLocation("animTime")
             this.enableWaveLoc = currentProgram.getUniformLocation("enableWave")
             this.chunkOffsetLoc = currentProgram.getUniformLocation("chunkOffset")
-            this.texMapBlockWidthLoc = currentProgram.getUniformLocation("texMapBlockWidth")
-            this.texMapWidthLoc = currentProgram.getUniformLocation("texMapWidth")
-            this.texMapHeightLoc = currentProgram.getUniformLocation("texMapHeight")
-            this.blocksPerTexMapRowLoc = currentProgram.getUniformLocation("blocksPerTexMapRow")
-            this.blockIdAttrLoc = currentProgram.getAttributeLocation("blockID")
 
             updateScreenSize()
         }
@@ -116,26 +106,6 @@ class ShaderManager {
         if (currentShaderID != -1) {
             currentProgram.setUniformf(chunkOffsetLoc, x, y, z);
         }
-    }
-
-    public int getBlockIdAttrLoc() {
-        return blockIdAttrLoc
-    }
-
-    public void setBlocksPerTexmapRow(int num) {
-        currentProgram.setUniformi(blocksPerTexMapRowLoc, num);
-    }
-
-    public void setTexmapWidth(int num) {
-        currentProgram.setUniformi(texMapWidthLoc, num);
-    }
-
-    public void setTexmapHeight(int num) {
-        currentProgram.setUniformi(texMapHeightLoc, num);
-    }
-
-    public void setTexmapBlockWidth(int num) {
-        currentProgram.setUniformi(texMapBlockWidthLoc, num);
     }
 
 }

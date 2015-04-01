@@ -2,8 +2,8 @@ package sx.lambda.mstojcevich.voxel.world.chunk
 
 import groovy.transform.CompileStatic
 import org.lwjgl.BufferUtils
+import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL15
-import org.lwjgl.opengl.GL20
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.api.events.render.EventChunkRender
 import sx.lambda.mstojcevich.voxel.block.Block
@@ -12,6 +12,7 @@ import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.client.render.meshing.GreedyMesher
 import sx.lambda.mstojcevich.voxel.client.render.meshing.MeshResult
 import sx.lambda.mstojcevich.voxel.client.render.meshing.Mesher
+import sx.lambda.mstojcevich.voxel.client.render.meshing.PlainMesher
 import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.world.IWorld
 
@@ -35,12 +36,12 @@ public class Chunk implements IChunk {
     private int highestPoint
 
     private transient int vboVertexHandle = -1
-    private transient int vboBlockIdHandle = -1
+    private transient int vboTextureHandle = -1
     private transient int vboNormalHandle = -1
     private transient int vboColorHandle = -1
 
     private transient int liquidVboVertexHandle = -1
-    private transient int liquidVboIdHandle = -1
+    private transient int liquidVboTextureHandle = -1
     private transient int liquidVboNormalHandle = -1
     private transient int liquidVboColorHandle = -1
 
@@ -72,7 +73,7 @@ public class Chunk implements IChunk {
         sunlightLevels = new int[size][height][size]
 
         if(VoxelGame.instance != null) { // We're a client
-            mesher = new GreedyMesher(this)
+            mesher = new PlainMesher(this)
         } else {
             mesher = null
         }
@@ -97,7 +98,7 @@ public class Chunk implements IChunk {
         sunlightLevels = new int[size][height][size]
 
         if(VoxelGame.instance != null) { // We're a client
-            mesher = new GreedyMesher(this)
+            mesher = new PlainMesher(this)
         } else {
             mesher = null
         }
@@ -123,11 +124,11 @@ public class Chunk implements IChunk {
             IntBuffer buffer = BufferUtils.createIntBuffer(8)
             GL15.glGenBuffers(buffer)
             vboVertexHandle = buffer.get(0)
-            vboBlockIdHandle = buffer.get(1)
+            vboTextureHandle = buffer.get(1)
             vboNormalHandle = buffer.get(2)
             vboColorHandle = buffer.get(3)
             liquidVboVertexHandle = buffer.get(4)
-            liquidVboIdHandle = buffer.get(5)
+            liquidVboTextureHandle = buffer.get(5)
             liquidVboNormalHandle = buffer.get(6)
             liquidVboColorHandle = buffer.get(7)
 
@@ -159,8 +160,8 @@ public class Chunk implements IChunk {
         opaqueVertexCount = (int)(opaqueResult.vertices.capacity()/3)
         transparentVertexCount = (int)(transparentResult.vertices.capacity()/3)
 
-        opaqueResult.putInVBO(vboVertexHandle, vboColorHandle, vboBlockIdHandle, vboNormalHandle)
-        transparentResult.putInVBO(liquidVboVertexHandle, liquidVboColorHandle, liquidVboIdHandle, liquidVboNormalHandle)
+        opaqueResult.putInVBO(vboVertexHandle, vboColorHandle, vboTextureHandle, vboNormalHandle)
+        transparentResult.putInVBO(liquidVboVertexHandle, liquidVboColorHandle, liquidVboTextureHandle, liquidVboNormalHandle)
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
 
@@ -181,8 +182,8 @@ public class Chunk implements IChunk {
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
             glVertexPointer(3, GL_FLOAT, 0, 0)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboBlockIdHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.blockIdAttrLoc, 1, GL_INT, false, 4, 0)
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboTextureHandle)
+            glTexCoordPointer(2, GL_FLOAT, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
             glNormalPointer(GL_FLOAT, 0, 0)
@@ -217,8 +218,8 @@ public class Chunk implements IChunk {
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
             glVertexPointer(3, GL_FLOAT, 0, 0)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboIdHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.blockIdAttrLoc, 1, GL_INT, false, 4, 0)
+            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboTextureHandle)
+            glTexCoordPointer(2, GL_FLOAT, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboNormalHandle)
             glNormalPointer(GL_FLOAT, 0, 0)
@@ -510,11 +511,11 @@ public class Chunk implements IChunk {
     void cleanup() {
         if(setup) {
             GL15.glDeleteBuffers(vboVertexHandle)
-            GL15.glDeleteBuffers(vboBlockIdHandle)
+            GL15.glDeleteBuffers(vboTextureHandle)
             GL15.glDeleteBuffers(vboColorHandle)
             GL15.glDeleteBuffers(vboNormalHandle)
             GL15.glDeleteBuffers(liquidVboVertexHandle)
-            GL15.glDeleteBuffers(liquidVboIdHandle)
+            GL15.glDeleteBuffers(liquidVboTextureHandle)
             GL15.glDeleteBuffers(liquidVboColorHandle)
             GL15.glDeleteBuffers(liquidVboNormalHandle)
         }

@@ -17,17 +17,19 @@ public class NormalBlockRenderer implements IBlockRenderer {
     private static int blockMap;
 
     protected final float u, v;
+    protected final int blockID;
 
     private static boolean initialized;
 
     public NormalBlockRenderer(int blockID) {
+        this.blockID = blockID;
         u = ((blockID%4)*TEXTURE_PERCENTAGE);
         v = ((blockID/4)*TEXTURE_PERCENTAGE);
     }
 
     @Override
     public void renderVBO(IChunk chunk, int x, int y, int z, float[][][] lightLevels,
-                          FloatBuffer vertexBuffer, FloatBuffer textureBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer,
+                          FloatBuffer vertexBuffer, FloatBuffer normalBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer,
                           boolean shouldRenderTop, boolean shouldRenderBottom,
                           boolean shouldRenderLeft, boolean shouldRenderRight,
                           boolean shouldRenderFront, boolean shouldRenderBack) {
@@ -36,17 +38,17 @@ public class NormalBlockRenderer implements IBlockRenderer {
 
         if(shouldRenderTop) {
             float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, y, worldZ+1));
-            renderNorth(x, y, x+1, y+1, z+1, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
+            renderNorth(x, y, x+1, y+1, z+1, usedLightLevel, vertexBuffer, normalBuffer, colorBuffer, idBuffer);
         }
 
         if(shouldRenderLeft) {
             float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX-1, y, worldZ));
-            renderWest(z, y, z+1, y+1, x, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
+            renderWest(z, y, z+1, y+1, x, usedLightLevel, vertexBuffer, normalBuffer, colorBuffer, idBuffer);
         }
 
         if(shouldRenderRight) {
             float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX + 1, y, worldZ));
-            renderEast(z, y, z+1, y+1, x+1, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
+            renderEast(z, y, z+1, y+1, x+1, usedLightLevel, vertexBuffer, normalBuffer, colorBuffer, idBuffer);
         }
 
         if(shouldRenderFront) {
@@ -54,7 +56,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
             if(y-1 > 0) {
                 usedLightLevel = lightLevels[x][y-1][z];
             }
-            renderBottom(x, z, x+1, z+1, y, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
+            renderBottom(x, z, x+1, z+1, y, usedLightLevel, vertexBuffer, normalBuffer, colorBuffer, idBuffer);
         }
 
         if(shouldRenderBack) {
@@ -62,12 +64,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
             if(y+1 < lightLevels[0].length) {
                 usedLightLevel = lightLevels[x][y+1][z];
             }
-            renderTop(x, z, x+1, z+1, y+1, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
+            renderTop(x, z, x+1, z+1, y+1, usedLightLevel, vertexBuffer, normalBuffer, colorBuffer, idBuffer);
         }
 
         if(shouldRenderBottom) {
             float usedLightLevel = chunk.getWorld().getLightLevel(new Vec3i(worldX, y, worldZ-1));
-            renderSouth(x, y, x+1, y+1, z, usedLightLevel, vertexBuffer, textureBuffer, normalBuffer, colorBuffer);
+            renderSouth(x, y, x+1, y+1, z, usedLightLevel, vertexBuffer, normalBuffer, colorBuffer, idBuffer);
         }
     }
 
@@ -82,23 +84,14 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // POSITIVE Z
-
-        float u2 = u+TEXTURE_PERCENTAGE-.001f;
-        float v2 = v+TEXTURE_PERCENTAGE-.001f;
 
         posBuffer.put(new float[] {
                 x1, y1, z,
                 x2, y1, z,
                 x2, y2, z,
                 x1, y2, z,
-        });
-        texBuffer.put(new float[] {
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
         });
         normBuffer.put(new float[]{
                 0, 0, 1,
@@ -109,14 +102,14 @@ public class NormalBlockRenderer implements IBlockRenderer {
         for(int i = 0; i < 4*3; i++) {
             colorBuffer.put(lightLevel);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // NEGATIVE Z
-
-        float u2 = u+TEXTURE_PERCENTAGE-.001f;
-        float v2 = v+TEXTURE_PERCENTAGE-.001f;
 
         posBuffer.put(new float[]{
                 // Bottom
@@ -125,12 +118,6 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 x1, y2, z,
                 x2, y2, z
         });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
-        });
         normBuffer.put(new float[]{
                 0, 0, -1,
                 0, 0, -1,
@@ -140,26 +127,20 @@ public class NormalBlockRenderer implements IBlockRenderer {
         for(int i = 0; i < 4*3; i++) {
             colorBuffer.put(lightLevel);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // NEGATIVE X
 
-        float u2 = u+TEXTURE_PERCENTAGE - .001f;
-        float v2 = v + TEXTURE_PERCENTAGE - .001f;
-
         posBuffer.put(new float[]{
                 x, y1, z1,
                 x, y1, z2,
                 x, y2, z2,
                 x, y2, z1,
-        });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
         });
         normBuffer.put(new float[]{
                 -1, 0, 0,
@@ -170,26 +151,20 @@ public class NormalBlockRenderer implements IBlockRenderer {
         for(int i = 0; i < 4*3; i++) {
             colorBuffer.put(lightLevel);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // POSITIVE X
 
-        float u2 = u+TEXTURE_PERCENTAGE - .001f;
-        float v2 = v + TEXTURE_PERCENTAGE - .001f;
-
         posBuffer.put(new float[]{
                 x, y1, z1,
                 x, y2, z1,
                 x, y2, z2,
                 x, y1, z2,
-        });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
         });
         normBuffer.put(new float[]{
                 1, 0, 0,
@@ -200,14 +175,14 @@ public class NormalBlockRenderer implements IBlockRenderer {
         for(int i = 0; i < 4*3; i++) {
             colorBuffer.put(lightLevel);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // POSITIVE Y
-
-        float u2 = u+TEXTURE_PERCENTAGE - .001f;
-        float v2 = v + TEXTURE_PERCENTAGE - .001f;
 
         posBuffer.put(new float[]{
                 // Back
@@ -216,12 +191,6 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 x1, y, z2,
                 x2, y, z2,
         });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
-        });
         normBuffer.put(new float[]{
                 0, 1, 0,
                 0, 1, 0,
@@ -231,14 +200,14 @@ public class NormalBlockRenderer implements IBlockRenderer {
         for(int i = 0; i < 4*3; i++) {
             colorBuffer.put(lightLevel);
         }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
+        }
     }
 
     @Override
-    public void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer texBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer) {
+    public void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
         // NEGATIVE Y
-
-        float u2 = u+TEXTURE_PERCENTAGE - .001f;
-        float v2 = v + TEXTURE_PERCENTAGE - .001f;
 
         posBuffer.put(new float[]{
                 // Front
@@ -246,12 +215,6 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 x2, y, z1,
                 x2, y, z2,
                 x1, y, z2,
-        });
-        texBuffer.put(new float[]{
-                u, v,
-                u, v2,
-                u2, v2,
-                u2, v,
         });
         normBuffer.put(new float[]{
                 0, -1, 0,
@@ -261,6 +224,9 @@ public class NormalBlockRenderer implements IBlockRenderer {
         });
         for(int i = 0; i < 4*3; i++) {
             colorBuffer.put(lightLevel);
+        }
+        for(int i = 0; i < 4; i++) {
+            idBuffer.put(blockID);
         }
     }
 

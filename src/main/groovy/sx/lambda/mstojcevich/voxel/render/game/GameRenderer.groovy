@@ -36,6 +36,8 @@ class GameRenderer implements Renderer {
     private Frustum frustum = new Frustum()
     private boolean calcFrustum
 
+    private long lastDynamicTextRerenderMS = 0
+
     // The dynamic static renders
     private StaticRender fpsRender, positionRender, headingRender, chunkposRender, awrtRender, lightlevelRender, activeThreadsRender
 
@@ -72,8 +74,9 @@ class GameRenderer implements Renderer {
     void draw2d() {
         if(!initted)init()
 
-        if(System.currentTimeMillis() % 1000 == 0) { // Rerender the dynamic texts every second
+        if(System.currentTimeMillis() - lastDynamicTextRerenderMS >= 1000) { // Rerender the dynamic texts every second
             createDynamicRenderers()
+            lastDynamicTextRerenderMS = System.currentTimeMillis()
         }
 
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {

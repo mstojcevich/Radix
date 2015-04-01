@@ -1,5 +1,7 @@
 varying vec3 normal;
-varying vec2 texCoord;
+varying vec3 position;
+varying vec4 color;
+varying float blockId;
 
 uniform sampler2D normalTexture;
 
@@ -8,6 +10,11 @@ uniform int enableTexturing;
 
 uniform vec2 camerarange;
 uniform vec2 screensize;
+
+const int mapWidth = 128, mapHeight = 128, blockWidth = 32;
+const int blocksPerRow = mapWidth/blockWidth;
+const float uPerBlock = float(blockWidth) / float(mapWidth),
+            vPerBlock = float(blockWidth) / float(mapHeight);
 
 struct SHC{
     vec3 L00, L1m1, L10, L11, L2m2, L2m1, L20, L21, L22;
@@ -79,9 +86,14 @@ vec3 gamma(vec3 color){
 }
 
 void main() {
-    gl_FragColor = gl_Color;
+    vec2 uvMult = fract(vec2(dot(normal.zxy, position),
+                           dot(normal.yzx, position)));
+    vec2 uvStart = vec2(float(mod(int(blockId), blocksPerRow))*uPerBlock, float(int(blockId) / (blocksPerRow))*vPerBlock);
+    vec2 tc = uvStart+vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
+
+    gl_FragColor = color;
     if(enableTexturing > 0) {
-        gl_FragColor *= texture2D(normalTexture, texCoord);
+        gl_FragColor *= texture2D(normalTexture, tc);
     }
     if(enableLighting > 0) {
         vec3 light = gamma(sh_light(normal, beach));

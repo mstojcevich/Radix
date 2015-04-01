@@ -224,9 +224,9 @@ public class PlainMesher implements Mesher {
                             boolean[][][] shouldRenderFront, boolean[][][] shouldRenderBack,
                             float[][][] lightLevels, int visibleSideCount) {
         FloatBuffer vertexPosData = BufferUtils.createFloatBuffer(visibleSideCount * 4 * 3);
-        FloatBuffer textureData = BufferUtils.createFloatBuffer(visibleSideCount*4*2);
         FloatBuffer normalData = BufferUtils.createFloatBuffer(visibleSideCount*4*3);
         FloatBuffer colorData = BufferUtils.createFloatBuffer(visibleSideCount*4*(useAlpha ? 4 : 3));
+        FloatBuffer idData = BufferUtils.createFloatBuffer(visibleSideCount*4);
 
         int width = blockList.length;
         int height = blockList[0].length;
@@ -240,8 +240,10 @@ public class PlainMesher implements Mesher {
                         if(!firstBlock) {
                             firstBlock = true;
                         }
-                        block.getRenderer().renderVBO(chunk, x, y, z, lightLevels,
-                                vertexPosData, textureData, normalData, colorData,
+                        block.getRenderer().renderVBO(chunk,
+                                x+chunk.getStartPosition().x, y+chunk.getStartPosition().y, z+chunk.getStartPosition().z,
+                                lightLevels,
+                                vertexPosData, normalData, colorData, idData,
                                 shouldRenderTop[x][y][z], shouldRenderBottom[x][y][z],
                                 shouldRenderLeft[x][y][z], shouldRenderRight[x][y][z],
                                 shouldRenderFront[x][y][z], shouldRenderBack[x][y][z]);
@@ -250,11 +252,11 @@ public class PlainMesher implements Mesher {
             }
         }
         vertexPosData.flip();
-        textureData.flip();
         normalData.flip();
         colorData.flip();
+        idData.flip();
 
-        return new MeshResult(vertexPosData, colorData, useAlpha, normalData, textureData);
+        return new MeshResult(vertexPosData, colorData, useAlpha, normalData, idData);
     }
 
 }

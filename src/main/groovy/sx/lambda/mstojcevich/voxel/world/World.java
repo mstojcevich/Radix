@@ -87,18 +87,12 @@ public class World implements IWorld {
 
             for (IChunk c : this.chunkList) {
                 if (VoxelGame.getInstance().getGameRenderer().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
-                    glPushMatrix();
-                    glTranslatef(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z);
                     c.render();
-                    glPopMatrix();
                 }
             }
             for (IChunk c : this.chunkList) {
                 if (VoxelGame.getInstance().getGameRenderer().getFrustum().cubeInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint())) {
-                    glPushMatrix();
-                    glTranslatef(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z);
                     c.renderWater();
-                    glPopMatrix();
                 }
             }
             if(VoxelGame.getInstance().numChunkRenders == 100) {  // Reset every 100 renders

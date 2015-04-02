@@ -232,7 +232,9 @@ public class Chunk implements IChunk {
             GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.normalAttr, 3, GL_FLOAT, false, 0, 0)
 
             glEnableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr);
+            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr);
             glDrawArrays(GL_QUADS, 0, transparentVertexCount)
+            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr);
             glDisableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr);
             glDisable(GL_BLEND)
             VoxelGame.instance.shaderManager.disableWave()

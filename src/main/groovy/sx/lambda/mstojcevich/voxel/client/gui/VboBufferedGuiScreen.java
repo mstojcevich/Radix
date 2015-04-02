@@ -1,6 +1,5 @@
 package sx.lambda.mstojcevich.voxel.client.gui;
 
-import com.sun.istack.internal.Nullable;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -95,7 +94,7 @@ public abstract class VboBufferedGuiScreen implements GuiScreen {
      * @param vertices New vertices (if null, doesn't update vertices)
      * @param colors New colors (if null, doesn't update colors)
      */
-    protected void updateVbo(@Nullable FloatBuffer vertices, @Nullable FloatBuffer colors) {
+    protected void updateVbo(FloatBuffer vertices, FloatBuffer colors) {
         if(vertices != null) {
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vertexVbo);
             GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, vertices);

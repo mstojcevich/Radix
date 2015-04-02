@@ -189,12 +189,14 @@ public class Chunk implements IChunk {
             GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.normalAttr, 3, GL_FLOAT, false, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
-            glColorPointer(3, GL_FLOAT, 0, 0)
+            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.lightingAndAlphaAttr, 1, GL_FLOAT, false, 0, 0)
 
             glEnableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr)
             glEnableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr)
             glEnableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr)
+            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr)
             glDrawArrays(GL_QUADS, 0, opaqueVertexCount)
+            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr)
             glDisableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr)
             glDisableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr)
             glEnableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr)
@@ -228,7 +230,7 @@ public class Chunk implements IChunk {
             GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.normalAttr, 3, GL_FLOAT, false, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboColorHandle)
-            glColorPointer(4, GL_FLOAT, 0, 0)
+            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.lightingAndAlphaAttr, 2, GL_FLOAT, false, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboIdHandle)
             GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.blockIdAttr, 1, GL_FLOAT, false, 0, 0)
@@ -236,7 +238,9 @@ public class Chunk implements IChunk {
             glEnableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr);
             glEnableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr);
             glEnableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr);
+            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr);
             glDrawArrays(GL_QUADS, 0, transparentVertexCount)
+            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr);
             glDisableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr);
             glDisableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr);
             glDisableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr);

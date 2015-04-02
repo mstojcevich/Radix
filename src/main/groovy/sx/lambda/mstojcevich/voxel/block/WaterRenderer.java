@@ -24,10 +24,8 @@ public class WaterRenderer extends NormalBlockRenderer {
                 0, 0, 1,
                 0, 0, 1
         });
-        for(int j = 0; j < 3; j++) {
-            for (int i = 0; i < 3; i++) {
-                colorBuffer.put(lightLevel);
-            }
+        for(int j = 0; j < 4; j++) {
+            colorBuffer.put(lightLevel);
             colorBuffer.put(0.6f);
         }
         for(int i = 0; i < 4; i++) {
@@ -53,9 +51,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 0, 0, -1,
         });
         for(int j = 0; j < 4; j++) {
-            for (int i = 0; i < 3; i++) {
-                colorBuffer.put(lightLevel);
-            }
+            colorBuffer.put(lightLevel);
             colorBuffer.put(0.6f);
         }
         for(int i = 0; i < 4; i++) {
@@ -80,9 +76,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 -1, 0, 0,
         });
         for(int j = 0; j < 4; j++) {
-            for (int i = 0; i < 3; i++) {
-                colorBuffer.put(lightLevel);
-            }
+            colorBuffer.put(lightLevel);
             colorBuffer.put(0.6f);
         }
         for(int i = 0; i < 4; i++) {
@@ -107,9 +101,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 1, 0, 0,
         });
         for(int j = 0; j < 4; j++) {
-            for (int i = 0; i < 3; i++) {
-                colorBuffer.put(lightLevel);
-            }
+            colorBuffer.put(lightLevel);
             colorBuffer.put(0.6f);
         }
         for(int i = 0; i < 4; i++) {
@@ -135,9 +127,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 0, 1, 0,
         });
         for(int j = 0; j < 4; j++) {
-            for (int i = 0; i < 3; i++) {
-                colorBuffer.put(lightLevel);
-            }
+            colorBuffer.put(lightLevel);
             colorBuffer.put(0.6f);
         }
         for(int i = 0; i < 4; i++) {
@@ -163,9 +153,7 @@ public class WaterRenderer extends NormalBlockRenderer {
                 0, -1, 0,
         });
         for(int j = 0; j < 4; j++) {
-            for (int i = 0; i < 3; i++) {
-                colorBuffer.put(lightLevel);
-            }
+            colorBuffer.put(lightLevel);
             colorBuffer.put(0.6f);
         }
         for(int i = 0; i < 4; i++) {

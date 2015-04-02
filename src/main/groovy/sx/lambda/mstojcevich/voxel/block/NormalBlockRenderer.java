@@ -99,7 +99,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 0, 0, 1,
                 0, 0, 1
         });
-        for(int i = 0; i < 4*3; i++) {
+        for(int i = 0; i < 4; i++) {
             colorBuffer.put(lightLevel);
         }
         for(int i = 0; i < 4; i++) {
@@ -124,7 +124,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 0, 0, -1,
                 0, 0, -1,
         });
-        for(int i = 0; i < 4*3; i++) {
+        for(int i = 0; i < 4; i++) {
             colorBuffer.put(lightLevel);
         }
         for(int i = 0; i < 4; i++) {
@@ -148,7 +148,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 -1, 0, 0,
                 -1, 0, 0,
         });
-        for(int i = 0; i < 4*3; i++) {
+        for(int i = 0; i < 4; i++) {
             colorBuffer.put(lightLevel);
         }
         for(int i = 0; i < 4; i++) {
@@ -172,7 +172,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 1, 0, 0,
                 1, 0, 0,
         });
-        for(int i = 0; i < 4*3; i++) {
+        for(int i = 0; i < 4; i++) {
             colorBuffer.put(lightLevel);
         }
         for(int i = 0; i < 4; i++) {
@@ -197,7 +197,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 0, 1, 0,
                 0, 1, 0,
         });
-        for(int i = 0; i < 4*3; i++) {
+        for(int i = 0; i < 4; i++) {
             colorBuffer.put(lightLevel);
         }
         for(int i = 0; i < 4; i++) {
@@ -222,7 +222,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
                 0, -1, 0,
                 0, -1, 0,
         });
-        for(int i = 0; i < 4*3; i++) {
+        for(int i = 0; i < 4; i++) {
             colorBuffer.put(lightLevel);
         }
         for(int i = 0; i < 4; i++) {

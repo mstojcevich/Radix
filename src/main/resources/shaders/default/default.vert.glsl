@@ -17,7 +17,7 @@ attribute float blockIdAttr;
 
 void main() {
     blockId = blockIdAttr;
-    color = gl_Color;
+    color = vec4(vec3(lightingAndAlphaAttr.x), lightingAndAlphaAttr.y);
     position = positionAttr.xyz;
     if(enableWave > 0) {
         vec4 pos = positionAttr;
@@ -35,6 +35,5 @@ void main() {
     } else {
         gl_Position = gl_ModelViewProjectionMatrix*positionAttr;
     }
-    gl_FrontColor = gl_Color;
     normal = normalAttr;
 }

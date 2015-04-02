@@ -164,7 +164,7 @@ public class GreedyMesher implements Mesher {
         }
 
         FloatBuffer posBuffer = BufferUtils.createFloatBuffer(faces.size()*4*3);
-        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(faces.size()*4*(useAlpha?4:3));
+        FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(faces.size()*4*(useAlpha?2:1));
         FloatBuffer normalBuffer = BufferUtils.createFloatBuffer(faces.size()*4*3);
         FloatBuffer blockIdBuffer = BufferUtils.createFloatBuffer(faces.size()*4);
         for(Face f : faces) {

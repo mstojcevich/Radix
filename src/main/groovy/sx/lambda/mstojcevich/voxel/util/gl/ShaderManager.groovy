@@ -17,7 +17,7 @@ class ShaderManager {
     private int animTimeLoc = -1
     private int enableWaveLoc = -1
     private int chunkOffsetLoc = -1
-    private int blockIdAttr = -1
+    private int blockIdAttr = -1, positionAttr = -1, lightingAndAlphaAttr = -1, normalAttr = -1
 
     private ShaderProgram currentProgram
 
@@ -36,6 +36,9 @@ class ShaderManager {
             this.enableWaveLoc = currentProgram.getUniformLocation("enableWave")
             this.chunkOffsetLoc = currentProgram.getUniformLocation("chunkOffset")
             this.blockIdAttr = currentProgram.getAttributeLocation("blockIdAttr")
+            this.positionAttr = currentProgram.getAttributeLocation("positionAttr")
+            this.lightingAndAlphaAttr = currentProgram.getAttributeLocation("lightingAndAlphaAttr")
+            this.normalAttr = currentProgram.getAttributeLocation("normalAttr")
 
             updateScreenSize()
         }
@@ -110,8 +113,9 @@ class ShaderManager {
         }
     }
 
-    public int getBlockIdAttr() {
-        return blockIdAttr
-    }
+    public int getBlockIdAttr() { blockIdAttr }
+    public int getPositionAttr() { positionAttr }
+    public int getLightingAndAlphaAttr() { lightingAndAlphaAttr }
+    public int getNormalAttr() { normalAttr }
 
 }

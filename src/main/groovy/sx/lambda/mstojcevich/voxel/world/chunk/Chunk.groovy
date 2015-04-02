@@ -186,14 +186,16 @@ public class Chunk implements IChunk {
             GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.blockIdAttr, 1, GL_FLOAT, false, 0, 0);
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
-            glNormalPointer(GL_FLOAT, 0, 0)
+            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.normalAttr, 3, GL_FLOAT, false, 0, 0)
 
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
             glColorPointer(3, GL_FLOAT, 0, 0)
 
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr);
+            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr)
+            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr)
             glDrawArrays(GL_QUADS, 0, opaqueVertexCount)
-            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr);
+            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr)
+            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr)
         }
     }
 

@@ -10,7 +10,7 @@ uniform vec3 chunkOffset;
 uniform int animTime;
 uniform int enableWave;
 
-attribute vec3 positionAttr;
+attribute vec4 positionAttr;
 attribute vec2 lightingAndAlphaAttr;
 attribute vec3 normalAttr;
 attribute float blockIdAttr;
@@ -18,9 +18,9 @@ attribute float blockIdAttr;
 void main() {
     blockId = blockIdAttr;
     color = gl_Color;
-    position = gl_Vertex.xyz;
+    position = positionAttr.xyz;
     if(enableWave > 0) {
-        vec4 pos = gl_Vertex;
+        vec4 pos = positionAttr;
 
         float waveLength = 1.0;
         float waveTime = 0.002;
@@ -33,7 +33,7 @@ void main() {
         pos.y -= sin(posYbuf) * waveHeight + sin(posYbuf / 7.0) * waveHeight;
         gl_Position = gl_ModelViewProjectionMatrix * pos;
     } else {
-        gl_Position = gl_ModelViewProjectionMatrix*gl_Vertex;
+        gl_Position = gl_ModelViewProjectionMatrix*positionAttr;
     }
     gl_FrontColor = gl_Color;
     normal = normalAttr;

@@ -27,7 +27,6 @@ import static org.lwjgl.opengl.GL11.*
 class GameRenderer implements Renderer {
 
     private final VoxelGame game
-    private int sphereList = -1
     private FrameBuffer postProcessFbo
     private FontRenderer debugTextRenderer
 
@@ -62,9 +61,7 @@ class GameRenderer implements Renderer {
         }
         game.getWorld().render()
         VoxelGameAPI.instance.eventManager.push(new EventPostWorldRender())
-        glPushMatrix()
         drawBlockSelection()
-        glPopMatrix()
         renderEntities()
         if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
             postProcessFbo.unbind()
@@ -129,7 +126,6 @@ class GameRenderer implements Renderer {
             postProcessFbo.cleanup()
         }
         debugTextRenderer.destroy()
-        glDeleteLists(sphereList, 0)
         glInfoRender.destroy()
         glInfoRender = null
 
@@ -139,13 +135,6 @@ class GameRenderer implements Renderer {
     @Override
     void init() {
         initted = true
-
-        sphereList = glGenLists(1)
-        glNewList(sphereList, GL_COMPILE)
-        Sphere sp = new Sphere()
-        sp.setDrawStyle GLU.GLU_SILHOUETTE
-        sp.draw(0.5f, 50, 50)
-        glEndList()
 
         new Thread() {
             @Override
@@ -180,25 +169,6 @@ class GameRenderer implements Renderer {
     }
 
     private void drawBlockSelection() {
-        if (game.getSelectedBlock() != null) {
-            glDisable GL_DEPTH_TEST
-            VoxelGame.instance.shaderManager.disableTexturing()
-            VoxelGame.instance.shaderManager.disableLighting()
-            if (game.getSelectedBlock() != null) {
-                glTranslatef((float) (game.getSelectedBlock().x + 0.5f), (float) (game.getSelectedBlock().y + 0.5f), (float) (game.getSelectedBlock().z + 0.5f))
-                glRotatef((float) ((System.currentTimeMillis() % 720) / 2f), 1, 1, 1)
-                try {
-                    Color incr = new Color(Color.HSBtoRGB((float)((((int)(System.currentTimeMillis()*0.1)) % 360) / 360.0f), 1, 1));
-                    glColor3f(incr.getRed()/255.0f as float, incr.getGreen()/255.0f as float, incr.getBlue()/255.0f as float)
-                } catch (Exception e) {
-                    e.printStackTrace()
-                }
-                glCallList(sphereList)
-            }
-            VoxelGame.instance.shaderManager.enableLighting()
-            VoxelGame.instance.shaderManager.enableTexturing()
-            glEnable GL_DEPTH_TEST
-        }
     }
 
     private void renderEntities() {

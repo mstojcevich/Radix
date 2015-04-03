@@ -172,17 +172,16 @@ class GameRenderer implements Renderer {
     }
 
     private void renderEntities() {
-        VoxelGame.instance.shaderManager.disableTexturing()
-        VoxelGame.instance.shaderManager.disableLighting()
-        glColor3f(1, 1, 1)
+        VoxelGame.instance.worldShader.disableTexturing()
+        VoxelGame.instance.worldShader.disableLighting()
         for(Entity e : game.world.loadedEntities) {
             if(e != null && e != game.player) {
                 e.render()
                 VoxelGameAPI.instance.eventManager.push(new EventEntityRender(e))
             }
         }
-        VoxelGame.instance.shaderManager.enableLighting()
-        VoxelGame.instance.shaderManager.enableTexturing()
+        VoxelGame.instance.worldShader.enableLighting()
+        VoxelGame.instance.worldShader.enableTexturing()
     }
 
     public void calculateFrustum() {

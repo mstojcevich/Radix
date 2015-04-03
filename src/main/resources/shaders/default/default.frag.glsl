@@ -12,9 +12,6 @@ uniform sampler2D normalTexture;
 uniform int enableLighting;
 uniform int enableTexturing;
 
-uniform vec2 camerarange;
-uniform vec2 screensize;
-
 const int mapWidth = 128, mapHeight = 128, blockWidth = 32;
 const int blocksPerRow = mapWidth/blockWidth;
 const float uPerBlock = float(blockWidth) / float(mapWidth),

@@ -22,6 +22,7 @@ import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.settings.SettingsManager
 import sx.lambda.mstojcevich.voxel.shader.GuiShader
 import sx.lambda.mstojcevich.voxel.shader.PostProcessShader
+import sx.lambda.mstojcevich.voxel.shader.WorldShader
 import sx.lambda.mstojcevich.voxel.tasks.EntityUpdater
 import sx.lambda.mstojcevich.voxel.tasks.InputHandler
 import sx.lambda.mstojcevich.voxel.tasks.LightUpdater
@@ -87,7 +88,7 @@ public class VoxelGame {
 
     private Renderer renderer
 
-    private ShaderProgram defaultShader
+    private WorldShader defaultShader
     private PostProcessShader postProcessShader
     private GuiShader guiShader
 
@@ -167,7 +168,7 @@ public class VoxelGame {
         glEnable GL_CULL_FACE
         glFrontFace GL_CCW
 
-        defaultShader = createShader("default", ShaderProgram.class)
+        defaultShader = createShader("default", WorldShader.class)
         postProcessShader = createShader("post-process", PostProcessShader.class)
         guiShader = createShader("gui", GuiShader.class)
 
@@ -178,10 +179,6 @@ public class VoxelGame {
         long startTime = System.currentTimeMillis()
         try {
             while (!Display.isCloseRequested() && !done) {
-                if(Display.wasResized()) {
-                    shaderManager.updateScreenSize()
-                }
-
                 render()
 
                 Display.update()
@@ -268,7 +265,7 @@ public class VoxelGame {
         glColor4f(1, 1, 1, 1)
         glDisable GL_LIGHTING
         glDisable GL_DEPTH_TEST
-        shaderManager.disableLighting()
+        worldShader.disableLighting()
     }
 
     private void prepareNewFrame() {
@@ -284,7 +281,6 @@ public class VoxelGame {
             camFar = settingsManager.visualSettings.viewDistance * world.chunkSize
         }
         GLU.gluPerspective(100, (float) Display.getWidth() / Display.getHeight(), camNear, camFar)
-        shaderManager.onPerspective(camNear, camFar)
         //Set up camera
 
         glMatrixMode GL_MODELVIEW //Currently altering modelview matrix
@@ -292,9 +288,9 @@ public class VoxelGame {
 
         getTextureManager().bindTexture(-1)
 
-        shaderManager.enableLighting()
+        worldShader.enableLighting()
 
-        shaderManager.setAnimTime((int)(System.currentTimeMillis() % 100000));
+        worldShader.updateAnimTime();
     }
 
     public void updateSelectedBlock() {
@@ -522,6 +518,8 @@ public class VoxelGame {
             Mouse.setGrabbed false
         }
     }
+
+    public WorldShader getWorldShader() { defaultShader }
 
     //TODO move frustum calc, light pos, etc into GameRenderer
 

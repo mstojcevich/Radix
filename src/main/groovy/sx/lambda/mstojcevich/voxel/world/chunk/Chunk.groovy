@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL20
+import org.lwjgl.opengl.GL30
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.api.events.render.EventChunkRender
 import sx.lambda.mstojcevich.voxel.block.Block
@@ -40,11 +41,13 @@ public class Chunk implements IChunk {
     private transient int vboIdHandle = -1
     private transient int vboNormalHandle = -1
     private transient int vboColorHandle = -1
+    private transient int vao = -1
 
     private transient int liquidVboVertexHandle = -1
     private transient int liquidVboIdHandle = -1
     private transient int liquidVboNormalHandle = -1
     private transient int liquidVboColorHandle = -1
+    private transient int liquidVao = -1
 
     private transient int opaqueVertexCount = 0
     private transient int transparentVertexCount = 0
@@ -133,6 +136,11 @@ public class Chunk implements IChunk {
             liquidVboColorHandle = buffer.get(6)
             liquidVboIdHandle = buffer.get(7)
 
+            IntBuffer vaoBuffer = BufferUtils.createIntBuffer(2)
+            GL30.glGenVertexArrays(vaoBuffer)
+            vao = vaoBuffer.get(0)
+            liquidVao = vaoBuffer.get(1)
+
             glEnableClientState(GL_NORMAL_ARRAY)
             glEnableClientState(GL_VERTEX_ARRAY)
             glEnableClientState(GL_COLOR_ARRAY)
@@ -165,6 +173,46 @@ public class Chunk implements IChunk {
 
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0)
 
+        GL30.glBindVertexArray(vao)
+        glEnableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr)
+        glEnableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr)
+        glEnableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr)
+        glEnableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
+        GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.positionAttr, 3, GL_FLOAT, false, 0, 0)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboIdHandle)
+        GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.blockIdAttr, 1, GL_FLOAT, false, 0, 0);
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
+        GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.normalAttr, 3, GL_FLOAT, false, 0, 0)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
+        GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.lightingAndAlphaAttr, 1, GL_FLOAT, false, 0, 0)
+
+        GL30.glBindVertexArray(0)
+
+        GL30.glBindVertexArray(liquidVao)
+        glEnableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr)
+        glEnableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr)
+        glEnableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr)
+        glEnableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
+        GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.positionAttr, 3, GL_FLOAT, false, 0, 0)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboNormalHandle)
+        GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.normalAttr, 3, GL_FLOAT, false, 0, 0)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboColorHandle)
+        GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.lightingAndAlphaAttr, 2, GL_FLOAT, false, 0, 0)
+
+        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboIdHandle)
+        GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.blockIdAttr, 1, GL_FLOAT, false, 0, 0)
+
+        GL30.glBindVertexArray(0)
+
         VoxelGameAPI.instance.eventManager.push(new EventChunkRender(this))
     }
 
@@ -179,27 +227,10 @@ public class Chunk implements IChunk {
         if(vboVertexHandle > 0) {
             glDisable(GL_BLEND)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboVertexHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.positionAttr, 3, GL_FLOAT, false, 0, 0)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboIdHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.blockIdAttr, 1, GL_FLOAT, false, 0, 0);
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboNormalHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.normalAttr, 3, GL_FLOAT, false, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vboColorHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.lightingAndAlphaAttr, 1, GL_FLOAT, false, 0, 0)
-
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr)
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr)
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr)
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr)
+            GL30.glBindVertexArray(vao)
             glDrawArrays(GL_QUADS, 0, opaqueVertexCount)
-            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr)
-            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr)
-            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr)
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr)
+            GL30.glBindVertexArray(0)
         }
     }
 
@@ -222,28 +253,10 @@ public class Chunk implements IChunk {
 
             VoxelGame.instance.shaderManager.enableWave()
             glEnable(GL_BLEND)
-            glPolygonOffset(1f, 0.7f)
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboVertexHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.positionAttr, 3, GL_FLOAT, false, 0, 0)
 
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboNormalHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.normalAttr, 3, GL_FLOAT, false, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboColorHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.lightingAndAlphaAttr, 2, GL_FLOAT, false, 0, 0)
-
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, liquidVboIdHandle)
-            GL20.glVertexAttribPointer(VoxelGame.instance.shaderManager.blockIdAttr, 1, GL_FLOAT, false, 0, 0)
-
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr);
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr);
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr);
-            glEnableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr);
+            GL30.glBindVertexArray(liquidVao)
             glDrawArrays(GL_QUADS, 0, transparentVertexCount)
-            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.lightingAndAlphaAttr);
-            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.positionAttr);
-            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.normalAttr);
-            glDisableVertexAttribArray(VoxelGame.instance.shaderManager.blockIdAttr);
+            GL30.glBindVertexArray(0)
             glDisable(GL_BLEND)
             VoxelGame.instance.shaderManager.disableWave()
         }
@@ -534,6 +547,7 @@ public class Chunk implements IChunk {
             GL15.glDeleteBuffers(liquidVboIdHandle)
             GL15.glDeleteBuffers(liquidVboColorHandle)
             GL15.glDeleteBuffers(liquidVboNormalHandle)
+            GL30.glDeleteVertexArrays(vao)
         }
         cleanedUp = true
     }

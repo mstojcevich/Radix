@@ -29,7 +29,7 @@ public class SpriteBatcher {
     private static final int VBO_MODE = GL_STREAM_DRAW; // We're going to draw every frame
     private static final int VERTICES_PER_RECT = 6;
 
-    private int vbo = -1, vao = -1;
+    private int vbo = -1;
     private boolean initialized;
 
     private Queue<float[]> vertexDrawQueue = new ConcurrentLinkedQueue<>();
@@ -48,7 +48,6 @@ public class SpriteBatcher {
     public void init() {
         if(!initialized) {
             vbo = glGenBuffers();
-            vao = glGenVertexArrays();
 
             initialized = true;
         }
@@ -57,7 +56,6 @@ public class SpriteBatcher {
     public void cleanup() {
         if(initialized) {
             glDeleteBuffers(vbo);
-            glDeleteVertexArrays(vao);
             initialized = false;
         }
     }
@@ -111,7 +109,6 @@ public class SpriteBatcher {
         glBufferData(GL_ARRAY_BUFFER, verticesBuffer, VBO_MODE);
 
         textureManager.bindTexture(textureID);
-        glBindVertexArray(vao);
         glEnableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getPositionAttrib());
         glVertexAttribPointer(VoxelGame.getInstance().getGuiShader().getPositionAttrib(), POSITION_FLOAT_COUNT, GL_FLOAT, false, VERTEX_SIZE_BYTES, 0);
         int byteOffset = FLOAT_SIZE_BYTES*POSITION_FLOAT_COUNT; // we added positions
@@ -124,9 +121,6 @@ public class SpriteBatcher {
 
         glDisableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getPositionAttrib());
         glDisableVertexAttribArray(VoxelGame.getInstance().getGuiShader().getTexCoordAttrib());
-
-        glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     public StaticRender renderStatic(int textureID) {

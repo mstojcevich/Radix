@@ -9,7 +9,7 @@ public class WorldShader extends ShaderProgram {
 
     private boolean lightingEnabled, texturingEnabled, wavesEnabled;
     private final int lightToggleUni, texToggleUni, waveToggleUni;
-    private final int animTimeUni, chunkOffsetUni;
+    private final int animTimeUni;
 
     public WorldShader(String vertex, String fragment) throws LWJGLException {
         super(vertex, fragment);
@@ -24,17 +24,12 @@ public class WorldShader extends ShaderProgram {
         waveToggleUni = getUniformLocation("enableWave");
 
         animTimeUni = getUniformLocation("animTime");
-        chunkOffsetUni = getUniformLocation("chunkOffset");
     }
 
     public int getBlockIdAttr() { return blkIdAtr; }
     public int getPositionAttr() { return posAtr; }
     public int getLightingAlphaAttr() { return clrAtr; }
     public int getNormalAttr() { return nrmAtr; }
-
-    public void setChunkOffset(float x, float y, float z) { // I might want to use int for this in the future
-        setUniformf(chunkOffsetUni, x, y, z);
-    }
 
     public void enableLighting() {
         if(!this.lightingEnabled) {

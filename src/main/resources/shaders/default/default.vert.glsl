@@ -6,7 +6,6 @@ varying vec4 color;
 varying float blockId;
 
 uniform sampler2D texSampler;
-uniform vec3 chunkOffset;
 uniform int animTime;
 uniform int enableWave;
 
@@ -28,7 +27,7 @@ void main() {
 
         pos.y -= 0.2;
 
-        float posYbuf = (pos.z+chunkOffset.z) / waveLength + float(animTime) * waveTime * waveLength;
+        float posYbuf = pos.z / waveLength + float(animTime) * waveTime * waveLength;
 
         pos.y -= sin(posYbuf) * waveHeight + sin(posYbuf / 7.0) * waveHeight;
         gl_Position = gl_ModelViewProjectionMatrix * pos;

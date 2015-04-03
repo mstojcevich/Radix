@@ -244,8 +244,6 @@ public class Chunk implements IChunk {
     public void renderWater() {
         if(cleanedUp)return;
         if(liquidVboVertexHandle > 0) {
-            VoxelGame.instance.worldShader.setChunkOffset(startPosition.x, startPosition.y, startPosition.z)
-
             VoxelGame.instance.worldShader.enableWaves()
             glEnable(GL_BLEND)
 

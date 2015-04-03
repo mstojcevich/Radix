@@ -2,6 +2,8 @@ package sx.lambda.mstojcevich.voxel.util.gl
 
 import groovy.transform.CompileStatic
 import org.lwjgl.opengl.GL15
+import org.lwjgl.opengl.GL20
+import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.util.gl.OBJLoader.Model
 
 import static org.lwjgl.opengl.GL11.*
@@ -18,28 +20,14 @@ class ObjModel {
 
     void render() {
         if(posVbo > 0) {
-            if(m.hasNormals()) {
-                glEnableClientState(GL_NORMAL_ARRAY)
-            } else {
-                glDisableClientState(GL_NORMAL_ARRAY)
-            }
-            glDisableClientState(GL_COLOR_ARRAY)
-            glDisableClientState(GL_TEXTURE_COORD_ARRAY)
-            glEnableClientState(GL_VERTEX_ARRAY)
-
             GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, posVbo)
-            glVertexPointer(3, GL_FLOAT, 0, 0)
+            GL20.glVertexAttribPointer(VoxelGame.instance.worldShader.positionAttr, 3, GL_FLOAT, false, 0, 0)
             if(m.hasNormals()) {
                 GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, normalVbo)
-                glNormalPointer(GL_FLOAT, 0, 0)
+                GL20.glVertexAttribPointer(VoxelGame.instance.worldShader.normalAttr, 3, GL_FLOAT, false, 0, 0)
             }
 
             glDrawArrays(GL_TRIANGLES, 0, m.getFaces().size()*3);
-
-            if(!m.hasNormals()) {
-                glEnableClientState(GL_NORMAL_ARRAY)
-            }
-            glEnableClientState(GL_COLOR_ARRAY)
         }
     }
 

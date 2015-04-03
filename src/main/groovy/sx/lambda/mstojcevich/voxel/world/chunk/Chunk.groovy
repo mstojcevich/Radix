@@ -19,7 +19,6 @@ import sx.lambda.mstojcevich.voxel.world.IWorld
 import java.nio.IntBuffer
 
 import static org.lwjgl.opengl.GL11.*
-import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray
 
 @CompileStatic
@@ -140,10 +139,6 @@ public class Chunk implements IChunk {
             GL30.glGenVertexArrays(vaoBuffer)
             vao = vaoBuffer.get(0)
             liquidVao = vaoBuffer.get(1)
-
-            glEnableClientState(GL_NORMAL_ARRAY)
-            glEnableClientState(GL_VERTEX_ARRAY)
-            glEnableClientState(GL_COLOR_ARRAY)
 
             setup = true
         }

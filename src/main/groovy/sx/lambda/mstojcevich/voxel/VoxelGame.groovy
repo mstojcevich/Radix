@@ -157,9 +157,6 @@ public class VoxelGame {
         glEnable GL_DEPTH_TEST //Enable depth visibility check
         glDepthFunc GL_LEQUAL //How to test depth (less than or equal)
 
-        glEnableClientState GL_VERTEX_ARRAY
-        glEnableClientState GL_COLOR_ARRAY
-
         glMatrixMode GL_PROJECTION //Currently altering projection matrix
         glLoadIdentity()
 

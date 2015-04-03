@@ -92,8 +92,6 @@ public class MainMenu extends VboBufferedGuiScreen {
 
     @Override
     public void render(boolean ingame) {
-        GL11.glDisableClientState(GL11.GL_NORMAL_ARRAY)
-        GL11.glDisableClientState(GL11.GL_TEXTURE_COORD_ARRAY)
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
 
         super.render(ingame)
@@ -107,8 +105,6 @@ public class MainMenu extends VboBufferedGuiScreen {
         }
         VoxelGame.instance.guiShader.enableColors()
         VoxelGame.instance.guiShader.disableTexturing()
-
-        GL11.glEnableClientState(GL11.GL_NORMAL_ARRAY)
     }
 
     @Override

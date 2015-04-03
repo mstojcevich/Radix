@@ -548,6 +548,7 @@ public class Chunk implements IChunk {
             GL15.glDeleteBuffers(liquidVboColorHandle)
             GL15.glDeleteBuffers(liquidVboNormalHandle)
             GL30.glDeleteVertexArrays(vao)
+            GL30.glDeleteVertexArrays(liquidVao)
         }
         cleanedUp = true
     }

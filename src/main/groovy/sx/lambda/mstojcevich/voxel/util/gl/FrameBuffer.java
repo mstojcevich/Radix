@@ -27,7 +27,7 @@ public class FrameBuffer {
     private int id = -1;
     private int texture;
 
-    private int renderBuffer, drawVaoId, drawVboId;
+    private int renderBuffer, drawVboId;
 
     boolean firstTime = true;
 
@@ -51,7 +51,6 @@ public class FrameBuffer {
 
         id = glGenFramebuffersEXT();
         texture = glGenTextures();
-        drawVaoId = glGenVertexArrays();
         drawVboId = glGenBuffers();
 
         renderBuffer = glGenRenderbuffers();
@@ -87,14 +86,11 @@ public class FrameBuffer {
             glDeleteTextures(texture);
             glDeleteRenderbuffers(renderBuffer);
 
-            glBindVertexArray(drawVaoId);
             glDisableVertexAttribArray(0);
             glDisableVertexAttribArray(1);
             glDisableVertexAttribArray(2);
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glDeleteBuffers(drawVboId);
-            glBindVertexArray(0);
-            glDeleteVertexArrays(drawVaoId);
 
             id = -1;
             texture = -1;
@@ -116,7 +112,6 @@ public class FrameBuffer {
         vertexData.put(bottomRight).put(topRight).put(bottomLeft);
         vertexData.flip();
 
-        glBindVertexArray(drawVaoId);
         glBindBuffer(GL_ARRAY_BUFFER, drawVboId);
         if(firstTime) {
             glBufferData(GL_ARRAY_BUFFER, vertexData, GL_DYNAMIC_DRAW);
@@ -131,7 +126,6 @@ public class FrameBuffer {
 
         glDrawArrays(GL_TRIANGLES, 0, indices);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
 
         firstTime = false;
     }

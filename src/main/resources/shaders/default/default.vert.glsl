@@ -19,7 +19,7 @@ void main() {
     color = vec4(vec3(lightingAndAlphaAttr.x), lightingAndAlphaAttr.y);
     position = positionAttr.xyz;
     if(enableWave > 0) {
-        vec4 pos = positionAttr;
+        vec3 pos = position; // using the varying here because otherwise the coordinates are messed up. I don't know enough about OpenGL to explain why.
 
         float waveLength = 1.0;
         float waveTime = 0.002;
@@ -30,7 +30,7 @@ void main() {
         float posYbuf = pos.z / waveLength + float(animTime) * waveTime * waveLength;
 
         pos.y -= sin(posYbuf) * waveHeight + sin(posYbuf / 7.0) * waveHeight;
-        gl_Position = gl_ModelViewProjectionMatrix * pos;
+        gl_Position = gl_ModelViewProjectionMatrix * vec4(pos, positionAttr.w);
     } else {
         gl_Position = gl_ModelViewProjectionMatrix*positionAttr;
     }

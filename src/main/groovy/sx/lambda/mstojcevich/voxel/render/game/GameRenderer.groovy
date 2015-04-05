@@ -83,7 +83,6 @@ class GameRenderer implements Renderer {
         }
 
         game.enableGuiShader()
-        game.getGuiShader().disableColors()
         game.getGuiShader().enableTexturing()
 
         if(fontRenderReady) {

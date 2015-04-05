@@ -7,8 +7,6 @@ varying vec2 vTexCoord;
 varying vec4 vColor;
 uniform float animTime;
 
-uniform sampler2D texture;
-
 void main() {
     vPosition = position;
     vTexCoord = texCoord;

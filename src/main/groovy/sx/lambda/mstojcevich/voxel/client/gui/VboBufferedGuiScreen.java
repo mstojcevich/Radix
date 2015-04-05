@@ -43,7 +43,6 @@ public abstract class VboBufferedGuiScreen implements GuiScreen {
 
     @Override
     public void render(boolean inGame) {
-        VoxelGame.getInstance().getGuiShader().enableColors();
         VoxelGame.getInstance().getGuiShader().disableTexturing();
         if(!renderedBefore) {
             if(!initialized) {

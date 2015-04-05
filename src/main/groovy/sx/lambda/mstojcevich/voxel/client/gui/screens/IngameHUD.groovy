@@ -33,7 +33,6 @@ class IngameHUD extends BufferedGUIScreen {
     public void render(boolean inGame) {
         super.render(inGame)
         VoxelGame.instance.guiShader.enableTexturing()
-        VoxelGame.instance.guiShader.disableColors()
 
         glEnable(GL_BLEND)
 

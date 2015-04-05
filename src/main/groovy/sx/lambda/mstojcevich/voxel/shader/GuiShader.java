@@ -12,7 +12,7 @@ public class GuiShader extends ShaderProgram {
             texCoordAttrib = -1,
             colorAttrib = -1,
             enableTexturingUniform = -1;
-    private boolean texturingEnabled, colorsEnabled;
+    private boolean texturingEnabled;
 
     /**
      * @param vertex Source code for the vertex shader

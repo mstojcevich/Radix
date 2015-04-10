@@ -11,9 +11,7 @@ import org.lwjgl.util.glu.GLU
 
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
-import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.client.gui.GuiScreen
-import sx.lambda.mstojcevich.voxel.client.gui.screens.BlockSelectGUI
 import sx.lambda.mstojcevich.voxel.client.gui.screens.IngameHUD
 import sx.lambda.mstojcevich.voxel.client.gui.screens.MainMenu
 import sx.lambda.mstojcevich.voxel.client.gui.transition.SlideUpAnimation
@@ -518,7 +516,7 @@ public class VoxelGame {
     }
 
     public WorldShader getWorldShader() { defaultShader }
-
+    
     //TODO move frustum calc, light pos, etc into GameRenderer
 
 }

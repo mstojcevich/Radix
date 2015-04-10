@@ -6,6 +6,7 @@ import org.lwjgl.input.Mouse
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.client.gui.screens.BlockSelectGUI
+import sx.lambda.mstojcevich.voxel.client.keybind.Keybind
 import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketBreakBlock
 import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketPlaceBlock
 import sx.lambda.mstojcevich.voxel.VoxelGame
@@ -24,8 +25,67 @@ class InputHandler implements RepeatedTask {
 
     private final VoxelGame game
 
+    private final List<Keybind> keybindList = Collections.synchronizedList(new ArrayList<Keybind>())
+
     public InputHandler(VoxelGame game) {
         this.game = game
+
+        // Register the default keybinds
+        registerKeybind(new Keybind("voxeltest.movement.jump", "Jump", KEY_SPACE, new Runnable() {
+            @Override
+            void run() {
+                if(game.world != null) {
+                    if (game.getPlayer().onGround) {
+                        game.getPlayer().setYVelocity(0.11f)
+                        game.getPlayer().setOnGround(false)
+                    }
+                }
+            }
+        }))
+        registerKeybind(new Keybind("voxeltest.gui.selectblock", "Select Block GUI", KEY_E, new Runnable() {
+            @Override
+            void run() {
+                if(game.world != null  && game.currentScreen == game.hud) {
+                    game.addToGLQueue(new Runnable() {
+                        @Override
+                        void run() {
+                            game.setCurrentScreen(new BlockSelectGUI(game.textureManager, Block.values(), game.hud.icons))
+                        }
+                    })
+                }
+            }
+        }))
+        registerKeybind(new Keybind("voxeltest.gui.back", "Back", KEY_ESCAPE, new Runnable() {
+            @Override
+            void run() {
+                if(game.world != null) {
+                    if (game.currentScreen != game.hud) {
+                        game.addToGLQueue(new Runnable() {
+                            @Override
+                            void run() {
+                                game.setCurrentScreen(game.hud)
+                            }
+                        })
+                    } else {
+                        game.exitWorld() // TODO show ingame options
+                    }
+                }
+            }
+        }))
+        registerKeybind(new Keybind("voxeltest.game.nextitem", "Next Item", KEY_UP, new Runnable() {
+            @Override
+            void run() {
+                if(game.world != null) {
+                    game.getPlayer().setItemInHand Block.values()[(game.getPlayer().getItemInHand().ordinal() + 1) % Block.values().size()]
+                    game.addToGLQueue(new Runnable() {
+                        @Override
+                        public void run() {
+                            game.hud.rerender(false)
+                        }
+                    })
+                }
+            }
+        }))
     }
 
     @Override
@@ -40,54 +100,19 @@ class InputHandler implements RepeatedTask {
                 while (next()) {
                     if (getEventKeyState()) { //Press down, not release
                         int key = getEventKey()
-                        switch (key) {
-                            case KEY_SPACE:
-                                if(game.world != null) {
-                                    if (game.getPlayer().onGround) {
-                                        game.getPlayer().setYVelocity(0.11f)
-                                        game.getPlayer().setOnGround(false)
-                                    }
-                                }
-                                break;
-                            case KEY_UP:
-                                if(game.world != null) {
-                                    game.getPlayer().setItemInHand Block.values()[(game.getPlayer().getItemInHand().ordinal() + 1) % Block.values().size()]
-                                    game.addToGLQueue(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            game.hud.rerender(false)
-                                        }
-                                    })
-                                }
-                                break;
-                            case KEY_ESCAPE:
-                                if(game.world != null) {
-                                    if (game.currentScreen != game.hud) {
-                                        game.addToGLQueue(new Runnable() {
-                                            @Override
-                                            void run() {
-                                                game.setCurrentScreen(game.hud)
-                                            }
-                                        })
-                                    } else {
-                                        game.exitWorld() // TODO show ingame options
-                                    }
-                                }
-                                break
-                            case KEY_E:
-                                if(game.world != null  && game.currentScreen == game.hud) {
-                                    game.addToGLQueue(new Runnable() {
-                                        @Override
-                                        void run() {
-                                            game.setCurrentScreen(new BlockSelectGUI(game.textureManager, Block.values(), game.hud.icons))
-                                        }
-                                    })
-                                }
-                                break
-                            default:
-                                break;
-                        }
 
+                        for(Keybind kb : keybindList) {
+                            if(kb.key == key) {
+                                kb.press()
+                            }
+                        }
+                    }
+                }
+                for(Keybind kb : keybindList) {
+                    if(kb.shouldRepeat()) {
+                        if(isKeyDown(kb.key)) {
+                            kb.press()
+                        }
                     }
                 }
                 while (Mouse.isCreated() && Mouse.next()) {
@@ -136,6 +161,10 @@ class InputHandler implements RepeatedTask {
         } catch (Exception e) {
             game.handleCriticalException(e)
         }
+    }
+
+    public void registerKeybind(Keybind kb) {
+        this.keybindList.add(kb)
     }
 
 }

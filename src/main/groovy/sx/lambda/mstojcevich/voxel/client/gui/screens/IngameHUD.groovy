@@ -85,4 +85,6 @@ class IngameHUD extends BufferedGUIScreen {
         this.guiBatcher.drawTexturedRect(x, y, x2, y2, u, v, u2, v2)
     }
 
+    public int getIcons() { icons }
+
 }

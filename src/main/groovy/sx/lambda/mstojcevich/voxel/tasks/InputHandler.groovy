@@ -4,10 +4,13 @@ import groovy.transform.CompileStatic
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import sx.lambda.mstojcevich.voxel.block.Block
+import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
+import sx.lambda.mstojcevich.voxel.client.gui.screens.BlockSelectGUI
 import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketBreakBlock
 import sx.lambda.mstojcevich.voxel.net.packet.shared.PacketPlaceBlock
 import sx.lambda.mstojcevich.voxel.VoxelGame
 
+import static org.lwjgl.input.Keyboard.KEY_E
 import static org.lwjgl.input.Keyboard.KEY_ESCAPE
 import static org.lwjgl.input.Keyboard.KEY_SPACE
 import static org.lwjgl.input.Keyboard.KEY_UP
@@ -58,8 +61,27 @@ class InputHandler implements RepeatedTask {
                                 }
                                 break;
                             case KEY_ESCAPE:
-                                if(game.getWorld() != null) {
-                                    game.exitWorld()
+                                if(game.world != null) {
+                                    if (game.currentScreen != game.hud) {
+                                        game.addToGLQueue(new Runnable() {
+                                            @Override
+                                            void run() {
+                                                game.setCurrentScreen(game.hud)
+                                            }
+                                        })
+                                    } else {
+                                        game.exitWorld() // TODO show ingame options
+                                    }
+                                }
+                                break
+                            case KEY_E:
+                                if(game.world != null  && game.currentScreen == game.hud) {
+                                    game.addToGLQueue(new Runnable() {
+                                        @Override
+                                        void run() {
+                                            game.setCurrentScreen(new BlockSelectGUI(game.textureManager, Block.values(), game.hud.icons))
+                                        }
+                                    })
                                 }
                                 break
                             default:

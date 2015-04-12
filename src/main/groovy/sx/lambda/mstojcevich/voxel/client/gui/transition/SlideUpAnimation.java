@@ -45,7 +45,6 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
 
     @Override
     public void render() {
-        VoxelGame.getInstance().getGuiShader().disableColors();
         VoxelGame.getInstance().getGuiShader().enableTexturing();
         float percentageDone = (float)getTimeSinceStart() / (float)getLength();
         fbo.drawTexture(VoxelGame.getInstance().getTextureManager(), 0, (int)(Display.getWidth()*percentageDone), Display.getWidth(), Display.getHeight(), VoxelGame.getInstance().getGuiShader().getPositionAttrib(), VoxelGame.getInstance().getGuiShader().getTexCoordAttrib());

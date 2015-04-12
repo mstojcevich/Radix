@@ -10,10 +10,7 @@ uniform int enableColors;
 void main() {
   if(enableTexturing > 0) {
     gl_FragColor = texture2D(texture, vTexCoord);
-    if(enableColors > 0) {
-      gl_FragColor *= vColor;
-    }
-  } else if(enableColors > 0) {
+  } else {
     gl_FragColor = vColor;
   }
 }

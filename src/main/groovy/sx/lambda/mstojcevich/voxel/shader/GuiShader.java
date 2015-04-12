@@ -11,10 +11,8 @@ public class GuiShader extends ShaderProgram {
     private int positionAttrib = -1,
             texCoordAttrib = -1,
             colorAttrib = -1,
-            enableTexturingUniform = -1,
-            enableColorsUniform = -1;
-
-    private boolean texturingEnabled, colorsEnabled;
+            enableTexturingUniform = -1;
+    private boolean texturingEnabled;
 
     /**
      * @param vertex Source code for the vertex shader
@@ -26,7 +24,6 @@ public class GuiShader extends ShaderProgram {
         positionAttrib = getAttributeLocation("position");
         texCoordAttrib = getAttributeLocation("texCoord");
         colorAttrib = getAttributeLocation("color");
-        enableColorsUniform = getUniformLocation("enableColors");
         enableTexturingUniform = getUniformLocation("enableTexturing");
 
     }
@@ -54,20 +51,6 @@ public class GuiShader extends ShaderProgram {
         if(texturingEnabled) {
             texturingEnabled = false;
             setUniformi(enableTexturingUniform, 0);
-        }
-    }
-
-    public void enableColors() {
-        if(!colorsEnabled) {
-            colorsEnabled = true;
-            setUniformi(enableColorsUniform, 1);
-        }
-    }
-
-    public void disableColors() {
-        if(colorsEnabled) {
-            colorsEnabled = false;
-            setUniformi(enableColorsUniform, 0);
         }
     }
 

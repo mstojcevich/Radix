@@ -97,13 +97,11 @@ public class MainMenu extends VboBufferedGuiScreen {
         super.render(ingame)
 
         VoxelGame.instance.guiShader.enableTexturing()
-        VoxelGame.instance.guiShader.disableColors()
         if(fontReady) {
             for (MainMenuButton b : buttons) {
                 b.drawLabel()
             }
         }
-        VoxelGame.instance.guiShader.enableColors()
         VoxelGame.instance.guiShader.disableTexturing()
     }
 

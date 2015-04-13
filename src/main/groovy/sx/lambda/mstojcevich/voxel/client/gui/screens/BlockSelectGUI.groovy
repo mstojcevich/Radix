@@ -57,7 +57,6 @@ class BlockSelectGUI implements GuiScreen {
             blockRender = blockBatcher.renderStatic(NormalBlockRenderer.blockMap)
         }
 
-        VoxelGame.instance.guiShader.disableColors()
         VoxelGame.instance.guiShader.enableTexturing()
         GL11.glEnable(GL11.GL_TEXTURE_2D)
         render.render()

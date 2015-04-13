@@ -3,14 +3,18 @@ package sx.lambda.mstojcevich.voxel
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
+import org.lwjgl.BufferUtils
 import org.lwjgl.LWJGLException
 import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.DisplayMode
 import org.lwjgl.util.glu.GLU
-
+import pw.oxcafebabe.marcusant.eventbus.EventListener
+import pw.oxcafebabe.marcusant.eventbus.Priority
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
+import sx.lambda.mstojcevich.voxel.api.events.EventEarlyInit
 import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
+import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.client.gui.GuiScreen
 import sx.lambda.mstojcevich.voxel.client.gui.screens.IngameHUD
 import sx.lambda.mstojcevich.voxel.client.gui.screens.MainMenu
@@ -18,6 +22,7 @@ import sx.lambda.mstojcevich.voxel.client.gui.transition.SlideUpAnimation
 import sx.lambda.mstojcevich.voxel.client.gui.transition.TransitionAnimation
 import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.net.packet.client.PacketLeaving
+import sx.lambda.mstojcevich.voxel.render.NotInitializedException
 import sx.lambda.mstojcevich.voxel.render.Renderer
 import sx.lambda.mstojcevich.voxel.settings.SettingsManager
 import sx.lambda.mstojcevich.voxel.shader.GuiShader
@@ -43,9 +48,12 @@ import sx.lambda.mstojcevich.voxel.util.Vec3i
 import sx.lambda.mstojcevich.voxel.util.gl.ShaderManager
 import sx.lambda.mstojcevich.voxel.util.gl.ShaderProgram
 
+import javax.imageio.ImageIO
 import javax.swing.JOptionPane
 import javax.vecmath.Vector3f
-import java.nio.FloatBuffer
+import java.awt.Graphics2D
+import java.awt.image.BufferedImage
+import java.nio.ByteBuffer
 import java.util.concurrent.ConcurrentLinkedDeque
 
 import static org.lwjgl.opengl.GL11.*
@@ -100,6 +108,8 @@ public class VoxelGame {
 
     private GameRenderer gameRenderer
 
+    private int blockTextureAtlas = -1
+
     private RepeatedTask[] handlers = [
             new WorldLoader(this),
             new InputHandler(this),
@@ -115,6 +125,10 @@ public class VoxelGame {
     }
 
     private void start() throws LWJGLException {
+        VoxelGameAPI.instance.registerBuiltinBlocks()
+        VoxelGameAPI.instance.eventManager.register(this)
+        VoxelGameAPI.instance.eventManager.push(new EventEarlyInit())
+
         settingsManager = new SettingsManager()
         setupWindow();
         this.setupOGL();
@@ -516,6 +530,45 @@ public class VoxelGame {
     }
 
     public WorldShader getWorldShader() { defaultShader }
+
+    public int getBlockTextureAtlas() throws NotInitializedException {
+        if(blockTextureAtlas == -1)throw new NotInitializedException()
+        return blockTextureAtlas
+    }
+
+    @EventListener(Priority.LAST)
+    public void onBlockRegister(EventEarlyInit event) {
+        // Create a texture atlas for all of the blocks
+        BufferedImage bi = new BufferedImage(1024, 1024, BufferedImage.TYPE_4BYTE_ABGR)
+        Graphics2D g = bi.createGraphics()
+        final int BLOCK_TEX_SIZE = 32
+        for(Block b : VoxelGameAPI.instance.blocks) {
+            int x = b.ID*BLOCK_TEX_SIZE % bi.getWidth()
+            int y = b.ID*BLOCK_TEX_SIZE / bi.getWidth() as int
+            InputStream texIS = b.textureLocation.openStream()
+            BufferedImage texImg = ImageIO.read(texIS)
+            texIS.close()
+            g.drawImage(texImg, x, y, BLOCK_TEX_SIZE, BLOCK_TEX_SIZE, null)
+        }
+        g.dispose()
+        addToGLQueue(new Runnable() {
+            @Override
+            void run() {
+                ByteBuffer imageBuffer = BufferUtils.createByteBuffer(4 * bi.getWidth() * bi.getHeight());
+                byte[] imageInByte = (byte[])bi.getRaster().getDataElements(0, 0, bi.getWidth(), bi.getHeight(), null);
+                imageBuffer.put(imageInByte);
+                imageBuffer.flip();
+
+                int colorMode = GL_RGBA;
+
+                blockTextureAtlas = glGenTextures()
+                textureManager.bindTexture(blockTextureAtlas)
+                glTexImage2D(GL_TEXTURE_2D, 0, colorMode, bi.getWidth(), bi.getHeight(), 0, colorMode, GL_UNSIGNED_BYTE, imageBuffer)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+            }
+        })
+    }
     
     //TODO move frustum calc, light pos, etc into GameRenderer
 

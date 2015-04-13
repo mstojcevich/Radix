@@ -66,13 +66,13 @@ public abstract class LivingEntity extends Entity implements Serializable {
      */
     public void onUpdate() {}
 
-    public Block getBlockInFeet(IWorld world) {
+    public int getBlockInFeet(IWorld world) {
         Vec3i feetPosition = new Vec3i(getPosition().x as int, getPosition().y as int, getPosition().z as int)
         IChunk chunk = world.getChunkAtPosition(feetPosition)
         if(chunk != null) {
-            return chunk.getBlockAtPosition(feetPosition)
+            return chunk.getBlockIdAtPosition(getPosition().x as int, getPosition().y as int, getPosition().z as int)
         } else {
-            return null
+            return 0
         }
     }
 

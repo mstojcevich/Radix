@@ -5,12 +5,15 @@ import org.lwjgl.input.Mouse
 import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.GL11
 import sx.lambda.mstojcevich.voxel.VoxelGame
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.client.gui.GuiScreen
 import sx.lambda.mstojcevich.voxel.texture.TextureManager
 import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher
 import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher.StaticRender
+
+import java.awt.Point
 
 @CompileStatic
 class BlockSelectGUI implements GuiScreen {
@@ -23,6 +26,8 @@ class BlockSelectGUI implements GuiScreen {
     private final int PADDING = 4
     private final int SLOT_SIZE = 32 + PADDING
     private final int BLOCK_SIZE = 24
+
+    private Map<Point, Integer> idPositions = new HashMap<>()
 
     public BlockSelectGUI(TextureManager manager, Block[] blocks, int guiTexture) {
         this.batcher = new SpriteBatcher(manager)
@@ -45,6 +50,7 @@ class BlockSelectGUI implements GuiScreen {
             final int USABLE_WIDTH = WIDTH - PADDING*2, USABLE_HEIGHT = HEIGHT - PADDING*2
             final int BLOCK_RENDER_OFFSET = (int)((SLOT_SIZE - BLOCK_SIZE)/2)
             for(Block b : blocks) {
+                if(b == null)continue;
                 final int x = PADDING + (currentBlockNum * SLOT_SIZE) % USABLE_WIDTH
                 final int y = PADDING + (int)((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)
 
@@ -52,6 +58,8 @@ class BlockSelectGUI implements GuiScreen {
                 b.renderer.render2d(blockBatcher, x+BLOCK_RENDER_OFFSET-2, y+BLOCK_RENDER_OFFSET-2, BLOCK_SIZE)
 
                 currentBlockNum++
+
+                idPositions.put(new Point(x, y), b.ID)
             }
             render = batcher.renderStatic(guiTexture)
             blockRender = blockBatcher.renderStatic(NormalBlockRenderer.blockMap)
@@ -77,24 +85,19 @@ class BlockSelectGUI implements GuiScreen {
         int mouseX = Mouse.getX()
         int mouseY = Display.getHeight()-Mouse.getY()
 
-        int id = getBlockID(mouseX, mouseY)
-        if(id < Block.values().length) {
-            VoxelGame.instance.player.setItemInHand(Block.values()[id])
+        Integer id = getBlockID(mouseX, mouseY)
+        if(id != null) {
+            VoxelGame.instance.player.setItemInHand(id)
         }
     }
 
     /**
      * Get the block ID at a certain position on the screen
      */
-    private int getBlockID(int x, int y) {
-        final int WIDTH = Display.width, HEIGHT = Display.height
-        final int USABLE_WIDTH = WIDTH - PADDING*2
-        final int BLOCKS_PER_WIDTH = USABLE_WIDTH/SLOT_SIZE as int
-
-        final int row = (y-PADDING) / SLOT_SIZE as int
-        final int column = (x-PADDING) / SLOT_SIZE as int
-
-        return row*BLOCKS_PER_WIDTH + column
+    private Integer getBlockID(int x, int y) {
+        x = x - (x % SLOT_SIZE) + PADDING
+        y = y - (y % SLOT_SIZE) + PADDING
+        return idPositions.get(new Point(x, y))
     }
 
 }

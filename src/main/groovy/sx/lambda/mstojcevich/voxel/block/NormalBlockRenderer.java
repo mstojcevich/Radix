@@ -2,6 +2,7 @@ package sx.lambda.mstojcevich.voxel.block;
 
 import groovy.transform.CompileStatic;
 import sx.lambda.mstojcevich.voxel.VoxelGame;
+import sx.lambda.mstojcevich.voxel.render.NotInitializedException;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher;
 import sx.lambda.mstojcevich.voxel.util.gl.TextureLoader;
@@ -12,7 +13,7 @@ import java.nio.FloatBuffer;
 @CompileStatic
 public class NormalBlockRenderer implements IBlockRenderer {
 
-    protected static final float TEXTURE_PERCENTAGE = 0.25f;
+    protected static final float TEXTURE_PERCENTAGE = 0.03125f;
 
     private static int blockMap;
 
@@ -21,10 +22,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
 
     private static boolean initialized;
 
+    final int BLOCKS_PER_WIDTH = 1024/32;
+
     public NormalBlockRenderer(int blockID) {
         this.blockID = blockID;
-        u = ((blockID%4)*TEXTURE_PERCENTAGE);
-        v = ((blockID/4)*TEXTURE_PERCENTAGE);
+        u = ((blockID%BLOCKS_PER_WIDTH)*TEXTURE_PERCENTAGE);
+        v = ((blockID/BLOCKS_PER_WIDTH)*TEXTURE_PERCENTAGE);
     }
 
     @Override
@@ -231,7 +234,12 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     private static void initialize() {
-        blockMap = TextureLoader.loadTexture(NormalBlockRenderer.class.getResourceAsStream("/textures/block/blockSheet.png"), VoxelGame.getInstance().getTextureManager());
+        try {
+            blockMap = VoxelGame.getInstance().getBlockTextureAtlas();
+        } catch (NotInitializedException e) {
+            System.err.println("Error getting block texture atlas!");
+            e.printStackTrace();
+        }
         initialized = true;
     }
 

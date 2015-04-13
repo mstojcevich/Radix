@@ -24,7 +24,7 @@ import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray
 @CompileStatic
 public class Chunk implements IChunk {
 
-    private Block[][][] blockList
+    private int[][][] blockList
 
     private transient IWorld parentWorld
     private transient final Mesher mesher
@@ -106,7 +106,7 @@ public class Chunk implements IChunk {
             mesher = null
         }
 
-        this.blockList = new Block[size][height][size]
+        this.blockList = new int[size][height][size]
         highestPoint = world.chunkGen.generate(startPosition, blockList)
 
         lightLevels = new float[size][height][size]
@@ -234,7 +234,7 @@ public class Chunk implements IChunk {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < size; z++) {
-                    Block blk = blockList[x][y][z]
+                    Block blk = VoxelGameAPI.instance.getBlockByID(blockList[x][y][z])
                     action(blk, x, y, z)
                 }
             }
@@ -269,7 +269,7 @@ public class Chunk implements IChunk {
         if (y > height - 1) return null
         if (y < 0) return null
 
-        return blockList[x][y][z];
+        return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
     }
 
     @Override
@@ -286,7 +286,7 @@ public class Chunk implements IChunk {
 
         if (y > height - 1) return
 
-        blockList[x][y][z] = null
+        blockList[x][y][z] = -1
 
         this.addNeighborsToSunlightQueue(x, y, z)
 
@@ -350,11 +350,11 @@ public class Chunk implements IChunk {
         }
 
         if(y < height-1) {
-            Block posYBlock = blockList[x][y+1][z]
+            Block posYBlock = VoxelGameAPI.instance.getBlockByID(blockList[x][y+1][z])
             if(getSunlight(x, y+1, z) > 1) {
                 if (posYBlock == null) {
                     parentWorld.addToSunlightQueue(posYNeighborPos)
-                } else if (blockList[x][y + 1][z].isTransparent()) {
+                } else if (posYBlock.isTransparent()) {
                     parentWorld.addToSunlightQueue(posYNeighborPos)
                 }
             }
@@ -362,7 +362,7 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    void addBlock(Block block, Vec3i position) {
+    void addBlock(int block, Vec3i position) {
         int x = position.x % size;
         int y = position.y;
         int z = position.z % size;
@@ -380,7 +380,7 @@ public class Chunk implements IChunk {
             highestPoint = Math.max(highestPoint, y)
         }
 
-        world.addToSunlightRemovalQueue new Vec3i(x + startPosition.x, y + startPosition.y, ((int)z) + startPosition.z)
+        world.addToSunlightRemovalQueue new Vec3i(x + startPosition.x, y + startPosition.y, z + startPosition.z)
     }
 
     @Override
@@ -410,44 +410,19 @@ public class Chunk implements IChunk {
 
     @Override
     public int[][][] blocksToIdInt() {
-        int[][][] ints = new int[size][highestPoint+1][size]
-        for(int x = 0; x < size; x++) {
-            for(int y = 0; y <= highestPoint; y++) {
-                for(int z = 0; z < size; z++) {
-                    Block b = blockList[x][y][z]
-                    if(b == null) {
-                        ints[x][y][z] = -1
-                    } else {
-                        ints[x][y][z] = b.ID
-                    }
-                }
-            }
-        }
-        return ints
+        return blockList
     }
 
     private void loadIdInts(int[][][] ints) {
-        int width = ints.length
-        int ht = ints[0].length
-        int length = ints[0][0].length
-        Block[][][] blocks = new Block[size][height][size]
-        for(int x = 0; x < width; x++) {
-            for(int y = 0; y < ht; y++) {
-                for(int z = 0; z < length; z++) {
-                    int id = ints[x][y][z]
-                    if(id > -1) {
-                        for(Block b : Block.values()) {
-                            if(b.ID == id) {
-                                highestPoint = Math.max(highestPoint, y)
-                                blocks[x][y][z] = b
-                            }
-                        }
-                    }
+        blockList = ints
+        highestPoint = 0
+        for(int x = 0; x < ints.length; x++) {
+            for(int z = 0; z < ints[0][0].length; z++) {
+                for(int y = 0; y < ints[0].length; y++) {
+                    highestPoint = Math.max(y, highestPoint)
                 }
             }
         }
-
-        this.blockList = blocks
     }
 
     private void setupSunlighting() {
@@ -544,5 +519,21 @@ public class Chunk implements IChunk {
             GL30.glDeleteVertexArrays(liquidVao)
         }
         cleanedUp = true
+    }
+
+    int getBlockIdAtPosition(int x, int y, int z) {
+        x = x % size;
+        y = y;
+        z = z % size;
+        if (x < 0) {
+            x += size
+        }
+        if (z < 0) {
+            z += size
+        }
+
+        if (y > height - 1) return 0
+        if (y < 0) return 0
+        return blockList[x][y][z]
     }
 }

@@ -18,12 +18,13 @@ public interface IChunk extends Serializable {
 	 * Renders the chunk 
 	 */
 	void render();
-	
+
+    int getBlockIdAtPosition(int x, int y, int z);
 	Block getBlockAtPosition(Vec3i position);
 
     void removeBlock(Vec3i Vec3i);
 
-    void addBlock(Block block, Vec3i position);
+    void addBlock(int block, Vec3i position);
 
     Vec3i getStartPosition();
 

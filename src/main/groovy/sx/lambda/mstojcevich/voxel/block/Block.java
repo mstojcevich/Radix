@@ -1,26 +1,24 @@
 package sx.lambda.mstojcevich.voxel.block;
 
-public enum Block {
-	
-	AIR(0), DIRT(1), GRASS(2), STONE(3), WATER(4, new WaterRenderer(4), true, false), SAND(5);
-	
-	final int id;
-	final transient IBlockRenderer renderer;
-	final boolean transparent, solid;
-	
-	Block(int id) {
-		this(id, new NormalBlockRenderer(id));
-	}
-	
-	Block(int id, IBlockRenderer renderer) {
-		this(id, renderer, false, true);
-	}
+import java.net.URL;
 
-	Block(int id, IBlockRenderer renderer, boolean transparent, boolean solid) {
+public class Block {
+	
+	// AIR(0), DIRT(1), GRASS(2), STONE(3), WATER(4, new WaterRenderer(4), true, false), SAND(5);
+	
+	private int id;
+	private final transient IBlockRenderer renderer;
+	private final boolean transparent, solid;
+	private final String humanName;
+	private final URL textureLocation;
+
+	Block(int id, String humanName, IBlockRenderer renderer, URL textureLocation, boolean transparent, boolean solid) {
 		this.id = id;
 		this.renderer = renderer;
 		this.transparent = transparent;
 		this.solid = solid;
+		this.humanName = humanName;
+		this.textureLocation = textureLocation;
 	}
 	
 	public IBlockRenderer getRenderer() {
@@ -39,4 +37,11 @@ public enum Block {
 		return this.solid;
 	}
 
+	public void setID(int id) {
+		this.id = id;
+	}
+
+	public String getHumanName() { return this.humanName; }
+
+	public URL getTextureLocation() { return textureLocation; }
 }

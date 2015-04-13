@@ -180,7 +180,7 @@ public class World implements IWorld {
     }
 
     @Override
-    public void addBlock(Block block, final Vec3i position) {
+    public void addBlock(int block, final Vec3i position) {
         synchronized(this) {
             final IChunk c = this.getChunkAtPosition(position);
             c.addBlock(block, position);

@@ -38,7 +38,7 @@ public interface IWorld {
 
     public void removeBlock(Vec3i Vec3i);
 
-    public void addBlock(Block block, Vec3i position);
+    public void addBlock(int block, Vec3i position);
 
     public IChunk[] getChunksInRange(EntityPosition pos, int viewDistance);
 

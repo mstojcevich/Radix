@@ -3,6 +3,8 @@ package sx.lambda.mstojcevich.voxel.tasks
 import groovy.transform.CompileStatic
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
+import sx.lambda.mstojcevich.voxel.api.BuiltInBlockIds
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.client.gui.screens.BlockSelectGUI
@@ -49,7 +51,7 @@ class InputHandler implements RepeatedTask {
                     game.addToGLQueue(new Runnable() {
                         @Override
                         void run() {
-                            game.setCurrentScreen(new BlockSelectGUI(game.textureManager, Block.values(), game.hud.icons))
+                            game.setCurrentScreen(new BlockSelectGUI(game.textureManager, VoxelGameAPI.instance.getBlocksSorted(), game.hud.icons))
                         }
                     })
                 }
@@ -69,20 +71,6 @@ class InputHandler implements RepeatedTask {
                     } else {
                         game.exitWorld() // TODO show ingame options
                     }
-                }
-            }
-        }))
-        registerKeybind(new Keybind("voxeltest.game.nextitem", "Next Item", KEY_UP, new Runnable() {
-            @Override
-            void run() {
-                if(game.world != null) {
-                    game.getPlayer().setItemInHand Block.values()[(game.getPlayer().getItemInHand().ordinal() + 1) % Block.values().size()]
-                    game.addToGLQueue(new Runnable() {
-                        @Override
-                        public void run() {
-                            game.hud.rerender(false)
-                        }
-                    })
                 }
             }
         }))
@@ -152,7 +140,7 @@ class InputHandler implements RepeatedTask {
                     }
                 }
                 if(Keyboard.isCreated()) {
-                    if (isKeyDown(KEY_SPACE) && game.player.getBlockInFeet(game.world) == Block.WATER) {
+                    if (isKeyDown(KEY_SPACE) && game.player.getBlockInFeet(game.world) == BuiltInBlockIds.WATER_ID) {
                         game.player.setYVelocity(0.02f);
                     }
                 }

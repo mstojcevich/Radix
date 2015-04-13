@@ -15,6 +15,7 @@ import io.netty.handler.codec.serialization.ObjectEncoder
 import io.netty.handler.logging.LogLevel
 import io.netty.handler.logging.LoggingHandler
 import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
+import sx.lambda.mstojcevich.voxel.api.events.EventEarlyInit
 import sx.lambda.mstojcevich.voxel.api.events.EventWorldStart
 import sx.lambda.mstojcevich.voxel.server.dedicated.config.ServerConfig
 import sx.lambda.mstojcevich.voxel.server.net.VoxelGameServerHandler
@@ -45,6 +46,9 @@ class VoxelGameServer {
      * @return Port listening on
      */
     public short start() {
+        VoxelGameAPI.instance.registerBuiltinBlocks()
+        VoxelGameAPI.instance.eventManager.push(new EventEarlyInit())
+
         EventLoopGroup bossGroup = new NioEventLoopGroup(1)
         EventLoopGroup workerGroup = new NioEventLoopGroup()
 

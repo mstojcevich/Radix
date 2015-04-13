@@ -2,6 +2,7 @@ package sx.lambda.mstojcevich.voxel.entity.player
 
 import groovy.transform.CompileStatic
 import sx.lambda.mstojcevich.voxel.VoxelGame
+import sx.lambda.mstojcevich.voxel.api.BuiltInBlockIds
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.entity.EntityRotation
 import sx.lambda.mstojcevich.voxel.entity.LivingEntity
@@ -22,7 +23,7 @@ class Player extends LivingEntity implements Serializable {
 
     private static final ObjModel playerModel = new ObjModel(this.class.getResourceAsStream('/models/entity/player.obj'))
 
-    private Block itemInHand = Block.GRASS
+    private int itemInHand = BuiltInBlockIds.STONE_ID
 
     //needed for serialization
     public Player() {
@@ -40,9 +41,9 @@ class Player extends LivingEntity implements Serializable {
 
     public float getReach() { REACH }
 
-    public Block getItemInHand() { itemInHand }
+    public int getItemInHand() { itemInHand }
 
-    public void setItemInHand(Block block) { itemInHand = block }
+    public void setItemInHand(int block) { itemInHand = block }
 
     @Override
     public void onUpdate() {
@@ -64,13 +65,13 @@ class Player extends LivingEntity implements Serializable {
         playerModel
     }
 
-    public Block getBlockInHead(IWorld world) {
+    public int getBlockInHead(IWorld world) {
         Vec3i eyePosition = new Vec3i(getPosition().x as int, getPosition().y+HEIGHT as int, getPosition().z as int)
         IChunk chunk = world.getChunkAtPosition(eyePosition)
         if(chunk != null) {
-            return chunk.getBlockAtPosition(eyePosition)
+            return chunk.getBlockIdAtPosition(getPosition().x as int, getPosition().y+HEIGHT as int, getPosition().z as int)
         } else {
-            return null
+            return 0
         }
     }
 

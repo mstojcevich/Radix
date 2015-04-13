@@ -2,6 +2,7 @@ package sx.lambda.mstojcevich.voxel.tasks
 
 import groovy.transform.CompileStatic
 import sx.lambda.mstojcevich.voxel.VoxelGame
+import sx.lambda.mstojcevich.voxel.api.BuiltInBlockIds
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.entity.Entity
 import sx.lambda.mstojcevich.voxel.entity.EntityPosition
@@ -124,7 +125,7 @@ class MovementHandler implements RepeatedTask {
                             }
                         }
 
-                        if (player.getBlockInFeet(world) == Block.WATER) {
+                        if (player.getBlockInFeet(world) == BuiltInBlockIds.WATER_ID) {
                             if (!isKeyDown(KEY_SPACE)) {
                                 player.setYVelocity(-0.05f);
                             }

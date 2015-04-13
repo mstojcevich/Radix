@@ -13,10 +13,10 @@ import sx.lambda.mstojcevich.voxel.util.Vec3i
 @CompileStatic
 class PacketPlaceBlock implements SharedPacket {
 
-    private final Block block
+    private final int block
     private final Vec3i pos
 
-    public PacketPlaceBlock(Vec3i pos, Block block) {
+    public PacketPlaceBlock(Vec3i pos, int block) {
         this.pos = pos
         this.block = block
     }

@@ -1,5 +1,6 @@
 package sx.lambda.mstojcevich.voxel.world.generation;
 
+import sx.lambda.mstojcevich.voxel.api.BuiltInBlockIds;
 import sx.lambda.mstojcevich.voxel.block.Block;
 import sx.lambda.mstojcevich.voxel.util.Vec3i;
 import sx.lambda.mstojcevich.voxel.world.IWorld;
@@ -21,7 +22,7 @@ public class SimplexChunkGenerator implements ChunkGenerator {
     }
 
     @Override
-    public int generate(Vec3i startPosition, Block[][][] blocks) {
+    public int generate(Vec3i startPosition, int[][][] blocks) {
         int highestPoint = world.getSeaLevel();
         for (int x = 0; x < blocks.length; x++) {
             for (int z = 0; z < blocks.length; z++) {
@@ -29,25 +30,25 @@ public class SimplexChunkGenerator implements ChunkGenerator {
                 int yMax = world.getSeaLevel() + distFromSeaLevel;
                 if (yMax < world.getSeaLevel()) {
                     for (int y = yMax; y < world.getSeaLevel(); y++) {
-                        Block blockType = Block.WATER;
+                        int blockType = BuiltInBlockIds.WATER_ID;
                         if (y == yMax) {
-                            blockType = Block.SAND;
+                            blockType = BuiltInBlockIds.SAND_ID;
                         }
                         blocks[x][y][z] = blockType;
                     }
                 }
                 for (int y = 0; y < yMax; y++) {
-                    Block blockType = Block.STONE;
+                    int blockType = BuiltInBlockIds.STONE_ID;
 
                     if (y == world.getSeaLevel() - 1 && y == yMax - 1) {
-                        blocks[x][y + 1][z] = Block.SAND;
+                        blocks[x][y + 1][z] = BuiltInBlockIds.SAND_ID;
                         highestPoint = Math.max(highestPoint, y+1);
                     }
 
                     if (y == yMax - 1) {
-                        blockType = Block.GRASS;
+                        blockType = BuiltInBlockIds.GRASS_ID;
                     } else if (y > yMax - 5) {
-                        blockType = Block.DIRT;
+                        blockType = BuiltInBlockIds.DIRT_ID;
                     }
                     blocks[x][y][z] = blockType;
                     highestPoint = Math.max(highestPoint, y);

@@ -14,6 +14,6 @@ public interface ChunkGenerator {
      * @param blocks Empty 3d array of blocks the size of the chunk
      * @return The maximum height of the generated blocks
      */
-    int generate(Vec3i startPosition, Block[][][] blocks);
+    int generate(Vec3i startPosition, int[][][] blocks);
 
 }

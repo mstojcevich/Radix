@@ -3,6 +3,8 @@ package sx.lambda.mstojcevich.voxel.client.gui.screens
 import groovy.transform.CompileStatic
 import org.lwjgl.opengl.Display
 import sx.lambda.mstojcevich.voxel.VoxelGame
+import sx.lambda.mstojcevich.voxel.api.BuiltInBlockIds
+import sx.lambda.mstojcevich.voxel.api.VoxelGameAPI
 import sx.lambda.mstojcevich.voxel.block.Block
 import sx.lambda.mstojcevich.voxel.block.NormalBlockRenderer
 import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher
@@ -36,17 +38,17 @@ class IngameHUD extends BufferedGUIScreen {
 
         glEnable(GL_BLEND)
 
-        Block blockInHead = VoxelGame.instance.player.getBlockInHead(VoxelGame.instance.world)
+        int blockInHead = VoxelGame.instance.player.getBlockInHead(VoxelGame.instance.world)
         if(blockInHead != null) {
             switch(blockInHead) {
-                case Block.WATER:
-                    Block.WATER.getRenderer().render2d(blockBatcher, 0, 0, Math.max(Display.getWidth(), Display.getHeight()))
+                case BuiltInBlockIds.WATER_ID:
+                    VoxelGameAPI.instance.getBlockByID(blockInHead).getRenderer().render2d(blockBatcher, 0, 0, Math.max(Display.getWidth(), Display.getHeight()))
                     // TODO add ability to set transparency with a spritebatcher so that we can render transparent overlay for the water
                     break;
             }
         }
 
-        VoxelGame.instance.player.itemInHand.renderer.render2d(blockBatcher, 0, 0, 50);
+        VoxelGameAPI.instance.getBlockByID(VoxelGame.instance.player.itemInHand).renderer.render2d(blockBatcher, 0, 0, 50);
 
         blockBatcher.render(NormalBlockRenderer.blockMap)
 

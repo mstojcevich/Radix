@@ -12,7 +12,7 @@ uniform sampler2D normalTexture;
 uniform int enableLighting;
 uniform int enableTexturing;
 
-const int mapWidth = 128, mapHeight = 128, blockWidth = 32;
+const int mapWidth = 1024, mapHeight = 1024, blockWidth = 32;
 const int blocksPerRow = mapWidth/blockWidth;
 const float uPerBlock = float(blockWidth) / float(mapWidth),
             vPerBlock = float(blockWidth) / float(mapHeight);

@@ -7,6 +7,8 @@ public final class BuiltInBlockIds {
         DIRT_ID  = 2,
         GRASS_ID = 3,
         SAND_ID = 4,
-        WATER_ID = 5;
+        WATER_ID = 5,
+        PLANKS_ID = 6,
+        STONE_BRICK_ID = 7;
 
 }

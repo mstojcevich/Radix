@@ -54,7 +54,9 @@ class VoxelGameAPI {
                 new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHumanName("Grass").setTextureLocation(getClass().getResource("/textures/block/grass.png")).build(),
                 new BlockBuilder().setID(BuiltInBlockIds.STONE_ID).setHumanName("Stone").setTextureLocation(getClass().getResource("/textures/block/stone.png")).build(),
                 new BlockBuilder().setID(BuiltInBlockIds.SAND_ID).setHumanName("Sand").setTextureLocation(getClass().getResource("/textures/block/sand.png")).build(),
-                new BlockBuilder().setID(BuiltInBlockIds.WATER_ID).setHumanName("Water").setSolid(false).setTransparent(true).setTextureLocation(getClass().getResource("/textures/block/water.png")).setBlockRenderer(new WaterRenderer(BuiltInBlockIds.WATER_ID)).build()
+                new BlockBuilder().setID(BuiltInBlockIds.WATER_ID).setHumanName("Water").setSolid(false).setTransparent(true).setTextureLocation(getClass().getResource("/textures/block/water.png")).setBlockRenderer(new WaterRenderer(BuiltInBlockIds.WATER_ID)).build(),
+                new BlockBuilder().setID(BuiltInBlockIds.PLANKS_ID).setHumanName("Planks").setTextureLocation(getClass().getResource("/textures/block/planks.png")).build(),
+                new BlockBuilder().setID(BuiltInBlockIds.STONE_BRICK_ID).setHumanName("Stone Brick").setTextureLocation(getClass().getResource("/textures/block/stonebrick.png")).build(),
         )
     }
 

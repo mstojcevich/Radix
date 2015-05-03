@@ -59,3 +59,19 @@ task jarWithLibs(type: Jar) {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }}
     with jar
 }
+
+task compileRel(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': project.name,
+                'Implementation-Version': version,
+                'Implementation-Vendor': 'Marcus Stojcevich',
+                'Specification-Title': project.name,
+                'Specification-Version': versionNum,
+                'Specification-Vendor': 'Marcus Stojcevich',
+                'Main-Class': 'sx.lambda.mstojcevich.voxel.VoxelGame'
+    }
+
+    baseName = project.name
+
+    with jar
+}

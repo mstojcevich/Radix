@@ -7,6 +7,7 @@ import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.GL11
 import sx.lambda.mstojcevich.voxel.VoxelGame
 import sx.lambda.mstojcevich.voxel.client.gui.VboBufferedGuiScreen
+import sx.lambda.mstojcevich.voxel.server.VoxelGameServer
 import sx.lambda.mstojcevich.voxel.util.gl.FontRenderer
 import sx.lambda.mstojcevich.voxel.util.gl.SpriteBatcher.StaticRender
 import sx.lambda.mstojcevich.voxel.world.World
@@ -44,7 +45,7 @@ public class MainMenu extends VboBufferedGuiScreen {
     }
 
     private Closure enterSingleplayer = {
-        VoxelGame.instance.enterLocalWorld(new World(false, false))
+        enterMultiplayer() // Just do multiplayer since plain singleplayer is bugged
     }
 
     private void resize() {

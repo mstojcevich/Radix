@@ -94,7 +94,7 @@ void main() {
 
     fragColor = color;
     if(enableTexturing > 0) {
-        fragColor *= texture2D(normalTexture, tc);
+        fragColor *= texture(normalTexture, tc);
     }
     if(enableLighting > 0) {
         vec3 light = gamma(sh_light(normal, beach));

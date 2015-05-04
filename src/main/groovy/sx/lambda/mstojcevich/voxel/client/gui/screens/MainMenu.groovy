@@ -33,18 +33,21 @@ public class MainMenu extends VboBufferedGuiScreen {
 
     public MainMenu() {
         buttons = [
-                new MainMenuButton(this, "Singleplayer", enterSingleplayer, TARGET_BUTTON_SIZE),
-                new MainMenuButton(this, "Multiplayer", enterMultiplayer, TARGET_BUTTON_SIZE),
+                new MainMenuButton(this, "Multiplayer (Local)", enterMPLocal, TARGET_BUTTON_SIZE),
+                new MainMenuButton(this, "Multiplayer (Lambda)", enterMPLambda, TARGET_BUTTON_SIZE),
                 new MainMenuButton(this, "Settings", {println("Settings pressed!")}, TARGET_BUTTON_SIZE),
                 new MainMenuButton(this, "Quit Game", {VoxelGame.instance.startShutdown()}, TARGET_BUTTON_SIZE),
         ]
     }
 
-    private Closure enterMultiplayer = {
+    private Closure enterMPLocal = {
         VoxelGame.instance.enterRemoteWorld("127.0.0.1", (short)31173)
     }
 
-    private Closure enterSingleplayer = enterMultiplayer
+    private Closure enterMPLambda = {
+        VoxelGame.instance.enterRemoteWorld("mc.stoj.pw", (short)31173)
+    }
+
     private void resize() {
         int dWidth = Display.getWidth()
         int buttonsPerRow = (int)(dWidth / (TARGET_BUTTON_SIZE+BUTTON_SPACING))

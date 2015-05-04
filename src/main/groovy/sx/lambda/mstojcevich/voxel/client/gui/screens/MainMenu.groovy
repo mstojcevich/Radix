@@ -44,10 +44,7 @@ public class MainMenu extends VboBufferedGuiScreen {
         VoxelGame.instance.enterRemoteWorld("127.0.0.1", (short)31173)
     }
 
-    private Closure enterSingleplayer = {
-        enterMultiplayer() // Just do multiplayer since plain singleplayer is bugged
-    }
-
+    private Closure enterSingleplayer = enterMultiplayer
     private void resize() {
         int dWidth = Display.getWidth()
         int buttonsPerRow = (int)(dWidth / (TARGET_BUTTON_SIZE+BUTTON_SPACING))

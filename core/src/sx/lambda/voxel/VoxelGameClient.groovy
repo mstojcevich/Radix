@@ -156,7 +156,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         camera.near = 0.01f;
         camera.far = 300f;
         camera.update();
-        hudCamera = new OrthographicCamera()
+        hudCamera = new OrthographicCamera(Gdx.graphics.width, Gdx.graphics.height)
 
         defaultShader = createShader("default", WorldShader.class)
         postProcessShader = createShader("post-process", PostProcessShader.class)
@@ -187,6 +187,11 @@ public class VoxelGameClient extends ApplicationAdapter {
 
             if (renderer != null) {
                 renderer.render()
+                renderer.draw2d()
+            }
+
+            if(currentScreen != null) {
+                currentScreen.render(world != null)
             }
 
             System.out.println(Gdx.graphics.framesPerSecond)
@@ -202,14 +207,6 @@ public class VoxelGameClient extends ApplicationAdapter {
         while ((currentRunnable = glQueue.poll()) != null) {
             currentRunnable.run()
         }
-    }
-
-    private void prepare2D() {
-        hudCamera.setToOrtho(false, Gdx.graphics.width, Gdx.graphics.height)
-        hudCamera.update()
-        guiShader.setUniformMatrix("u_projectionViewMatrix", hudCamera.combined)
-        Gdx.gl.glDisable GL_DEPTH_TEST
-        worldShader.disableLighting()
     }
 
     private void prepareNewFrame() {
@@ -343,7 +340,6 @@ public class VoxelGameClient extends ApplicationAdapter {
             shaderManager.setShader(postProcessShader)
             hudCamera.setToOrtho(false, Gdx.graphics.width, Gdx.graphics.height)
             hudCamera.update()
-            postProcessShader.setUniformMatrix("u_projectionViewMatrix", hudCamera.combined)
         }
     }
 
@@ -475,8 +471,22 @@ public class VoxelGameClient extends ApplicationAdapter {
         })
     }
 
+    @Override
+    public void resize(int width, int height) {
+        hudCamera.setToOrtho(false, width, height)
+        hudCamera.update()
+
+        camera.viewportWidth = width
+        camera.viewportHeight = height
+        camera.update()
+    }
+
     public PerspectiveCamera getCamera() {
         return camera;
+    }
+
+    public OrthographicCamera getHudCamera() {
+        return hudCamera
     }
 
     //TODO move frustum calc, light pos, etc into GameRenderer

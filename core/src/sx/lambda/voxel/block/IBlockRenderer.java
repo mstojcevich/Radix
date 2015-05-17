@@ -1,15 +1,15 @@
 package sx.lambda.voxel.block;
 
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-import sx.lambda.voxel.util.gl.SpriteBatcher;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 import java.nio.FloatBuffer;
 
 public interface IBlockRenderer {
 
-    void render2d(SpriteBatcher batcher, int x, int y, int width);
+    void render2d(SpriteBatch batcher, int x, int y, int width);
 
     Mesh renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder);
     Mesh renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder);

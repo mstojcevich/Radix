@@ -4,15 +4,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import groovy.transform.CompileStatic;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.render.NotInitializedException;
-import sx.lambda.voxel.util.Vec3i;
-import sx.lambda.voxel.util.gl.SpriteBatcher;
-import sx.lambda.voxel.world.chunk.IChunk;
-
-import java.nio.FloatBuffer;
 
 @CompileStatic
 public class NormalBlockRenderer implements IBlockRenderer {
@@ -35,13 +31,13 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void render2d(SpriteBatcher batcher, int x, int y, int width) {
+    public void render2d(SpriteBatch batcher, int x, int y, int width) {
         if(!initialized) {
             initialize();
         }
         float u2 = u+TEXTURE_PERCENTAGE-.001f;
         float v2 = v+TEXTURE_PERCENTAGE-.001f;
-        batcher.drawTexturedRect(x, y, x+width, y+width, u, v, u2, v2);
+        batcher.draw(getBlockMap(), x, y, x+width, y+width, u, v, u2, v2);
     }
 
     @Override

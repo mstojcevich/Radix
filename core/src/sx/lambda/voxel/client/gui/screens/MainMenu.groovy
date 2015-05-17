@@ -9,18 +9,12 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
-import com.badlogic.gdx.utils.BufferUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.client.gui.GuiScreen
-import sx.lambda.voxel.client.gui.VboBufferedGuiScreen
-import sx.lambda.voxel.util.gl.FontRenderer
-import sx.lambda.voxel.util.gl.SpriteBatcher
 
 import java.awt.*
-import java.nio.FloatBuffer
 
 @CompileStatic
 public class MainMenu implements GuiScreen {
@@ -85,6 +79,7 @@ public class MainMenu implements GuiScreen {
         if(!initialized) {
             camera = new OrthographicCamera()
             batch = new SpriteBatch()
+            batch.setTransformMatrix(VoxelGameClient.instance.hudCamera.combined)
             batch.setTransformMatrix(camera.combined)
             mmButtonTexture = new Texture(Gdx.files.internal("textures/gui/mmBtn.png"))
 

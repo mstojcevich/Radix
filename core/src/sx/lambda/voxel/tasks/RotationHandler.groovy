@@ -19,6 +19,8 @@ class RotationHandler implements RepeatedTask {
         return "Rotation Handler"
     }
 
+    private int lastX = -1, lastY = -1;
+
     @Override
     void run() {
         try {
@@ -27,17 +29,19 @@ class RotationHandler implements RepeatedTask {
                 if(game.world == null || game.player == null) {
                     sleep(1000)
                 } else {
-                    if (true) { // TODO check if window is in focus
-                        float deltaYaw = (float) Gdx.input.getDeltaX() * mouseSensitivity
-                        float deltaPitch = (float) Gdx.input.getDeltaY() * mouseSensitivity
-                        float newPitch = Math.abs(game.getPlayer().getRotation().getPitch() + deltaPitch)
-                        if (newPitch > 90) {
-                            deltaPitch = 0
-                        }
-                        game.getPlayer().getRotation().offset(deltaPitch, deltaYaw)
-                        game.updateSelectedBlock()
-                        game.gameRenderer.calculateFrustum()
+                    if(lastX == -1)lastX = Gdx.input.getX()
+                    if(lastY == -1)lastY = Gdx.input.getY()
+                    float deltaYaw = (float) (Gdx.input.getX() - lastX) * mouseSensitivity
+                    float deltaPitch = (float)(lastY - Gdx.input.getY()) * mouseSensitivity
+                    lastX = Gdx.input.getX()
+                    lastY = Gdx.input.getY()
+                    float newPitch = Math.abs(game.getPlayer().getRotation().getPitch() + deltaPitch)
+                    if (newPitch > 90) {
+                        deltaPitch = 0
                     }
+                    game.getPlayer().getRotation().offset(deltaPitch, deltaYaw)
+                    game.updateSelectedBlock()
+                    game.gameRenderer.calculateFrustum()
                     sleep(10)
                 }
             }

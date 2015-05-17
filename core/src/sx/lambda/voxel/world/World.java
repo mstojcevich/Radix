@@ -94,16 +94,16 @@ public class World implements IWorld {
 
             modelBatch.begin(VoxelGameClient.getInstance().getCamera());
             for (IChunk c : this.chunkList) {
-                //if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE / 2.0f, c.getHighestPoint() / 2.0f, CHUNK_SIZE / 2.0f)) {
+                if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint(), CHUNK_SIZE)) {
                     c.render(modelBatch);
-                //}
+                }
             }
             modelBatch.end();
             modelBatch.begin(VoxelGameClient.getInstance().getCamera());
             for (IChunk c : this.chunkList) {
-                //if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE / 2.0f, c.getHighestPoint() / 2.0f, CHUNK_SIZE / 2.0f)) {
+                if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint(), CHUNK_SIZE)) {
                     c.renderWater(modelBatch);
-                //}
+                }
             }
             modelBatch.end();
             if(VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders

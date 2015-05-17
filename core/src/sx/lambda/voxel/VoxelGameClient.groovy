@@ -7,18 +7,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.PerspectiveCamera
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.TextureData
-import com.badlogic.gdx.graphics.VertexAttributes
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g3d.Material
-import com.badlogic.gdx.graphics.g3d.Model
-import com.badlogic.gdx.graphics.g3d.ModelBatch
-import com.badlogic.gdx.graphics.g3d.ModelInstance
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
-import com.badlogic.gdx.graphics.g3d.utils.CameraInputController
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.utils.BufferUtils
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
@@ -40,7 +28,6 @@ import sx.lambda.voxel.shader.GuiShader
 import sx.lambda.voxel.shader.PostProcessShader
 import sx.lambda.voxel.shader.WorldShader
 import sx.lambda.voxel.tasks.EntityUpdater
-import sx.lambda.voxel.tasks.InputHandler
 import sx.lambda.voxel.tasks.LightUpdater
 import sx.lambda.voxel.tasks.MovementHandler
 import sx.lambda.voxel.tasks.RepeatedTask
@@ -61,14 +48,8 @@ import sx.lambda.voxel.entity.EntityPosition
 import sx.lambda.voxel.render.Renderer
 import pw.oxcafebabe.marcusant.eventbus.EventListener
 
-import com.badlogic.gdx.Graphics.DisplayMode
-
-import javax.imageio.ImageIO
 import javax.swing.*
 import javax.vecmath.Vector3f
-import java.awt.*
-import java.awt.image.BufferedImage
-import java.nio.ByteBuffer
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedDeque
 
@@ -127,15 +108,12 @@ public class VoxelGameClient extends ApplicationAdapter {
     private PerspectiveCamera camera
     private OrthographicCamera hudCamera
 
-    private CameraInputController camInput
-
     private RepeatedTask[] handlers = [
             new WorldLoader(this),
-            new InputHandler(this),
             new MovementHandler(this),
-            new RotationHandler(this),
             new EntityUpdater(this),
-            new LightUpdater(this)
+            new LightUpdater(this),
+            new RotationHandler(this)
     ]
 
     @Override
@@ -172,15 +150,13 @@ public class VoxelGameClient extends ApplicationAdapter {
         Gdx.gl.glEnable GL_DEPTH_TEST //Enable depth visibility check
         Gdx.gl.glDepthFunc GL_LEQUAL //How to test depth (less than or equal)
 
-        camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
+        camera = new PerspectiveCamera(90, Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
         camera.position.set(10f, 150f, 10f);
         camera.lookAt(0,0,0);
-        camera.near = 1f;
+        camera.near = 0.01f;
         camera.far = 300f;
         camera.update();
         hudCamera = new OrthographicCamera()
-
-        camInput = new CameraInputController(camera)
 
         defaultShader = createShader("default", WorldShader.class)
         postProcessShader = createShader("post-process", PostProcessShader.class)
@@ -189,7 +165,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         getShaderManager().setShader(defaultShader)
         //defaultShader.setUniformMatrix("u_projectionViewMatrix", camera.combined)
 
-        Gdx.input.setInputProcessor(camInput)
+        Gdx.input.setInputProcessor(new VoxelGameGdxInputHandler(this))
     }
 
     @Override
@@ -204,12 +180,20 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     @Override
     public void render() {
-        prepareNewFrame()
+        try {
+            prepareNewFrame()
 
-        runQueuedOGL()
+            runQueuedOGL()
 
-        if(renderer != null) {
-            renderer.render()
+            if (renderer != null) {
+                renderer.render()
+            }
+
+            System.out.println(Gdx.graphics.framesPerSecond)
+        } catch(Exception e) {
+            done = true;
+            e.printStackTrace()
+            Gdx.input.setCursorCatched(false)
         }
     }
 
@@ -229,8 +213,6 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     private void prepareNewFrame() {
-        camInput.update()
-
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Gdx.gl.glClearColor(0.2f, 0.2f, 1.0f, 1.0f)
         Gdx.gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -444,8 +426,6 @@ public class VoxelGameClient extends ApplicationAdapter {
                 // Delays are somewhere in this function. Above here.
             }
         })
-
-        Gdx.input.setInputProcessor(camInput)
     }
 
     public void setCurrentScreen(GuiScreen screen) {

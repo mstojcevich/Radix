@@ -42,6 +42,8 @@ class GameRenderer implements Renderer {
 
     private long frameCounter
 
+    private Frustum frustum
+
     public GameRenderer(VoxelGameClient game) {
         this.game = game
     }
@@ -132,6 +134,8 @@ class GameRenderer implements Renderer {
     void init() {
         initted = true
 
+        frustum = game.camera.frustum
+
         new Thread() {
             @Override
             public void run() {
@@ -155,18 +159,18 @@ class GameRenderer implements Renderer {
 
     private void prepareWorldRender() {
         //TODO game camera
-//        game.camera.direction.set(0, 0, 0)
-//        game.camera.position.set(0, 0, 0)
-//        game.camera.rotate(-game.getPlayer().getRotation().getPitch(), 1, 0, 0)
-//        game.camera.rotate(game.getPlayer().getRotation().getYaw(), 0, 1, 0)
-//        game.camera.translate(-game.getPlayer().getPosition().getX(), (float) -(game.getPlayer().getPosition().getY() + game.getPlayer().getEyeHeight()), -game.getPlayer().getPosition().getZ())
+        game.camera.position.set(game.player.position.x, game.player.position.y + game.player.eyeHeight, game.player.position.z)
+        game.camera.up.set(0, 1, 0);
+        game.camera.direction.set(0, 0, -1);
+        game.camera.rotate(game.player.rotation.pitch, 1, 0, 0)
+        game.camera.rotate(-game.player.rotation.yaw, 0, 1, 0)
 
-//        if (shouldCalcFrustum()) {
-//            calcFrustum = false
-//            game.camera.update(true)
-//        } else {
-//            game.camera.update()
-//        }
+        if (shouldCalcFrustum()) {
+            calcFrustum = false
+            game.camera.update(true)
+        } else {
+            game.camera.update()
+        }
     }
 
     private void drawBlockSelection() {

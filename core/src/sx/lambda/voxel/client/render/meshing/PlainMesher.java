@@ -1,3 +1,4 @@
+/*
 package sx.lambda.voxel.client.render.meshing;
 
 import com.badlogic.gdx.utils.BufferUtils;
@@ -9,18 +10,22 @@ import sx.lambda.voxel.world.chunk.IChunk;
 
 import java.nio.FloatBuffer;
 
+*/
 /**
  * Regular mesher. Gets the job done.
  * Doesn't use any specific algorithms, just culls faces that are next to others.
- */
+ *//*
+
 public class PlainMesher implements Mesher {
 
     private final IChunk chunk;
     private boolean useAlpha;
 
-    /**
+    */
+/**
      * @param chunk Chunk that this will be meshing
-     */
+     *//*
+
     public PlainMesher(IChunk chunk) {
         this.chunk = chunk;
     }
@@ -59,7 +64,8 @@ public class PlainMesher implements Mesher {
         this.useAlpha = false;
     }
 
-    /**
+    */
+/**
      * @param blockList 3d array of voxels we're meshing
      * @param shouldRenderTop Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
      * @param shouldRenderBottom Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
@@ -68,7 +74,8 @@ public class PlainMesher implements Mesher {
      * @param shouldRenderFront Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
      * @param shouldRenderBack Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
      * @return Number of visible faces
-     */
+     *//*
+
     private int calcShouldRender(Block[][][] blockList,
                                 boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,
                                 boolean[][][] shouldRenderLeft, boolean[][][] shouldRenderRight,
@@ -206,7 +213,8 @@ public class PlainMesher implements Mesher {
         return visFaceCount;
     }
 
-    /**
+    */
+/**
      *
      * @param blockList 3d array of voxels to draw.
      * @param shouldRenderTop 3d array of booleans, the size of the chunk.
@@ -217,7 +225,8 @@ public class PlainMesher implements Mesher {
      * @param shouldRenderBack 3d array of booleans, the size of the chunk.
      * @param visibleSideCount Number of faces that are visible
      * @return Result of drawing the mesh
-     */
+     *//*
+
     private MeshResult draw(Block[][][] blockList,
                             boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,
                             boolean[][][] shouldRenderLeft, boolean[][][] shouldRenderRight,
@@ -260,3 +269,4 @@ public class PlainMesher implements Mesher {
     }
 
 }
+*/

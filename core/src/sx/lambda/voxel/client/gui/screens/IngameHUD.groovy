@@ -49,7 +49,7 @@ class IngameHUD extends BufferedGUIScreen {
 
         VoxelGameAPI.instance.getBlockByID(VoxelGameClient.instance.player.itemInHand).renderer.render2d(blockBatcher, 0, 0, 50);
 
-        blockBatcher.render(NormalBlockRenderer.blockMap)
+        blockBatcher.render(NormalBlockRenderer.blockMap.getTextureObjectHandle())
 
         // Draw crosshair (after guiBatcher render because it needs to render with its own blending mode
         float centerX = Gdx.graphics.getWidth()/2f as float

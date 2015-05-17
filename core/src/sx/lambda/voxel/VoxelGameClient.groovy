@@ -5,6 +5,9 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.PerspectiveCamera
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.TextureData
 import com.badlogic.gdx.utils.BufferUtils
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -109,7 +112,7 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     private GameRenderer gameRenderer
 
-    private int blockTextureAtlas = -1
+    private Texture blockTextureAtlas
 
     private PerspectiveCamera camera
     private OrthographicCamera hudCamera
@@ -159,19 +162,19 @@ public class VoxelGameClient extends ApplicationAdapter {
         Gdx.gl.glDepthFunc GL_LEQUAL //How to test depth (less than or equal)
 
         camera = new PerspectiveCamera()
-        camera.fieldOfView = 90
-
+        camera.position.set(10f, 150f, 10f);
+        camera.lookAt(0, 0, 0);
+        camera.near = 1f;
+        camera.far = 300f;
+        camera.update();
         hudCamera = new OrthographicCamera()
-
-        Gdx.gl.glEnable GL_CULL_FACE
-        Gdx.gl.glFrontFace GL_CCW
 
         defaultShader = createShader("default", WorldShader.class)
         postProcessShader = createShader("post-process", PostProcessShader.class)
         guiShader = createShader("gui", GuiShader.class)
 
         getShaderManager().setShader(defaultShader)
-        defaultShader.setUniformMatrix("u_projectionViewMatrix", camera.combined)
+        //defaultShader.setUniformMatrix("u_projectionViewMatrix", camera.combined)
     }
 
     @Override
@@ -208,7 +211,6 @@ public class VoxelGameClient extends ApplicationAdapter {
         }
 
         synchronized (currentScreen) {
-            enableGuiShader()
             currentScreen.render(true)
             if(transitionAnimation != null) {
                 transitionAnimation.render()
@@ -217,7 +219,6 @@ public class VoxelGameClient extends ApplicationAdapter {
                     transitionAnimation = null
                 }
             }
-            enableDefaultShader()
         }
 
         Thread.yield()
@@ -489,8 +490,8 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     public WorldShader getWorldShader() { defaultShader }
 
-    public int getBlockTextureAtlas() throws NotInitializedException {
-        if(blockTextureAtlas == -1)throw new NotInitializedException()
+    public Texture getBlockTextureAtlas() throws NotInitializedException {
+        if(blockTextureAtlas == null)throw new NotInitializedException()
         return blockTextureAtlas
     }
 
@@ -519,8 +520,8 @@ public class VoxelGameClient extends ApplicationAdapter {
 
                 int colorMode = GL_RGBA;
 
-                blockTextureAtlas = Gdx.gl.glGenTexture()
-                textureManager.bindTexture(blockTextureAtlas)
+                blockTextureAtlas = new Texture(bi.getWidth(), bi.getHeight(), Pixmap.Format.RGBA8888)
+                textureManager.bindTexture(blockTextureAtlas.getTextureObjectHandle())
                 Gdx.gl.glTexImage2D(GL_TEXTURE_2D, 0, colorMode, bi.getWidth(), bi.getHeight(), 0, colorMode, GL_UNSIGNED_BYTE, imageBuffer)
                 Gdx.gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
                 Gdx.gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)

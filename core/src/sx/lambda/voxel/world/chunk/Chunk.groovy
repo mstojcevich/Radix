@@ -1,13 +1,23 @@
 package sx.lambda.voxel.world.chunk
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Mesh
+import com.badlogic.gdx.graphics.g3d.Material
+import com.badlogic.gdx.graphics.g3d.Model
+import com.badlogic.gdx.graphics.g3d.ModelBatch
+import com.badlogic.gdx.graphics.g3d.ModelInstance
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.utils.BufferUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.events.render.EventChunkRender
 import sx.lambda.voxel.block.Block
 import sx.lambda.voxel.block.NormalBlockRenderer
-import sx.lambda.voxel.client.render.meshing.MeshResult
 import sx.lambda.voxel.client.render.meshing.Mesher
 import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.IWorld
@@ -25,6 +35,8 @@ public class Chunk implements IChunk {
 
     private transient IWorld parentWorld
     private transient final Mesher mesher
+    private transient MeshBuilder meshBuilder
+    private transient ModelBuilder modelBuilder
 
     private final int size
     private final int height
@@ -33,27 +45,13 @@ public class Chunk implements IChunk {
 
     private int highestPoint
 
-    private transient int vboVertexHandle = -1
-    private transient int vboIdHandle = -1
-    private transient int vboNormalHandle = -1
-    private transient int vboColorHandle = -1
-    private transient int vao = -1
-
-    private transient int liquidVboVertexHandle = -1
-    private transient int liquidVboIdHandle = -1
-    private transient int liquidVboNormalHandle = -1
-    private transient int liquidVboColorHandle = -1
-    private transient int liquidVao = -1
-
-    private transient int opaqueVertexCount = 0
-    private transient int transparentVertexCount = 0
+    private transient Model opaqueModel, transparentModel
+    private transient ModelInstance opaqueInstance, transparentInstance
 
     private transient float[][][] lightLevels
     private transient int[][][] sunlightLevels
     private transient boolean sunlightChanging
     private transient boolean sunlightChanged
-
-    private transient IntBuffer vboBuffer, vaoBuffer
 
     private boolean setup, cleanedUp
 
@@ -122,22 +120,9 @@ public class Chunk implements IChunk {
             }
         }
 
-        if(vboVertexHandle == -1 || vboVertexHandle == 0) {
-            vboBuffer = BufferUtils.newIntBuffer(8)
-            Gdx.gl.glGenBuffers(8, vboBuffer)
-            vboVertexHandle = vboBuffer.get(0)
-            vboNormalHandle = vboBuffer.get(1)
-            vboColorHandle = vboBuffer.get(2)
-            vboIdHandle = vboBuffer.get(3)
-            liquidVboVertexHandle = vboBuffer.get(4)
-            liquidVboNormalHandle = vboBuffer.get(5)
-            liquidVboColorHandle = vboBuffer.get(6)
-            liquidVboIdHandle = vboBuffer.get(7)
-
-            vaoBuffer = BufferUtils.newIntBuffer(2)
-            Gdx.gl30.glGenVertexArrays(2, vaoBuffer)
-            vao = vaoBuffer.get(0)
-            liquidVao = vaoBuffer.get(1)
+        if(!setup) {
+            meshBuilder = new MeshBuilder()
+            modelBuilder = new ModelBuilder()
 
             setup = true
         }
@@ -155,80 +140,48 @@ public class Chunk implements IChunk {
             }
         }
         mesher.disableAlpha()
-        MeshResult opaqueResult = mesher.meshVoxels(opaque, lightLevels)
+        Mesh[] opaqueResult = mesher.meshVoxels(meshBuilder, opaque, lightLevels)
         mesher.enableAlpha()
-        MeshResult transparentResult = mesher.meshVoxels(transparent, lightLevels)
+        Mesh[] transparentResult = mesher.meshVoxels(meshBuilder, transparent, lightLevels)
 
-        opaqueVertexCount = (int)(opaqueResult.vertices.capacity()/3)
-        transparentVertexCount = (int)(transparentResult.vertices.capacity()/3)
+        modelBuilder.begin()
+        int meshNum = 0
+        for(Mesh m : opaqueResult) {
+            modelBuilder.part(toString() + meshNum, m, GL_TRIANGLES,
+                    new Material(ColorAttribute.createAmbient(Color.WHITE),
+                            TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
+            meshNum++
+        }
+        opaqueModel = modelBuilder.end();
+        opaqueInstance = new ModelInstance(opaqueModel)
 
-        opaqueResult.putInVBO(vboVertexHandle, vboColorHandle, vboNormalHandle, vboIdHandle)
-        transparentResult.putInVBO(liquidVboVertexHandle, liquidVboColorHandle, liquidVboNormalHandle, liquidVboIdHandle)
-
-        Gdx.gl.glBindBuffer(GL_ARRAY_BUFFER, 0)
-
-        Gdx.gl30.glBindVertexArray(vao)
-        Gdx.gl.glEnableVertexAttribArray(VoxelGameClient.instance.worldShader.positionAttr)
-        Gdx.gl.glEnableVertexAttribArray(VoxelGameClient.instance.worldShader.normalAttr)
-        Gdx.gl.glEnableVertexAttribArray(VoxelGameClient.instance.worldShader.blockIdAttr)
-        Gdx.gl.glEnableVertexAttribArray(VoxelGameClient.instance.worldShader.lightingAlphaAttr)
-
-        Gdx.gl.glBindBuffer(GL_ARRAY_BUFFER, vboVertexHandle)
-        Gdx.gl.glVertexAttribPointer(VoxelGameClient.instance.worldShader.positionAttr, 3, GL_FLOAT, false, 0, 0)
-
-        Gdx.gl.glBindBuffer(GL_ARRAY_BUFFER, vboIdHandle)
-        Gdx.gl.glVertexAttribPointer(VoxelGameClient.instance.worldShader.blockIdAttr, 1, GL_FLOAT, false, 0, 0);
-
-        Gdx.gl.glBindBuffer(GL_ARRAY_BUFFER, vboNormalHandle)
-        Gdx.gl.glVertexAttribPointer(VoxelGameClient.instance.worldShader.normalAttr, 3, GL_FLOAT, false, 0, 0)
-
-        Gdx.gl.glBindBuffer(GL_ARRAY_BUFFER, vboColorHandle)
-        Gdx.gl.glVertexAttribPointer(VoxelGameClient.instance.worldShader.lightingAlphaAttr, 1, GL_FLOAT, false, 0, 0)
-
-        Gdx.gl30.glBindVertexArray(0)
-
-        Gdx.gl30.glBindVertexArray(liquidVao)
-        Gdx.gl.glEnableVertexAttribArray(VoxelGameClient.instance.worldShader.positionAttr)
-        Gdx.gl.glEnableVertexAttribArray(VoxelGameClient.instance.worldShader.normalAttr)
-        Gdx.gl.glEnableVertexAttribArray(VoxelGameClient.instance.worldShader.blockIdAttr)
-        Gdx.gl.glEnableVertexAttribArray(VoxelGameClient.instance.worldShader.lightingAlphaAttr)
-
-        Gdx.gl.glBindBuffer(GL_ARRAY_BUFFER, liquidVboVertexHandle)
-        Gdx.gl.glVertexAttribPointer(VoxelGameClient.instance.worldShader.positionAttr, 3, GL_FLOAT, false, 0, 0)
-
-        Gdx.gl.glBindBuffer(GL_ARRAY_BUFFER, liquidVboNormalHandle)
-        Gdx.gl.glVertexAttribPointer(VoxelGameClient.instance.worldShader.normalAttr, 3, GL_FLOAT, false, 0, 0)
-
-        Gdx.gl.glBindBuffer(GL_ARRAY_BUFFER, liquidVboColorHandle)
-        Gdx.gl.glVertexAttribPointer(VoxelGameClient.instance.worldShader.lightingAlphaAttr, 2, GL_FLOAT, false, 0, 0)
-
-        Gdx.gl.glBindBuffer(GL_ARRAY_BUFFER, liquidVboIdHandle)
-        Gdx.gl.glVertexAttribPointer(VoxelGameClient.instance.worldShader.blockIdAttr, 1, GL_FLOAT, false, 0, 0)
-
-        Gdx.gl30.glBindVertexArray(0)
+        modelBuilder.begin()
+        meshNum = 0
+        for(Mesh m : transparentResult) {
+            modelBuilder.part(toString() + "t" + meshNum, m, GL_TRIANGLES,
+                    new Material(ColorAttribute.createAmbient(Color.WHITE),
+                            TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
+            meshNum++
+        }
+        transparentModel = modelBuilder.end();
+        transparentInstance = new ModelInstance(transparentModel)
 
         VoxelGameAPI.instance.eventManager.push(new EventChunkRender(this))
     }
 
     @Override
-    public void render() {
-        println("YA")
+    public void render(ModelBatch batch) {
         if(cleanedUp)return;
         if(sunlightChanged && !sunlightChanging) {
             rerender()
         }
 
-        VoxelGameClient.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap)
-        if(vboVertexHandle > 0) {
+        VoxelGameClient.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap.getTextureObjectHandle())
+        if(setup) {
             Gdx.gl.glDisable(GL_BLEND)
 
-
-            Gdx.gl30.glBindVertexArray(vao)
-            Gdx.gl.glDrawArrays(0x7 /* Quads */, 0, opaqueVertexCount) // TODO quads -> triangles
-            Gdx.gl30.glBindVertexArray(0)
+            batch.render(opaqueInstance)
         }
-
-        println("YO")
     }
 
     @Override
@@ -243,16 +196,13 @@ public class Chunk implements IChunk {
         }
     }
 
-    public void renderWater() {
+    public void renderWater(ModelBatch batch) {
         if(cleanedUp)return;
-        if(liquidVboVertexHandle > 0) {
+        if(setup) {
             VoxelGameClient.instance.worldShader.enableWaves()
             Gdx.gl.glEnable(GL_BLEND)
 
-            Gdx.gl30.glBindVertexArray(liquidVao)
-            Gdx.gl.glDrawArrays(0x7 /* Quads */, 0, transparentVertexCount)
-            Gdx.gl30.glBindVertexArray(0)
-            Gdx.gl.glDisable(GL_BLEND)
+            batch.render(transparentInstance)
             VoxelGameClient.instance.worldShader.disableWaves()
         }
     }
@@ -509,8 +459,8 @@ public class Chunk implements IChunk {
     @Override
     void cleanup() {
         if(setup) {
-            Gdx.gl.glDeleteBuffers(vboBuffer.remaining(), vboBuffer)
-            Gdx.gl30.glDeleteVertexArrays(vaoBuffer.remaining(), vaoBuffer)
+            transparentModel.dispose()
+            opaqueModel.dispose()
         }
         cleanedUp = true
     }

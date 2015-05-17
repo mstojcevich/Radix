@@ -59,7 +59,7 @@ class BlockSelectGUI implements GuiScreen {
                 idPositions.put(new Point(x, y), b.ID)
             }
             render = batcher.renderStatic(guiTexture)
-            blockRender = blockBatcher.renderStatic(NormalBlockRenderer.blockMap)
+            blockRender = blockBatcher.renderStatic(NormalBlockRenderer.blockMap.getTextureObjectHandle())
         }
 
         VoxelGameClient.instance.guiShader.enableTexturing()

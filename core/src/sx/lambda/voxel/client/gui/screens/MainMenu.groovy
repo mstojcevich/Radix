@@ -1,10 +1,20 @@
 package sx.lambda.voxel.client.gui.screens
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.utils.BufferUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
+import sx.lambda.voxel.client.gui.GuiScreen
 import sx.lambda.voxel.client.gui.VboBufferedGuiScreen
 import sx.lambda.voxel.util.gl.FontRenderer
 import sx.lambda.voxel.util.gl.SpriteBatcher
@@ -13,19 +23,23 @@ import java.awt.*
 import java.nio.FloatBuffer
 
 @CompileStatic
-public class MainMenu extends VboBufferedGuiScreen {
+public class MainMenu implements GuiScreen {
 
-    private static final int VERTICES_PER_BUTTON = 6
     private static final int TARGET_BUTTON_SIZE = 150
     private static final int BUTTON_SPACING = 4
 
-    private static final int PARTS_PER_VERTEX = 6 // XYRGBA
-
     private final MainMenuButton[] buttons
+    private boolean initialized
+    private SpriteBatch batch
 
-    private FontRenderer buttonFont
+    private FrameBuffer mmPrerenderFbo
+    private Texture mmPrerender
 
-    private boolean fontReady
+    private BitmapFont buttonFont
+
+    private Texture mmButtonTexture
+
+    private OrthographicCamera camera
 
     public MainMenu() {
         buttons = [
@@ -47,6 +61,14 @@ public class MainMenu extends VboBufferedGuiScreen {
     }
 
     private void resize() {
+        camera.setToOrtho(true, Gdx.graphics.width, Gdx.graphics.height)
+        camera.update()
+
+        if(mmPrerenderFbo != null)
+            mmPrerenderFbo.dispose()
+        mmPrerenderFbo = new FrameBuffer(Pixmap.Format.RGBA4444, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false)
+        mmPrerender = mmPrerenderFbo.getColorBufferTexture()
+
         int dWidth = Gdx.graphics.getWidth()
         int buttonsPerRow = (int)(dWidth / (TARGET_BUTTON_SIZE+BUTTON_SPACING))
 
@@ -59,52 +81,43 @@ public class MainMenu extends VboBufferedGuiScreen {
         }
     }
 
-    @Override
     public void init() {
         if(!initialized) {
-            new Thread("Main Menu Font Loading") {
-                @Override
-                public void run() {
-                    InputStream is = Gdx.files.internal("fonts/LiberationSans-Regular.ttf").read()
-                    buttonFont = new FontRenderer(Font.createFont(Font.TRUETYPE_FONT, is).deriveFont(16f), true)
-                    fontReady = true
-                }
-            }.start()
-            resize()
+            camera = new OrthographicCamera()
+            batch = new SpriteBatch()
+            batch.setTransformMatrix(camera.combined)
+            mmButtonTexture = new Texture(Gdx.files.internal("textures/gui/mmBtn.png"))
 
-            super.init()
+            buttonFont = new BitmapFont()
+
+            resize()
+            rerender()
 
             initialized = true
         }
     }
 
-    @Override
     protected void rerender() {
-        int numVertices = buttons.length*VERTICES_PER_BUTTON
-        FloatBuffer vertexBuffer = BufferUtils.newFloatBuffer(numVertices * PARTS_PER_VERTEX)
+        mmPrerenderFbo.begin()
+        batch.begin()
+        Gdx.gl.glClearColor(0, 0, 0, 1)
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         for(MainMenuButton button : buttons) {
-            button.render(vertexBuffer)
+            button.drawLabel()
+            button.render()
         }
-        vertexBuffer.flip()
-        renderVbo(vertexBuffer)
+        batch.end()
+        mmPrerenderFbo.end()
     }
 
     @Override
     public void render(boolean ingame) {
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-
-        super.render(ingame)
-
-        VoxelGameClient.instance.guiShader.enableTexturing()
-        if(fontReady) {
-            for (MainMenuButton b : buttons) {
-                b.drawLabel()
-            }
-        }
-        VoxelGameClient.instance.guiShader.disableTexturing()
+        batch.begin()
+        batch.draw(mmPrerender, 0, 0)
+        buttonFont.draw(batch, "Hello", 0, 0)
+        batch.end()
     }
 
-    @Override
     void onMouseClick(int clickType) {
         int mouseX = Gdx.input.getX()
         int mouseY = Gdx.graphics.getHeight()-Gdx.input.getY()
@@ -118,13 +131,21 @@ public class MainMenu extends VboBufferedGuiScreen {
         }
     }
 
+    @Override
+    public void finish() {
+        if(mmPrerenderFbo != null)
+            mmPrerenderFbo.dispose()
+        if(batch != null)
+            batch.dispose()
+    }
+
     class MainMenuButton {
         private final String title
         private final Closure onClick
         private final MainMenu parent
         private final Rectangle bounds
 
-        private SpriteBatcher.StaticRender labelRender
+        private GlyphLayout labelLayout
 
         MainMenuButton(MainMenu parent, String title, Closure onClick, int size) {
             this.parent = parent
@@ -155,37 +176,24 @@ public class MainMenu extends VboBufferedGuiScreen {
             }
         }
 
-        private void render(FloatBuffer vertexBuffer) {
-            float x1 = bounds.x as float
-            float x2 = bounds.x+bounds.width as float
-            float y1 = bounds.y as float
-            float y2 = bounds.y+bounds.height as float
-            float[] bottomRight = [x2, y2, 0.2f, 0.2f, 0.2f, 0.7f] as float[]
-            float[] bottomLeft = [x1, y2, 0.2f, 0.2f, 0.2f, 0.7f] as float[]
-            float[] topLeft = [x1, y1, 0.2f, 0.2f, 0.2f, 0.7f] as float[]
-            float[] topRight = [x2, y1, 0.2f, 0.2f, 0.2f, 0.7f] as float[]
-
-            vertexBuffer.put(topLeft).put(bottomLeft).put(topRight);
-            vertexBuffer.put(bottomRight).put(topRight).put(bottomLeft);
+        private void render() {
+            batch.draw(mmButtonTexture, bounds.x as float, bounds.y as float, bounds.width as float, bounds.height as float)
         }
 
         void drawLabel() {
             if(buttonFont != null) {
-                if (labelRender == null) {
-                    rerenderLabel()
+                if (labelLayout == null) {
+                    labelLayout = buttonFont.draw(batch, title, -1000, -1000)
                 }
 
-                labelRender.render()
+                int textStartX = bounds.x+(bounds.width/2.0f - labelLayout.width/2.0f) as int
+                int textStartY = bounds.y+(bounds.height/2.0f - labelLayout.height/2.0f) as int
+                buttonFont.draw(batch, title, textStartX, textStartY)
             }
         }
 
         void rerenderLabel() {
-            if(labelRender != null) {
-                labelRender.destroy()
-            }
-            int textStartX = bounds.x+(bounds.width/2.0f - buttonFont.getWidth(title)/2.0f) as int
-            int textStartY = bounds.y+(bounds.height/2.0f - buttonFont.getHeight(title)/2.0f) as int
-            labelRender = buttonFont.drawStringStatic(textStartX, textStartY, title, FontRenderer.ALIGN_LEFT)
+            labelLayout = null // force redraw next frame
         }
     }
 }

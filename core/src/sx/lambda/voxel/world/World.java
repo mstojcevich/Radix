@@ -1,5 +1,6 @@
 package sx.lambda.voxel.world;
 
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import io.netty.util.internal.ConcurrentSet;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
@@ -46,6 +47,8 @@ public class World implements IWorld {
     private Queue<Vec3i> sunlightQueue = new ConcurrentLinkedQueue<>();
     private Queue<Vec3i> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
 
+    private ModelBatch modelBatch;
+
     public World(boolean remote, boolean server) {
         this.remote = remote;
         this.server = server;
@@ -73,6 +76,10 @@ public class World implements IWorld {
 
     @Override
     public void render() {
+        if(modelBatch == null) {
+            modelBatch = new ModelBatch();
+        }
+
         if(!server) {
 
             if(!chunksToRerender.isEmpty()) {
@@ -85,17 +92,20 @@ public class World implements IWorld {
 
             long renderStartNS = System.nanoTime();
 
-            for (IChunk c : this.chunkList) {
-                System.out.println("YSDFSDF");
-                //if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE / 2.0f, c.getHighestPoint() / 2.0f, CHUNK_SIZE / 2.0f)) {
-                    c.render();
-                //}
-            }
+            modelBatch.begin(VoxelGameClient.getInstance().getCamera());
             for (IChunk c : this.chunkList) {
                 //if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE / 2.0f, c.getHighestPoint() / 2.0f, CHUNK_SIZE / 2.0f)) {
-                    c.renderWater();
+                    c.render(modelBatch);
                 //}
             }
+            modelBatch.end();
+            modelBatch.begin(VoxelGameClient.getInstance().getCamera());
+            for (IChunk c : this.chunkList) {
+                //if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE / 2.0f, c.getHighestPoint() / 2.0f, CHUNK_SIZE / 2.0f)) {
+                    c.renderWater(modelBatch);
+                //}
+            }
+            modelBatch.end();
             if(VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
                 VoxelGameClient.getInstance().numChunkRenders = 0;
                 VoxelGameClient.getInstance().chunkRenderTimes = 0;
@@ -585,6 +595,8 @@ public class World implements IWorld {
         for(IChunk c : chunkList) {
             c.cleanup();
         }
+        modelBatch.dispose();
+        modelBatch = null;
     }
 
 }

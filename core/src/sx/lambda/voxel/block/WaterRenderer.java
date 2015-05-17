@@ -1,5 +1,10 @@
 package sx.lambda.voxel.block;
 
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+
 import java.nio.FloatBuffer;
 
 public class WaterRenderer extends NormalBlockRenderer {
@@ -9,156 +14,87 @@ public class WaterRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
+    public Mesh renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
         // POSITIVE Z
-
-        posBuffer.put(new float[] {
-                x1, y1, z,
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        builder.setColor(lightLevel, lightLevel, lightLevel, 0.6f);
+        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.rect(x1, y1, z,
                 x2, y1, z,
                 x2, y2, z,
                 x1, y2, z,
-        });
-        normBuffer.put(new float[]{
-                0, 0, 1,
-                0, 0, 1,
-                0, 0, 1,
-                0, 0, 1
-        });
-        for(int j = 0; j < 4; j++) {
-            colorBuffer.put(lightLevel);
-            colorBuffer.put(0.6f);
-        }
-        for(int i = 0; i < 4; i++) {
-            idBuffer.put(blockID);
-        }
+                0, 0, 1);
+        return builder.end();
     }
 
     @Override
-    public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
+    public Mesh renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Z
-
-        posBuffer.put(new float[]{
-                // Bottom
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        builder.setColor(lightLevel, lightLevel, lightLevel, 0.6f);
+        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.rect(x1, y2, z,
+                x2, y2, z,
                 x2, y1, z,
                 x1, y1, z,
-                x1, y2, z,
-                x2, y2, z
-        });
-        normBuffer.put(new float[]{
-                0, 0, -1,
-                0, 0, -1,
-                0, 0, -1,
-                0, 0, -1,
-        });
-        for(int j = 0; j < 4; j++) {
-            colorBuffer.put(lightLevel);
-            colorBuffer.put(0.6f);
-        }
-        for(int i = 0; i < 4; i++) {
-            idBuffer.put(blockID);
-        }
+                0, 0, -1);
+        return builder.end();
     }
 
     @Override
-    public void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
+    public Mesh renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
         // NEGATIVE X
-
-        posBuffer.put(new float[]{
-                x, y1, z1,
-                x, y1, z2,
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        builder.setColor(lightLevel, lightLevel, lightLevel, 0.6f);
+        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.rect(x, y1, z2,
                 x, y2, z2,
                 x, y2, z1,
-        });
-        normBuffer.put(new float[]{
-                -1, 0, 0,
-                -1, 0, 0,
-                -1, 0, 0,
-                -1, 0, 0,
-        });
-        for(int j = 0; j < 4; j++) {
-            colorBuffer.put(lightLevel);
-            colorBuffer.put(0.6f);
-        }
-        for(int i = 0; i < 4; i++) {
-            idBuffer.put(blockID);
-        }
+                x, y1, z1,
+                -1, 0, 0);
+        return builder.end();
     }
 
     @Override
-    public void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
+    public Mesh renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
         // POSITIVE X
-
-        posBuffer.put(new float[]{
-                x, y1, z1,
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        builder.setColor(lightLevel, lightLevel, lightLevel, 0.6f);
+        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.rect(x, y1, z1,
                 x, y2, z1,
                 x, y2, z2,
                 x, y1, z2,
-        });
-        normBuffer.put(new float[]{
-                1, 0, 0,
-                1, 0, 0,
-                1, 0, 0,
-                1, 0, 0,
-        });
-        for(int j = 0; j < 4; j++) {
-            colorBuffer.put(lightLevel);
-            colorBuffer.put(0.6f);
-        }
-        for(int i = 0; i < 4; i++) {
-            idBuffer.put(blockID);
-        }
+                1, 0, 0);
+        return builder.end();
     }
 
     @Override
-    public void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
+    public Mesh renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
         // POSITIVE Y
-
-        posBuffer.put(new float[]{
-                // Back
-                x2, y, z1,
-                x1, y, z1,
-                x1, y, z2,
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        builder.setColor(lightLevel, lightLevel, lightLevel, 0.6f);
+        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.rect(x1, y, z2,
                 x2, y, z2,
-        });
-        normBuffer.put(new float[]{
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0,
-        });
-        for(int j = 0; j < 4; j++) {
-            colorBuffer.put(lightLevel);
-            colorBuffer.put(0.6f);
-        }
-        for(int i = 0; i < 4; i++) {
-            idBuffer.put(blockID);
-        }
+                x1, y, z1,
+                x1, y, z1,
+                0, 1, 0);
+        return builder.end();
     }
 
     @Override
-    public void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, FloatBuffer posBuffer, FloatBuffer normBuffer, FloatBuffer colorBuffer, FloatBuffer idBuffer) {
+    public Mesh renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Y
-
-        posBuffer.put(new float[]{
-                // Front
-                x1, y, z1,
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        builder.setColor(lightLevel, lightLevel, lightLevel, 0.6f);
+        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.rect(x1, y, z1,
                 x2, y, z1,
                 x2, y, z2,
                 x1, y, z2,
-        });
-        normBuffer.put(new float[]{
-                0, -1, 0,
-                0, -1, 0,
-                0, -1, 0,
-                0, -1, 0,
-        });
-        for(int j = 0; j < 4; j++) {
-            colorBuffer.put(lightLevel);
-            colorBuffer.put(0.6f);
-        }
-        for(int i = 0; i < 4; i++) {
-            idBuffer.put(blockID);
-        }
+                0, -1, 0);
+        return builder.end();
     }
 
 }

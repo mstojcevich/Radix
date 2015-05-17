@@ -49,7 +49,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
         // POSITIVE Z
         builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
         builder.rect(x1, y1, z,
                 x2, y1, z,
                 x2, y2, z,
@@ -63,7 +63,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
         // NEGATIVE Z
         builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
         builder.rect(x1, y2, z,
                 x2, y2, z,
                 x2, y1, z,
@@ -77,7 +77,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
         // NEGATIVE X
         builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
         builder.rect(x, y1, z2,
                 x, y2, z2,
                 x, y2, z1,
@@ -91,7 +91,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
         // POSITIVE X
         builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
         builder.rect(x, y1, z1,
                 x, y2, z1,
                 x, y2, z2,
@@ -105,10 +105,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
         // POSITIVE Y
         builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
         builder.rect(x1, y, z2,
                 x2, y, z2,
-                x1, y, z1,
+                x2, y, z1,
                 x1, y, z1,
                 0, 1, 0);
         return builder.end();
@@ -119,7 +119,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
         // NEGATIVE Y
         builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(u, v, u + TEXTURE_PERCENTAGE, v + TEXTURE_PERCENTAGE);
+        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
         builder.rect(x1, y, z1,
                 x2, y, z1,
                 x2, y, z2,

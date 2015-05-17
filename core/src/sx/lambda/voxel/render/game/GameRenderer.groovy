@@ -154,18 +154,19 @@ class GameRenderer implements Renderer {
     }
 
     private void prepareWorldRender() {
-        game.camera.direction.set(0, 0, 0)
-        game.camera.position.set(0, 0, 0)
-        game.camera.rotate(-game.getPlayer().getRotation().getPitch(), 1, 0, 0)
-        game.camera.rotate(game.getPlayer().getRotation().getYaw(), 0, 1, 0)
-        game.camera.translate(-game.getPlayer().getPosition().getX(), (float) -(game.getPlayer().getPosition().getY() + game.getPlayer().getEyeHeight()), -game.getPlayer().getPosition().getZ())
+        //TODO game camera
+//        game.camera.direction.set(0, 0, 0)
+//        game.camera.position.set(0, 0, 0)
+//        game.camera.rotate(-game.getPlayer().getRotation().getPitch(), 1, 0, 0)
+//        game.camera.rotate(game.getPlayer().getRotation().getYaw(), 0, 1, 0)
+//        game.camera.translate(-game.getPlayer().getPosition().getX(), (float) -(game.getPlayer().getPosition().getY() + game.getPlayer().getEyeHeight()), -game.getPlayer().getPosition().getZ())
 
-        if (shouldCalcFrustum()) {
-            calcFrustum = false
-            game.camera.update(true)
-        } else {
-            game.camera.update()
-        }
+//        if (shouldCalcFrustum()) {
+//            calcFrustum = false
+//            game.camera.update(true)
+//        } else {
+//            game.camera.update()
+//        }
     }
 
     private void drawBlockSelection() {

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Mesh
+import com.badlogic.gdx.graphics.VertexAttributes
 import com.badlogic.gdx.graphics.g3d.Material
 import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.graphics.g3d.ModelBatch
@@ -45,8 +46,8 @@ public class Chunk implements IChunk {
 
     private int highestPoint
 
-    private transient Model opaqueModel, transparentModel
-    private transient ModelInstance opaqueInstance, transparentInstance
+    private transient Model opaqueModel, transparentModel, box
+    private transient ModelInstance opaqueInstance, transparentInstance, boxInstance
 
     private transient float[][][] lightLevels
     private transient int[][][] sunlightLevels
@@ -147,9 +148,8 @@ public class Chunk implements IChunk {
         modelBuilder.begin()
         int meshNum = 0
         for(Mesh m : opaqueResult) {
-            modelBuilder.part(toString() + meshNum, m, GL_TRIANGLES,
-                    new Material(ColorAttribute.createAmbient(Color.WHITE),
-                            TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
+            modelBuilder.part(String.format("c-%d,%d-%d", startPosition.x, startPosition.z, meshNum), m, GL_TRIANGLES,
+                    new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
             meshNum++
         }
         opaqueModel = modelBuilder.end();
@@ -158,13 +158,16 @@ public class Chunk implements IChunk {
         modelBuilder.begin()
         meshNum = 0
         for(Mesh m : transparentResult) {
-            modelBuilder.part(toString() + "t" + meshNum, m, GL_TRIANGLES,
+            modelBuilder.part(String.format("c-%d,%d-%d", startPosition.x, startPosition.z, meshNum), m, GL_TRIANGLES,
                     new Material(ColorAttribute.createAmbient(Color.WHITE),
                             TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
             meshNum++
         }
         transparentModel = modelBuilder.end();
         transparentInstance = new ModelInstance(transparentModel)
+
+        box = modelBuilder.createBox(10, 10, 10, new Material(ColorAttribute.createAmbient(Color.RED)), VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal | VertexAttributes.Usage.Position)
+        boxInstance = new ModelInstance(box)
 
         VoxelGameAPI.instance.eventManager.push(new EventChunkRender(this))
     }
@@ -176,11 +179,12 @@ public class Chunk implements IChunk {
             rerender()
         }
 
-        VoxelGameClient.getInstance().getTextureManager().bindTexture(NormalBlockRenderer.blockMap.getTextureObjectHandle())
         if(setup) {
             Gdx.gl.glDisable(GL_BLEND)
 
             batch.render(opaqueInstance)
+
+            batch.render(boxInstance)
         }
     }
 

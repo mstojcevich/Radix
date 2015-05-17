@@ -1,5 +1,6 @@
 package sx.lambda.voxel.world;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import io.netty.util.internal.ConcurrentSet;
 import sx.lambda.voxel.VoxelGameClient;
@@ -77,11 +78,10 @@ public class World implements IWorld {
     @Override
     public void render() {
         if(modelBatch == null) {
-            modelBatch = new ModelBatch();
+            modelBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
         }
 
         if(!server) {
-
             if(!chunksToRerender.isEmpty()) {
                 processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
             }

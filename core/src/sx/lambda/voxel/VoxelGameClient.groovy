@@ -8,6 +8,16 @@ import com.badlogic.gdx.graphics.PerspectiveCamera
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.TextureData
+import com.badlogic.gdx.graphics.VertexAttributes
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g3d.Material
+import com.badlogic.gdx.graphics.g3d.Model
+import com.badlogic.gdx.graphics.g3d.ModelBatch
+import com.badlogic.gdx.graphics.g3d.ModelInstance
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.utils.BufferUtils
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -117,6 +127,8 @@ public class VoxelGameClient extends ApplicationAdapter {
     private PerspectiveCamera camera
     private OrthographicCamera hudCamera
 
+    private CameraInputController camInput
+
     private RepeatedTask[] handlers = [
             new WorldLoader(this),
             new InputHandler(this),
@@ -146,7 +158,7 @@ public class VoxelGameClient extends ApplicationAdapter {
 
         this.startHandlers()
 
-        Gdx.input.setInputProcessor(new VoxelGameGdxInputHandler())
+        enterRemoteWorld("127.0.0.1", (short)31173)
     }
 
     private void startHandlers() {
@@ -157,17 +169,18 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     private void setupOGL() {
         Gdx.gl.glEnable GL_TEXTURE_2D
-        Gdx.gl.glClearColor(0.2f, 0.4f, 1, 0) //Set default color
         Gdx.gl.glEnable GL_DEPTH_TEST //Enable depth visibility check
         Gdx.gl.glDepthFunc GL_LEQUAL //How to test depth (less than or equal)
 
-        camera = new PerspectiveCamera()
+        camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight())
         camera.position.set(10f, 150f, 10f);
-        camera.lookAt(0, 0, 0);
+        camera.lookAt(0,0,0);
         camera.near = 1f;
         camera.far = 300f;
         camera.update();
         hudCamera = new OrthographicCamera()
+
+        camInput = new CameraInputController(camera)
 
         defaultShader = createShader("default", WorldShader.class)
         postProcessShader = createShader("post-process", PostProcessShader.class)
@@ -175,6 +188,8 @@ public class VoxelGameClient extends ApplicationAdapter {
 
         getShaderManager().setShader(defaultShader)
         //defaultShader.setUniformMatrix("u_projectionViewMatrix", camera.combined)
+
+        Gdx.input.setInputProcessor(camInput)
     }
 
     @Override
@@ -193,35 +208,9 @@ public class VoxelGameClient extends ApplicationAdapter {
 
         runQueuedOGL()
 
-        if(renderer != null) {
-            synchronized (renderer) {
-                renderer.render()
-            }
+        if(world != null) {
+            world.render()
         }
-
-        //2D starts here
-        prepare2D()
-
-        Gdx.gl.glEnable(GL_BLEND)
-
-        if(renderer != null) {
-            synchronized (renderer) {
-                renderer.draw2d()
-            }
-        }
-
-        synchronized (currentScreen) {
-            currentScreen.render(true)
-            if(transitionAnimation != null) {
-                transitionAnimation.render()
-                if(transitionAnimation.isFinished()) {
-                    transitionAnimation.finish()
-                    transitionAnimation = null
-                }
-            }
-        }
-
-        Thread.yield()
     }
 
     private void runQueuedOGL() {
@@ -240,24 +229,11 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     private void prepareNewFrame() {
-        if(!settingsManager.visualSettings.postProcessEnabled) {
-            Gdx.gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        }
+        camInput.update()
 
-        float camNear = 0.1f
-        float camFar = 0f
-        if(world != null) {
-            camFar = settingsManager.visualSettings.viewDistance * world.chunkSize
-        }
-        camera.near = camNear
-        camera.far = camFar
-        camera.update()
-
-        getTextureManager().bindTexture(-1)
-
-        worldShader.enableLighting()
-
-        worldShader.updateAnimTime();
+        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        Gdx.gl.glClearColor(0.2f, 0.2f, 1.0f, 1.0f)
+        Gdx.gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     public void updateSelectedBlock() {
@@ -468,6 +444,8 @@ public class VoxelGameClient extends ApplicationAdapter {
                 // Delays are somewhere in this function. Above here.
             }
         })
+
+        Gdx.input.setInputProcessor(camInput)
     }
 
     public void setCurrentScreen(GuiScreen screen) {
@@ -498,33 +476,21 @@ public class VoxelGameClient extends ApplicationAdapter {
     @EventListener(Priority.LAST)
     public void onBlockRegister(EventEarlyInit event) {
         // Create a texture atlas for all of the blocks
-        BufferedImage bi = new BufferedImage(1024, 1024, BufferedImage.TYPE_4BYTE_ABGR)
-        Graphics2D g = bi.createGraphics()
-        final int BLOCK_TEX_SIZE = 32
-        for(Block b : VoxelGameAPI.instance.blocks) {
-            int x = b.ID*BLOCK_TEX_SIZE % bi.getWidth()
-            int y = b.ID*BLOCK_TEX_SIZE / bi.getWidth() as int
-            InputStream texIS = b.textureLocation.read()
-            BufferedImage texImg = ImageIO.read(texIS)
-            texIS.close()
-            g.drawImage(texImg, x, y, BLOCK_TEX_SIZE, BLOCK_TEX_SIZE, null)
-        }
-        g.dispose()
         addToGLQueue(new Runnable() {
             @Override
             void run() {
-                ByteBuffer imageBuffer = BufferUtils.newByteBuffer(4 * bi.getWidth() * bi.getHeight());
-                byte[] imageInByte = (byte[])bi.getRaster().getDataElements(0, 0, bi.getWidth(), bi.getHeight(), null);
-                imageBuffer.put(imageInByte);
-                imageBuffer.flip();
-
-                int colorMode = GL_RGBA;
-
-                blockTextureAtlas = new Texture(bi.getWidth(), bi.getHeight(), Pixmap.Format.RGBA8888)
-                textureManager.bindTexture(blockTextureAtlas.getTextureObjectHandle())
-                Gdx.gl.glTexImage2D(GL_TEXTURE_2D, 0, colorMode, bi.getWidth(), bi.getHeight(), 0, colorMode, GL_UNSIGNED_BYTE, imageBuffer)
-                Gdx.gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-                Gdx.gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+                Pixmap bi = new Pixmap(1024, 1024, Pixmap.Format.RGB888)
+                bi.setColor(1, 1, 1, 1)
+                final int BLOCK_TEX_SIZE = 32
+                for(Block b : VoxelGameAPI.instance.blocks) {
+                    int x = b.ID*BLOCK_TEX_SIZE % bi.getWidth()
+                    int y = b.ID*BLOCK_TEX_SIZE / bi.getWidth() as int
+                    Pixmap tex = new Pixmap(b.textureLocation)
+                    bi.drawPixmap(tex, x, y)
+                    tex.dispose()
+                }
+                blockTextureAtlas = new Texture(bi)
+                bi.dispose()
             }
         })
     }
@@ -532,7 +498,7 @@ public class VoxelGameClient extends ApplicationAdapter {
     public PerspectiveCamera getCamera() {
         return camera;
     }
-    
+
     //TODO move frustum calc, light pos, etc into GameRenderer
 
 }

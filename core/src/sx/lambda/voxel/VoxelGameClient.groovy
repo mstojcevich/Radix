@@ -208,8 +208,8 @@ public class VoxelGameClient extends ApplicationAdapter {
 
         runQueuedOGL()
 
-        if(world != null) {
-            world.render()
+        if(renderer != null) {
+            renderer.render()
         }
     }
 

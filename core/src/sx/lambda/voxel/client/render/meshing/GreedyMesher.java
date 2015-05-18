@@ -1,6 +1,8 @@
 package sx.lambda.voxel.client.render.meshing;
 
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.utils.BufferUtils;
 import sx.lambda.voxel.block.Block;
@@ -27,7 +29,7 @@ public class GreedyMesher implements Mesher {
 
 
     @Override
-    public Mesh[] meshVoxels(MeshBuilder builder, Block[][][] voxels, float[][][] lightLevels) {
+    public Mesh meshVoxels(MeshBuilder builder, Block[][][] voxels, float[][][] lightLevels) {
         List<Face> faces = new ArrayList<>();
 
         // Top, bottom
@@ -164,14 +166,11 @@ public class GreedyMesher implements Mesher {
             greedy(faces, Side.SOUTH, southBlocks, southLightLevels, z+chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
         }
 
-        Mesh[] meshes = new Mesh[faces.size()];
-        int i = 0;
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
         for(Face f : faces) {
-            meshes[i] = f.render(builder);
-            i++;
+            f.render(builder);
         }
-
-        return meshes;
+        return builder.end();
     }
 
     /**
@@ -257,25 +256,30 @@ public class GreedyMesher implements Mesher {
             this.side = side;
         }
 
-        public Mesh render(MeshBuilder builder) {
+        public void render(MeshBuilder builder) {
             IBlockRenderer renderer = block.getRenderer();
 
             switch(side) {
                 case TOP:
-                    return renderer.renderTop(x1, y1, x2, y2, z+1, lightLevel, builder);
+                    renderer.renderTop(x1, y1, x2, y2, z+1, lightLevel, builder);
+                    break;
                 case BOTTOM:
-                    return renderer.renderBottom(x1, y1, x2, y2, z, lightLevel, builder);
+                    renderer.renderBottom(x1, y1, x2, y2, z, lightLevel, builder);
+                    break;
                 case NORTH:
-                    return renderer.renderNorth(x1, y1, x2, y2, z+1, lightLevel, builder);
+                    renderer.renderNorth(x1, y1, x2, y2, z+1, lightLevel, builder);
+                    break;
                 case SOUTH:
-                    return renderer.renderSouth(x1, y1, x2, y2, z, lightLevel, builder);
+                    renderer.renderSouth(x1, y1, x2, y2, z, lightLevel, builder);
+                    break;
                 case EAST:
-                    return renderer.renderEast(x1, y1, x2, y2, z+1, lightLevel, builder);
+                    renderer.renderEast(x1, y1, x2, y2, z+1, lightLevel, builder);
+                    break;
                 case WEST:
-                    return renderer.renderWest(x1, y1, x2, y2, z, lightLevel, builder);
-            }
+                    renderer.renderWest(x1, y1, x2, y2, z, lightLevel, builder);
+                    break;
 
-            return null;
+            }
         }
     }
 }

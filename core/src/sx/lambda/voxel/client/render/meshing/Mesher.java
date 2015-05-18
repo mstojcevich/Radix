@@ -16,7 +16,7 @@ public interface Mesher {
      * @param lightLevels Light levels of voxels
      * @return Result of meshing the voxels.
      */
-    Mesh[] meshVoxels(MeshBuilder builder, Block[][][] voxels, float[][][] lightLevels);
+    Mesh meshVoxels(MeshBuilder builder, Block[][][] voxels, float[][][] lightLevels);
 
     /**
      * Enables the alpha channel for color

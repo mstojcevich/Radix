@@ -141,28 +141,19 @@ public class Chunk implements IChunk {
             }
         }
         mesher.disableAlpha()
-        Mesh[] opaqueResult = mesher.meshVoxels(meshBuilder, opaque, lightLevels)
+        Mesh opaqueResult = mesher.meshVoxels(meshBuilder, opaque, lightLevels)
         mesher.enableAlpha()
-        Mesh[] transparentResult = mesher.meshVoxels(meshBuilder, transparent, lightLevels)
+        Mesh transparentResult = mesher.meshVoxels(meshBuilder, transparent, lightLevels)
 
         modelBuilder.begin()
-        int meshNum = 0
-        for(Mesh m : opaqueResult) {
-            modelBuilder.part(String.format("c-%d,%d-%d", startPosition.x, startPosition.z, meshNum), m, GL_TRIANGLES,
-                    new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
-            meshNum++
-        }
+        modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueResult, GL_TRIANGLES,
+                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
         opaqueModel = modelBuilder.end();
         opaqueInstance = new ModelInstance(opaqueModel)
 
         modelBuilder.begin()
-        meshNum = 0
-        for(Mesh m : transparentResult) {
-            modelBuilder.part(String.format("c-%d,%d-%d", startPosition.x, startPosition.z, meshNum), m, GL_TRIANGLES,
-                    new Material(ColorAttribute.createAmbient(Color.WHITE),
-                            TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
-            meshNum++
-        }
+        modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), transparentResult, GL_TRIANGLES,
+                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
         transparentModel = modelBuilder.end();
         transparentInstance = new ModelInstance(transparentModel)
 

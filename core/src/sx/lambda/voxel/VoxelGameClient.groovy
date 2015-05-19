@@ -78,7 +78,6 @@ public class VoxelGameClient extends ApplicationAdapter {
     private IngameHUD hud
     private GuiScreen currentScreen
 
-    private int fps
     public int chunkRenderTimes = 0 // TODO move to World
     public int numChunkRenders = 0 // TODO move to World
 
@@ -99,9 +98,7 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     private PerspectiveCamera camera
     private OrthographicCamera hudCamera
-
-    private long lastFpsPrint
-
+    
     private SpriteBatch guiBatch
 
     private RepeatedTask[] handlers = [
@@ -188,11 +185,6 @@ public class VoxelGameClient extends ApplicationAdapter {
                 currentScreen.render(world != null, guiBatch)
             }
             guiBatch.end()
-
-            if(System.currentTimeMillis() - lastFpsPrint >= 5000) {
-                System.out.println(Gdx.graphics.framesPerSecond)
-                lastFpsPrint = System.currentTimeMillis()
-            }
         } catch(Exception e) {
             done = true;
             e.printStackTrace()
@@ -317,8 +309,6 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     public GuiScreen getCurrentScreen() { currentScreen }
-
-    public int getFps() { fps }
 
     public IngameHUD getHud() { this.hud }
 

@@ -56,6 +56,8 @@ public class Chunk implements IChunk {
 
     private boolean setup, cleanedUp
 
+    private boolean rerenderNext
+
     /**
      * Map of light levels (integers 0-16) to brightness multipliers
      */
@@ -166,8 +168,9 @@ public class Chunk implements IChunk {
     @Override
     public void render(ModelBatch batch) {
         if(cleanedUp)return;
-        if(sunlightChanged && !sunlightChanging) {
+        if((sunlightChanged && !sunlightChanging) || rerenderNext) {
             rerender()
+            rerenderNext = false
         }
 
         if(setup) {
@@ -444,6 +447,7 @@ public class Chunk implements IChunk {
     @Override
     public void finishChangingSunlight() {
         sunlightChanging = false
+        rerenderNext = true
     }
 
     @Override

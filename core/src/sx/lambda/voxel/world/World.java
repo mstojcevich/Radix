@@ -50,6 +50,8 @@ public class World implements IWorld {
 
     private ModelBatch modelBatch;
 
+    private boolean shouldUpdateLight, updatingLight;
+
     public World(boolean remote, boolean server) {
         this.remote = remote;
         this.server = server;
@@ -82,10 +84,10 @@ public class World implements IWorld {
         }
 
         if(!server) {
-            if(!chunksToRerender.isEmpty()) {
+            if(!updatingLight && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
                 processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
             }
-            for(IChunk c : chunksToRerender) {
+            for (IChunk c : chunksToRerender) {
                 c.rerender();
                 chunksToRerender.remove(c);
             }
@@ -322,149 +324,161 @@ public class World implements IWorld {
 
     @Override
     public void processLightQueue() {
-        processLightRemovalQueue();
+        shouldUpdateLight = true;
+        if(!updatingLight) {
+            new Thread("Light update") {
+                @Override
+                public void run() {
+                    shouldUpdateLight = false;
+                    updatingLight = true;
 
-        if(!sunlightQueue.isEmpty()) {
-            Queue<IChunk> changedChunks = new LinkedBlockingDeque<>();
-            Vec3i pos;
-            while((pos = sunlightQueue.poll()) != null) {
-                IChunk posChunk = getChunkAtPosition(pos);
-                if(posChunk == null) {
-                    continue;
-                }
-                int ll = posChunk.getSunlight(pos.x, pos.y, pos.z);
-                int nextLL = ll-1;
+                    processLightRemovalQueue();
 
-                Vec3i negXNeighborPos = pos.translate(-1,0,0);
-                Vec3i posXNeighborPos = pos.translate(1,0,0);
-                Vec3i negZNeighborPos = pos.translate(0,0,-1);
-                Vec3i posZNeighborPos = pos.translate(0,0,1);
-                IChunk negXNeighborChunk = getChunkAtPosition(negXNeighborPos);
-                IChunk posXNeighborChunk = getChunkAtPosition(posXNeighborPos);
-                IChunk negZNeighborChunk = getChunkAtPosition(negZNeighborPos);
-                IChunk posZNeighborChunk = getChunkAtPosition(posZNeighborPos);
-
-                if(negXNeighborChunk != null) {
-                    Block bl = negXNeighborChunk.getBlockAtPosition(negXNeighborPos);
-                    if(bl == null) {
-                        if(negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z) < nextLL) {
-                            negXNeighborChunk.setSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z, nextLL);
-                            sunlightQueue.add(negXNeighborPos);
-                            changedChunks.add(negXNeighborChunk);
-                        }
-                    } else if(bl.isTransparent()) {
-                        if(negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z) < nextLL) {
-                            negXNeighborChunk.setSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z, nextLL);
-                            sunlightQueue.add(negXNeighborPos);
-                            changedChunks.add(negXNeighborChunk);
-                        }
-                    }
-                }
-                if(posXNeighborChunk != null) {
-                    Block bl = posXNeighborChunk.getBlockAtPosition(posXNeighborPos);
-                    if(bl == null) {
-                        if(posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z) < nextLL) {
-                            posXNeighborChunk.setSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z, nextLL);
-                            sunlightQueue.add(posXNeighborPos);
-                            changedChunks.add(posXNeighborChunk);
-                        }
-                    } else if(bl.isTransparent()) {
-                        if(posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z) < nextLL) {
-                            posXNeighborChunk.setSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z, nextLL);
-                            sunlightQueue.add(posXNeighborPos);
-                            changedChunks.add(posXNeighborChunk);
-                        }
-                    }
-                }
-                if(negZNeighborChunk != null) {
-                    Block bl = negZNeighborChunk.getBlockAtPosition(negZNeighborPos);
-                    if(bl == null) {
-                        if(negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z) < nextLL) {
-                            negZNeighborChunk.setSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z, nextLL);
-                            sunlightQueue.add(negZNeighborPos);
-                            changedChunks.add(negZNeighborChunk);
-                        }
-                    } else if(bl.isTransparent()) {
-                        if(negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z) < nextLL) {
-                            negZNeighborChunk.setSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z, nextLL);
-                            sunlightQueue.add(negZNeighborPos);
-                            changedChunks.add(negZNeighborChunk);
-                        }
-                    }
-                }
-                if(posZNeighborChunk != null) {
-                    Block bl = posZNeighborChunk.getBlockAtPosition(posZNeighborPos);
-                    if(bl == null) {
-                        if(posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z) < nextLL) {
-                            posZNeighborChunk.setSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z, nextLL);
-                            sunlightQueue.add(posZNeighborPos);
-                            changedChunks.add(posZNeighborChunk);
-                        }
-                    } else if(bl.isTransparent()) {
-                        if(posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z) < nextLL) {
-                            posZNeighborChunk.setSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z, nextLL);
-                            sunlightQueue.add(posZNeighborPos);
-                            changedChunks.add(posZNeighborChunk);
-                        }
-                    }
-                }
-
-                if(pos.y < WORLD_HEIGHT - 2) {
-                    Vec3i posYPos = pos.translate(0, 1, 0);
-                    Block posYBlock = posChunk.getBlockAtPosition(posYPos);
-                    if(posYBlock == null) {
-                        if(nextLL > posChunk.getSunlight(posYPos.x, posYPos.y, posYPos.z)) {
-                            posChunk.setSunlight(posYPos.x, posYPos.y, posYPos.z, nextLL);
-                            sunlightQueue.add(posYPos);
-                            changedChunks.add(posChunk);
-                        }
-                    } else if(posYBlock.isTransparent()) {
-                        if(nextLL > posChunk.getSunlight(posYPos.x, posYPos.y, posYPos.z)) {
-                            posChunk.setSunlight(posYPos.x, posYPos.y, posYPos.z, nextLL);
-                            sunlightQueue.add(posYPos);
-                            changedChunks.add(posChunk);
-                        }
-                    }
-                }
-
-                if(pos.y > 0) {
-                    Vec3i negYPos = pos.translate(0, -1, 0);
-                    Block negYBlock = posChunk.getBlockAtPosition(negYPos);
-                    if(negYBlock == null) {
-                        if(ll == 16) {
-                            if(posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) < 16) {
-                                posChunk.setSunlight(negYPos.x, negYPos.y, negYPos.z, 16);
-                                sunlightQueue.add(negYPos);
-                                changedChunks.add(posChunk);
+                    if (!sunlightQueue.isEmpty()) {
+                        Queue<IChunk> changedChunks = new LinkedBlockingDeque<>();
+                        Vec3i pos;
+                        while ((pos = sunlightQueue.poll()) != null) {
+                            IChunk posChunk = getChunkAtPosition(pos);
+                            if (posChunk == null) {
+                                continue;
                             }
-                        } else {
-                            if(posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) < nextLL) {
-                                posChunk.setSunlight(negYPos.x, negYPos.y, negYPos.z, nextLL);
-                                sunlightQueue.add(negYPos);
-                                changedChunks.add(posChunk);
+                            int ll = posChunk.getSunlight(pos.x, pos.y, pos.z);
+                            int nextLL = ll - 1;
+
+                            Vec3i negXNeighborPos = pos.translate(-1, 0, 0);
+                            Vec3i posXNeighborPos = pos.translate(1, 0, 0);
+                            Vec3i negZNeighborPos = pos.translate(0, 0, -1);
+                            Vec3i posZNeighborPos = pos.translate(0, 0, 1);
+                            IChunk negXNeighborChunk = getChunkAtPosition(negXNeighborPos);
+                            IChunk posXNeighborChunk = getChunkAtPosition(posXNeighborPos);
+                            IChunk negZNeighborChunk = getChunkAtPosition(negZNeighborPos);
+                            IChunk posZNeighborChunk = getChunkAtPosition(posZNeighborPos);
+
+                            if (negXNeighborChunk != null) {
+                                Block bl = negXNeighborChunk.getBlockAtPosition(negXNeighborPos);
+                                if (bl == null) {
+                                    if (negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z) < nextLL) {
+                                        negXNeighborChunk.setSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z, nextLL);
+                                        sunlightQueue.add(negXNeighborPos);
+                                        changedChunks.add(negXNeighborChunk);
+                                    }
+                                } else if (bl.isTransparent()) {
+                                    if (negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z) < nextLL) {
+                                        negXNeighborChunk.setSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z, nextLL);
+                                        sunlightQueue.add(negXNeighborPos);
+                                        changedChunks.add(negXNeighborChunk);
+                                    }
+                                }
+                            }
+                            if (posXNeighborChunk != null) {
+                                Block bl = posXNeighborChunk.getBlockAtPosition(posXNeighborPos);
+                                if (bl == null) {
+                                    if (posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z) < nextLL) {
+                                        posXNeighborChunk.setSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z, nextLL);
+                                        sunlightQueue.add(posXNeighborPos);
+                                        changedChunks.add(posXNeighborChunk);
+                                    }
+                                } else if (bl.isTransparent()) {
+                                    if (posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z) < nextLL) {
+                                        posXNeighborChunk.setSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z, nextLL);
+                                        sunlightQueue.add(posXNeighborPos);
+                                        changedChunks.add(posXNeighborChunk);
+                                    }
+                                }
+                            }
+                            if (negZNeighborChunk != null) {
+                                Block bl = negZNeighborChunk.getBlockAtPosition(negZNeighborPos);
+                                if (bl == null) {
+                                    if (negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z) < nextLL) {
+                                        negZNeighborChunk.setSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z, nextLL);
+                                        sunlightQueue.add(negZNeighborPos);
+                                        changedChunks.add(negZNeighborChunk);
+                                    }
+                                } else if (bl.isTransparent()) {
+                                    if (negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z) < nextLL) {
+                                        negZNeighborChunk.setSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z, nextLL);
+                                        sunlightQueue.add(negZNeighborPos);
+                                        changedChunks.add(negZNeighborChunk);
+                                    }
+                                }
+                            }
+                            if (posZNeighborChunk != null) {
+                                Block bl = posZNeighborChunk.getBlockAtPosition(posZNeighborPos);
+                                if (bl == null) {
+                                    if (posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z) < nextLL) {
+                                        posZNeighborChunk.setSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z, nextLL);
+                                        sunlightQueue.add(posZNeighborPos);
+                                        changedChunks.add(posZNeighborChunk);
+                                    }
+                                } else if (bl.isTransparent()) {
+                                    if (posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z) < nextLL) {
+                                        posZNeighborChunk.setSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z, nextLL);
+                                        sunlightQueue.add(posZNeighborPos);
+                                        changedChunks.add(posZNeighborChunk);
+                                    }
+                                }
+                            }
+
+                            if (pos.y < WORLD_HEIGHT - 2) {
+                                Vec3i posYPos = pos.translate(0, 1, 0);
+                                Block posYBlock = posChunk.getBlockAtPosition(posYPos);
+                                if (posYBlock == null) {
+                                    if (nextLL > posChunk.getSunlight(posYPos.x, posYPos.y, posYPos.z)) {
+                                        posChunk.setSunlight(posYPos.x, posYPos.y, posYPos.z, nextLL);
+                                        sunlightQueue.add(posYPos);
+                                        changedChunks.add(posChunk);
+                                    }
+                                } else if (posYBlock.isTransparent()) {
+                                    if (nextLL > posChunk.getSunlight(posYPos.x, posYPos.y, posYPos.z)) {
+                                        posChunk.setSunlight(posYPos.x, posYPos.y, posYPos.z, nextLL);
+                                        sunlightQueue.add(posYPos);
+                                        changedChunks.add(posChunk);
+                                    }
+                                }
+                            }
+
+                            if (pos.y > 0) {
+                                Vec3i negYPos = pos.translate(0, -1, 0);
+                                Block negYBlock = posChunk.getBlockAtPosition(negYPos);
+                                if (negYBlock == null) {
+                                    if (ll == 16) {
+                                        if (posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) < 16) {
+                                            posChunk.setSunlight(negYPos.x, negYPos.y, negYPos.z, 16);
+                                            sunlightQueue.add(negYPos);
+                                            changedChunks.add(posChunk);
+                                        }
+                                    } else {
+                                        if (posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) < nextLL) {
+                                            posChunk.setSunlight(negYPos.x, negYPos.y, negYPos.z, nextLL);
+                                            sunlightQueue.add(negYPos);
+                                            changedChunks.add(posChunk);
+                                        }
+                                    }
+                                } else if (negYBlock.isTransparent()) {
+                                    if (ll == 16) {
+                                        if (posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) < 16) {
+                                            posChunk.setSunlight(negYPos.x, negYPos.y, negYPos.z, 16);
+                                            sunlightQueue.add(negYPos);
+                                            changedChunks.add(posChunk);
+                                        }
+                                    } else {
+                                        if (posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) < nextLL) {
+                                            posChunk.setSunlight(negYPos.x, negYPos.y, negYPos.z, nextLL);
+                                            sunlightQueue.add(negYPos);
+                                            changedChunks.add(posChunk);
+                                        }
+                                    }
+                                }
                             }
                         }
-                    } else if(negYBlock.isTransparent()) {
-                        if(ll == 16) {
-                            if(posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) < 16) {
-                                posChunk.setSunlight(negYPos.x, negYPos.y, negYPos.z, 16);
-                                sunlightQueue.add(negYPos);
-                                changedChunks.add(posChunk);
-                            }
-                        } else {
-                            if(posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) < nextLL) {
-                                posChunk.setSunlight(negYPos.x, negYPos.y, negYPos.z, nextLL);
-                                sunlightQueue.add(negYPos);
-                                changedChunks.add(posChunk);
-                            }
+                        IChunk changedChunk;
+                        while ((changedChunk = changedChunks.poll()) != null) {
+                            changedChunk.finishChangingSunlight();
                         }
                     }
+                    updatingLight = false;
                 }
-            }
-            IChunk changedChunk;
-            while((changedChunk = changedChunks.poll()) != null) {
-                changedChunk.finishChangingSunlight();
-            }
+            }.start();
         }
     }
 

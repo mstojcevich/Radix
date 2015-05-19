@@ -37,7 +37,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
         }
         float u2 = u+TEXTURE_PERCENTAGE-.001f;
         float v2 = v+TEXTURE_PERCENTAGE-.001f;
-        batcher.draw(getBlockMap(), x, y, x+width, y+width, u, v, u2, v2);
+        batcher.draw(getBlockMap(), x, y, width, width, u, v, u2, v2);
     }
 
     @Override

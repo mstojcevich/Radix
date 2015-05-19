@@ -98,7 +98,7 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     private PerspectiveCamera camera
     private OrthographicCamera hudCamera
-    
+
     private SpriteBatch guiBatch
 
     private RepeatedTask[] handlers = [

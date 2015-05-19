@@ -39,11 +39,12 @@ class BlockSelectGUI implements GuiScreen {
         for(Block b : blocks) {
             if(b == null)continue;
             final int x = PADDING + (currentBlockNum * SLOT_SIZE) % USABLE_WIDTH
-            final int y = PADDING + (int)((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)
-            batch.draw(guiTexture, x, y, x+SLOT_SIZE-PADDING, y+SLOT_SIZE-PADDING, 0.05f, 0, 0.1f, 0.05f)
+            final int regularY = PADDING + (int)((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)
+            final int y = Gdx.graphics.height - (regularY + SLOT_SIZE)
+            batch.draw(guiTexture, x, y, SLOT_SIZE - PADDING, SLOT_SIZE - PADDING, 0.05f, 0, 0.1f, 0.05f)
             b.renderer.render2d(batch, x+BLOCK_RENDER_OFFSET-2, y+BLOCK_RENDER_OFFSET-2, BLOCK_SIZE)
             currentBlockNum++
-            idPositions.put(new Point(x, y), b.ID)
+            idPositions.put(new Point(x, regularY), b.ID)
         }
     }
 
@@ -54,7 +55,7 @@ class BlockSelectGUI implements GuiScreen {
     @Override
     void onMouseClick(int button) {
         int mouseX = Gdx.input.getX()
-        int mouseY = Gdx.graphics.getHeight()-Gdx.input.getY()
+        int mouseY = Gdx.input.getY()
 
         Integer id = getBlockID(mouseX, mouseY)
         if(id != null) {
@@ -68,6 +69,8 @@ class BlockSelectGUI implements GuiScreen {
     private Integer getBlockID(int x, int y) {
         x = x - (x % SLOT_SIZE) + PADDING
         y = y - (y % SLOT_SIZE) + PADDING
+        println(x)
+        println(y)
         return idPositions.get(new Point(x, y))
     }
 

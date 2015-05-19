@@ -138,6 +138,10 @@ class MovementHandler implements RepeatedTask {
                         player.setMoved(true);
                     }
 
+                    if(player.hasMoved()) {
+                        game.gameRenderer.calculateFrustum()
+                    }
+
                     lastMoveCheckMS = System.currentTimeMillis()
                     sleep(10)
                 }

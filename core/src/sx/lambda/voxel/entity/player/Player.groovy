@@ -61,6 +61,10 @@ class Player extends LivingEntity implements Serializable {
         this.moved = moved
     }
 
+    public boolean hasMoved() {
+        return this.moved;
+    }
+
     @Override
     public ObjModel getDefaultModel() {
         playerModel

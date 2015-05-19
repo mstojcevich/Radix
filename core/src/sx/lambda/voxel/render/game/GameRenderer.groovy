@@ -139,16 +139,15 @@ class GameRenderer implements Renderer {
     }
 
     private void prepareWorldRender() {
-        //TODO game camera
-        game.camera.position.set(game.player.position.x, game.player.position.y + game.player.eyeHeight, game.player.position.z)
-        game.camera.up.set(0, 1, 0);
-        game.camera.direction.set(0, 0, -1);
-        game.camera.rotate(game.player.rotation.pitch, 1, 0, 0)
-        game.camera.rotate(-game.player.rotation.yaw, 0, 1, 0)
-
         if (shouldCalcFrustum()) {
-            calcFrustum = false
+            game.camera.position.set(game.player.position.x, game.player.position.y + game.player.eyeHeight, game.player.position.z)
+            game.camera.up.set(0, 1, 0);
+            game.camera.direction.set(0, 0, -1);
+            game.camera.rotate(game.player.rotation.pitch, 1, 0, 0)
+            game.camera.rotate(-game.player.rotation.yaw, 0, 1, 0)
+
             game.camera.update(true)
+            calcFrustum = false
         } else {
             game.camera.update()
         }

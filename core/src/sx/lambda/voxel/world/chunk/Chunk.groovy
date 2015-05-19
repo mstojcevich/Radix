@@ -46,8 +46,8 @@ public class Chunk implements IChunk {
 
     private int highestPoint
 
-    private transient Model opaqueModel, transparentModel, box
-    private transient ModelInstance opaqueInstance, transparentInstance, boxInstance
+    private transient Model opaqueModel, transparentModel
+    private transient ModelInstance opaqueInstance, transparentInstance
 
     private transient float[][][] lightLevels
     private transient int[][][] sunlightLevels
@@ -159,9 +159,6 @@ public class Chunk implements IChunk {
         transparentModel = modelBuilder.end();
         transparentInstance = new ModelInstance(transparentModel)
 
-        box = modelBuilder.createBox(10, 10, 10, new Material(ColorAttribute.createAmbient(Color.RED)), VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal | VertexAttributes.Usage.Position)
-        boxInstance = new ModelInstance(box)
-
         VoxelGameAPI.instance.eventManager.push(new EventChunkRender(this))
     }
 
@@ -177,8 +174,6 @@ public class Chunk implements IChunk {
             Gdx.gl.glDisable(GL_BLEND)
 
             batch.render(opaqueInstance)
-
-            batch.render(boxInstance)
         }
     }
 

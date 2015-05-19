@@ -1,5 +1,6 @@
 package sx.lambda.voxel.world.chunk;
 
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import groovy.lang.Closure;
 import sx.lambda.voxel.block.Block;
@@ -18,7 +19,7 @@ public interface IChunk extends Serializable {
 	/**
 	 * Renders the chunk 
 	 */
-	void render(ModelBatch batch);
+	void render();
 
     int getBlockIdAtPosition(int x, int y, int z);
 	Block getBlockAtPosition(Vec3i position);
@@ -33,7 +34,7 @@ public interface IChunk extends Serializable {
 
     float getLightLevel(int x, int y, int z);
 
-    void renderWater(ModelBatch batch);
+    void renderWater();
 
     int[][][] blocksToIdInt();
 
@@ -42,10 +43,13 @@ public interface IChunk extends Serializable {
     void setSunlight(int x, int y, int z, int level);
     int getSunlight(int x, int y, int z);
 
-    public void finishChangingSunlight();
+    void finishChangingSunlight();
 
-    public IWorld getWorld();
+    IWorld getWorld();
 
-    public void cleanup();
+    void cleanup();
+
+    Mesh getMesh();
+    Mesh getTransparentMesh();
 
 }

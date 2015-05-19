@@ -1,31 +1,19 @@
 package sx.lambda.voxel.world.chunk
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Mesh
-import com.badlogic.gdx.graphics.VertexAttributes
-import com.badlogic.gdx.graphics.g3d.Material
-import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.graphics.g3d.ModelBatch
-import com.badlogic.gdx.graphics.g3d.ModelInstance
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
-import com.badlogic.gdx.utils.BufferUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.events.render.EventChunkRender
 import sx.lambda.voxel.block.Block
-import sx.lambda.voxel.block.NormalBlockRenderer
 import sx.lambda.voxel.client.render.meshing.Mesher
 import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.api.VoxelGameAPI
 import sx.lambda.voxel.client.render.meshing.GreedyMesher
-
-import java.nio.IntBuffer
 
 import static com.badlogic.gdx.graphics.GL20.*
 
@@ -46,8 +34,7 @@ public class Chunk implements IChunk {
 
     private int highestPoint
 
-    private transient Model opaqueModel, transparentModel
-    private transient ModelInstance opaqueInstance, transparentInstance
+    private Mesh opaqueMesh, transparentMesh
 
     private transient float[][][] lightLevels
     private transient int[][][] sunlightLevels
@@ -143,37 +130,19 @@ public class Chunk implements IChunk {
             }
         }
         mesher.disableAlpha()
-        Mesh opaqueResult = mesher.meshVoxels(meshBuilder, opaque, lightLevels)
+        opaqueMesh = mesher.meshVoxels(meshBuilder, opaque, lightLevels)
         mesher.enableAlpha()
-        Mesh transparentResult = mesher.meshVoxels(meshBuilder, transparent, lightLevels)
-
-        modelBuilder.begin()
-        modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueResult, GL_TRIANGLES,
-                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
-        opaqueModel = modelBuilder.end();
-        opaqueInstance = new ModelInstance(opaqueModel)
-
-        modelBuilder.begin()
-        modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), transparentResult, GL_TRIANGLES,
-                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.blockMap)))
-        transparentModel = modelBuilder.end();
-        transparentInstance = new ModelInstance(transparentModel)
+        transparentMesh = mesher.meshVoxels(meshBuilder, transparent, lightLevels)
 
         VoxelGameAPI.instance.eventManager.push(new EventChunkRender(this))
     }
 
     @Override
-    public void render(ModelBatch batch) {
+    public void render() {
         if(cleanedUp)return;
         if((sunlightChanged && !sunlightChanging) || rerenderNext) {
             rerender()
             rerenderNext = false
-        }
-
-        if(setup) {
-            Gdx.gl.glDisable(GL_BLEND)
-
-            batch.render(opaqueInstance)
         }
     }
 
@@ -189,13 +158,7 @@ public class Chunk implements IChunk {
         }
     }
 
-    public void renderWater(ModelBatch batch) {
-        if(cleanedUp)return;
-        if(setup) {
-            Gdx.gl.glEnable(GL_BLEND)
-
-            batch.render(transparentInstance)
-        }
+    public void renderWater() {
     }
 
     public Block getBlockAtPosition(Vec3i position) {
@@ -450,10 +413,6 @@ public class Chunk implements IChunk {
 
     @Override
     void cleanup() {
-        if(setup) {
-            transparentModel.dispose()
-            opaqueModel.dispose()
-        }
         cleanedUp = true
     }
 
@@ -472,4 +431,13 @@ public class Chunk implements IChunk {
         if (y < 0) return 0
         return blockList[x][y][z]
     }
+
+    public Mesh getMesh() {
+        return opaqueMesh
+    }
+
+    public Mesh getTransparentMesh() {
+        return transparentMesh
+    }
+
 }

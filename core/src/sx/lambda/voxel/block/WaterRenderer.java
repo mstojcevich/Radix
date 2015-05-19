@@ -28,7 +28,7 @@ public class WaterRenderer extends NormalBlockRenderer {
     @Override
     public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Z
-        builder.setColor(lightLevel, lightLevel, lightLevel, 1);
+        builder.setColor(lightLevel, lightLevel, lightLevel, 0.6f);
         builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
         builder.rect(x1, y2, z,
                 x2, y2, z,

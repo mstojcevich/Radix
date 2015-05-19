@@ -198,6 +198,7 @@ public class VoxelGameClient extends ApplicationAdapter {
             done = true;
             e.printStackTrace()
             Gdx.input.setCursorCatched(false)
+            Gdx.app.exit()
         }
     }
 

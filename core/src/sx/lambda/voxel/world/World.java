@@ -1,12 +1,21 @@
 package sx.lambda.voxel.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import io.netty.util.internal.ConcurrentSet;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.api.events.worldgen.EventFinishChunkGen;
 import sx.lambda.voxel.block.Block;
+import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.entity.Entity;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.net.packet.client.PacketUnloadChunk;
@@ -50,6 +59,8 @@ public class World implements IWorld {
 
     private ModelBatch modelBatch;
 
+    private Material blockMaterial, transparentBlockMaterial;
+
     private boolean shouldUpdateLight, updatingLight;
 
     public World(boolean remote, boolean server) {
@@ -81,6 +92,9 @@ public class World implements IWorld {
     public void render() {
         if(modelBatch == null) {
             modelBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
+            blockMaterial = new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()));
+            transparentBlockMaterial = new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
+                    new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
         }
 
         if(!server) {
@@ -94,17 +108,14 @@ public class World implements IWorld {
 
             long renderStartNS = System.nanoTime();
 
+            for (IChunk c : this.chunkList) {
+                c.render();
+            }
+            for (IChunk c : this.chunkList) {
+                c.renderWater();
+            }
             modelBatch.begin(VoxelGameClient.getInstance().getCamera());
-            for (IChunk c : this.chunkList) {
-                if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint(), CHUNK_SIZE)) {
-                    c.render(modelBatch);
-                }
-            }
-            for (IChunk c : this.chunkList) {
-                if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint(), CHUNK_SIZE)) {
-                    c.renderWater(modelBatch);
-                }
-            }
+            modelBatch.render(this);
             modelBatch.end();
             if(VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
                 VoxelGameClient.getInstance().numChunkRenders = 0;
@@ -611,4 +622,33 @@ public class World implements IWorld {
         modelBatch = null;
     }
 
+    @Override
+    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
+        for(IChunk c : chunkList) {
+            Mesh m = c.getMesh();
+            if(m == null)continue;
+            if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint(), CHUNK_SIZE)) {
+                Renderable renderable = pool.obtain();
+                renderable.material = blockMaterial;
+                renderable.mesh = m;
+                renderable.meshPartOffset = 0;
+                renderable.meshPartSize = m.getNumVertices() * 6;
+                renderable.primitiveType = GL20.GL_TRIANGLES;
+                renderables.add(renderable);
+            }
+        }
+        for(IChunk c : chunkList) {
+            Mesh m = c.getTransparentMesh();
+            if(m == null)continue;
+            if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint(), CHUNK_SIZE)) {
+                Renderable renderable = pool.obtain();
+                renderable.material = transparentBlockMaterial;
+                renderable.mesh = m;
+                renderable.meshPartOffset = 0;
+                renderable.meshPartSize = m.getNumVertices() * 6;
+                renderable.primitiveType = GL20.GL_TRIANGLES;
+                renderables.add(renderable);
+            }
+        }
+    }
 }

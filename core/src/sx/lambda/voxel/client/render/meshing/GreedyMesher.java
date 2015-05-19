@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-import com.badlogic.gdx.utils.BufferUtils;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.IBlockRenderer;
 import sx.lambda.voxel.block.Side;

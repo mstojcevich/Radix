@@ -1,5 +1,6 @@
 package sx.lambda.voxel.world;
 
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import sx.lambda.voxel.entity.Entity;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.util.Vec3i;
@@ -8,24 +9,24 @@ import sx.lambda.voxel.world.generation.ChunkGenerator;
 
 import java.util.List;
 
-public interface IWorld {
+public interface IWorld extends RenderableProvider {
 	
-	public int getChunkSize();
+	int getChunkSize();
 
-    public int getHeight();
+    int getHeight();
 
-    public IChunk getChunkAtPosition(Vec3i position);
+    IChunk getChunkAtPosition(Vec3i position);
 
-    public void render();
+    void render();
 
-    public void loadChunks(EntityPosition playerPosition, int viewDistance);
+    void loadChunks(EntityPosition playerPosition, int viewDistance);
 
-    public int getSeaLevel();
+    int getSeaLevel();
 
     /**
      * @return Gravity of the world in m/(s^2)
      */
-    public float getGravity();
+    float getGravity();
 
     /**
      *
@@ -33,21 +34,21 @@ public interface IWorld {
      * @param ms Time elapsed in MS since last gravity application
      * @return Velocity affected by gravity
      */
-    public float applyGravity(float velocity, long ms);
+    float applyGravity(float velocity, long ms);
 
-    public void removeBlock(Vec3i Vec3i);
+    void removeBlock(Vec3i Vec3i);
 
-    public void addBlock(int block, Vec3i position);
+    void addBlock(int block, Vec3i position);
 
-    public IChunk[] getChunksInRange(EntityPosition pos, int viewDistance);
+    IChunk[] getChunksInRange(EntityPosition pos, int viewDistance);
 
-    public void addChunk(IChunk chunk);
+    void addChunk(IChunk chunk);
 
-    public void gcChunks(EntityPosition playerPos, int viewDistance);
+    void gcChunks(EntityPosition playerPos, int viewDistance);
 
-    public List<Entity> getLoadedEntities();
+    List<Entity> getLoadedEntities();
 
-    public void addEntity(Entity e);
+    void addEntity(Entity e);
 
     void rerenderChunk(IChunk c);
 

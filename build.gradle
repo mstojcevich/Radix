@@ -44,10 +44,6 @@ project(":desktop") {
         compile project(":core")
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        compile group: 'io.netty', name: 'netty-codec', version:'5.0.0.Alpha2'
-        compile group: 'io.netty', name: 'netty-handler', version:'5.0.0.Alpha2'
-        compile group: 'org.codehaus.groovy', name: 'groovy', version:'2.4.3'
-        compile name: 'iridiumeventbus-v0'
     }
 }
 
@@ -57,6 +53,10 @@ project(":core") {
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
+        compile group: 'io.netty', name: 'netty-codec', version:'5.0.0.Alpha2'
+        compile group: 'io.netty', name: 'netty-handler', version:'5.0.0.Alpha2'
+        compile group: 'org.codehaus.groovy', name: 'groovy', version:'2.4.3'
+        compile name: 'iridiumeventbus-v0'
     }
 }
 

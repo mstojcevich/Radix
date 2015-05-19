@@ -423,7 +423,7 @@ public class VoxelGameClient extends ApplicationAdapter {
                 for(Block b : VoxelGameAPI.instance.blocks) {
                     int x = b.ID*BLOCK_TEX_SIZE % bi.getWidth()
                     int y = b.ID*BLOCK_TEX_SIZE / bi.getWidth() as int
-                    Pixmap tex = new Pixmap(b.textureLocation)
+                    Pixmap tex = new Pixmap(Gdx.files.internal(b.textureLocation))
                     bi.drawPixmap(tex, x, y)
                     tex.dispose()
                 }

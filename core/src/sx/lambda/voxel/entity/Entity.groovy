@@ -1,28 +1,23 @@
 package sx.lambda.voxel.entity
 
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.graphics.g3d.Model
 import groovy.transform.CompileStatic
-import sx.lambda.voxel.VoxelGameClient
-import sx.lambda.voxel.util.gl.ObjModel
-
-import static com.badlogic.gdx.graphics.GL20.*
 
 @CompileStatic
 abstract class Entity implements Serializable {
 
     private final EntityPosition position;
     private final EntityRotation rotation;
-    private transient ObjModel model;
+    private transient Model model;
     private int id = -1
 
-    public Entity(ObjModel model, EntityPosition position, EntityRotation rotation) {
+    public Entity(Model model, EntityPosition position, EntityRotation rotation) {
         this.model = model
         this.position = position
         this.rotation = rotation
     }
 
-    public Entity(ObjModel model) {
+    public Entity(Model model) {
         this(model, new EntityPosition(0, 0, 0), new EntityRotation(0, 0))
     }
 
@@ -54,16 +49,13 @@ abstract class Entity implements Serializable {
      * Initialization once an opengl context is available
      */
     public void init() {
-        if(model != null) {
-            model.init()
-        }
     }
 
-    public void setModel(ObjModel model) {
+    public void setModel(Model model) {
         this.model = model
     }
 
-    public ObjModel getDefaultModel() {
+    public Model getDefaultModel() {
         return null
     }
 

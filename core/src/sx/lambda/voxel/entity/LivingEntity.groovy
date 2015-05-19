@@ -1,9 +1,9 @@
 package sx.lambda.voxel.entity
 
+import com.badlogic.gdx.graphics.g3d.Model
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.tasks.MovementHandler
 import sx.lambda.voxel.util.Vec3i
-import sx.lambda.voxel.util.gl.ObjModel
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.chunk.IChunk
 
@@ -19,11 +19,11 @@ public abstract class LivingEntity extends Entity implements Serializable {
         this(getDefaultModel(), new EntityPosition(0,0,0), new EntityRotation())
     }
 
-    public LivingEntity(ObjModel model, EntityPosition pos, EntityRotation rot) {
+    public LivingEntity(Model model, EntityPosition pos, EntityRotation rot) {
         this(model, pos, rot, 1, 1);
     }
 
-    public LivingEntity(ObjModel model, EntityPosition pos, EntityRotation rot, float width, float height) {
+    public LivingEntity(Model model, EntityPosition pos, EntityRotation rot, float width, float height) {
         super(model, pos, rot)
         this.width = width
         this.height = height

@@ -1,14 +1,15 @@
 package sx.lambda.voxel.entity.player
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.g3d.Model
+import com.badlogic.gdx.graphics.g3d.loader.ObjLoader
+import com.badlogic.gdx.graphics.g3d.model.data.ModelData
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
 import sx.lambda.voxel.entity.EntityRotation
 import sx.lambda.voxel.net.packet.shared.PacketPlayerPosition
 import sx.lambda.voxel.util.Vec3i
-import sx.lambda.voxel.util.gl.ObjModel
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.chunk.IChunk
 import sx.lambda.voxel.entity.EntityPosition
@@ -22,13 +23,17 @@ class Player extends LivingEntity implements Serializable {
 
     private transient boolean moved = false
 
-    private static final ObjModel playerModel = new ObjModel(new FileHandle('entity/player.obj'))
+    private static Model playerModel
 
     private int itemInHand = BuiltInBlockIds.STONE_ID
 
     //needed for serialization
     public Player() {
         this(new EntityPosition(0, 0, 0), new EntityRotation())
+
+        if(playerModel == null && VoxelGameClient.instance != null) {
+            playerModel = new ObjLoader().loadModel(Gdx.files.internal('entity/player.obj'));
+        }
     }
 
     public Player(EntityPosition pos, EntityRotation rot) {
@@ -66,7 +71,7 @@ class Player extends LivingEntity implements Serializable {
     }
 
     @Override
-    public ObjModel getDefaultModel() {
+    public Model getDefaultModel() {
         playerModel
     }
 

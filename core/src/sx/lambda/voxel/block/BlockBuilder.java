@@ -8,7 +8,7 @@ import java.net.URL;
 public class BlockBuilder {
 
     private String humanName = "Undefined";
-    private FileHandle textureLocation = new FileHandle("textures/block/undefined.png");
+    private String textureLocation = "textures/block/undefined.png";
     private int id = -1;
     private boolean transparent = false;
     private IBlockRenderer renderer;
@@ -19,7 +19,7 @@ public class BlockBuilder {
         return this;
     }
 
-    public BlockBuilder setTextureLocation(FileHandle tl) {
+    public BlockBuilder setTextureLocation(String tl) {
         this.textureLocation = tl;
         return this;
     }

@@ -12,9 +12,9 @@ public class Block {
 	private final transient IBlockRenderer renderer;
 	private final boolean transparent, solid;
 	private final String humanName;
-	private final FileHandle textureLocation;
+	private final String textureLocation;
 
-	Block(int id, String humanName, IBlockRenderer renderer, FileHandle textureLocation, boolean transparent, boolean solid) {
+	Block(int id, String humanName, IBlockRenderer renderer, String textureLocation, boolean transparent, boolean solid) {
 		this.id = id;
 		this.renderer = renderer;
 		this.transparent = transparent;
@@ -45,5 +45,5 @@ public class Block {
 
 	public String getHumanName() { return this.humanName; }
 
-	public FileHandle getTextureLocation() { return textureLocation; }
+	public String getTextureLocation() { return textureLocation; }
 }

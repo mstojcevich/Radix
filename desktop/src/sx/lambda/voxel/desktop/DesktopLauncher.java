@@ -10,6 +10,7 @@ public class DesktopLauncher {
 		config.useGL30 = true;
 		config.vSyncEnabled = false;
 		config.foregroundFPS = 0;
+		config.samples = 16;
 		new LwjglApplication(new VoxelGameClient(), config);
 	}
 }

@@ -3,12 +3,11 @@ package sx.lambda.voxel.client.gui.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.math.Vector2
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.block.Block
 import sx.lambda.voxel.client.gui.GuiScreen
-
-import java.awt.*
 
 @CompileStatic
 class BlockSelectGUI implements GuiScreen {
@@ -19,7 +18,7 @@ class BlockSelectGUI implements GuiScreen {
     private final int SLOT_SIZE = 32 + PADDING
     private final int BLOCK_SIZE = 24
 
-    private Map<Point, Integer> idPositions = new HashMap<>()
+    private Map<Vector2, Integer> idPositions = new HashMap<>()
 
     public BlockSelectGUI(Block[] blocks, Texture guiTexture) {
         this.guiTexture = guiTexture
@@ -44,7 +43,7 @@ class BlockSelectGUI implements GuiScreen {
             batch.draw(guiTexture, x, y, SLOT_SIZE - PADDING, SLOT_SIZE - PADDING, 0.05f, 0, 0.1f, 0.05f)
             b.renderer.render2d(batch, x+BLOCK_RENDER_OFFSET-2, y+BLOCK_RENDER_OFFSET-2, BLOCK_SIZE)
             currentBlockNum++
-            idPositions.put(new Point(x, regularY), b.ID)
+            idPositions.put(new Vector2(x, regularY), b.ID)
         }
     }
 
@@ -71,7 +70,7 @@ class BlockSelectGUI implements GuiScreen {
         y = y - (y % SLOT_SIZE) + PADDING
         println(x)
         println(y)
-        return idPositions.get(new Point(x, y))
+        return idPositions.get(new Vector2(x, y))
     }
 
 }

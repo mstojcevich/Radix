@@ -8,11 +8,10 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
+import com.badlogic.gdx.math.Rectangle
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.client.gui.GuiScreen
-
-import java.awt.*
 
 @CompileStatic
 public class MainMenu implements GuiScreen {
@@ -142,7 +141,7 @@ public class MainMenu implements GuiScreen {
             this.parent = parent
             this.title = title
             this.onClick = onClick
-            this.bounds = new Rectangle(size, size)
+            this.bounds = new Rectangle(0, 0, size, size)
         }
 
         Rectangle getBounds() {
@@ -161,7 +160,7 @@ public class MainMenu implements GuiScreen {
         }
 
         void setPosition(int x, int y) {
-            this.bounds.setLocation(x, y)
+            this.bounds.setPosition(x, y)
             if(buttonFont != null) {
                 rerenderLabel()
             }

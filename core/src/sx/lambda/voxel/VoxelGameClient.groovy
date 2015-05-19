@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.PerspectiveCamera
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.math.Vector3
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
@@ -49,8 +50,6 @@ import sx.lambda.voxel.render.Renderer
 import pw.oxcafebabe.marcusant.eventbus.EventListener
 
 import javax.swing.*
-import javax.vecmath.Vector3f
-import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedDeque
 
 import static GL20.*
@@ -228,7 +227,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         float deltaY = (float)(Math.sin(Math.toRadians(pitch)))
         float deltaZ = (float)(-Math.cos(Math.toRadians(pitch)) * Math.cos(Math.toRadians(yaw)))
 
-        plotter.plot(new Vector3f(x, y, z), new Vector3f(deltaX, deltaY, deltaZ), (int) Math.ceil(reach * reach))
+        plotter.plot(new Vector3(x, y, z), new Vector3(deltaX, deltaY, deltaZ), (int) Math.ceil(reach * reach))
         Vec3i last
         while (plotter.next()) {
             Vec3i v = plotter.get()

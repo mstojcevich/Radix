@@ -1,6 +1,6 @@
 package sx.lambda.voxel.util;
 
-import javax.vecmath.Vector3f;
+import com.badlogic.gdx.math.Vector3;
 
 interface Plot<T>
 {
@@ -13,16 +13,16 @@ interface Plot<T>
 public class PlotCell3f implements Plot<Vec3i>
 {
 
-    private final Vector3f size = new Vector3f();
-    private final Vector3f off = new Vector3f();
-    private final Vector3f pos = new Vector3f();
-    private final Vector3f dir = new Vector3f();
+    private final Vector3 size = new Vector3();
+    private final Vector3 off = new Vector3();
+    private final Vector3 pos = new Vector3();
+    private final Vector3 dir = new Vector3();
 
     private final Vec3i index = new Vec3i();
 
-    private final Vector3f delta = new Vector3f();
+    private final Vector3 delta = new Vector3();
     private final Vec3i sign = new Vec3i();
-    private final Vector3f max = new Vector3f();
+    private final Vector3 max = new Vector3();
 
     private int limit;
     private int plotted;
@@ -33,12 +33,17 @@ public class PlotCell3f implements Plot<Vec3i>
         size.set( width, height, depth );
     }
 
-    public void plot(Vector3f position, Vector3f direction, int cells)
+    public void plot(Vector3 position, Vector3 direction, int cells)
     {
         limit = cells;
 
-        pos.set( position );
-        dir.normalize(direction);
+        pos.set(position);
+        
+        // Normalize dir w/ direction
+        float invLen = 1.0f / direction.len();
+        dir.x = direction.x * invLen;
+        dir.y = direction.y * invLen;
+        dir.z = direction.z * invLen;
 
         delta.set( size );
         delta.set(delta.x / dir.x, delta.y / dir.y, delta.z / dir.z);
@@ -109,13 +114,13 @@ public class PlotCell3f implements Plot<Vec3i>
         return index;
     }
 
-    public Vector3f actual() {
-        return new Vector3f(index.x * size.x + off.x,
+    public Vector3 actual() {
+        return new Vector3(index.x * size.x + off.x,
                 index.y * size.y + off.y,
                 index.z * size.z + off.z);
     }
 
-    public Vector3f size() {
+    public Vector3 size() {
         return size;
     }
 
@@ -123,7 +128,7 @@ public class PlotCell3f implements Plot<Vec3i>
         size.set(w, h, d);
     }
 
-    public Vector3f offset() {
+    public Vector3 offset() {
         return off;
     }
 
@@ -131,11 +136,11 @@ public class PlotCell3f implements Plot<Vec3i>
         off.set(x, y, z);
     }
 
-    public Vector3f position() {
+    public Vector3 position() {
         return pos;
     }
 
-    public Vector3f direction() {
+    public Vector3 direction() {
         return dir;
     }
 
@@ -143,11 +148,11 @@ public class PlotCell3f implements Plot<Vec3i>
         return sign;
     }
 
-    public Vector3f delta() {
+    public Vector3 delta() {
         return delta;
     }
 
-    public Vector3f max() {
+    public Vector3 max() {
         return max;
     }
 

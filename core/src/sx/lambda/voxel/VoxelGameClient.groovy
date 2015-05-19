@@ -489,6 +489,7 @@ public class VoxelGameClient extends ApplicationAdapter {
     public void resize(int width, int height) {
         hudCamera.setToOrtho(false, width, height)
         hudCamera.update()
+        guiBatch.setProjectionMatrix(hudCamera.combined)
 
         camera.viewportWidth = width
         camera.viewportHeight = height

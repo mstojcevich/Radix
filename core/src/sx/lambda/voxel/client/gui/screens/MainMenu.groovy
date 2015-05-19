@@ -109,7 +109,6 @@ public class MainMenu implements GuiScreen {
     public void render(boolean ingame) {
         batch.begin()
         batch.draw(mmPrerender, 0, 0)
-        buttonFont.draw(batch, "Hello", 0, 0)
         batch.end()
     }
 

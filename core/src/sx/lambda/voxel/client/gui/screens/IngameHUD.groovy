@@ -1,19 +1,18 @@
 package sx.lambda.voxel.client.gui.screens
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
 import sx.lambda.voxel.api.VoxelGameAPI
-import sx.lambda.voxel.client.gui.BufferedGUIScreen
+import sx.lambda.voxel.client.gui.GuiScreen
 
 import static com.badlogic.gdx.graphics.GL20.*
 
 @CompileStatic
-class IngameHUD extends BufferedGUIScreen {
+class IngameHUD  implements GuiScreen {
 
     private SpriteBatch guiBatcher
     private Texture icons
@@ -25,13 +24,7 @@ class IngameHUD extends BufferedGUIScreen {
     }
 
     @Override
-    public void rerender(boolean exec) {
-        super.rerender(exec)
-    }
-
-    @Override
     public void render(boolean inGame) {
-        super.render(inGame)
         guiBatcher.setProjectionMatrix(VoxelGameClient.instance.hudCamera.combined)
 
         VoxelGameClient.instance.guiShader.enableTexturing()
@@ -67,11 +60,16 @@ class IngameHUD extends BufferedGUIScreen {
     }
 
     @Override
+    void finish() {
+        guiBatcher.dispose()
+        icons.dispose()
+    }
+
+    @Override
     void onMouseClick(int clickType) {}
 
     @Override
     public void init() {
-        super.init()
         this.icons = new Texture(Gdx.files.internal("textures/gui/icons.png"))
         this.guiBatcher = new SpriteBatch()
     }

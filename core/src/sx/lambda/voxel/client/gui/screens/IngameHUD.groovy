@@ -41,9 +41,9 @@ class IngameHUD  implements GuiScreen {
         // Draw crosshair (after guiBatcher render because it needs to render with its own blending mode
         float centerX = Gdx.graphics.getWidth()/2f as float
         float centerY = Gdx.graphics.getHeight()/2f as float
-        float crosshairSize = 32
+        int crosshairSize = 32
         float halfCrosshairSize = crosshairSize/2f as float
-        this.drawTexture(guiBatch, 0, (int)Math.round(centerX-halfCrosshairSize), (int)Math.round(centerY-halfCrosshairSize), (int)Math.round(centerX+halfCrosshairSize), (int)Math.round(centerY+halfCrosshairSize))
+        this.drawTexture(guiBatch, 0, (int)Math.round(centerX-halfCrosshairSize), (int)Math.round(centerY+halfCrosshairSize), crosshairSize, crosshairSize)
     }
 
     @Override
@@ -59,13 +59,13 @@ class IngameHUD  implements GuiScreen {
         this.icons = new Texture(Gdx.files.internal("textures/gui/icons.png"))
     }
 
-    private void drawTexture(SpriteBatch batch, int number, int x, int y, int x2, int y2) {
+    private void drawTexture(SpriteBatch batch, int number, int x, int y, int width, int height) {
         float u = ((number%9)*TEXTURE_PERCENT);
         float v = ((number/9)*TEXTURE_PERCENT);
         float u2 = u+TEXTURE_PERCENT-0.001f
         float v2 = v+TEXTURE_PERCENT-0.001f
 
-        batch.draw(icons, x, y, x2, y2, u, v, u2, v2)
+        batch.draw(icons, x, y, width, height, u, v, u2, v2)
     }
 
     public Texture getIcons() { icons }

@@ -100,8 +100,6 @@ public class World implements IWorld {
                     c.render(modelBatch);
                 }
             }
-            modelBatch.end();
-            modelBatch.begin(VoxelGameClient.getInstance().getCamera());
             for (IChunk c : this.chunkList) {
                 if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint(), CHUNK_SIZE)) {
                     c.renderWater(modelBatch);

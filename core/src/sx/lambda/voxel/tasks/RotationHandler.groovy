@@ -29,22 +29,26 @@ class RotationHandler implements RepeatedTask {
                 if(game.world == null || game.player == null) {
                     sleep(1000)
                 } else {
-                    if(lastX == -1)lastX = Gdx.input.getX()
-                    if(lastY == -1)lastY = Gdx.input.getY()
-                    float deltaYaw = (float) (Gdx.input.getX() - lastX) * mouseSensitivity
-                    float deltaPitch = (float)(lastY - Gdx.input.getY()) * mouseSensitivity
-                    lastX = Gdx.input.getX()
-                    lastY = Gdx.input.getY()
-                    float newPitch = Math.abs(game.getPlayer().getRotation().getPitch() + deltaPitch)
-                    if (newPitch > 90) {
-                        deltaPitch = 0
+                    if(game.currentScreen != game.hud) {
+                        sleep(10)
+                    } else {
+                        if (lastX == -1) lastX = Gdx.input.getX()
+                        if (lastY == -1) lastY = Gdx.input.getY()
+                        float deltaYaw = (float) (Gdx.input.getX() - lastX) * mouseSensitivity
+                        float deltaPitch = (float) (lastY - Gdx.input.getY()) * mouseSensitivity
+                        lastX = Gdx.input.getX()
+                        lastY = Gdx.input.getY()
+                        float newPitch = Math.abs(game.getPlayer().getRotation().getPitch() + deltaPitch)
+                        if (newPitch > 90) {
+                            deltaPitch = 0
+                        }
+                        game.getPlayer().getRotation().offset(deltaPitch, deltaYaw)
+                        game.updateSelectedBlock()
+                        if (Math.abs(deltaPitch) > 0 || Math.abs(deltaYaw) > 0) {
+                            game.gameRenderer.calculateFrustum()
+                        }
+                        sleep(10)
                     }
-                    game.getPlayer().getRotation().offset(deltaPitch, deltaYaw)
-                    game.updateSelectedBlock()
-                    if(Math.abs(deltaPitch) > 0 || Math.abs(deltaYaw) > 0) {
-                        game.gameRenderer.calculateFrustum()
-                    }
-                    sleep(10)
                 }
             }
         } catch(Exception e) {

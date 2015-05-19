@@ -93,7 +93,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
         switch (button) {
             case 0:
                 if(game.world != null) {
-                    if (game.getSelectedBlock() != null) {
+                    if (game.getSelectedBlock() != null && game.currentScreen == game.hud) {
                         if (game.isRemote() && game.serverChanCtx != null) {
                             game.serverChanCtx.writeAndFlush(new PacketBreakBlock(
                                     game.getSelectedBlock()))
@@ -105,7 +105,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
                 break;
             case 1:
                 if(game.world != null) {
-                    if (game.getNextPlacePos() != null) {
+                    if (game.getNextPlacePos() != null && game.currentScreen == game.hud) {
                         if (game.isRemote() && game.serverChanCtx != null) {
                             game.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
                                     game.getNextPlacePos(),

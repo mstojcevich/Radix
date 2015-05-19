@@ -107,6 +107,8 @@ public class VoxelGameClient extends ApplicationAdapter {
     private PerspectiveCamera camera
     private OrthographicCamera hudCamera
 
+    private long lastFpsPrint
+
     private RepeatedTask[] handlers = [
             new WorldLoader(this),
             new MovementHandler(this),
@@ -193,7 +195,10 @@ public class VoxelGameClient extends ApplicationAdapter {
                 currentScreen.render(world != null)
             }
 
-            System.out.println(Gdx.graphics.framesPerSecond)
+            if(System.currentTimeMillis() - lastFpsPrint >= 5000) {
+                System.out.println(Gdx.graphics.framesPerSecond)
+                lastFpsPrint = System.currentTimeMillis()
+            }
         } catch(Exception e) {
             done = true;
             e.printStackTrace()

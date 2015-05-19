@@ -1,5 +1,7 @@
 package sx.lambda.voxel.client.gui
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
+
 public interface GuiScreen {
 
     /**
@@ -11,7 +13,7 @@ public interface GuiScreen {
      * Draws the screen
      * @param inGame Whether the screen is being drawn inside a world
      */
-    void render(boolean inGame)
+    void render(boolean inGame, SpriteBatch guiBatch)
 
     /**
      * Called after a screen is no longer active.

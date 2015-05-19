@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.PerspectiveCamera
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Vector3
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -109,6 +110,8 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     private long lastFpsPrint
 
+    private SpriteBatch guiBatch
+
     private RepeatedTask[] handlers = [
             new WorldLoader(this),
             new MovementHandler(this),
@@ -166,6 +169,9 @@ public class VoxelGameClient extends ApplicationAdapter {
         getShaderManager().setShader(defaultShader)
         //defaultShader.setUniformMatrix("u_projectionViewMatrix", camera.combined)
 
+        guiBatch = new SpriteBatch()
+        guiBatch.setProjectionMatrix(hudCamera.combined)
+
         Gdx.input.setInputProcessor(new VoxelGameGdxInputHandler(this))
     }
 
@@ -188,12 +194,16 @@ public class VoxelGameClient extends ApplicationAdapter {
 
             if (renderer != null) {
                 renderer.render()
-                renderer.draw2d()
             }
 
-            if(currentScreen != null) {
-                currentScreen.render(world != null)
+            guiBatch.begin()
+            if (renderer != null) {
+                renderer.draw2d(guiBatch)
             }
+            if(currentScreen != null) {
+                currentScreen.render(world != null, guiBatch)
+            }
+            guiBatch.end()
 
             if(System.currentTimeMillis() - lastFpsPrint >= 5000) {
                 System.out.println(Gdx.graphics.framesPerSecond)

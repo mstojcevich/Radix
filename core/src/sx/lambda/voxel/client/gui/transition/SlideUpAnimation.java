@@ -2,6 +2,7 @@ package sx.lambda.voxel.client.gui.transition;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.client.gui.GuiScreen;
 import sx.lambda.voxel.util.gl.FrameBuffer;
@@ -40,7 +41,10 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
         // TODO apply cam
         Gdx.gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Gdx.gl.glEnable(GL_BLEND);
-        currentScreen.render(false);
+        SpriteBatch batch = new SpriteBatch();
+        batch.begin();
+        currentScreen.render(false, batch);
+        batch.end();
         fbo.unbind();
     }
 

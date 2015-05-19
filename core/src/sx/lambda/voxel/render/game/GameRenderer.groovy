@@ -27,8 +27,6 @@ class GameRenderer implements Renderer {
     private FrameBuffer postProcessFbo
     private BitmapFont debugTextRenderer
 
-    private SpriteBatch batch
-
     private boolean initted = false, fontRenderReady = true
 
     private boolean calcFrustum
@@ -62,16 +60,15 @@ class GameRenderer implements Renderer {
         }
     }
 
-    void draw2d() {
+    void draw2d(SpriteBatch batch) {
         if(!initted)init()
 
         if(System.currentTimeMillis() - lastDynamicTextRerenderMS >= 1000) { // Rerender the dynamic texts every second
-            createDynamicRenderers()
+            createDynamicRenderers(batch)
             lastDynamicTextRerenderMS = System.currentTimeMillis()
         }
 
         if(fontRenderReady) {
-            batch.begin()
             float currentHeight = 2
             if(glInfoRender != null) {
                 debugTextRenderer.draw(batch, glInfoRender, Gdx.graphics.width-glInfoRender.width, currentHeight)
@@ -106,7 +103,6 @@ class GameRenderer implements Renderer {
                 debugTextRenderer.draw(batch, activeThreadsRender, Gdx.graphics.width-fpsRender.width, currentHeight)
                 currentHeight += debugTextRenderer.getLineHeight()
             }
-            batch.end()
         }
     }
 
@@ -117,17 +113,12 @@ class GameRenderer implements Renderer {
         }
         debugTextRenderer.dispose()
 
-        batch.dispose();
-
         initted = false
     }
 
     @Override
     void init() {
         initted = true
-
-        batch = new SpriteBatch()
-        batch.setTransformMatrix(VoxelGameClient.instance.hudCamera.combined)
 
         frustum = game.camera.frustum
 
@@ -177,9 +168,8 @@ class GameRenderer implements Renderer {
 
     public Frustum getFrustum() { frustum }
 
-    private void createDynamicRenderers() {
+    private void createDynamicRenderers(SpriteBatch batch) {
         if(fontRenderReady) {
-            batch.begin()
             float currentHeight = 2 + debugTextRenderer.getLineHeight() * 1
             // There is 1 text not part of the dynamic texts, offset to make room
 
@@ -225,7 +215,6 @@ class GameRenderer implements Renderer {
 
             String threadsStr = "Active threads: " + Thread.activeCount()
             headingRender = debugTextRenderer.draw(batch, threadsStr, Gdx.graphics.getWidth(), currentHeight)
-            batch.end()
         }
     }
 

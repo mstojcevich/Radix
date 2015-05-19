@@ -106,10 +106,8 @@ public class MainMenu implements GuiScreen {
     }
 
     @Override
-    public void render(boolean ingame) {
-        batch.begin()
-        batch.draw(mmPrerender, 0, 0)
-        batch.end()
+    public void render(boolean ingame, SpriteBatch guiBatch) {
+        guiBatch.draw(mmPrerender, 0, 0)
     }
 
     void onMouseClick(int clickType) {

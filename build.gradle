@@ -2,7 +2,7 @@ buildscript {
     repositories {
         mavenCentral()
         flatDir {
-            dirs 'lib'
+            dirs (rootDir.absolutePath + File.separator + 'lib')
         }
         maven { url "http://repo.maven.apache.org/maven2" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
@@ -28,7 +28,7 @@ allprojects {
     repositories {
         mavenCentral()
         flatDir {
-            dirs 'lib'
+            dirs (rootDir.absolutePath + File.separator + 'lib')
         }
         maven { url "http://repo.maven.apache.org/maven2" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
@@ -39,7 +39,6 @@ allprojects {
 project(":desktop") {
     apply plugin: "java"
 
-
     dependencies {
         compile project(":core")
         compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
@@ -49,7 +48,6 @@ project(":desktop") {
 
 project(":core") {
     apply plugin: "java"
-
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"

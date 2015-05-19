@@ -1,9 +1,10 @@
 apply plugin: "java"
+apply plugin: "groovy"
 
 sourceCompatibility = 1.7
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-sourceSets.main.java.srcDirs = [ "src/" ]
+sourceSets.main.groovy.srcDirs = [ "src/" ]
 
 
 eclipse.project {

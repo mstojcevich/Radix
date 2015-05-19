@@ -1,8 +1,6 @@
 package sx.lambda.voxel.client.gui.screens
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Camera
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
@@ -55,12 +53,12 @@ public class MainMenu implements GuiScreen {
     }
 
     private void resize() {
-        camera.setToOrtho(true, Gdx.graphics.width, Gdx.graphics.height)
+        camera.setToOrtho(false, Gdx.graphics.width, Gdx.graphics.height)
         camera.update()
 
         if(mmPrerenderFbo != null)
             mmPrerenderFbo.dispose()
-        mmPrerenderFbo = new FrameBuffer(Pixmap.Format.RGBA4444, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false)
+        mmPrerenderFbo = new FrameBuffer(Pixmap.Format.RGB888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false)
         mmPrerender = mmPrerenderFbo.getColorBufferTexture()
 
         int dWidth = Gdx.graphics.getWidth()
@@ -69,7 +67,7 @@ public class MainMenu implements GuiScreen {
         int currentButtonNum = 0
         for(MainMenuButton button : buttons) {
             int btnX = BUTTON_SPACING+(currentButtonNum % buttonsPerRow)*(TARGET_BUTTON_SIZE+BUTTON_SPACING)
-            int btnY = BUTTON_SPACING+((int)(currentButtonNum / buttonsPerRow))*(TARGET_BUTTON_SIZE+BUTTON_SPACING)
+            int btnY = Gdx.graphics.height-(BUTTON_SPACING+((int)(currentButtonNum / buttonsPerRow)+1)*(TARGET_BUTTON_SIZE+BUTTON_SPACING))
             button.setPosition(btnX, btnY)
             currentButtonNum++
         }
@@ -96,7 +94,6 @@ public class MainMenu implements GuiScreen {
         mmPrerenderFbo.begin()
         batch.begin()
         Gdx.gl.glClearColor(0, 0, 0, 1)
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         for(MainMenuButton button : buttons) {
             button.drawLabel()
             button.render()
@@ -107,7 +104,7 @@ public class MainMenu implements GuiScreen {
 
     @Override
     public void render(boolean ingame, SpriteBatch guiBatch) {
-        guiBatch.draw(mmPrerender, 0, 0)
+        guiBatch.draw(mmPrerender, 0, Gdx.graphics.height, Gdx.graphics.width, -Gdx.graphics.height)
     }
 
     void onMouseClick(int clickType) {
@@ -129,6 +126,8 @@ public class MainMenu implements GuiScreen {
             mmPrerenderFbo.dispose()
         if(batch != null)
             batch.dispose()
+
+        initialized = false
     }
 
     class MainMenuButton {
@@ -179,7 +178,7 @@ public class MainMenu implements GuiScreen {
                 }
 
                 int textStartX = bounds.x+(bounds.width/2.0f - labelLayout.width/2.0f) as int
-                int textStartY = bounds.y+(bounds.height/2.0f - labelLayout.height/2.0f) as int
+                int textStartY = bounds.y+(bounds.height/2.0f + labelLayout.height/2.0f) as int
                 buttonFont.draw(batch, title, textStartX, textStartY)
             }
         }

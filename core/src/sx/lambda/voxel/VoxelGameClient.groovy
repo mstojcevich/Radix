@@ -128,11 +128,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         mainMenu = new MainMenu()
         setCurrentScreen(mainMenu)
 
-        currentScreen = mainMenu
-
         this.startHandlers()
-
-        enterRemoteWorld("127.0.0.1", (short)31173)
     }
 
     private void startHandlers() {
@@ -173,6 +169,9 @@ public class VoxelGameClient extends ApplicationAdapter {
     @Override
     public void render() {
         try {
+            if(done)
+                Gdx.app.exit()
+
             prepareNewFrame()
 
             runQueuedOGL()

@@ -2,11 +2,11 @@ package sx.lambda.voxel.client.gui.transition;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import sx.lambda.voxel.VoxelGameClient;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import sx.lambda.voxel.client.gui.GuiScreen;
-import sx.lambda.voxel.util.gl.FrameBuffer;
-
 import static com.badlogic.gdx.graphics.GL20.*;
 
 /**
@@ -17,6 +17,7 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
     private final GuiScreen currentScreen;
 
     private FrameBuffer fbo;
+    private Texture fboTex;
 
     private OrthographicCamera cam;
 
@@ -32,9 +33,8 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
     @Override
     public void init() {
         super.init();
-        fbo = new FrameBuffer();
-        VoxelGameClient.getInstance().enableGuiShader();
-        fbo.bind();
+        fbo = new FrameBuffer(Pixmap.Format.RGBA4444, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+        fboTex = fbo.getColorBufferTexture();
         // TODO convert to use libgdx's prepared matrices (in camera??)
         cam = new OrthographicCamera();
         cam.update();
@@ -50,14 +50,16 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
 
     @Override
     public void render() {
-        VoxelGameClient.getInstance().getGuiShader().enableTexturing();
         float percentageDone = (float)getTimeSinceStart() / (float)getLength();
-        fbo.drawTexture(VoxelGameClient.getInstance().getTextureManager(), 0, (int)(Gdx.graphics.getWidth()*percentageDone), Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), VoxelGameClient.getInstance().getGuiShader().getPositionAttrib(), VoxelGameClient.getInstance().getGuiShader().getTexCoordAttrib());
+        //TODO draw the FBO
+        //TODO implement
+        //fbo.drawTexture(VoxelGameClient.getInstance().getTextureManager(), 0, (int)(Gdx.graphics.getWidth()*percentageDone), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     @Override
     public void finish() {
-        fbo.cleanup();
+        fbo.dispose();
+        fboTex.dispose();
     }
 
 }

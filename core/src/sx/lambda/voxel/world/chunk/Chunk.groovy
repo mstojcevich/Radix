@@ -192,11 +192,9 @@ public class Chunk implements IChunk {
     public void renderWater(ModelBatch batch) {
         if(cleanedUp)return;
         if(setup) {
-            VoxelGameClient.instance.worldShader.enableWaves()
             Gdx.gl.glEnable(GL_BLEND)
 
             batch.render(transparentInstance)
-            VoxelGameClient.instance.worldShader.disableWaves()
         }
     }
 

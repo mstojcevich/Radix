@@ -24,8 +24,6 @@ class IngameHUD  implements GuiScreen {
 
     @Override
     public void render(boolean inGame, SpriteBatch guiBatch) {
-        VoxelGameClient.instance.guiShader.enableTexturing()
-
         Gdx.gl.glEnable(GL_BLEND)
 
         int blockInHead = VoxelGameClient.instance.player.getBlockInHead(VoxelGameClient.instance.world)

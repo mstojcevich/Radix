@@ -26,9 +26,6 @@ import sx.lambda.voxel.net.packet.client.PacketLeaving
 import sx.lambda.voxel.render.NotInitializedException
 import sx.lambda.voxel.render.game.GameRenderer
 import sx.lambda.voxel.settings.SettingsManager
-import sx.lambda.voxel.shader.GuiShader
-import sx.lambda.voxel.shader.PostProcessShader
-import sx.lambda.voxel.shader.WorldShader
 import sx.lambda.voxel.tasks.EntityUpdater
 import sx.lambda.voxel.tasks.LightUpdater
 import sx.lambda.voxel.tasks.MovementHandler
@@ -39,7 +36,6 @@ import sx.lambda.voxel.texture.TextureManager
 import sx.lambda.voxel.util.PlotCell3f
 import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.util.gl.ShaderManager
-import sx.lambda.voxel.util.gl.ShaderProgram
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.World
 import sx.lambda.voxel.world.chunk.IChunk
@@ -90,10 +86,6 @@ public class VoxelGameClient extends ApplicationAdapter {
     private ShaderManager shaderManager = new ShaderManager()
 
     private Renderer renderer
-
-    private WorldShader defaultShader
-    private PostProcessShader postProcessShader
-    private GuiShader guiShader
 
     private TransitionAnimation transitionAnimation
 
@@ -161,13 +153,6 @@ public class VoxelGameClient extends ApplicationAdapter {
         camera.far = 300f;
         camera.update();
         hudCamera = new OrthographicCamera(Gdx.graphics.width, Gdx.graphics.height)
-
-        defaultShader = createShader("default", WorldShader.class)
-        postProcessShader = createShader("post-process", PostProcessShader.class)
-        guiShader = createShader("gui", GuiShader.class)
-
-        getShaderManager().setShader(defaultShader)
-        //defaultShader.setUniformMatrix("u_projectionViewMatrix", camera.combined)
 
         guiBatch = new SpriteBatch()
         guiBatch.setProjectionMatrix(hudCamera.combined)
@@ -316,22 +301,6 @@ public class VoxelGameClient extends ApplicationAdapter {
         }
     }
 
-    public <T extends ShaderProgram> T createShader(String shaderName, Class<T> type) {
-        String nameNoExt = "shaders/$shaderName/$shaderName"
-        String vertex = Gdx.files.internal(nameNoExt + ".vert.glsl").readString()
-        String fragment = Gdx.files.internal(nameNoExt + ".frag.glsl").readString()
-
-        Object[] args = [vertex, fragment]
-        ShaderProgram program = (ShaderProgram)type.newInstance(args);
-
-        if(!program.getLog().isEmpty()) {
-            System.err.println(program.getLog())
-            return null
-        }
-
-        return (T)program
-    }
-
     public boolean isRemote() {
         return remote
     }
@@ -348,26 +317,6 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     public GuiScreen getCurrentScreen() { currentScreen }
-
-    public void enablePostProcessShader() {
-        if(settingsManager.visualSettings.postProcessEnabled) {
-            shaderManager.setShader(postProcessShader)
-            hudCamera.setToOrtho(false, Gdx.graphics.width, Gdx.graphics.height)
-            hudCamera.update()
-        }
-    }
-
-    public void enableDefaultShader() {
-        shaderManager.setShader(defaultShader)
-    }
-
-    public void enableGuiShader() {
-        shaderManager.setShader(guiShader)
-    }
-
-    public GuiShader getGuiShader() { guiShader }
-
-    public PostProcessShader getPostProcessShader() { postProcessShader }
 
     public int getFps() { fps }
 
@@ -455,8 +404,6 @@ public class VoxelGameClient extends ApplicationAdapter {
             Gdx.input.setCursorCatched false
         }
     }
-
-    public WorldShader getWorldShader() { defaultShader }
 
     public Texture getBlockTextureAtlas() throws NotInitializedException {
         if(blockTextureAtlas == null)throw new NotInitializedException()

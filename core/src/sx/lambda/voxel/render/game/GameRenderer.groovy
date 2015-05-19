@@ -14,7 +14,6 @@ import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.chunk.IChunk
 import sx.lambda.voxel.api.VoxelGameAPI
 import sx.lambda.voxel.entity.Entity
-import sx.lambda.voxel.util.gl.FrameBuffer
 
 import java.text.DecimalFormat
 
@@ -24,7 +23,6 @@ import static com.badlogic.gdx.graphics.GL20.*
 class GameRenderer implements Renderer {
 
     private final VoxelGameClient game
-    private FrameBuffer postProcessFbo
     private BitmapFont debugTextRenderer
 
     private boolean initted = false, fontRenderReady = true
@@ -46,18 +44,10 @@ class GameRenderer implements Renderer {
         if(!initted)init()
 
         prepareWorldRender()
-        if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
-            postProcessFbo.bind()
-            Gdx.gl.glClearColor(0.2f, 0.4f, 1, 1)
-            Gdx.gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        }
         game.getWorld().render()
         VoxelGameAPI.instance.eventManager.push(new EventPostWorldRender())
         drawBlockSelection()
         renderEntities()
-        if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
-            postProcessFbo.unbind()
-        }
     }
 
     void draw2d(SpriteBatch batch) {
@@ -108,9 +98,6 @@ class GameRenderer implements Renderer {
 
     @Override
     void cleanup() {
-        if(postProcessFbo != null) {
-            postProcessFbo.cleanup()
-        }
         debugTextRenderer.dispose()
 
         initted = false
@@ -123,10 +110,6 @@ class GameRenderer implements Renderer {
         frustum = game.camera.frustum
 
         debugTextRenderer = new BitmapFont()
-
-        if(game.instance.settingsManager.visualSettings.postProcessEnabled) {
-            postProcessFbo = new FrameBuffer()
-        }
     }
 
     private void prepareWorldRender() {
@@ -148,16 +131,12 @@ class GameRenderer implements Renderer {
     }
 
     private void renderEntities() {
-        VoxelGameClient.instance.worldShader.disableTexturing()
-        VoxelGameClient.instance.worldShader.disableLighting()
         for(Entity e : game.world.loadedEntities) {
             if(e != null && e != game.player) {
                 e.render()
                 VoxelGameAPI.instance.eventManager.push(new EventEntityRender(e))
             }
         }
-        VoxelGameClient.instance.worldShader.enableLighting()
-        VoxelGameClient.instance.worldShader.enableTexturing()
     }
 
     public void calculateFrustum() {

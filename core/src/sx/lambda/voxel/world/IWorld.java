@@ -1,6 +1,5 @@
 package sx.lambda.voxel.world;
 
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import sx.lambda.voxel.entity.Entity;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.util.Vec3i;
@@ -9,7 +8,7 @@ import sx.lambda.voxel.world.generation.ChunkGenerator;
 
 import java.util.List;
 
-public interface IWorld extends RenderableProvider {
+public interface IWorld {
 
     int getChunkSize();
 

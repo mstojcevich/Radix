@@ -2,24 +2,18 @@ package sx.lambda.voxel.net.packet.client
 
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
+import sx.lambda.voxel.api.VoxelGameAPI
+import sx.lambda.voxel.api.events.server.EventClientJoin
+import sx.lambda.voxel.entity.EntityPosition
 import sx.lambda.voxel.entity.EntityRotation
 import sx.lambda.voxel.entity.player.Player
 import sx.lambda.voxel.net.packet.ClientPacket
 import sx.lambda.voxel.net.packet.server.*
-import sx.lambda.voxel.net.packet.server.PacketAuthSuccess
-import sx.lambda.voxel.net.packet.server.PacketChunkData
-import sx.lambda.voxel.net.packet.server.PacketEndChunkGroup
-import sx.lambda.voxel.net.packet.server.PacketNewEntity
-import sx.lambda.voxel.net.packet.server.PacketPlayBegin
-import sx.lambda.voxel.net.packet.server.PacketStartChunkGroup
 import sx.lambda.voxel.net.packet.shared.PacketPlayerPosition
-import sx.lambda.voxel.server.net.ConnectionStage
-import sx.lambda.voxel.world.chunk.IChunk
-import sx.lambda.voxel.api.VoxelGameAPI
-import sx.lambda.voxel.api.events.server.EventClientJoin
-import sx.lambda.voxel.entity.EntityPosition
 import sx.lambda.voxel.server.VoxelGameServer
 import sx.lambda.voxel.server.net.ConnectedClient
+import sx.lambda.voxel.server.net.ConnectionStage
+import sx.lambda.voxel.world.chunk.IChunk
 
 @CompileStatic
 /**
@@ -50,7 +44,8 @@ class PacketAuthInfo implements ClientPacket {
          * TODO read from file to find last position of the player
          */
         Player cp = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0));
-        cp.setID(server.world.loadedEntities.size()+1) //The +1 prevents us sending the client it's own player id for someone else
+        cp.setID(server.world.loadedEntities.size() + 1)
+        //The +1 prevents us sending the client it's own player id for someone else
         server.world.loadedEntities.add(cp)
         server.getClient(ctx).setPlayer(cp)
         server.getClient(ctx).setLastChunkSendPos(cp.getPosition().clone())
@@ -65,8 +60,8 @@ class PacketAuthInfo implements ClientPacket {
         server.getClient(ctx).setStage(ConnectionStage.PLAY)
         ctx.writeAndFlush(new PacketPlayBegin())
 
-        for(ConnectedClient client : server.getClientList()) {
-            if(client == server.getClient(ctx))continue
+        for (ConnectedClient client : server.getClientList()) {
+            if (client == server.getClient(ctx)) continue
             //Send them us
             client.getContext().writeAndFlush(new PacketNewEntity(cp)) //TODO don't send players that are out of range
             //Send us them

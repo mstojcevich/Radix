@@ -36,44 +36,44 @@ public class MainMenu implements GuiScreen {
         buttons = [
                 new MainMenuButton(this, "Multiplayer (Local)", enterMPLocal, TARGET_BUTTON_SIZE),
                 new MainMenuButton(this, "Multiplayer (Lambda)", enterMPLambda, TARGET_BUTTON_SIZE),
-                new MainMenuButton(this, "Settings", {println("Settings pressed!")}, TARGET_BUTTON_SIZE),
-                new MainMenuButton(this, "Quit Game", {VoxelGameClient.instance.startShutdown()}, TARGET_BUTTON_SIZE),
+                new MainMenuButton(this, "Settings", { println("Settings pressed!") }, TARGET_BUTTON_SIZE),
+                new MainMenuButton(this, "Quit Game", { VoxelGameClient.instance.startShutdown() }, TARGET_BUTTON_SIZE),
         ]
     }
 
     private Closure enterMPLocal = {
         println("Entering local mp")
-        VoxelGameClient.instance.enterRemoteWorld("127.0.0.1", (short)31173)
+        VoxelGameClient.instance.enterRemoteWorld("127.0.0.1", (short) 31173)
     }
 
     private Closure enterMPLambda = {
         println("Entering lambda mp")
-        VoxelGameClient.instance.enterRemoteWorld("mc.stoj.pw", (short)31173)
+        VoxelGameClient.instance.enterRemoteWorld("mc.stoj.pw", (short) 31173)
     }
 
     private void resize() {
         camera.setToOrtho(false, Gdx.graphics.width, Gdx.graphics.height)
         camera.update()
 
-        if(mmPrerenderFbo != null)
+        if (mmPrerenderFbo != null)
             mmPrerenderFbo.dispose()
         mmPrerenderFbo = new FrameBuffer(Pixmap.Format.RGB888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false)
         mmPrerender = mmPrerenderFbo.getColorBufferTexture()
 
         int dWidth = Gdx.graphics.getWidth()
-        int buttonsPerRow = (int)(dWidth / (TARGET_BUTTON_SIZE+BUTTON_SPACING))
+        int buttonsPerRow = (int) (dWidth / (TARGET_BUTTON_SIZE + BUTTON_SPACING))
 
         int currentButtonNum = 0
-        for(MainMenuButton button : buttons) {
-            int btnX = BUTTON_SPACING+(currentButtonNum % buttonsPerRow)*(TARGET_BUTTON_SIZE+BUTTON_SPACING)
-            int btnY = Gdx.graphics.height-(BUTTON_SPACING+((int)(currentButtonNum / buttonsPerRow)+1)*(TARGET_BUTTON_SIZE+BUTTON_SPACING))
+        for (MainMenuButton button : buttons) {
+            int btnX = BUTTON_SPACING + (currentButtonNum % buttonsPerRow) * (TARGET_BUTTON_SIZE + BUTTON_SPACING)
+            int btnY = Gdx.graphics.height - (BUTTON_SPACING + ((int) (currentButtonNum / buttonsPerRow) + 1) * (TARGET_BUTTON_SIZE + BUTTON_SPACING))
             button.setPosition(btnX, btnY)
             currentButtonNum++
         }
     }
 
     public void init() {
-        if(!initialized) {
+        if (!initialized) {
             camera = new OrthographicCamera()
             batch = new SpriteBatch()
             batch.setTransformMatrix(VoxelGameClient.instance.hudCamera.combined)
@@ -93,7 +93,7 @@ public class MainMenu implements GuiScreen {
         mmPrerenderFbo.begin()
         batch.begin()
         Gdx.gl.glClearColor(0, 0, 0, 1)
-        for(MainMenuButton button : buttons) {
+        for (MainMenuButton button : buttons) {
             button.drawLabel()
             button.render()
         }
@@ -108,11 +108,11 @@ public class MainMenu implements GuiScreen {
 
     void onMouseClick(int clickType) {
         int mouseX = Gdx.input.getX()
-        int mouseY = Gdx.graphics.getHeight()-Gdx.input.getY()
+        int mouseY = Gdx.graphics.getHeight() - Gdx.input.getY()
 
-        if(clickType == 0) {
-            for(MainMenuButton b : buttons) {
-                if(b.bounds.contains(mouseX, mouseY)) {
+        if (clickType == 0) {
+            for (MainMenuButton b : buttons) {
+                if (b.bounds.contains(mouseX, mouseY)) {
                     b.click()
                 }
             }
@@ -121,9 +121,9 @@ public class MainMenu implements GuiScreen {
 
     @Override
     public void finish() {
-        if(mmPrerenderFbo != null)
+        if (mmPrerenderFbo != null)
             mmPrerenderFbo.dispose()
-        if(batch != null)
+        if (batch != null)
             batch.dispose()
 
         initialized = false
@@ -154,14 +154,14 @@ public class MainMenu implements GuiScreen {
 
         void setSize(int size) {
             this.bounds.setSize(size, size)
-            if(buttonFont != null) {
+            if (buttonFont != null) {
                 rerenderLabel()
             }
         }
 
         void setPosition(int x, int y) {
             this.bounds.setPosition(x, y)
-            if(buttonFont != null) {
+            if (buttonFont != null) {
                 rerenderLabel()
             }
         }
@@ -171,13 +171,13 @@ public class MainMenu implements GuiScreen {
         }
 
         void drawLabel() {
-            if(buttonFont != null) {
+            if (buttonFont != null) {
                 if (labelLayout == null) {
                     labelLayout = buttonFont.draw(batch, title, -1000, -1000)
                 }
 
-                int textStartX = bounds.x+(bounds.width/2.0f - labelLayout.width/2.0f) as int
-                int textStartY = bounds.y+(bounds.height/2.0f + labelLayout.height/2.0f) as int
+                int textStartX = bounds.x + (bounds.width / 2.0f - labelLayout.width / 2.0f) as int
+                int textStartY = bounds.y + (bounds.height / 2.0f + labelLayout.height / 2.0f) as int
                 buttonFont.draw(batch, title, textStartX, textStartY)
             }
         }

@@ -26,10 +26,10 @@ class RotationHandler implements RepeatedTask {
         try {
             final float mouseSensitivity = 0.05f //TODO Config - allow changeable mouse sensitivity
             while (!game.isDone()) {
-                if(game.world == null || game.player == null) {
+                if (game.world == null || game.player == null) {
                     sleep(1000)
                 } else {
-                    if(game.currentScreen != game.hud) {
+                    if (game.currentScreen != game.hud) {
                         sleep(10)
                     } else {
                         if (lastX == -1) lastX = Gdx.input.getX()
@@ -51,7 +51,7 @@ class RotationHandler implements RepeatedTask {
                     }
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             game.handleCriticalException(e)
         }
     }

@@ -3,17 +3,16 @@ package sx.lambda.voxel.entity.player
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader
-import com.badlogic.gdx.graphics.g3d.model.data.ModelData
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
+import sx.lambda.voxel.entity.EntityPosition
 import sx.lambda.voxel.entity.EntityRotation
+import sx.lambda.voxel.entity.LivingEntity
 import sx.lambda.voxel.net.packet.shared.PacketPlayerPosition
 import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.chunk.IChunk
-import sx.lambda.voxel.entity.EntityPosition
-import sx.lambda.voxel.entity.LivingEntity
 
 @CompileStatic
 class Player extends LivingEntity implements Serializable {
@@ -31,7 +30,7 @@ class Player extends LivingEntity implements Serializable {
     public Player() {
         this(new EntityPosition(0, 0, 0), new EntityRotation())
 
-        if(playerModel == null && VoxelGameClient.instance != null) {
+        if (playerModel == null && VoxelGameClient.instance != null) {
             playerModel = new ObjLoader().loadModel(Gdx.files.internal('entity/player.obj'));
         }
     }
@@ -42,7 +41,7 @@ class Player extends LivingEntity implements Serializable {
     }
 
     public float getEyeHeight() {
-        HEIGHT*0.75
+        HEIGHT * 0.75
     }
 
     public float getReach() { REACH }
@@ -54,8 +53,8 @@ class Player extends LivingEntity implements Serializable {
     @Override
     public void onUpdate() {
         super.onUpdate();
-        if(moved) {
-            if(VoxelGameClient.instance.getServerChanCtx() != null) {
+        if (moved) {
+            if (VoxelGameClient.instance.getServerChanCtx() != null) {
                 VoxelGameClient.instance.getServerChanCtx().writeAndFlush(new PacketPlayerPosition(this.getPosition()))
             }
             moved = false
@@ -76,10 +75,10 @@ class Player extends LivingEntity implements Serializable {
     }
 
     public int getBlockInHead(IWorld world) {
-        Vec3i eyePosition = new Vec3i(getPosition().x as int, getPosition().y+HEIGHT as int, getPosition().z as int)
+        Vec3i eyePosition = new Vec3i(getPosition().x as int, getPosition().y + HEIGHT as int, getPosition().z as int)
         IChunk chunk = world.getChunkAtPosition(eyePosition)
-        if(chunk != null) {
-            return chunk.getBlockIdAtPosition(getPosition().x as int, getPosition().y+HEIGHT as int, getPosition().z as int)
+        if (chunk != null) {
+            return chunk.getBlockIdAtPosition(getPosition().x as int, getPosition().y + HEIGHT as int, getPosition().z as int)
         } else {
             return 0
         }

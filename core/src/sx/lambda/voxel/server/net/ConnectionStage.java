@@ -21,7 +21,7 @@ public enum ConnectionStage {
 
     private final Class<? extends ClientPacket>[] receivablePackets;
 
-    ConnectionStage(Class<? extends ClientPacket> ... receivablePackets) {
+    ConnectionStage(Class<? extends ClientPacket>... receivablePackets) {
         this.receivablePackets = receivablePackets;
     }
 

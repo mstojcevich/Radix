@@ -1,11 +1,6 @@
 package sx.lambda.voxel.block;
 
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-
-import java.nio.FloatBuffer;
 
 public class WaterRenderer extends NormalBlockRenderer {
 

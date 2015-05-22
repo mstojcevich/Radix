@@ -1,7 +1,6 @@
 package sx.lambda.voxel.render.game
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.BitmapFontCache
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -9,13 +8,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Frustum
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
+import sx.lambda.voxel.api.VoxelGameAPI
 import sx.lambda.voxel.api.events.render.EventEntityRender
 import sx.lambda.voxel.api.events.render.EventPostWorldRender
+import sx.lambda.voxel.entity.Entity
 import sx.lambda.voxel.render.Renderer
 import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.chunk.IChunk
-import sx.lambda.voxel.api.VoxelGameAPI
-import sx.lambda.voxel.entity.Entity
 
 import java.text.DecimalFormat
 
@@ -137,12 +136,12 @@ class GameRenderer implements Renderer {
                 Gdx.gl.glGetString(GL_VERSION),
                 Gdx.gl.glGetString(GL_VENDOR))
         GlyphLayout glGl = glInfoRender.setText(glInfoStr, 0, 0)
-        glInfoRender.setPosition(Gdx.graphics.width - glGl.width, (float)(Gdx.graphics.height - currentHeight))
+        glInfoRender.setPosition(Gdx.graphics.width - glGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
         String fpsStr = "FPS: $Gdx.graphics.framesPerSecond"
         GlyphLayout fpsGl = fpsRender.setText(fpsStr, 0, 0)
-        fpsRender.setPosition(Gdx.graphics.width - fpsGl.width, (float)(Gdx.graphics.height - currentHeight))
+        fpsRender.setPosition(Gdx.graphics.width - fpsGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
         int acrt = 0
@@ -151,7 +150,7 @@ class GameRenderer implements Renderer {
         }
         String lcrtStr = "AWRT: $acrt ns"
         GlyphLayout awrtGl = awrtRender.setText(lcrtStr, 0, 0)
-        awrtRender.setPosition(Gdx.graphics.width - awrtGl.width, (float)(Gdx.graphics.height - currentHeight))
+        awrtRender.setPosition(Gdx.graphics.width - awrtGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
         DecimalFormat posFormat = new DecimalFormat("#.00");
@@ -160,21 +159,21 @@ class GameRenderer implements Renderer {
                 posFormat.format(game.player.position.y),
                 posFormat.format(game.player.position.z))
         GlyphLayout posGl = positionRender.setText(coordsStr, 0, 0)
-        positionRender.setPosition(Gdx.graphics.width - posGl.width, (float)(Gdx.graphics.height - currentHeight))
+        positionRender.setPosition(Gdx.graphics.width - posGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
         String chunk = String.format("Chunk (x,z): %s,%s",
                 game.world.getChunkPosition(game.player.position.x),
                 game.world.getChunkPosition(game.player.position.z))
         GlyphLayout chunkGl = chunkposRender.setText(chunk, 0, 0)
-        chunkposRender.setPosition(Gdx.graphics.width - chunkGl.width, (float)(Gdx.graphics.height - currentHeight))
+        chunkposRender.setPosition(Gdx.graphics.width - chunkGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
         String headingStr = String.format("(yaw,pitch): %s,%s",
                 posFormat.format(game.player.rotation.yaw),
                 posFormat.format(game.player.rotation.pitch))
         GlyphLayout headingGl = headingRender.setText(headingStr, 0, 0)
-        headingRender.setPosition(Gdx.graphics.width - headingGl.width, (float)(Gdx.graphics.height - currentHeight))
+        headingRender.setPosition(Gdx.graphics.width - headingGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
         Vec3i playerPosVec = new Vec3i(Math.floor(game.player.position.x) as int, Math.floor(game.player.position.y) as int, Math.floor(game.player.position.z) as int)
@@ -182,13 +181,13 @@ class GameRenderer implements Renderer {
         if (playerChunk != null) {
             String llStr = String.format("Light Level @ Feet: " + playerChunk.getSunlight(playerPosVec.x, playerPosVec.y, playerPosVec.z))
             GlyphLayout llGl = lightlevelRender.setText(llStr, 0, 0)
-            lightlevelRender.setPosition(Gdx.graphics.width - llGl.width, (float)(Gdx.graphics.height - currentHeight))
+            lightlevelRender.setPosition(Gdx.graphics.width - llGl.width, (float) (Gdx.graphics.height - currentHeight))
             currentHeight += debugTextRenderer.getLineHeight()
         }
 
         String threadsStr = "Active threads: " + Thread.activeCount()
         GlyphLayout threadsGl = activeThreadsRender.setText(threadsStr, 0, 0)
-        activeThreadsRender.setPosition(Gdx.graphics.width - threadsGl.width, (float)(Gdx.graphics.height - currentHeight))
+        activeThreadsRender.setPosition(Gdx.graphics.width - threadsGl.width, (float) (Gdx.graphics.height - currentHeight))
     }
 
 }

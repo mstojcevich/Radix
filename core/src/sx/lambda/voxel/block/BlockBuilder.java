@@ -1,10 +1,5 @@
 package sx.lambda.voxel.block;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-
-import java.net.URL;
-
 public class BlockBuilder {
 
     private String humanName = "Undefined";
@@ -45,8 +40,8 @@ public class BlockBuilder {
     }
 
     public Block build() throws MissingElementException {
-        if(id == -1) throw new MissingElementException("id");
-        if(renderer == null) {
+        if (id == -1) throw new MissingElementException("id");
+        if (renderer == null) {
             renderer = new NormalBlockRenderer(id);
         }
         return new Block(id, humanName, renderer, textureLocation, transparent, solid);

@@ -46,8 +46,8 @@ class ClientConnection {
         try {
             Bootstrap b = new Bootstrap();
             b.group(group)
-                .channel(NioSocketChannel.class)
-                .handler(new ChannelInitializer<SocketChannel>() {
+                    .channel(NioSocketChannel.class)
+                    .handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
                     ch.pipeline().addLast(new ObjectEncoder())
@@ -57,7 +57,7 @@ class ClientConnection {
             })
 
             b.connect(hostname, port).sync().channel().closeFuture().sync()
-        } catch(Exception e) {
+        } catch (Exception e) {
             group.shutdownGracefully()
             throw e
         } finally {

@@ -1,6 +1,5 @@
 package sx.lambda.voxel.util.gl
 
-import com.badlogic.gdx.Gdx
 import groovy.transform.CompileStatic
 
 @CompileStatic

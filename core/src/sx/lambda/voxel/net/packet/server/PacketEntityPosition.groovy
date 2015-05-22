@@ -23,8 +23,8 @@ class PacketEntityPosition implements ServerPacket {
 
     @Override
     void handleClientReceive(ChannelHandlerContext ctx) {
-        for(Entity e : VoxelGameClient.instance.world.loadedEntities) {
-            if(e.getID() == entityID) {
+        for (Entity e : VoxelGameClient.instance.world.loadedEntities) {
+            if (e.getID() == entityID) {
                 e.position.setPos(pos.x, pos.y, pos.z)
                 e.rotation.setRot(rot.pitch, rot.yaw)
             }

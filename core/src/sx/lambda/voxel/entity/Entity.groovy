@@ -35,7 +35,7 @@ abstract class Entity implements Serializable {
 
     public void render() {
         //TODO implement
-        if(model != null) {
+        if (model != null) {
 //            Vector3 oldPos = VoxelGameClient.instance.camera.position
 //            VoxelGameClient.instance.camera.position = new Vector3(position.x, position.y, position.z)
 //            VoxelGameClient.instance.camera.update()

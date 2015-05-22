@@ -33,10 +33,10 @@ class Tessellator {
 
     */
 /**
-     * Initializes the renderer
-     *
-     * MAKE SURE OGL IS SETUP BEFORE RUNNING
-     *//*
+ * Initializes the renderer
+ *
+ * MAKE SURE OGL IS SETUP BEFORE RUNNING
+ *//*
 
     public void init() {
         vboColorHandle = Gdx.gl.glGenBuffer()

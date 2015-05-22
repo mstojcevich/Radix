@@ -33,15 +33,15 @@ class BlockSelectGUI implements GuiScreen {
     void render(boolean inGame, SpriteBatch batch) {
         int currentBlockNum = 0
         final int WIDTH = Gdx.graphics.width, HEIGHT = Gdx.graphics.height
-        final int USABLE_WIDTH = WIDTH - PADDING*2, USABLE_HEIGHT = HEIGHT - PADDING*2
-        final int BLOCK_RENDER_OFFSET = (int)((SLOT_SIZE - BLOCK_SIZE)/2)
-        for(Block b : blocks) {
-            if(b == null)continue;
+        final int USABLE_WIDTH = WIDTH - PADDING * 2, USABLE_HEIGHT = HEIGHT - PADDING * 2
+        final int BLOCK_RENDER_OFFSET = (int) ((SLOT_SIZE - BLOCK_SIZE) / 2)
+        for (Block b : blocks) {
+            if (b == null) continue;
             final int x = PADDING + (currentBlockNum * SLOT_SIZE) % USABLE_WIDTH
-            final int regularY = PADDING + (int)((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)
+            final int regularY = PADDING + (int) ((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)
             final int y = Gdx.graphics.height - (regularY + SLOT_SIZE)
             batch.draw(guiTexture, x, y, SLOT_SIZE - PADDING, SLOT_SIZE - PADDING, 0.05f, 0, 0.1f, 0.05f)
-            b.renderer.render2d(batch, x+BLOCK_RENDER_OFFSET-2, y+BLOCK_RENDER_OFFSET-2, BLOCK_SIZE)
+            b.renderer.render2d(batch, x + BLOCK_RENDER_OFFSET - 2, y + BLOCK_RENDER_OFFSET - 2, BLOCK_SIZE)
             currentBlockNum++
             idPositions.put(new Vector2(x, regularY), b.ID)
         }
@@ -57,7 +57,7 @@ class BlockSelectGUI implements GuiScreen {
         int mouseY = Gdx.input.getY()
 
         Integer id = getBlockID(mouseX, mouseY)
-        if(id != null) {
+        if (id != null) {
             VoxelGameClient.instance.player.setItemInHand(id)
         }
     }

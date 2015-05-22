@@ -46,10 +46,10 @@ public class EntityPosition implements Cloneable, Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if(o.is(this)) return true;
-        if(!(o instanceof EntityPosition)) return false;
+        if (o.is(this)) return true;
+        if (!(o instanceof EntityPosition)) return false;
 
-        EntityPosition other = (EntityPosition)o;
+        EntityPosition other = (EntityPosition) o;
         return this.getX() == other.getX() && this.getY() == other.getY() && this.getZ() == other.getZ();
     }
 
@@ -65,9 +65,9 @@ public class EntityPosition implements Cloneable, Serializable {
     //TODO Will this give any hash overlap?
     public int hashCode() {
         float hashCode = 1;
-        hashCode = hashCode*2 + this.getX();
-        hashCode = hashCode*2 + this.getY();
-        hashCode = hashCode*2 + this.getZ();
+        hashCode = hashCode * 2 + this.getX();
+        hashCode = hashCode * 2 + this.getY();
+        hashCode = hashCode * 2 + this.getZ();
         return hashCode;
     }
 

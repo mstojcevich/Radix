@@ -16,7 +16,7 @@ public abstract class LivingEntity extends Entity implements Serializable {
 
     //Needed for serialization
     public LivingEntity() {
-        this(getDefaultModel(), new EntityPosition(0,0,0), new EntityRotation())
+        this(getDefaultModel(), new EntityPosition(0, 0, 0), new EntityRotation())
     }
 
     public LivingEntity(Model model, EntityPosition pos, EntityRotation rot) {
@@ -29,15 +29,15 @@ public abstract class LivingEntity extends Entity implements Serializable {
         this.height = height
     }
 
-    public float getYVelocity(){ this.yVelocity }
+    public float getYVelocity() { this.yVelocity }
 
     public boolean isOnGround() { this.onGround }
 
-    public void updateMovement(MovementHandler handler){
-        if(this.onGround) {
+    public void updateMovement(MovementHandler handler) {
+        if (this.onGround) {
             this.yVelocity = Math.max(this.yVelocity, 0)
         }
-        if(!handler.checkCollision(this, 0, yVelocity, 0)) {
+        if (!handler.checkCollision(this, 0, yVelocity, 0)) {
             this.getPosition().offset(0, this.yVelocity, 0)
         } else {
             yVelocity = 0
@@ -68,7 +68,7 @@ public abstract class LivingEntity extends Entity implements Serializable {
     public int getBlockInFeet(IWorld world) {
         Vec3i feetPosition = new Vec3i(getPosition().x as int, getPosition().y as int, getPosition().z as int)
         IChunk chunk = world.getChunkAtPosition(feetPosition)
-        if(chunk != null) {
+        if (chunk != null) {
             return chunk.getBlockIdAtPosition(getPosition().x as int, getPosition().y as int, getPosition().z as int)
         } else {
             return 0

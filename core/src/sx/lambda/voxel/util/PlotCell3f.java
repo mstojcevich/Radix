@@ -2,16 +2,17 @@ package sx.lambda.voxel.util;
 
 import com.badlogic.gdx.math.Vector3;
 
-interface Plot<T>
-{
+interface Plot<T> {
     public boolean next();
+
     public void reset();
+
     public void end();
+
     public T get();
 }
 
-public class PlotCell3f implements Plot<Vec3i>
-{
+public class PlotCell3f implements Plot<Vec3i> {
 
     private final Vector3 size = new Vector3();
     private final Vector3 off = new Vector3();
@@ -27,25 +28,23 @@ public class PlotCell3f implements Plot<Vec3i>
     private int limit;
     private int plotted;
 
-    public PlotCell3f(float offx, float offy, float offz, float width, float height, float depth)
-    {
-        off.set( offx, offy, offz );
-        size.set( width, height, depth );
+    public PlotCell3f(float offx, float offy, float offz, float width, float height, float depth) {
+        off.set(offx, offy, offz);
+        size.set(width, height, depth);
     }
 
-    public void plot(Vector3 position, Vector3 direction, int cells)
-    {
+    public void plot(Vector3 position, Vector3 direction, int cells) {
         limit = cells;
 
         pos.set(position);
-        
+
         // Normalize dir w/ direction
         float invLen = 1.0f / direction.len();
         dir.x = direction.x * invLen;
         dir.y = direction.y * invLen;
         dir.z = direction.z * invLen;
 
-        delta.set( size );
+        delta.set(size);
         delta.set(delta.x / dir.x, delta.y / dir.y, delta.z / dir.z);
 
         sign.x = (dir.x > 0) ? 1 : (dir.x < 0 ? -1 : 0);
@@ -56,26 +55,19 @@ public class PlotCell3f implements Plot<Vec3i>
     }
 
     @Override
-    public boolean next()
-    {
-        if (plotted++ > 0)
-        {
+    public boolean next() {
+        if (plotted++ > 0) {
             float mx = sign.x * max.x;
             float my = sign.y * max.y;
             float mz = sign.z * max.z;
 
-            if (mx < my && mx < mz)
-            {
+            if (mx < my && mx < mz) {
                 max.x += delta.x;
                 index.x += sign.x;
-            }
-            else if (mz < my && mz < mx)
-            {
+            } else if (mz < my && mz < mx) {
                 max.z += delta.z;
                 index.z += sign.z;
-            }
-            else
-            {
+            } else {
                 max.y += delta.y;
                 index.y += sign.y;
             }
@@ -84,13 +76,12 @@ public class PlotCell3f implements Plot<Vec3i>
     }
 
     @Override
-    public void reset()
-    {
+    public void reset() {
         plotted = 0;
 
-        index.x = (int)Math.floor((pos.x - off.x) / size.x);
-        index.y = (int)Math.floor((pos.y - off.y) / size.y);
-        index.z = (int)Math.floor((pos.z - off.z) / size.z);
+        index.x = (int) Math.floor((pos.x - off.x) / size.x);
+        index.y = (int) Math.floor((pos.y - off.y) / size.y);
+        index.z = (int) Math.floor((pos.z - off.z) / size.z);
 
         float ax = index.x * size.x + off.x;
         float ay = index.y * size.y + off.y;
@@ -103,14 +94,12 @@ public class PlotCell3f implements Plot<Vec3i>
     }
 
     @Override
-    public void end()
-    {
+    public void end() {
         plotted = limit + 1;
     }
 
     @Override
-    public Vec3i get()
-    {
+    public Vec3i get() {
         return index;
     }
 
@@ -163,7 +152,6 @@ public class PlotCell3f implements Plot<Vec3i>
     public int plotted() {
         return plotted;
     }
-
 
 
 }

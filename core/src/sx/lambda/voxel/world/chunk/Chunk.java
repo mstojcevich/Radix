@@ -43,7 +43,7 @@ public class Chunk implements IChunk {
 
         for (int i = 0; i < 17; i++) {
             int reduction = 16 - i;
-            lightLevelMap[i] = (float)Math.pow(0.8, reduction);
+            lightLevelMap[i] = (float) Math.pow(0.8, reduction);
         }
 
         sunlightLevels = new int[size][height][size];
@@ -70,7 +70,7 @@ public class Chunk implements IChunk {
 
         for (int i = 0; i < 17; i++) {
             int reduction = 16 - i;
-            lightLevelMap[i] = (float)Math.pow(0.8, reduction);
+            lightLevelMap[i] = (float) Math.pow(0.8, reduction);
         }
 
         sunlightLevels = new int[size][height][size];

@@ -3,8 +3,8 @@ package sx.lambda.voxel.net.packet.server
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
 import sx.lambda.voxel.VoxelGameClient
-import sx.lambda.voxel.net.packet.ServerPacket
 import sx.lambda.voxel.entity.Entity
+import sx.lambda.voxel.net.packet.ServerPacket
 
 @CompileStatic
 /**
@@ -22,8 +22,8 @@ class PacketRmEntity implements ServerPacket {
     void handleClientReceive(ChannelHandlerContext ctx) {
         //TODO the entity isn't actually getting removed. Make sure ID stuff is correct.
         println("WE GOT AN RM!")
-        for(Entity e : VoxelGameClient.instance.world.loadedEntities) {
-            if(e.ID == entityId) {
+        for (Entity e : VoxelGameClient.instance.world.loadedEntities) {
+            if (e.ID == entityId) {
                 VoxelGameClient.instance.world.loadedEntities.remove(e)
             }
         }

@@ -10,8 +10,8 @@ import sx.lambda.voxel.world.generation.ChunkGenerator;
 import java.util.List;
 
 public interface IWorld extends RenderableProvider {
-	
-	int getChunkSize();
+
+    int getChunkSize();
 
     int getHeight();
 
@@ -29,9 +29,8 @@ public interface IWorld extends RenderableProvider {
     float getGravity();
 
     /**
-     *
      * @param velocity Velocity to modify, in m/s
-     * @param ms Time elapsed in MS since last gravity application
+     * @param ms       Time elapsed in MS since last gravity application
      * @return Velocity affected by gravity
      */
     float applyGravity(float velocity, long ms);
@@ -57,6 +56,7 @@ public interface IWorld extends RenderableProvider {
     ChunkGenerator getChunkGen();
 
     void addToSunlightQueue(Vec3i block);
+
     void addToSunlightRemovalQueue(Vec3i block);
 
     void processLightQueue();

@@ -14,15 +14,15 @@ class BoundingBox {
         this.x = x
         this.y = y
         this.z = z
-        this.x2 = x+xDiff
-        this.y2 = y+yDiff
-        this.z2 = z+zDiff
-        this.xMid = x + xDiff/2
-        this.yMid = y + yDiff/2
-        this.zMid = z + zDiff/2
-        this.xRadius = xDiff/2
-        this.yRadius = yDiff/2
-        this.zRadius = zDiff/2
+        this.x2 = x + xDiff
+        this.y2 = y + yDiff
+        this.z2 = z + zDiff
+        this.xMid = x + xDiff / 2
+        this.yMid = y + yDiff / 2
+        this.zMid = z + zDiff / 2
+        this.xRadius = xDiff / 2
+        this.yRadius = yDiff / 2
+        this.zRadius = zDiff / 2
     }
 
     public BoundingBox(EntityPosition position, float xDiff, float yDiff, float zDiff) {
@@ -30,10 +30,15 @@ class BoundingBox {
     }
 
     public float getX() { this.x }
+
     public float getY() { this.y }
+
     public float getZ() { this.z }
+
     public float getX2() { this.x2 }
+
     public float getY2() { this.y2 }
+
     public float getZ2() { this.z2 }
 
     public boolean collides(BoundingBox boundingBox) {
@@ -45,10 +50,10 @@ class BoundingBox {
 
     @Override
     public boolean equals(Object o) {
-        if(o == this) return true;
-        if(!(o instanceof BoundingBox)) return false;
+        if (o == this) return true;
+        if (!(o instanceof BoundingBox)) return false;
 
-        BoundingBox other = (BoundingBox)o;
+        BoundingBox other = (BoundingBox) o;
         return this.getX() == other.getX() && this.getY() == other.getY() && this.getZ() == other.getZ() &&
                 this.getX2() == other.getX2() && this.getY2() == other.getY2() && this.getZ2() == other.getZ2();
     }
@@ -56,12 +61,12 @@ class BoundingBox {
     @Override
     public int hashCode() {
         float hashCode = 1;
-        hashCode = hashCode*2 + this.x;
-        hashCode = hashCode*2 + this.y;
-        hashCode = hashCode*2 + this.z;
-        hashCode = hashCode*2 + this.x2;
-        hashCode = hashCode*2 + this.y2;
-        hashCode = hashCode*2 + this.z2;
+        hashCode = hashCode * 2 + this.x;
+        hashCode = hashCode * 2 + this.y;
+        hashCode = hashCode * 2 + this.z;
+        hashCode = hashCode * 2 + this.x2;
+        hashCode = hashCode * 2 + this.y2;
+        hashCode = hashCode * 2 + this.z2;
         return hashCode;
     }
 

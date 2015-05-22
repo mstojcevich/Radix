@@ -14,6 +14,25 @@ import java.nio.FloatBuffer;
 /**
  * Regular mesher. Gets the job done.
  * Doesn't use any specific algorithms, just culls faces that are next to others.
+ *
+ * @param chunk Chunk that this will be meshing
+ * @param blockList 3d array of voxels we're meshing
+ * @param shouldRenderTop Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderBottom Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderLeft Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderRight Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderFront Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderBack Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @return Number of visible faces
+ * @param blockList 3d array of voxels to draw.
+ * @param shouldRenderTop 3d array of booleans, the size of the chunk.
+ * @param shouldRenderBottom 3d array of booleans, the size of the chunk.
+ * @param shouldRenderLeft 3d array of booleans, the size of the chunk.
+ * @param shouldRenderRight 3d array of booleans, the size of the chunk.
+ * @param shouldRenderFront 3d array of booleans, the size of the chunk.
+ * @param shouldRenderBack 3d array of booleans, the size of the chunk.
+ * @param visibleSideCount Number of faces that are visible
+ * @return Result of drawing the mesh
  *//*
 
 public class PlainMesher implements Mesher {
@@ -23,8 +42,8 @@ public class PlainMesher implements Mesher {
 
     */
 /**
-     * @param chunk Chunk that this will be meshing
-     *//*
+ * @param chunk Chunk that this will be meshing
+ *//*
 
     public PlainMesher(IChunk chunk) {
         this.chunk = chunk;
@@ -66,15 +85,15 @@ public class PlainMesher implements Mesher {
 
     */
 /**
-     * @param blockList 3d array of voxels we're meshing
-     * @param shouldRenderTop Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
-     * @param shouldRenderBottom Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
-     * @param shouldRenderLeft Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
-     * @param shouldRenderRight Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
-     * @param shouldRenderFront Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
-     * @param shouldRenderBack Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
-     * @return Number of visible faces
-     *//*
+ * @param blockList 3d array of voxels we're meshing
+ * @param shouldRenderTop Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderBottom Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderLeft Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderRight Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderFront Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @param shouldRenderBack Empty 3d array of booleans, the size of the chunk. Values get changed by this function.
+ * @return Number of visible faces
+ *//*
 
     private int calcShouldRender(Block[][][] blockList,
                                 boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,
@@ -215,17 +234,17 @@ public class PlainMesher implements Mesher {
 
     */
 /**
-     *
-     * @param blockList 3d array of voxels to draw.
-     * @param shouldRenderTop 3d array of booleans, the size of the chunk.
-     * @param shouldRenderBottom 3d array of booleans, the size of the chunk.
-     * @param shouldRenderLeft 3d array of booleans, the size of the chunk.
-     * @param shouldRenderRight 3d array of booleans, the size of the chunk.
-     * @param shouldRenderFront 3d array of booleans, the size of the chunk.
-     * @param shouldRenderBack 3d array of booleans, the size of the chunk.
-     * @param visibleSideCount Number of faces that are visible
-     * @return Result of drawing the mesh
-     *//*
+ *
+ * @param blockList 3d array of voxels to draw.
+ * @param shouldRenderTop 3d array of booleans, the size of the chunk.
+ * @param shouldRenderBottom 3d array of booleans, the size of the chunk.
+ * @param shouldRenderLeft 3d array of booleans, the size of the chunk.
+ * @param shouldRenderRight 3d array of booleans, the size of the chunk.
+ * @param shouldRenderFront 3d array of booleans, the size of the chunk.
+ * @param shouldRenderBack 3d array of booleans, the size of the chunk.
+ * @param visibleSideCount Number of faces that are visible
+ * @return Result of drawing the mesh
+ *//*
 
     private MeshResult draw(Block[][][] blockList,
                             boolean[][][] shouldRenderTop, boolean[][][] shouldRenderBottom,

@@ -27,11 +27,11 @@ class EntityRotation implements Serializable {
 
     public void offset(float pitch, float yaw) {
         synchronized (this) {
-            this.pitch = (this.pitch+pitch)%360
+            this.pitch = (this.pitch + pitch) % 360
 //            if(this.pitch < 0) {
 //                this.pitch = 360-pitch
 //            }
-            this.yaw = (this.yaw+yaw)%360
+            this.yaw = (this.yaw + yaw) % 360
 //            if(this.yaw < 0) {
 //                this.yaw = 360-yaw
 //            }

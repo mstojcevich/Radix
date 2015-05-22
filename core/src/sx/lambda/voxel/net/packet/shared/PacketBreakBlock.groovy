@@ -21,8 +21,8 @@ class PacketBreakBlock implements SharedPacket {
     @Override
     void handleServerReceive(VoxelGameServer server, ChannelHandlerContext ctx) {
         server.world.removeBlock(blockPos)
-        for(ConnectedClient client : server.getClientList()) {
-            if(client.stage == ConnectionStage.PLAY) {
+        for (ConnectedClient client : server.getClientList()) {
+            if (client.stage == ConnectionStage.PLAY) {
                 client.context.writeAndFlush(this)
             }
         }

@@ -6,11 +6,11 @@ import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
 import sx.lambda.voxel.block.Block
-import sx.lambda.voxel.util.Vec3i
-import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.entity.EntityPosition
 import sx.lambda.voxel.entity.LivingEntity
 import sx.lambda.voxel.entity.player.Player
+import sx.lambda.voxel.util.Vec3i
+import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.chunk.IChunk
 
 @CompileStatic
@@ -138,7 +138,7 @@ class MovementHandler implements RepeatedTask {
                         player.setMoved(true);
                     }
 
-                    if(player.hasMoved()) {
+                    if (player.hasMoved()) {
                         game.gameRenderer.calculateFrustum()
                     }
 
@@ -146,7 +146,7 @@ class MovementHandler implements RepeatedTask {
                     sleep(10)
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             game.handleCriticalException(e)
         }
     }
@@ -170,13 +170,13 @@ class MovementHandler implements RepeatedTask {
         Block block2 = newChunk2.getBlockAtPosition(newPosition2);
 
         boolean passed = true
-        if(block1 != null) {
-            if(block1.isSolid()) {
+        if (block1 != null) {
+            if (block1.isSolid()) {
                 passed = false
             }
         }
-        if(block2 != null) {
-            if(block2.isSolid()) {
+        if (block2 != null) {
+            if (block2.isSolid()) {
                 passed = false
             }
         }

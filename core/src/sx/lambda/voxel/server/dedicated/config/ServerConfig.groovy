@@ -12,7 +12,9 @@ class ServerConfig {
     private int viewDistance = 3
 
     public short getPort() { port }
+
     public String getMOTD() { motd }
+
     public int getViewDistance() { viewDistance }
 
 }

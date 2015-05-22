@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import sx.lambda.voxel.client.gui.GuiScreen;
+
 import static com.badlogic.gdx.graphics.GL20.*;
 
 /**
@@ -23,7 +24,7 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
 
     /**
      * @param currentScreen The currently shown screen
-     * @param length Time in milliseconds to run the animation for
+     * @param length        Time in milliseconds to run the animation for
      */
     public SlideUpAnimation(GuiScreen currentScreen, int length) {
         super(length);
@@ -50,7 +51,7 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
 
     @Override
     public void render() {
-        float percentageDone = (float)getTimeSinceStart() / (float)getLength();
+        float percentageDone = (float) getTimeSinceStart() / (float) getLength();
         //TODO draw the FBO
         //TODO implement
         //fbo.drawTexture(VoxelGameClient.getInstance().getTextureManager(), 0, (int)(Gdx.graphics.getWidth()*percentageDone), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

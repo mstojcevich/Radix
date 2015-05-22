@@ -4,10 +4,10 @@ import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.net.packet.SharedPacket
-import sx.lambda.voxel.server.net.ConnectionStage
-import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.server.VoxelGameServer
 import sx.lambda.voxel.server.net.ConnectedClient
+import sx.lambda.voxel.server.net.ConnectionStage
+import sx.lambda.voxel.util.Vec3i
 
 @CompileStatic
 class PacketPlaceBlock implements SharedPacket {
@@ -23,8 +23,8 @@ class PacketPlaceBlock implements SharedPacket {
     @Override
     void handleServerReceive(VoxelGameServer server, ChannelHandlerContext ctx) {
         server.world.addBlock(block, pos)
-        for(ConnectedClient client : server.getClientList()) {
-            if(client.stage == ConnectionStage.PLAY) {
+        for (ConnectedClient client : server.getClientList()) {
+            if (client.stage == ConnectionStage.PLAY) {
                 client.context.writeAndFlush(this)
             }
         }

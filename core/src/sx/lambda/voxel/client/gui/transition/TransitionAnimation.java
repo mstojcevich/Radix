@@ -19,6 +19,7 @@ public interface TransitionAnimation {
 
     /**
      * Check if the animation is finished
+     *
      * @return Whether the animation has finished
      */
     boolean isFinished();

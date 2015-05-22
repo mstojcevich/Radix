@@ -2,8 +2,8 @@ package sx.lambda.voxel.tasks
 
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
-import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.entity.EntityPosition
+import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.chunk.IChunk
 
 @CompileStatic
@@ -38,7 +38,7 @@ class WorldLoader implements RepeatedTask {
 
                 sleep(100);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             VoxelGameClient.instance.handleCriticalException(e)
         }
     }

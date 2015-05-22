@@ -1,9 +1,6 @@
 package sx.lambda.voxel.block;
 
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import groovy.transform.CompileStatic;
@@ -22,21 +19,21 @@ public class NormalBlockRenderer implements IBlockRenderer {
 
     private static boolean initialized;
 
-    final int BLOCKS_PER_WIDTH = 1024/32;
+    final int BLOCKS_PER_WIDTH = 1024 / 32;
 
     public NormalBlockRenderer(int blockID) {
         this.blockID = blockID;
-        u = ((blockID%BLOCKS_PER_WIDTH)*TEXTURE_PERCENTAGE);
-        v = ((blockID/BLOCKS_PER_WIDTH)*TEXTURE_PERCENTAGE);
+        u = ((blockID % BLOCKS_PER_WIDTH) * TEXTURE_PERCENTAGE);
+        v = ((blockID / BLOCKS_PER_WIDTH) * TEXTURE_PERCENTAGE);
     }
 
     @Override
     public void render2d(SpriteBatch batcher, int x, int y, int width) {
-        if(!initialized) {
+        if (!initialized) {
             initialize();
         }
-        float u2 = u+TEXTURE_PERCENTAGE-.001f;
-        float v2 = v+TEXTURE_PERCENTAGE-.001f;
+        float u2 = u + TEXTURE_PERCENTAGE - .001f;
+        float v2 = v + TEXTURE_PERCENTAGE - .001f;
         batcher.draw(getBlockMap(), x, y, width, width, u, v, u2, v2);
     }
 
@@ -123,7 +120,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     public static Texture getBlockMap() {
-        if(blockMap == null) {
+        if (blockMap == null) {
             initialize();
         }
         return blockMap;

@@ -2,12 +2,12 @@ package sx.lambda.voxel.net.packet.shared
 
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
+import sx.lambda.voxel.net.ProtocolInfo
 import sx.lambda.voxel.net.packet.SharedPacket
 import sx.lambda.voxel.net.packet.client.PacketAuthInfo
+import sx.lambda.voxel.net.packet.server.PacketKick
 import sx.lambda.voxel.server.VoxelGameServer
 import sx.lambda.voxel.server.net.ConnectionStage
-import sx.lambda.voxel.net.ProtocolInfo
-import sx.lambda.voxel.net.packet.server.PacketKick
 
 @CompileStatic
 class PacketHello implements SharedPacket {
@@ -21,16 +21,16 @@ class PacketHello implements SharedPacket {
 
     @Override
     void handleClientReceive(ChannelHandlerContext ctx) {
-        String hostname = ((InetSocketAddress)ctx.channel().remoteAddress()).hostName
+        String hostname = ((InetSocketAddress) ctx.channel().remoteAddress()).hostName
         println "Got a hello response from $hostname"
         ctx.writeAndFlush(new PacketAuthInfo("marcusant", 32390234)) //TODO get username and token from somewhere else
     }
 
     @Override
     void handleServerReceive(VoxelGameServer server, ChannelHandlerContext ctx) {
-        String hostname = ((InetSocketAddress)ctx.channel().remoteAddress()).hostName
+        String hostname = ((InetSocketAddress) ctx.channel().remoteAddress()).hostName
         println "Hello from $hostname"
-        if(version == ProtocolInfo.VERSION) {
+        if (version == ProtocolInfo.VERSION) {
             ctx.writeAndFlush(new PacketHello(false))
             server.getClient(ctx).setStage(ConnectionStage.AUTH)
         } else {

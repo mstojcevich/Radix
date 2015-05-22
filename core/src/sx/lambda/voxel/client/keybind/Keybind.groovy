@@ -12,7 +12,7 @@ class Keybind {
     public Keybind(String id, String displayName, int key, Runnable onPress) {
         this.id = id
         this.displayName = displayName
-        this.key =  key
+        this.key = key
         this.onPress = onPress
     }
 
@@ -21,6 +21,7 @@ class Keybind {
     }
 
     public String getName() { name }
+
     public int getKey() { key }
 
 }

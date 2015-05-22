@@ -27,9 +27,11 @@ class VisualSettings implements Serializable {
     public boolean isFullscreen() { fullscreen }
 
     public int getWindowWidth() { windowWidth }
+
     public int getWindowHeight() { windowHeight }
 
     public boolean isPostProcessEnabled() { return postProcess }
+
     public boolean isPeasantModeEnabled() { peasantMode }
 
 }

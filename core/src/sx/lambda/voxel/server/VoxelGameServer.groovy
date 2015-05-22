@@ -14,14 +14,14 @@ import io.netty.handler.codec.serialization.ObjectDecoder
 import io.netty.handler.codec.serialization.ObjectEncoder
 import io.netty.handler.logging.LogLevel
 import io.netty.handler.logging.LoggingHandler
+import sx.lambda.voxel.api.VoxelGameAPI
 import sx.lambda.voxel.api.events.EventEarlyInit
 import sx.lambda.voxel.api.events.EventWorldStart
 import sx.lambda.voxel.server.dedicated.config.ServerConfig
+import sx.lambda.voxel.server.net.ConnectedClient
 import sx.lambda.voxel.server.net.VoxelGameServerHandler
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.World
-import sx.lambda.voxel.api.VoxelGameAPI
-import sx.lambda.voxel.server.net.ConnectedClient
 
 /**
  * Used for both local and remote servers
@@ -70,7 +70,7 @@ class VoxelGameServer {
             })
 
             b.bind(config.port).sync().channel().closeFuture().sync();
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace()
             bossGroup.shutdownGracefully()
             return -1;
@@ -106,7 +106,7 @@ class VoxelGameServer {
     static void main(String[] args) {
         instance = new VoxelGameServer()
         VoxelGameAPI.instance.eventManager.push(new EventWorldStart())
-        instance.start() 
+        instance.start()
     }
 
 }

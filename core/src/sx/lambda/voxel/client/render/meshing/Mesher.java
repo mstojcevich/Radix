@@ -11,8 +11,9 @@ public interface Mesher {
 
     /**
      * Meshes the specified voxels.
-     * @param builder MeshBuilder to build the mesh onto
-     * @param voxels Voxels to mesh
+     *
+     * @param builder     MeshBuilder to build the mesh onto
+     * @param voxels      Voxels to mesh
      * @param lightLevels Light levels of voxels
      * @return Result of meshing the voxels.
      */

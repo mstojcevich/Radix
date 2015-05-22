@@ -28,14 +28,14 @@ class VoxelGameServerHandler extends ChannelHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         boolean validPacket = false
-        for(Class<? extends ClientPacket> c : server.getClient(ctx).stage.receivablePackets) {
-            if(c.isInstance(msg)) {
+        for (Class<? extends ClientPacket> c : server.getClient(ctx).stage.receivablePackets) {
+            if (c.isInstance(msg)) {
                 c.cast(msg).handleServerReceive(server, ctx)
                 validPacket = true
             }
         }
-        if(!validPacket) {
-            String hostname = ((InetSocketAddress)ctx.channel().remoteAddress()).hostName
+        if (!validPacket) {
+            String hostname = ((InetSocketAddress) ctx.channel().remoteAddress()).hostName
             String className = msg.class.name
             println "[$hostname] Kicking client for invalid object (type $className) in stage " + server.getClient(ctx).getStage().name()
             println "Valid packets are " + server.getClient(ctx).stage.receivablePackets

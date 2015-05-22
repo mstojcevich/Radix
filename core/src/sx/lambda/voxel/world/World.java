@@ -32,8 +32,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class World implements IWorld {
-	
-	private static final int CHUNK_SIZE = 16;
+
+    private static final int CHUNK_SIZE = 16;
 
     private static final int WORLD_HEIGHT = 128;
 
@@ -66,18 +66,20 @@ public class World implements IWorld {
     public World(boolean remote, boolean server) {
         this.remote = remote;
         this.server = server;
-        if(!remote) {
+        if (!remote) {
             this.chunkGen = new SimplexChunkGenerator(this, 200, new Random().nextInt());
         } else {
             this.chunkGen = null;
         }
     }
-	
-	public int getChunkSize() {
-		return CHUNK_SIZE;
-	}
 
-    public int getHeight() { return WORLD_HEIGHT; }
+    public int getChunkSize() {
+        return CHUNK_SIZE;
+    }
+
+    public int getHeight() {
+        return WORLD_HEIGHT;
+    }
 
     public IChunk getChunkAtPosition(Vec3i position) {
         Vec3i chunkPosition = new Vec3i(
@@ -90,15 +92,15 @@ public class World implements IWorld {
 
     @Override
     public void render() {
-        if(modelBatch == null) {
+        if (modelBatch == null) {
             modelBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
             blockMaterial = new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()));
             transparentBlockMaterial = new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
                     new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
         }
 
-        if(!server) {
-            if(!updatingLight && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
+        if (!server) {
+            if (!updatingLight && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
                 processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
             }
             for (IChunk c : chunksToRerender) {
@@ -117,11 +119,11 @@ public class World implements IWorld {
             modelBatch.begin(VoxelGameClient.getInstance().getCamera());
             modelBatch.render(this);
             modelBatch.end();
-            if(VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
+            if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
                 VoxelGameClient.getInstance().numChunkRenders = 0;
                 VoxelGameClient.getInstance().chunkRenderTimes = 0;
             }
-            VoxelGameClient.getInstance().chunkRenderTimes += (int)(System.nanoTime() - renderStartNS);
+            VoxelGameClient.getInstance().chunkRenderTimes += (int) (System.nanoTime() - renderStartNS);
             VoxelGameClient.getInstance().numChunkRenders++;
         } else {
             System.err.println("Why the hell is the server running render?");
@@ -130,7 +132,7 @@ public class World implements IWorld {
 
     @Override
     public void loadChunks(EntityPosition playerPosition, int viewDistance) {
-        if(!remote) { //don't gen chunks if we're not local
+        if (!remote) { //don't gen chunks if we're not local
             this.getChunksInRange(playerPosition, viewDistance);
         }
 
@@ -138,15 +140,17 @@ public class World implements IWorld {
     }
 
     @Override
-    public int getSeaLevel() { return SEA_LEVEL; }
+    public int getSeaLevel() {
+        return SEA_LEVEL;
+    }
 
     @Override
     public int getChunkPosition(float value) {
-        int subtraction = (int)(value%CHUNK_SIZE);
-        if(value < 0 && subtraction != 0) {
-            subtraction = CHUNK_SIZE+subtraction;
+        int subtraction = (int) (value % CHUNK_SIZE);
+        if (value < 0 && subtraction != 0) {
+            subtraction = CHUNK_SIZE + subtraction;
         }
-        return (int)(value-subtraction);
+        return (int) (value - subtraction);
     }
 
     @Override
@@ -156,8 +160,8 @@ public class World implements IWorld {
 
     @Override
     public float applyGravity(float velocity, long ms) {
-        if(ms < 0)ms = 0-ms;
-        return Math.max(-TERMINAL_VELOCITY, velocity-(getGravity()/1000)*(ms/10f));
+        if (ms < 0) ms = 0 - ms;
+        return Math.max(-TERMINAL_VELOCITY, velocity - (getGravity() / 1000) * (ms / 10f));
     }
 
     @Override
@@ -203,10 +207,10 @@ public class World implements IWorld {
 
     @Override
     public void addBlock(int block, final Vec3i position) {
-        synchronized(this) {
+        synchronized (this) {
             final IChunk c = this.getChunkAtPosition(position);
             c.addBlock(block, position);
-            if(!server) {
+            if (!server) {
                 rerenderChunk(c);
             }
         }
@@ -217,7 +221,7 @@ public class World implements IWorld {
         List<IChunk> chunkList = new ArrayList<IChunk>();
         int playerChunkX = getChunkPosition(epos.getX());
         int playerChunkZ = getChunkPosition(epos.getZ());
-        int range = viewDistance*CHUNK_SIZE;
+        int range = viewDistance * CHUNK_SIZE;
         for (int x = playerChunkX - range; x < playerChunkX + range; x += CHUNK_SIZE) {
             for (int z = playerChunkZ - range; z < playerChunkZ + range; z += CHUNK_SIZE) {
                 chunkList.add(loadChunk(x, z));
@@ -230,13 +234,13 @@ public class World implements IWorld {
     public void addChunk(final IChunk chunk) {
         Vec3i pos = chunk.getStartPosition();
         IChunk c = this.chunkMap.get(pos);
-        if(c != null) {
+        if (c != null) {
             this.chunkMap.remove(pos);
             this.chunkList.remove(c);
         }
         this.chunkMap.put(pos, chunk);
         this.chunkList.add(chunk);
-        if(!server) {
+        if (!server) {
             rerenderChunk(chunk);
         }
 
@@ -245,14 +249,14 @@ public class World implements IWorld {
 
     @Override
     public void gcChunks(EntityPosition playerPosition, int viewDistance) {
-        int range = viewDistance*CHUNK_SIZE;
+        int range = viewDistance * CHUNK_SIZE;
 
         int playerChunkX = getChunkPosition(playerPosition.getX());
         int playerChunkZ = getChunkPosition(playerPosition.getZ());
 
-        for(final Map.Entry<Vec3i, IChunk> e : this.chunkMap.entrySet()) {
+        for (final Map.Entry<Vec3i, IChunk> e : this.chunkMap.entrySet()) {
             Vec3i b = e.getKey();
-            if(Math.abs(b.x - playerChunkX) > range
+            if (Math.abs(b.x - playerChunkX) > range
                     || Math.abs(b.z - playerChunkZ) > range) {
                 this.chunkList.remove(e.getValue());
                 VoxelGameClient.getInstance().addToGLQueue(new Runnable() {
@@ -262,7 +266,7 @@ public class World implements IWorld {
                     }
                 });
                 this.chunkMap.remove(b);
-                if(remote) {
+                if (remote) {
                     VoxelGameClient.getInstance().getServerChanCtx().writeAndFlush(new PacketUnloadChunk(b));
                 }
 
@@ -284,7 +288,7 @@ public class World implements IWorld {
             this.chunkMap.put(pos, c);
             this.chunkList.add(c);
             addSun(c);
-            if(!server) {
+            if (!server) {
                 rerenderChunk(c);
             }
             return c;
@@ -294,10 +298,10 @@ public class World implements IWorld {
     }
 
     private void addSun(IChunk c) {
-        for(int x = 0; x < CHUNK_SIZE; x++) {
-            for(int z = 0; z < CHUNK_SIZE; z++) {
-                c.setSunlight(x, WORLD_HEIGHT-1, z, 16);
-                addToSunlightQueue(new Vec3i(c.getStartPosition().x + x, WORLD_HEIGHT-1, c.getStartPosition().z + z));
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                c.setSunlight(x, WORLD_HEIGHT - 1, z, 16);
+                addToSunlightQueue(new Vec3i(c.getStartPosition().x + x, WORLD_HEIGHT - 1, c.getStartPosition().z + z));
             }
         }
         c.finishChangingSunlight();
@@ -334,7 +338,7 @@ public class World implements IWorld {
     @Override
     public void processLightQueue() {
         shouldUpdateLight = true;
-        if(!updatingLight) {
+        if (!updatingLight) {
             new Thread("Light update") {
                 @Override
                 public void run() {
@@ -492,35 +496,35 @@ public class World implements IWorld {
     }
 
     private void processLightRemovalQueue() {
-        if(!sunlightRemovalQueue.isEmpty()) {
+        if (!sunlightRemovalQueue.isEmpty()) {
             Queue<IChunk> changedChunks = new LinkedBlockingDeque<>();
             Vec3i pos;
-            while((pos = sunlightRemovalQueue.poll()) != null) {
+            while ((pos = sunlightRemovalQueue.poll()) != null) {
                 IChunk posChunk = getChunkAtPosition(pos);
-                if(posChunk == null) {
+                if (posChunk == null) {
                     continue;
                 }
                 int ll = posChunk.getSunlight(pos.x, pos.y, pos.z);
 
-                Vec3i negXNeighborPos = pos.translate(-1,0,0);
-                Vec3i posXNeighborPos = pos.translate(1,0,0);
-                Vec3i negZNeighborPos = pos.translate(0,0,-1);
-                Vec3i posZNeighborPos = pos.translate(0,0,1);
+                Vec3i negXNeighborPos = pos.translate(-1, 0, 0);
+                Vec3i posXNeighborPos = pos.translate(1, 0, 0);
+                Vec3i negZNeighborPos = pos.translate(0, 0, -1);
+                Vec3i posZNeighborPos = pos.translate(0, 0, 1);
                 IChunk negXNeighborChunk = getChunkAtPosition(negXNeighborPos);
                 IChunk posXNeighborChunk = getChunkAtPosition(posXNeighborPos);
                 IChunk negZNeighborChunk = getChunkAtPosition(negZNeighborPos);
                 IChunk posZNeighborChunk = getChunkAtPosition(posZNeighborPos);
 
-                if(negXNeighborChunk != null) {
+                if (negXNeighborChunk != null) {
                     Block bl = negXNeighborChunk.getBlockAtPosition(negXNeighborPos);
                     int bll = negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z);
-                    if(bll < ll && bll != 0) {
+                    if (bll < ll && bll != 0) {
                         if (bl == null) {
                             sunlightRemovalQueue.add(negXNeighborPos);
                         } else if (bl.isTransparent()) {
                             sunlightRemovalQueue.add(negXNeighborPos);
                         }
-                    } else if(bll >= ll) {
+                    } else if (bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(negXNeighborPos);
                         } else if (bl.isTransparent()) {
@@ -528,16 +532,16 @@ public class World implements IWorld {
                         }
                     }
                 }
-                if(posXNeighborChunk != null) {
+                if (posXNeighborChunk != null) {
                     Block bl = posXNeighborChunk.getBlockAtPosition(posXNeighborPos);
                     int bll = posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z);
-                    if(bll < ll && bll != 0) {
+                    if (bll < ll && bll != 0) {
                         if (bl == null) {
                             sunlightRemovalQueue.add(posXNeighborPos);
                         } else if (bl.isTransparent()) {
                             sunlightRemovalQueue.add(posXNeighborPos);
                         }
-                    } else if(bll >= ll) {
+                    } else if (bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(posXNeighborPos);
                         } else if (bl.isTransparent()) {
@@ -545,16 +549,16 @@ public class World implements IWorld {
                         }
                     }
                 }
-                if(negZNeighborChunk != null) {
+                if (negZNeighborChunk != null) {
                     Block bl = negZNeighborChunk.getBlockAtPosition(negZNeighborPos);
                     int bll = negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z);
-                    if(bll < ll && bll != 0) {
+                    if (bll < ll && bll != 0) {
                         if (bl == null) {
                             sunlightRemovalQueue.add(negZNeighborPos);
                         } else if (bl.isTransparent()) {
                             sunlightRemovalQueue.add(negZNeighborPos);
                         }
-                    } else if(bll >= ll) {
+                    } else if (bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(negZNeighborPos);
                         } else if (bl.isTransparent()) {
@@ -562,16 +566,16 @@ public class World implements IWorld {
                         }
                     }
                 }
-                if(posZNeighborChunk != null) {
+                if (posZNeighborChunk != null) {
                     Block bl = posZNeighborChunk.getBlockAtPosition(posZNeighborPos);
                     int bll = posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z);
-                    if(bll < ll && bll != 0) {
+                    if (bll < ll && bll != 0) {
                         if (bl == null) {
                             sunlightRemovalQueue.add(posZNeighborPos);
                         } else if (bl.isTransparent()) {
                             sunlightRemovalQueue.add(posZNeighborPos);
                         }
-                    } else if(bll >= ll) {
+                    } else if (bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(posZNeighborPos);
                         } else if (bl.isTransparent()) {
@@ -580,15 +584,15 @@ public class World implements IWorld {
                     }
                 }
 
-                if(pos.y > 0) {
+                if (pos.y > 0) {
                     Vec3i negYPos = pos.translate(0, -1, 0);
                     Block negYBlock = posChunk.getBlockAtPosition(negYPos);
-                    if(negYBlock == null) {
-                        if(posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) != 0) {
+                    if (negYBlock == null) {
+                        if (posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) != 0) {
                             sunlightRemovalQueue.add(negYPos);
                         }
-                    } else if(negYBlock.isTransparent()) {
-                        if(posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) != 0) {
+                    } else if (negYBlock.isTransparent()) {
+                        if (posChunk.getSunlight(negYPos.x, negYPos.y, negYPos.z) != 0) {
                             sunlightRemovalQueue.add(negYPos);
                         }
                     }
@@ -598,7 +602,7 @@ public class World implements IWorld {
                 changedChunks.add(posChunk);
             }
             IChunk changedChunk;
-            while((changedChunk = changedChunks.poll()) != null) {
+            while ((changedChunk = changedChunks.poll()) != null) {
                 changedChunk.finishChangingSunlight();
             }
         }
@@ -607,7 +611,7 @@ public class World implements IWorld {
     @Override
     public float getLightLevel(Vec3i pos) {
         IChunk chunk = getChunkAtPosition(pos);
-        if(chunk == null) {
+        if (chunk == null) {
             return 1;
         }
         return chunk.getLightLevel(pos.x, pos.y, pos.z);
@@ -615,7 +619,7 @@ public class World implements IWorld {
 
     @Override
     public void cleanup() {
-        for(IChunk c : chunkList) {
+        for (IChunk c : chunkList) {
             c.cleanup();
         }
         modelBatch.dispose();
@@ -624,9 +628,9 @@ public class World implements IWorld {
 
     @Override
     public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
-        for(IChunk c : chunkList) {
+        for (IChunk c : chunkList) {
             Mesh m = c.getMesh();
-            if(m == null)continue;
+            if (m == null) continue;
             if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint(), CHUNK_SIZE)) {
                 Renderable renderable = pool.obtain();
                 renderable.material = blockMaterial;
@@ -637,9 +641,9 @@ public class World implements IWorld {
                 renderables.add(renderable);
             }
         }
-        for(IChunk c : chunkList) {
+        for (IChunk c : chunkList) {
             Mesh m = c.getTransparentMesh();
-            if(m == null)continue;
+            if (m == null) continue;
             if (VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(c.getStartPosition().x, c.getStartPosition().y, c.getStartPosition().z, CHUNK_SIZE, c.getHighestPoint(), CHUNK_SIZE)) {
                 Renderable renderable = pool.obtain();
                 renderable.material = transparentBlockMaterial;

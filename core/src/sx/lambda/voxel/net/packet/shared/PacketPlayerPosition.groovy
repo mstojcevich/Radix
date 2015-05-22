@@ -3,15 +3,10 @@ package sx.lambda.voxel.net.packet.shared
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
 import sx.lambda.voxel.VoxelGameClient
-import sx.lambda.voxel.net.packet.SharedPacket
-import sx.lambda.voxel.net.packet.server.*
-import sx.lambda.voxel.net.packet.server.PacketChunkData
-import sx.lambda.voxel.net.packet.server.PacketEntityPosition
-import sx.lambda.voxel.net.packet.server.PacketStartChunkGroup
 import sx.lambda.voxel.entity.EntityPosition
 import sx.lambda.voxel.entity.player.Player
-import sx.lambda.voxel.net.packet.server.PacketEndChunkGroup
-import sx.lambda.voxel.net.packet.server.PacketKick
+import sx.lambda.voxel.net.packet.SharedPacket
+import sx.lambda.voxel.net.packet.server.*
 import sx.lambda.voxel.server.VoxelGameServer
 import sx.lambda.voxel.server.net.ConnectedClient
 import sx.lambda.voxel.world.chunk.IChunk
@@ -37,23 +32,23 @@ class PacketPlayerPosition implements SharedPacket {
         ConnectedClient cc = server.getClient(ctx);
         Player p = cc.player;
 
-        if(p != null) {
+        if (p != null) {
             p.getPosition().setPos(x, y, z)
 
-            for(ConnectedClient client : server.clientList) {
-                if(client.context != ctx)
+            for (ConnectedClient client : server.clientList) {
+                if (client.context != ctx)
                     client.context.writeAndFlush(new PacketEntityPosition(p))
             }
 
-            if(cc.lastChunkSendPos == null) {
+            if (cc.lastChunkSendPos == null) {
                 sendChunks(server, ctx, p, server.config.viewDistance)
             } else {
                 if (cc.info == null) {
-                    if(cc.lastChunkSendPos.planeDistance(p.getPosition()) >= ((server.config.viewDistance/2f)*server.getWorld().getChunkSize()))
+                    if (cc.lastChunkSendPos.planeDistance(p.getPosition()) >= ((server.config.viewDistance / 2f) * server.getWorld().getChunkSize()))
                         sendChunks(server, ctx, p, server.config.viewDistance)
                 } else {
                     int viewDistance = Math.min(server.config.viewDistance, cc.info.viewDistance);
-                    if(cc.lastChunkSendPos.planeDistance(p.getPosition()) >= ((viewDistance/2f)*server.getWorld().getChunkSize()))
+                    if (cc.lastChunkSendPos.planeDistance(p.getPosition()) >= ((viewDistance / 2f) * server.getWorld().getChunkSize()))
                         sendChunks(server, ctx, p, viewDistance)
                 }
             }

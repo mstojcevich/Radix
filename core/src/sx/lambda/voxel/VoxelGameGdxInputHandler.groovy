@@ -1,17 +1,13 @@
-package sx.lambda.voxel;
+package sx.lambda.voxel
 
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputProcessor
-import groovy.transform.CompileStatic;
-import sx.lambda.voxel.api.VoxelGameAPI;
-import sx.lambda.voxel.client.gui.screens.BlockSelectGUI;
+import groovy.transform.CompileStatic
+import sx.lambda.voxel.api.VoxelGameAPI
+import sx.lambda.voxel.client.gui.screens.BlockSelectGUI
 import sx.lambda.voxel.client.keybind.Keybind
 import sx.lambda.voxel.net.packet.shared.PacketBreakBlock
-import sx.lambda.voxel.net.packet.shared.PacketPlaceBlock;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import sx.lambda.voxel.net.packet.shared.PacketPlaceBlock
 
 @CompileStatic
 public class VoxelGameGdxInputHandler implements InputProcessor {
@@ -27,7 +23,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
         registerKeybind(new Keybind("voxeltest.movement.jump", "Jump", Input.Keys.SPACE, new Runnable() {
             @Override
             void run() {
-                if(game.world != null) {
+                if (game.world != null) {
                     if (game.getPlayer().onGround) {
                         game.getPlayer().setYVelocity(0.11f)
                         game.getPlayer().setOnGround(false)
@@ -38,7 +34,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
         registerKeybind(new Keybind("voxeltest.gui.selectblock", "Select Block GUI", Input.Keys.E, new Runnable() {
             @Override
             void run() {
-                if(game.world != null  && game.currentScreen == game.hud) {
+                if (game.world != null && game.currentScreen == game.hud) {
                     game.addToGLQueue(new Runnable() {
                         @Override
                         void run() {
@@ -51,7 +47,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
         registerKeybind(new Keybind("voxeltest.gui.back", "Back", Input.Keys.ESCAPE, new Runnable() {
             @Override
             void run() {
-                if(game.world != null) {
+                if (game.world != null) {
                     if (game.currentScreen != game.hud) {
                         game.addToGLQueue(new Runnable() {
                             @Override
@@ -69,8 +65,8 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        for(Keybind kb : keybindList) {
-            if(kb.key == keycode) {
+        for (Keybind kb : keybindList) {
+            if (kb.key == keycode) {
                 kb.press()
             }
         }
@@ -92,7 +88,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
         game.currentScreen.onMouseClick(button)
         switch (button) {
             case 0:
-                if(game.world != null) {
+                if (game.world != null) {
                     if (game.getSelectedBlock() != null && game.currentScreen == game.hud) {
                         if (game.isRemote() && game.serverChanCtx != null) {
                             game.serverChanCtx.writeAndFlush(new PacketBreakBlock(
@@ -104,7 +100,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
                 }
                 break;
             case 1:
-                if(game.world != null) {
+                if (game.world != null) {
                     if (game.getNextPlacePos() != null && game.currentScreen == game.hud) {
                         if (game.isRemote() && game.serverChanCtx != null) {
                             game.serverChanCtx.writeAndFlush(new PacketPlaceBlock(

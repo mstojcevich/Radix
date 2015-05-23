@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import groovy.lang.Closure;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.api.events.render.EventChunkRender;
@@ -122,13 +121,14 @@ public class Chunk implements IChunk {
 
         final Block[][][] transparent = new Block[size][height][size];
         final Block[][][] opaque = new Block[size][height][size];
-        eachBlock(new Closure<Block>(this, this) {
-            public Block doCall(Block it, int x, int y, int z) {
-                if (it != null) {
-                    if (it.isTransparent()) return transparent[x][y][z] = it;
-                    else return opaque[x][y][z] = it;
-                } else {
-                    return null;
+        eachBlock(new EachBlockCallee() {
+            @Override
+            public void call(Block block, int x, int y, int z) {
+                if (block != null) {
+                    if (block.isTransparent())
+                        transparent[x][y][z] = block;
+                    else
+                        opaque[x][y][z] = block;
                 }
             }
         });
@@ -177,18 +177,15 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void eachBlock(Closure action) {
+    public void eachBlock(EachBlockCallee callee) {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < size; z++) {
                     Block blk = VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
-                    action.call(blk, x, y, z);
+                    callee.call(blk, x, y, z);
                 }
-
             }
-
         }
-
     }
 
     public Block getBlockAtPosition(Vec3i position) {

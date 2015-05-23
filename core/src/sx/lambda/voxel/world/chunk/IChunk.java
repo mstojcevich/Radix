@@ -1,7 +1,6 @@
 package sx.lambda.voxel.world.chunk;
 
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import groovy.lang.Closure;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
@@ -39,7 +38,7 @@ public interface IChunk extends Serializable {
 
     int[][][] blocksToIdInt();
 
-    void eachBlock(Closure action);
+    void eachBlock(EachBlockCallee action);
 
     void setSunlight(int x, int y, int z, int level);
 
@@ -50,5 +49,9 @@ public interface IChunk extends Serializable {
     IWorld getWorld();
 
     void cleanup();
+
+    interface EachBlockCallee {
+        void call(Block block, int x, int y, int z);
+    }
 
 }

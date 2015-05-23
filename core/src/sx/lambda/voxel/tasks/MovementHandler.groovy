@@ -109,13 +109,13 @@ class MovementHandler implements RepeatedTask {
                     }
 
                     if (world != null && player != null) {
-                        int playerX = (int)Math.floor(player.position.x);
-                        int playerZ = (int)Math.floor(player.position.z);
+                        int playerX = MathUtils.floor(player.position.x);
+                        int playerZ = MathUtils.floor(player.position.z);
                         IChunk playerChunk = world.getChunkAtPosition(playerX, playerZ);
                         player.setOnGround(false)
                         if (playerChunk != null) {
                             Block blockAtPlayer = VoxelGameAPI.instance.getBlockByID(
-                                    playerChunk.getBlockIdAtPosition(playerX, (int)Math.floor(player.position.y-0.2f), playerZ))
+                                    playerChunk.getBlockIdAtPosition(playerX, MathUtils.floor((float)player.position.y-0.2f), playerZ))
                             if (blockAtPlayer != null) {
                                 if (blockAtPlayer.isSolid()) {
                                     player.setOnGround(true)
@@ -154,7 +154,7 @@ class MovementHandler implements RepeatedTask {
         int newX = MathUtils.floor((float)e.getPosition().getX() + deltaX)
         int newY = MathUtils.floor((float)e.getPosition().getY() - 0.1f + deltaY)
         int newY2 = MathUtils.floor((float)e.getPosition().getY() + e.getHeight() - 0.1f + deltaY)
-        int newZ = MathUtils.floor((int)e.getPosition().getZ() + deltaZ)
+        int newZ = MathUtils.floor((float)e.getPosition().getZ() + deltaZ)
 
         return checkCollision(newX, newY2, newZ) || checkCollision(newX, newY, newZ);
     }

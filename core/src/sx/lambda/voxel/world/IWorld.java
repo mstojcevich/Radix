@@ -55,9 +55,17 @@ public interface IWorld {
 
     ChunkGenerator getChunkGen();
 
-    void addToSunlightQueue(Vec3i block);
+    /**
+     * Add a position to the sunlight queue
+     * @param pos int[] {x, y, z}
+     */
+    void addToSunlightQueue(int[] pos);
 
-    void addToSunlightRemovalQueue(Vec3i block);
+    /**
+     * Add a position to the sunlight removal queue
+     * @param pos int[] {x, y, z}
+     */
+    void addToSunlightRemovalQueue(int[] pos);
 
     void processLightQueue();
 

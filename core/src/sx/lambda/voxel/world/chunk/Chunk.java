@@ -231,85 +231,75 @@ public class Chunk implements IChunk {
     }
 
     private void addNeighborsToSunlightQueue(int x, int y, int z) {// X Y and Z are relative coords, not world coords
-        Vec3i pos = new Vec3i(startPosition.x + x, startPosition.y + y, startPosition.z + z);
-        Vec3i negXNeighborPos = pos.translate(-1, 0, 0);
-        Vec3i posXNeighborPos = pos.translate(1, 0, 0);
-        Vec3i negZNeighborPos = pos.translate(0, 0, -1);
-        Vec3i posZNeighborPos = pos.translate(0, 0, 1);
-        Vec3i posYNeighborPos = pos.translate(0, 1, 0);
-        IChunk negXNeighborChunk = parentWorld.getChunkAtPosition(negXNeighborPos);
-        IChunk posXNeighborChunk = parentWorld.getChunkAtPosition(posXNeighborPos);
-        IChunk negZNeighborChunk = parentWorld.getChunkAtPosition(negZNeighborPos);
-        IChunk posZNeighborChunk = parentWorld.getChunkAtPosition(posZNeighborPos);
+        x += startPosition.x;
+        z += startPosition.z;
+        int negX = x-1;
+        int posX = x+1;
+        int negZ = z-1;
+        int posZ = z+1;
+        int posY = y+1;
+        IChunk negXNeighborChunk = parentWorld.getChunkAtPosition(negX, z);
+        IChunk posXNeighborChunk = parentWorld.getChunkAtPosition(posX, z);
+        IChunk negZNeighborChunk = parentWorld.getChunkAtPosition(x, negZ);
+        IChunk posZNeighborChunk = parentWorld.getChunkAtPosition(x, posZ);
 
         if (negXNeighborChunk != null) {
-            int negXSunlight = negXNeighborChunk.getSunlight(negXNeighborPos.x, negXNeighborPos.y, negXNeighborPos.z);
+            int negXSunlight = negXNeighborChunk.getSunlight(negX, y, z);
             if (negXSunlight > 1) {
-                Block bl = negXNeighborChunk.getBlockAtPosition(negXNeighborPos);
+                Block bl = negXNeighborChunk.getBlockAtPosition(negX, y, z);
                 if (bl == null) {
-                    parentWorld.addToSunlightQueue(negXNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{negX, y, z});
                 } else if (bl.isTransparent()) {
-                    parentWorld.addToSunlightQueue(negXNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{negX, y, z});
                 }
-
             }
-
         }
 
         if (posXNeighborChunk != null) {
-            int posXSunlight = posXNeighborChunk.getSunlight(posXNeighborPos.x, posXNeighborPos.y, posXNeighborPos.z);
+            int posXSunlight = posXNeighborChunk.getSunlight(posX, y, z);
             if (posXSunlight > 1) {
-                Block bl = posXNeighborChunk.getBlockAtPosition(posXNeighborPos);
+                Block bl = posXNeighborChunk.getBlockAtPosition(posX, y, z);
                 if (bl == null) {
-                    parentWorld.addToSunlightQueue(posXNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{posX, y, z});
                 } else if (bl.isTransparent()) {
-                    parentWorld.addToSunlightQueue(posXNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{posX, y, z});
                 }
-
             }
-
         }
 
         if (negZNeighborChunk != null) {
-            int negZSunlight = negZNeighborChunk.getSunlight(negZNeighborPos.x, negZNeighborPos.y, negZNeighborPos.z);
+            int negZSunlight = negZNeighborChunk.getSunlight(x, y, negZ);
             if (negZSunlight > 1) {
-                Block bl = negZNeighborChunk.getBlockAtPosition(negZNeighborPos);
+                Block bl = negZNeighborChunk.getBlockAtPosition(x, y, negZ);
                 if (bl == null) {
-                    parentWorld.addToSunlightQueue(negZNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{x, y, negZ});
                 } else if (bl.isTransparent()) {
-                    parentWorld.addToSunlightQueue(negZNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{x, y, negZ});
                 }
-
             }
-
         }
 
         if (posZNeighborChunk != null) {
-            int posZSunlight = posZNeighborChunk.getSunlight(posZNeighborPos.x, posZNeighborPos.y, posZNeighborPos.z);
+            int posZSunlight = posZNeighborChunk.getSunlight(x, y, posZ);
             if (posZSunlight > 1) {
-                Block bl = posZNeighborChunk.getBlockAtPosition(posZNeighborPos);
+                Block bl = posZNeighborChunk.getBlockAtPosition(x, y, posZ);
                 if (bl == null) {
-                    parentWorld.addToSunlightQueue(posZNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{x, y, posZ});
                 } else if (bl.isTransparent()) {
-                    parentWorld.addToSunlightQueue(posZNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{x, y, posZ});
                 }
-
             }
-
         }
 
-
         if (y < height - 1) {
-            Block posYBlock = VoxelGameAPI.instance.getBlockByID(blockList[x][y + 1][z]);
+            Block posYBlock = VoxelGameAPI.instance.getBlockByID(blockList[x - startPosition.x][posY][z - startPosition.z]);
             if (getSunlight(x, y + 1, z) > 1) {
                 if (posYBlock == null) {
-                    parentWorld.addToSunlightQueue(posYNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{x, posY, z});
                 } else if (posYBlock.isTransparent()) {
-                    parentWorld.addToSunlightQueue(posYNeighborPos);
+                    parentWorld.addToSunlightQueue(new int[]{x, posY, z});
                 }
-
             }
-
         }
 
     }
@@ -337,7 +327,7 @@ public class Chunk implements IChunk {
         }
 
 
-        getWorld().addToSunlightRemovalQueue(new Vec3i(x + startPosition.x, y + startPosition.y, z + startPosition.z));
+        getWorld().addToSunlightRemovalQueue(new int[]{x + startPosition.x, y + startPosition.y, z + startPosition.z});
     }
 
     @Override
@@ -395,7 +385,7 @@ public class Chunk implements IChunk {
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
                 sunlightLevels[x][height - 1][z] = 16;
-                parentWorld.addToSunlightQueue(new Vec3i(startPosition.x + x, height - 1, startPosition.z + z));
+                parentWorld.addToSunlightQueue(new int[]{startPosition.x + x, height - 1, startPosition.z + z});
             }
 
         }

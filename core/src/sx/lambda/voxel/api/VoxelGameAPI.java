@@ -83,7 +83,6 @@ public class VoxelGameAPI {
 
         }
 
-
         this.registeredBlocks.add(b);
         this.registeredBlockArray[b.getID()] = b;
         highestID = Math.max(highestID, b.getID());
@@ -94,6 +93,7 @@ public class VoxelGameAPI {
     }
 
     public Block getBlockByID(int id) {
+        if(id <= 0)return null;
         return registeredBlockArray[id];
     }
 

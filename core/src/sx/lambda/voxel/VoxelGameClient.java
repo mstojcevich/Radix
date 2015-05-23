@@ -73,7 +73,7 @@ public class VoxelGameClient extends ApplicationAdapter {
     private PerspectiveCamera camera;
     private OrthographicCamera hudCamera;
     private SpriteBatch guiBatch;
-    private RepeatedTask[] handlers = new RepeatedTask[]{new WorldLoader(this), new MovementHandler(this), new EntityUpdater(this), new LightUpdater(this), new RotationHandler(this)};
+    private RepeatedTask[] handlers = new RepeatedTask[]{new WorldLoader(this), new MovementHandler(this), new EntityUpdater(this), new LightUpdater(this)};
 
     public static VoxelGameClient getInstance() {
         return theGame;

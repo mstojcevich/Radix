@@ -512,21 +512,4 @@ public class Chunk implements IChunk {
         return blockList[x][y][z];
     }
 
-    @Override
-    public Block getBlockAtPosition(int x, int y, int z) {
-        x = x % size;
-        z = z % size;
-        if (x < 0) {
-            x += size;
-        }
-
-        if (z < 0) {
-            z += size;
-        }
-        
-        if (y > height - 1) return null;
-        if (y < 0) return null;
-        return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
-    }
-
 }

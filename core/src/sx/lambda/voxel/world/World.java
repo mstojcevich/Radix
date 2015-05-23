@@ -131,8 +131,6 @@ public class World implements IWorld {
         for (IChunk c : this.chunkList) {
             c.render(modelBatch);
         }
-        modelBatch.end();
-        modelBatch.begin(VoxelGameClient.getInstance().getCamera());
         for (IChunk c : this.chunkList) {
             c.renderWater(modelBatch);
         }

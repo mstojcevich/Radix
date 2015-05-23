@@ -77,7 +77,8 @@ public class GreedyMesher implements Mesher {
             float[][] eastLightLevels = new float[voxels[0][0].length][voxels[0].length];
             for (int z = 0; z < voxels[0][0].length; z++) {
                 for (int y = 0; y < voxels[0].length; y++) {
-                    if (voxels[x][y][z] == null) continue;
+                    if(voxels[x][y][z] == null) continue;
+
                     Vec3i westNeighborPos = chunk.getStartPosition().translate(x - 1, y, z);
                     IChunk westNeighborChunk = chunk.getWorld().getChunkAtPosition(westNeighborPos);
                     if (westNeighborChunk != null) {
@@ -90,8 +91,8 @@ public class GreedyMesher implements Mesher {
                             westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborPos.x, westNeighborPos.y, westNeighborPos.z);
                         }
                     } else {
-                        westBlocks[z][y] = voxels[x][y][z];
                         westLightLevels[z][y] = 1;
+                        continue;
                     }
 
                     Vec3i eastNeighborPos = chunk.getStartPosition().translate(x + 1, y, z);
@@ -106,8 +107,8 @@ public class GreedyMesher implements Mesher {
                             eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborPos.x, eastNeighborPos.y, eastNeighborPos.z);
                         }
                     } else {
-                        eastBlocks[z][y] = voxels[x][y][z];
                         eastLightLevels[z][y] = 1;
+                        continue;
                     }
                 }
             }
@@ -140,8 +141,8 @@ public class GreedyMesher implements Mesher {
                             northLightLevels[x][y] = northNeighborChunk.getLightLevel(northNeighborPos.x, northNeighborPos.y, northNeighborPos.z);
                         }
                     } else {
-                        northBlocks[x][y] = voxels[x][y][z];
                         northLightLevels[x][y] = 1;
+                        continue;
                     }
 
                     if (southNeighborChunk != null) {
@@ -154,8 +155,8 @@ public class GreedyMesher implements Mesher {
                             southLightLevels[x][y] = southNeighborChunk.getLightLevel(southNeighborPos.x, southNeighborPos.y, southNeighborPos.z);
                         }
                     } else {
-                        southBlocks[x][y] = voxels[x][y][z];
                         southLightLevels[x][y] = 1;
+                        continue;
                     }
                 }
             }

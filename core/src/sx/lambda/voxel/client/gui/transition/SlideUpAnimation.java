@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.client.gui.GuiScreen;
 
 import static com.badlogic.gdx.graphics.GL20.*;
@@ -36,12 +37,11 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
         super.init();
         fbo = new FrameBuffer(Pixmap.Format.RGBA4444, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
         fboTex = fbo.getColorBufferTexture();
-        cam = new OrthographicCamera();
-        cam.update();
-        // TODO apply cam
         Gdx.gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Gdx.gl.glEnable(GL_BLEND);
         SpriteBatch batch = new SpriteBatch();
+        batch.setProjectionMatrix(VoxelGameClient.getInstance().getHudCamera().combined);
+        fbo.bind();
         batch.begin();
         currentScreen.render(false, batch);
         batch.end();
@@ -49,11 +49,10 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
     }
 
     @Override
-    public void render() {
+    public void render(SpriteBatch guiBatch) {
         float percentageDone = (float) getTimeSinceStart() / (float) getLength();
-        //TODO draw the FBO
-        //TODO implement
-        //fbo.drawTexture(VoxelGameClient.getInstance().getTextureManager(), 0, (int)(Gdx.graphics.getWidth()*percentageDone), Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        guiBatch.draw(fboTex, 0, Gdx.graphics.getHeight() + Gdx.graphics.getHeight()*percentageDone, Gdx.graphics.getWidth(), -Gdx.graphics.getHeight());
     }
 
     @Override

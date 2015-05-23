@@ -166,6 +166,14 @@ public class VoxelGameClient extends ApplicationAdapter {
                 currentScreen.render(world != null, guiBatch);
             }
 
+            if(transitionAnimation != null) {
+                transitionAnimation.render(guiBatch);
+                if(transitionAnimation.isFinished()) {
+                    transitionAnimation.finish();
+                    transitionAnimation = null;
+                }
+            }
+
             guiBatch.end();
         } catch (Exception e) {
             done = true;

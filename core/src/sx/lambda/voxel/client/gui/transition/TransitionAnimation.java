@@ -1,5 +1,7 @@
 package sx.lambda.voxel.client.gui.transition;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+
 public interface TransitionAnimation {
 
     /**
@@ -10,7 +12,7 @@ public interface TransitionAnimation {
     /**
      * Render the animation on the screen
      */
-    void render();
+    void render(SpriteBatch guiBatch);
 
     /**
      * Clean up transition animation resources

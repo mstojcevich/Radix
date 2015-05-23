@@ -22,6 +22,7 @@ public interface IChunk extends Serializable {
 
     int getBlockIdAtPosition(int x, int y, int z);
 
+    Block getBlockAtPosition(int x, int y, int z);
     Block getBlockAtPosition(Vec3i position);
 
     void removeBlock(Vec3i Vec3i);

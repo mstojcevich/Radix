@@ -108,13 +108,13 @@ class MovementHandler implements RepeatedTask {
                     }
 
                     if (world != null && player != null) {
-                        int playerX = (int)(player.position.x);
-                        int playerZ = (int)(player.position.z);
+                        int playerX = (int)Math.floor(player.position.x);
+                        int playerZ = (int)Math.floor(player.position.z);
                         IChunk playerChunk = world.getChunkAtPosition(playerX, playerZ);
                         player.setOnGround(false)
                         if (playerChunk != null) {
                             Block blockAtPlayer = VoxelGameAPI.instance.getBlockByID(
-                                    playerChunk.getBlockIdAtPosition(playerX, (int)player.position.y, playerZ))
+                                    playerChunk.getBlockIdAtPosition(playerX, (int)Math.floor(player.position.y-0.2f), playerZ))
                             if (blockAtPlayer != null) {
                                 if (blockAtPlayer.isSolid()) {
                                     player.setOnGround(true)

@@ -175,8 +175,8 @@ class GameRenderer implements Renderer {
         headingRender.setPosition(Gdx.graphics.width - headingGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
-        int playerX = (int)game.player.position.x;
-        int playerZ = (int)game.player.position.z;
+        int playerX = (int)Math.floor(game.player.position.x);
+        int playerZ = (int)Math.floor(game.player.position.z);
         IChunk playerChunk = game.world.getChunkAtPosition(playerX, playerZ)
         if (playerChunk != null) {
             String llStr = String.format("Light Level @ Feet: "

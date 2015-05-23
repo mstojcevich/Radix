@@ -108,6 +108,8 @@ public class World implements IWorld {
 
     @Override
     public void render() {
+        assert !server;
+
         if (modelBatch == null) {
             modelBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
             blockMaterial = new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()));
@@ -115,36 +117,32 @@ public class World implements IWorld {
                     new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
         }
 
-        if (!server) {
-            if (!updatingLight && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
-                processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
-            }
-            for (IChunk c : chunksToRerender) {
-                c.rerender();
-                chunksToRerender.remove(c);
-            }
-
-            long renderStartNS = System.nanoTime();
-
-            modelBatch.begin(VoxelGameClient.getInstance().getCamera());
-            for (IChunk c : this.chunkList) {
-                c.render(modelBatch);
-            }
-            modelBatch.end();
-            modelBatch.begin(VoxelGameClient.getInstance().getCamera());
-            for (IChunk c : this.chunkList) {
-                c.renderWater(modelBatch);
-            }
-            modelBatch.end();
-            if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
-                VoxelGameClient.getInstance().numChunkRenders = 0;
-                VoxelGameClient.getInstance().chunkRenderTimes = 0;
-            }
-            VoxelGameClient.getInstance().chunkRenderTimes += (int) (System.nanoTime() - renderStartNS);
-            VoxelGameClient.getInstance().numChunkRenders++;
-        } else {
-            System.err.println("Why the hell is the server running render?");
+        if (!updatingLight && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
+            processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
         }
+        for (IChunk c : chunksToRerender) {
+            c.rerender();
+            chunksToRerender.remove(c);
+        }
+
+        long renderStartNS = System.nanoTime();
+
+        modelBatch.begin(VoxelGameClient.getInstance().getCamera());
+        for (IChunk c : this.chunkList) {
+            c.render(modelBatch);
+        }
+        modelBatch.end();
+        modelBatch.begin(VoxelGameClient.getInstance().getCamera());
+        for (IChunk c : this.chunkList) {
+            c.renderWater(modelBatch);
+        }
+        modelBatch.end();
+        if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
+            VoxelGameClient.getInstance().numChunkRenders = 0;
+            VoxelGameClient.getInstance().chunkRenderTimes = 0;
+        }
+        VoxelGameClient.getInstance().chunkRenderTimes += (int) (System.nanoTime() - renderStartNS);
+        VoxelGameClient.getInstance().numChunkRenders++;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package sx.lambda.voxel.entity
 
 import com.badlogic.gdx.graphics.g3d.Model
+import com.badlogic.gdx.math.MathUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.tasks.MovementHandler
 import sx.lambda.voxel.world.IWorld
@@ -60,9 +61,9 @@ public abstract class LivingEntity extends Entity implements Serializable {
     }
 
     public int getBlockInFeet(IWorld world) {
-        IChunk chunk = world.getChunkAtPosition((int)Math.floor(position.x), (int)Math.floor(position.z))
+        IChunk chunk = world.getChunkAtPosition(MathUtils.floor(position.x), MathUtils.floor(position.z))
         if (chunk != null) {
-            return chunk.getBlockIdAtPosition((int)Math.floor(position.x), (int)Math.floor(position.y), (int)Math.floor(position.z))
+            return chunk.getBlockIdAtPosition(MathUtils.floor(position.x), MathUtils.floor(position.y), MathUtils.floor(position.z))
         } else {
             return 0
         }

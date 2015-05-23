@@ -3,6 +3,7 @@ package sx.lambda.voxel.client.gui.screens
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.math.MathUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
@@ -42,7 +43,7 @@ class IngameHUD implements GuiScreen {
         float centerY = Gdx.graphics.getHeight() / 2f as float
         int crosshairSize = 32
         float halfCrosshairSize = crosshairSize / 2f as float
-        this.drawTexture(guiBatch, 0, (int) Math.round(centerX - halfCrosshairSize), (int) Math.round(centerY + halfCrosshairSize), crosshairSize, crosshairSize)
+        this.drawTexture(guiBatch, 0, MathUtils.round((float)centerX - halfCrosshairSize), MathUtils.round((float)centerY + halfCrosshairSize), crosshairSize, crosshairSize)
     }
 
     @Override

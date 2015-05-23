@@ -2,6 +2,7 @@ package sx.lambda.voxel.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.IntMap;
 import io.netty.util.internal.ConcurrentSet;
 import sx.lambda.voxel.VoxelGameClient;
@@ -149,11 +150,12 @@ public class World implements IWorld {
 
     @Override
     public int getChunkPosition(float value) {
-        int subtraction = (int) (value % CHUNK_SIZE);
+        // TODO changed (int) to MathUtils.floor, might cause issues. If it doesn't, remove this TODO.
+        int subtraction = MathUtils.floor(value % CHUNK_SIZE);
         if (value < 0 && subtraction != 0) {
             subtraction = CHUNK_SIZE + subtraction;
         }
-        return (int) (value - subtraction);
+        return MathUtils.floor(value - subtraction);
     }
 
     @Override

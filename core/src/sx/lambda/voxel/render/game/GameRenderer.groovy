@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFontCache
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Frustum
+import com.badlogic.gdx.math.MathUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.VoxelGameAPI
@@ -181,12 +182,12 @@ class GameRenderer implements Renderer {
         headingRender.setPosition(Gdx.graphics.width - headingGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
-        int playerX = (int)Math.floor(game.player.position.x);
-        int playerZ = (int)Math.floor(game.player.position.z);
+        int playerX = MathUtils.floor(game.player.position.x);
+        int playerZ = MathUtils.floor(game.player.position.z);
         IChunk playerChunk = game.world.getChunkAtPosition(playerX, playerZ)
         if (playerChunk != null) {
             String llStr = String.format("Light Level @ Feet: "
-                    + playerChunk.getSunlight(playerX, (int)game.player.position.y, playerZ))
+                    + playerChunk.getSunlight(playerX, MathUtils.floor(game.player.position.y), playerZ))
             GlyphLayout llGl = lightlevelRender.setText(llStr, 0, 0)
             lightlevelRender.setPosition(Gdx.graphics.width - llGl.width, (float) (Gdx.graphics.height - currentHeight))
             currentHeight += debugTextRenderer.getLineHeight()

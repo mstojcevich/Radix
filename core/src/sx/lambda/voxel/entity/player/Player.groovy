@@ -3,6 +3,7 @@ package sx.lambda.voxel.entity.player
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader
+import com.badlogic.gdx.math.MathUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
@@ -74,11 +75,11 @@ class Player extends LivingEntity implements Serializable {
     }
 
     public int getBlockInHead(IWorld world) {
-        int x = (int)Math.floor(getPosition().x);
-        int z = (int)Math.floor(getPosition().z);
+        int x = MathUtils.floor(getPosition().x);
+        int z = MathUtils.floor(getPosition().z);
         IChunk chunk = world.getChunkAtPosition(x, z)
         if (chunk != null) {
-            return chunk.getBlockIdAtPosition(x, (int)(Math.floor(getPosition().y + HEIGHT)), z)
+            return chunk.getBlockIdAtPosition(x, MathUtils.floor(getPosition().y + HEIGHT), z)
         } else {
             return 0
         }

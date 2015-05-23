@@ -272,7 +272,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         float deltaY = (float) (Math.sin(Math.toRadians(pitch)));
         float deltaZ = (float) (-Math.cos(Math.toRadians(pitch)) * Math.cos(Math.toRadians(yaw)));
 
-        plotter.plot(new Vector3(x, y, z), new Vector3(deltaX, deltaY, deltaZ), (int) Math.ceil((double) reach * reach));
+        plotter.plot(new Vector3(x, y, z), new Vector3(deltaX, deltaY, deltaZ), MathUtils.ceil(reach * reach));
         Vec3i last = null;
         while (plotter.next()) {
             Vec3i v = plotter.get();

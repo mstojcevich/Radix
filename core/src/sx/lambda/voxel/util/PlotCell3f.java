@@ -1,5 +1,6 @@
 package sx.lambda.voxel.util;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
 interface Plot<T> {
@@ -79,9 +80,9 @@ public class PlotCell3f implements Plot<Vec3i> {
     public void reset() {
         plotted = 0;
 
-        index.x = (int) Math.floor((pos.x - off.x) / size.x);
-        index.y = (int) Math.floor((pos.y - off.y) / size.y);
-        index.z = (int) Math.floor((pos.z - off.z) / size.z);
+        index.x = MathUtils.floor((pos.x - off.x) / size.x);
+        index.y = MathUtils.floor((pos.y - off.y) / size.y);
+        index.z = MathUtils.floor((pos.z - off.z) / size.z);
 
         float ax = index.x * size.x + off.x;
         float ay = index.y * size.y + off.y;

@@ -17,6 +17,8 @@
  */
 package sx.lambda.voxel.util;
 
+import com.badlogic.gdx.math.MathUtils;
+
 import java.io.Serializable;
 
 public class Vec3i implements Serializable {
@@ -79,7 +81,7 @@ public class Vec3i implements Serializable {
      * @return {@code this}
      */
     public Vec3i scale(float f) {
-        set((int) Math.floor(x * f), (int) Math.floor(y * f), (int) Math.floor(z * f));
+        set(MathUtils.floor(x * f), MathUtils.floor(y * f), MathUtils.floor(z * f));
         return this;
     }
 

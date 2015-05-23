@@ -1,5 +1,6 @@
 package sx.lambda.voxel.tasks
 
+import com.badlogic.gdx.math.MathUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.entity.EntityPosition
@@ -25,11 +26,11 @@ class WorldLoader implements RepeatedTask {
                     EntityPosition playerPos = game.getPlayer().getPosition()
                     if (currentChunk == null) {
                         game.getWorld().loadChunks(playerPos, viewDistance)
-                        currentChunk = game.getWorld().getChunkAtPosition((int) playerPos.getX(), (int) playerPos.getZ());
+                        currentChunk = game.getWorld().getChunkAtPosition(MathUtils.floor(playerPos.getX()), MathUtils.floor(playerPos.getZ()));
                     } else {
                         if (Math.abs(currentChunk.getStartPosition().x - game.getPlayer().getPosition().getX()) > game.getWorld().getChunkSize()
                                 || Math.abs(currentChunk.getStartPosition().z - game.getPlayer().getPosition().getZ()) > game.getWorld().getChunkSize()) {
-                            currentChunk = game.getWorld().getChunkAtPosition((int) playerPos.getX(), (int) playerPos.getZ());
+                            currentChunk = game.getWorld().getChunkAtPosition(MathUtils.floor(playerPos.getX()), MathUtils.floor(playerPos.getZ()));
                             game.getWorld().loadChunks(playerPos, viewDistance)
                         }
                     }

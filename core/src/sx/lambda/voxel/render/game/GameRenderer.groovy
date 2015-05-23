@@ -196,7 +196,7 @@ class GameRenderer implements Renderer {
     }
 
     private void updateRotation() {
-        if (game.world != null || game.player != null) {
+        if ((game.world != null || game.player != null) && (game.currentScreen == null || game.currentScreen == game.hud)) {
             float deltaYaw = Gdx.input.getDeltaX() * mouseSensitivity;
             float deltaPitch = -Gdx.input.getDeltaY() * mouseSensitivity;
 

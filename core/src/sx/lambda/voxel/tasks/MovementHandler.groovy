@@ -150,10 +150,10 @@ class MovementHandler implements RepeatedTask {
     }
 
     public boolean checkCollision(LivingEntity e, float deltaX, float deltaY, float deltaZ) {
-        int newX = (int) (e.getPosition().getX() + deltaX)
-        int newY = (int) (e.getPosition().getY() - 0.1 + deltaY)
-        int newY2 = (int) (e.getPosition().getY() + e.getHeight() - 0.1 + deltaY)
-        int newZ = (int) (e.getPosition().getZ() + deltaZ)
+        int newX = (int) Math.floor(e.getPosition().getX() + deltaX)
+        int newY = (int) Math.floor(e.getPosition().getY() - 0.1 + deltaY)
+        int newY2 = (int) Math.floor(e.getPosition().getY() + e.getHeight() - 0.1 + deltaY)
+        int newZ = (int) Math.floor(e.getPosition().getZ() + deltaZ)
 
         IChunk newChunk = game.getWorld().getChunkAtPosition(newX, newZ);
 

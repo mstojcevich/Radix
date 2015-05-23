@@ -5,11 +5,11 @@ import com.badlogic.gdx.Input.Keys
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
+import sx.lambda.voxel.api.VoxelGameAPI
 import sx.lambda.voxel.block.Block
 import sx.lambda.voxel.entity.EntityPosition
 import sx.lambda.voxel.entity.LivingEntity
 import sx.lambda.voxel.entity.player.Player
-import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.chunk.IChunk
 
@@ -108,15 +108,13 @@ class MovementHandler implements RepeatedTask {
                     }
 
                     if (world != null && player != null) {
-                        Vec3i playerPosition = new Vec3i(
-                                (int) Math.floor(player.getPosition().getX()),
-                                (int) Math.floor(player.getPosition().getY() - 0.2f),
-                                (int) Math.floor(player.getPosition().getZ())
-                        );
-                        IChunk playerChunk = world.getChunkAtPosition(playerPosition);
+                        int playerX = (int)(player.position.x);
+                        int playerZ = (int)(player.position.z);
+                        IChunk playerChunk = world.getChunkAtPosition(playerX, playerZ);
                         player.setOnGround(false)
                         if (playerChunk != null) {
-                            Block blockAtPlayer = playerChunk.getBlockAtPosition(playerPosition)
+                            Block blockAtPlayer = VoxelGameAPI.instance.getBlockByID(
+                                    playerChunk.getBlockIdAtPosition(playerX, (int)player.position.y, playerZ))
                             if (blockAtPlayer != null) {
                                 if (blockAtPlayer.isSolid()) {
                                     player.setOnGround(true)
@@ -152,22 +150,16 @@ class MovementHandler implements RepeatedTask {
     }
 
     public boolean checkCollision(LivingEntity e, float deltaX, float deltaY, float deltaZ) {
-        Vec3i newPosition = new Vec3i(
-                (int) Math.floor(e.getPosition().getX() + deltaX),
-                (int) Math.floor(e.getPosition().getY() - 0.1 + deltaY),
-                (int) Math.floor(e.getPosition().getZ() + deltaZ)
-        );
-        Vec3i newPosition2 = new Vec3i(
-                (int) Math.floor(e.getPosition().getX() + deltaX),
-                (int) Math.floor(e.getPosition().getY() + e.getHeight() - 0.1 + deltaY),
-                (int) Math.floor(e.getPosition().getZ() + deltaZ)
-        );
-        IChunk newChunk = game.getWorld().getChunkAtPosition(newPosition);
-        IChunk newChunk2 = game.getWorld().getChunkAtPosition(newPosition2);
-        if (newChunk2 == null) return true
+        int newX = (int) (e.getPosition().getX() + deltaX)
+        int newY = (int) (e.getPosition().getY() - 0.1 + deltaY)
+        int newY2 = (int) (e.getPosition().getY() + e.getHeight() - 0.1 + deltaY)
+        int newZ = (int) (e.getPosition().getZ() + deltaZ)
+
+        IChunk newChunk = game.getWorld().getChunkAtPosition(newX, newZ);
+
         if (newChunk == null) return true
-        Block block1 = newChunk.getBlockAtPosition(newPosition);
-        Block block2 = newChunk2.getBlockAtPosition(newPosition2);
+        Block block1 = VoxelGameAPI.instance.getBlockByID(newChunk.getBlockIdAtPosition(newX, newY, newZ));
+        Block block2 = VoxelGameAPI.instance.getBlockByID(newChunk.getBlockIdAtPosition(newX, newY2, newZ));
 
         boolean passed = true
         if (block1 != null) {

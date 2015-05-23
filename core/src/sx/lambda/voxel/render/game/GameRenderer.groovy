@@ -13,7 +13,6 @@ import sx.lambda.voxel.api.events.render.EventEntityRender
 import sx.lambda.voxel.api.events.render.EventPostWorldRender
 import sx.lambda.voxel.entity.Entity
 import sx.lambda.voxel.render.Renderer
-import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.chunk.IChunk
 
 import java.text.DecimalFormat
@@ -176,8 +175,7 @@ class GameRenderer implements Renderer {
         headingRender.setPosition(Gdx.graphics.width - headingGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
-        Vec3i playerPosVec = new Vec3i(Math.floor(game.player.position.x) as int, Math.floor(game.player.position.y) as int, Math.floor(game.player.position.z) as int)
-        IChunk playerChunk = game.world.getChunkAtPosition(playerPosVec)
+        IChunk playerChunk = game.world.getChunkAtPosition((int)(game.player.position.x), (int)(game.player.position.z))
         if (playerChunk != null) {
             String llStr = String.format("Light Level @ Feet: " + playerChunk.getSunlight(playerPosVec.x, playerPosVec.y, playerPosVec.z))
             GlyphLayout llGl = lightlevelRender.setText(llStr, 0, 0)

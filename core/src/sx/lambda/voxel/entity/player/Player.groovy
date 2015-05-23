@@ -10,7 +10,6 @@ import sx.lambda.voxel.entity.EntityPosition
 import sx.lambda.voxel.entity.EntityRotation
 import sx.lambda.voxel.entity.LivingEntity
 import sx.lambda.voxel.net.packet.shared.PacketPlayerPosition
-import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.chunk.IChunk
 
@@ -75,10 +74,11 @@ class Player extends LivingEntity implements Serializable {
     }
 
     public int getBlockInHead(IWorld world) {
-        Vec3i eyePosition = new Vec3i(getPosition().x as int, getPosition().y + HEIGHT as int, getPosition().z as int)
-        IChunk chunk = world.getChunkAtPosition(eyePosition)
+        int x = (int)getPosition().x;
+        int z = (int)getPosition().z;
+        IChunk chunk = world.getChunkAtPosition(x, z)
         if (chunk != null) {
-            return chunk.getBlockIdAtPosition(getPosition().x as int, getPosition().y + HEIGHT as int, getPosition().z as int)
+            return chunk.getBlockIdAtPosition(x, (int)(getPosition().y + HEIGHT), z)
         } else {
             return 0
         }

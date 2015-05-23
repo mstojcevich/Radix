@@ -36,7 +36,7 @@ public abstract class LivingEntity extends Entity implements Serializable {
         if (this.onGround) {
             this.yVelocity = Math.max(this.yVelocity, 0)
         }
-        if (!handler.checkCollision(this, 0, yVelocity, 0)) {
+        if (!handler.checkDeltaCollision(this, 0, yVelocity, 0)) {
             this.getPosition().offset(0, this.yVelocity, 0)
         } else {
             yVelocity = 0

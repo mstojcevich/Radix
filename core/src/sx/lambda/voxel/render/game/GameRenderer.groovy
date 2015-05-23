@@ -95,7 +95,9 @@ class GameRenderer implements Renderer {
     }
 
     private void prepareWorldRender() {
-        updateRotation()
+        if(!game.onAndroid()) {
+            updateRotation()
+        }
 
         if (shouldCalcFrustum()) {
             game.camera.position.set(game.player.position.x, game.player.position.y + game.player.eyeHeight, game.player.position.z)

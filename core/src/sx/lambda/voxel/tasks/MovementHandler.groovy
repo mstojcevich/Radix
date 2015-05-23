@@ -2,6 +2,7 @@ package sx.lambda.voxel.tasks
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.math.MathUtils
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
@@ -58,7 +59,7 @@ class MovementHandler implements RepeatedTask {
                             deltaY = 0
                         }
 
-                        if (!checkCollision(player, deltaX, deltaY, deltaZ)) {
+                        if (!checkDeltaCollision(player, deltaX, deltaY, deltaZ)) {
                             player.getPosition().offset(deltaX, deltaY, deltaZ)
                         }
                     }
@@ -78,7 +79,7 @@ class MovementHandler implements RepeatedTask {
                             deltaY = 0
                         }
 
-                        if (!checkCollision(player, deltaX, deltaY, deltaZ)) {
+                        if (!checkDeltaCollision(player, deltaX, deltaY, deltaZ)) {
                             player.getPosition().offset(deltaX, deltaY, deltaZ)
                         }
                     }
@@ -90,7 +91,7 @@ class MovementHandler implements RepeatedTask {
                         deltaX = (float) (-Math.sin(Math.toRadians(yaw - 90)) * movementMultiplier)
                         deltaZ = (float) (Math.cos(Math.toRadians(yaw - 90)) * movementMultiplier)
 
-                        if (!checkCollision(player, deltaX, 0, deltaZ)) {
+                        if (!checkDeltaCollision(player, deltaX, 0, deltaZ)) {
                             player.getPosition().offset(deltaX, 0, deltaZ)
                         }
                     }
@@ -102,7 +103,7 @@ class MovementHandler implements RepeatedTask {
                         deltaX = (float) (-Math.sin(Math.toRadians(yaw + 90)) * movementMultiplier)
                         deltaZ = (float) (Math.cos(Math.toRadians(yaw + 90)) * movementMultiplier)
 
-                        if (!checkCollision(player, deltaX, 0, deltaZ)) {
+                        if (!checkDeltaCollision(player, deltaX, 0, deltaZ)) {
                             player.getPosition().offset(deltaX, 0, deltaZ)
                         }
                     }
@@ -149,26 +150,24 @@ class MovementHandler implements RepeatedTask {
         }
     }
 
-    public boolean checkCollision(LivingEntity e, float deltaX, float deltaY, float deltaZ) {
-        int newX = (int) Math.floor(e.getPosition().getX() + deltaX)
-        int newY = (int) Math.floor(e.getPosition().getY() - 0.1 + deltaY)
-        int newY2 = (int) Math.floor(e.getPosition().getY() + e.getHeight() - 0.1 + deltaY)
-        int newZ = (int) Math.floor(e.getPosition().getZ() + deltaZ)
+    public boolean checkDeltaCollision(LivingEntity e, float deltaX, float deltaY, float deltaZ) {
+        int newX = MathUtils.floor((float)e.getPosition().getX() + deltaX)
+        int newY = MathUtils.floor((float)e.getPosition().getY() - 0.1f + deltaY)
+        int newY2 = MathUtils.floor((float)e.getPosition().getY() + e.getHeight() - 0.1f + deltaY)
+        int newZ = MathUtils.floor((int)e.getPosition().getZ() + deltaZ)
 
-        IChunk newChunk = game.getWorld().getChunkAtPosition(newX, newZ);
+        return checkCollision(newX, newY2, newZ) || checkCollision(newX, newY, newZ);
+    }
 
+    public boolean checkCollision(int x, int y, int z) {
+        IChunk newChunk = game.getWorld().getChunkAtPosition(x, z);
         if (newChunk == null) return true
-        Block block1 = VoxelGameAPI.instance.getBlockByID(newChunk.getBlockIdAtPosition(newX, newY, newZ));
-        Block block2 = VoxelGameAPI.instance.getBlockByID(newChunk.getBlockIdAtPosition(newX, newY2, newZ));
+
+        Block block = VoxelGameAPI.instance.getBlockByID(newChunk.getBlockIdAtPosition(x, y, z));
 
         boolean passed = true
-        if (block1 != null) {
-            if (block1.isSolid()) {
-                passed = false
-            }
-        }
-        if (block2 != null) {
-            if (block2.isSolid()) {
+        if (block != null) {
+            if (block.isSolid()) {
                 passed = false
             }
         }

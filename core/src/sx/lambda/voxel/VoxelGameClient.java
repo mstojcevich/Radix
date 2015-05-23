@@ -1,5 +1,6 @@
 package sx.lambda.voxel;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -7,7 +8,15 @@ import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
+import com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.netty.channel.ChannelHandlerContext;
 import pw.oxcafebabe.marcusant.eventbus.EventListener;
 import pw.oxcafebabe.marcusant.eventbus.Priority;
@@ -73,7 +82,17 @@ public class VoxelGameClient extends ApplicationAdapter {
     private PerspectiveCamera camera;
     private OrthographicCamera hudCamera;
     private SpriteBatch guiBatch;
-    private RepeatedTask[] handlers = new RepeatedTask[]{new WorldLoader(this), new MovementHandler(this), new EntityUpdater(this), new LightUpdater(this)};
+
+    private MovementHandler movementHandler = new MovementHandler(this);
+    private RepeatedTask[] handlers = new RepeatedTask[]{new WorldLoader(this), movementHandler, new EntityUpdater(this), new LightUpdater(this)};
+
+    // Android specific stuff
+    private boolean android;
+    private Stage androidStage;
+    private Touchpad moveTouchpad, rotateTouchpad;
+    private Skin touchpadSkin;
+    private TouchpadStyle touchpadStyle;
+    private TextureAtlas touchControlsAtlas;
 
     public static VoxelGameClient getInstance() {
         return theGame;
@@ -82,6 +101,8 @@ public class VoxelGameClient extends ApplicationAdapter {
     @Override
     public void create() {
         theGame = this;
+
+        this.android = Gdx.app.getType().equals(Application.ApplicationType.Android);
 
         try {
             VoxelGameAPI.instance.registerBuiltinBlocks();
@@ -106,11 +127,36 @@ public class VoxelGameClient extends ApplicationAdapter {
         this.startHandlers();
     }
 
+    private void setupTouchControls() {
+        // Create touch control element atlas
+        touchControlsAtlas = new TextureAtlas(Gdx.files.internal("textures/gui/touch/touch.atlas"));
+        TextureAtlas.AtlasRegion backgroundRegion = touchControlsAtlas.findRegion("touchpadBackground");
+        TextureAtlas.AtlasRegion knobRegion = touchControlsAtlas.findRegion("touchpadKnob");
+
+        // Create touchpad skin/style
+        touchpadSkin = new Skin();
+        touchpadSkin.add("touchBackground", backgroundRegion, TextureRegion.class);
+        touchpadSkin.add("touchKnob", knobRegion, TextureRegion.class);
+        touchpadStyle = new TouchpadStyle();
+        touchpadStyle.background = touchpadSkin.getDrawable("touchBackground");
+        touchpadStyle.knob = touchpadSkin.getDrawable("touchKnob");
+
+        moveTouchpad = new Touchpad(10, touchpadStyle);
+        moveTouchpad.setBounds(15, 15, 200, 200);
+
+        rotateTouchpad = new Touchpad(10, touchpadStyle);
+        rotateTouchpad.setBounds(1280 - 200 - 15, 15, 200, 200);
+
+        // Setup android stage
+        androidStage = new Stage(new FitViewport(1280, 720));
+        androidStage.addActor(moveTouchpad);
+        androidStage.addActor(rotateTouchpad);
+    }
+
     private void startHandlers() {
         for (RepeatedTask r : handlers) {
             new Thread(r, r.getIdentifier()).start();
         }
-
     }
 
     private void setupOGL() {
@@ -129,6 +175,10 @@ public class VoxelGameClient extends ApplicationAdapter {
         guiBatch = new SpriteBatch();
         guiBatch.setProjectionMatrix(hudCamera.combined);
 
+        if(android) {
+            setupTouchControls();
+        }
+
         Gdx.input.setInputProcessor(new VoxelGameGdxInputHandler(this));
     }
 
@@ -141,6 +191,11 @@ public class VoxelGameClient extends ApplicationAdapter {
             this.serverChanCtx.disconnect();
         }
 
+        if(android) {
+            androidStage.dispose();
+            touchpadSkin.dispose();
+            touchControlsAtlas.dispose();
+        }
     }
 
     @Override
@@ -155,7 +210,6 @@ public class VoxelGameClient extends ApplicationAdapter {
             if (renderer != null) {
                 renderer.render();
             }
-
 
             guiBatch.begin();
             if (renderer != null) {
@@ -175,6 +229,13 @@ public class VoxelGameClient extends ApplicationAdapter {
             }
 
             guiBatch.end();
+
+            if(world != null && android) {
+                updatePositionRotationAndroid();
+                androidStage.act();
+                androidStage.draw();
+            }
+
         } catch (Exception e) {
             done = true;
             e.printStackTrace();
@@ -343,7 +404,7 @@ public class VoxelGameClient extends ApplicationAdapter {
 
         }
 
-        if (screen.equals(hud)) {
+        if (screen.equals(hud) && !android) {
             Gdx.input.setCursorCatched(true);
         } else {
             Gdx.input.setCursorCatched(false);
@@ -380,7 +441,6 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     public void exitWorld() {
-
         addToGLQueue(new Runnable() {
             @Override
             public void run() {
@@ -403,6 +463,9 @@ public class VoxelGameClient extends ApplicationAdapter {
 
         });
 
+        if(android) {
+            Gdx.input.setInputProcessor(new VoxelGameGdxInputHandler(this));
+        }
     }
 
     private void enterWorld(final IWorld world, final boolean remote) {
@@ -429,6 +492,10 @@ public class VoxelGameClient extends ApplicationAdapter {
             }
 
         });
+
+        if(android) {
+            Gdx.input.setInputProcessor(androidStage);
+        }
     }
 
     public Texture getBlockTextureAtlas() throws NotInitializedException {
@@ -469,6 +536,13 @@ public class VoxelGameClient extends ApplicationAdapter {
         camera.viewportWidth = width;
         camera.viewportHeight = height;
         camera.update();
+
+        if(android)
+            androidStage.getViewport().update(width, height, true);
+    }
+
+    public boolean onAndroid() {
+        return android;
     }
 
     public PerspectiveCamera getCamera() {
@@ -478,4 +552,37 @@ public class VoxelGameClient extends ApplicationAdapter {
     public OrthographicCamera getHudCamera() {
         return hudCamera;
     }
+
+    private void updatePositionRotationAndroid() {
+        if(!MathUtils.isZero(rotateTouchpad.getKnobPercentX()) || !MathUtils.isZero(rotateTouchpad.getKnobPercentY())) {
+            float rotMult = 200 * Gdx.graphics.getDeltaTime();
+
+            player.getRotation().offset(rotateTouchpad.getKnobPercentY() * rotMult, rotateTouchpad.getKnobPercentX() * rotMult);
+            gameRenderer.calculateFrustum();
+        }
+
+        if(!MathUtils.isZero(moveTouchpad.getKnobPercentX()) || !MathUtils.isZero(moveTouchpad.getKnobPercentY())) {
+            float posMult = 4.5f * Gdx.graphics.getDeltaTime();
+
+            float newX = player.getPosition().getX();
+            float newZ = player.getPosition().getZ();
+            float yawSine = MathUtils.sinDeg(player.getRotation().getYaw());
+            float yawCosine = MathUtils.cosDeg(player.getRotation().getYaw());
+            newX += yawSine * moveTouchpad.getKnobPercentY() * posMult;
+            newZ += -yawCosine * moveTouchpad.getKnobPercentY() * posMult;
+            newX += yawCosine * moveTouchpad.getKnobPercentX() * posMult;
+            newZ += -yawSine * moveTouchpad.getKnobPercentX() * posMult;
+
+            int blockX = MathUtils.floor(newX);
+            int blockZ = MathUtils.floor(newZ);
+            int blockFeetY = MathUtils.floor(player.getPosition().getY() - 0.1f);
+            int blockHeadY = MathUtils.floor(player.getPosition().getY() + player.getHeight() - 0.1f);
+            if(!movementHandler.checkCollision(blockX, blockFeetY, blockZ)
+                    && !movementHandler.checkCollision(blockX, blockHeadY, blockZ)) {
+                player.getPosition().setPos(newX, player.getPosition().getY(), newZ);
+                gameRenderer.calculateFrustum();
+            }
+        }
+    }
+
 }

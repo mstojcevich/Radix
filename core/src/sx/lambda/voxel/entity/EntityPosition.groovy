@@ -62,7 +62,6 @@ public class EntityPosition implements Cloneable, Serializable {
     }
 
     @Override
-    //TODO Will this give any hash overlap?
     public int hashCode() {
         float hashCode = 1;
         hashCode = hashCode * 2 + this.getX();

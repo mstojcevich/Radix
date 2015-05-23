@@ -36,7 +36,6 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
         super.init();
         fbo = new FrameBuffer(Pixmap.Format.RGBA4444, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
         fboTex = fbo.getColorBufferTexture();
-        // TODO convert to use libgdx's prepared matrices (in camera??)
         cam = new OrthographicCamera();
         cam.update();
         // TODO apply cam

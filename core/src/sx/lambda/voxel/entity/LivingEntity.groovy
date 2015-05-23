@@ -59,11 +59,6 @@ public abstract class LivingEntity extends Entity implements Serializable {
         }
     }
 
-    /**
-     * Called 20 times a second
-     */
-    public void onUpdate() {}
-
     public int getBlockInFeet(IWorld world) {
         IChunk chunk = world.getChunkAtPosition((int)Math.floor(position.x), (int)Math.floor(position.z))
         if (chunk != null) {

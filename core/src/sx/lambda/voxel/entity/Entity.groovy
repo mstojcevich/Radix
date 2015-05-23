@@ -67,4 +67,9 @@ abstract class Entity implements Serializable {
         id
     }
 
+    /**
+     * Called 20 times a second
+     */
+    public void onUpdate() {}
+
 }

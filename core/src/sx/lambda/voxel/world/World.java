@@ -150,7 +150,6 @@ public class World implements IWorld {
 
     @Override
     public int getChunkPosition(float value) {
-        // TODO changed (int) to MathUtils.floor, might cause issues. If it doesn't, remove this TODO.
         int subtraction = MathUtils.floor(value % CHUNK_SIZE);
         if (value < 0 && subtraction != 0) {
             subtraction = CHUNK_SIZE + subtraction;

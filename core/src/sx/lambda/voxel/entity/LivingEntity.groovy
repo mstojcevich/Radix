@@ -3,7 +3,6 @@ package sx.lambda.voxel.entity
 import com.badlogic.gdx.graphics.g3d.Model
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.tasks.MovementHandler
-import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.chunk.IChunk
 
@@ -66,10 +65,9 @@ public abstract class LivingEntity extends Entity implements Serializable {
     public void onUpdate() {}
 
     public int getBlockInFeet(IWorld world) {
-        Vec3i feetPosition = new Vec3i(getPosition().x as int, getPosition().y as int, getPosition().z as int)
-        IChunk chunk = world.getChunkAtPosition(feetPosition)
+        IChunk chunk = world.getChunkAtPosition((int)Math.floor(position.x), (int)Math.floor(position.z))
         if (chunk != null) {
-            return chunk.getBlockIdAtPosition(getPosition().x as int, getPosition().y as int, getPosition().z as int)
+            return chunk.getBlockIdAtPosition((int)Math.floor(position.x), (int)Math.floor(position.y), (int)Math.floor(position.z))
         } else {
             return 0
         }

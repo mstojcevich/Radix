@@ -4,10 +4,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.IBlockRenderer;
 import sx.lambda.voxel.block.Side;
-import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 import java.util.ArrayList;
@@ -60,8 +60,8 @@ public class GreedyMesher implements Mesher {
                             btmLightLevels[x][z] = lightLevels[x][y - 1][z];
                         }
                     } else {
-                        btmBlocks[x][z] = voxels[x][y][z];
                         btmLightLevels[x][z] = 1;
+                        continue;
                     }
                 }
             }
@@ -77,34 +77,36 @@ public class GreedyMesher implements Mesher {
             float[][] eastLightLevels = new float[voxels[0][0].length][voxels[0].length];
             for (int z = 0; z < voxels[0][0].length; z++) {
                 for (int y = 0; y < voxels[0].length; y++) {
-                    if(voxels[x][y][z] == null) continue;
+                    if (voxels[x][y][z] == null) continue;
 
-                    Vec3i westNeighborPos = chunk.getStartPosition().translate(x - 1, y, z);
-                    IChunk westNeighborChunk = chunk.getWorld().getChunkAtPosition(westNeighborPos);
+                    int westNeighborX = chunk.getStartPosition().x + x - 1;
+                    IChunk westNeighborChunk = chunk.getWorld().getChunkAtPosition(westNeighborX, chunk.getStartPosition().z + z);
                     if (westNeighborChunk != null) {
-                        Block westNeighborBlk = westNeighborChunk.getBlockAtPosition(westNeighborPos);
+                        Block westNeighborBlk = VoxelGameAPI.instance.getBlockByID(
+                                westNeighborChunk.getBlockIdAtPosition(westNeighborX, y, z));
                         if (westNeighborBlk == null) {
                             westBlocks[z][y] = voxels[x][y][z];
-                            westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborPos.x, westNeighborPos.y, westNeighborPos.z);
+                            westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX, y, z);
                         } else if (westNeighborBlk.isTransparent() && !voxels[x][y][z].isTransparent()) {
                             westBlocks[z][y] = voxels[x][y][z];
-                            westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborPos.x, westNeighborPos.y, westNeighborPos.z);
+                            westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX, y, z);
                         }
                     } else {
                         westLightLevels[z][y] = 1;
                         continue;
                     }
 
-                    Vec3i eastNeighborPos = chunk.getStartPosition().translate(x + 1, y, z);
-                    IChunk eastNeighborChunk = chunk.getWorld().getChunkAtPosition(eastNeighborPos);
+                    int eastNeighborX = chunk.getStartPosition().x + x + 1;
+                    IChunk eastNeighborChunk = chunk.getWorld().getChunkAtPosition(eastNeighborX, chunk.getStartPosition().z + z);
                     if (eastNeighborChunk != null) {
-                        Block eastNeighborBlk = eastNeighborChunk.getBlockAtPosition(eastNeighborPos);
+                        Block eastNeighborBlk = VoxelGameAPI.instance.getBlockByID(
+                                eastNeighborChunk.getBlockIdAtPosition(eastNeighborX, y, z));
                         if (eastNeighborBlk == null) {
                             eastBlocks[z][y] = voxels[x][y][z];
-                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborPos.x, eastNeighborPos.y, eastNeighborPos.z);
+                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX, y, z);
                         } else if (eastNeighborBlk.isTransparent() && !voxels[x][y][z].isTransparent()) {
                             eastBlocks[z][y] = voxels[x][y][z];
-                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborPos.x, eastNeighborPos.y, eastNeighborPos.z);
+                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX, y, z);
                         }
                     } else {
                         eastLightLevels[z][y] = 1;
@@ -126,33 +128,35 @@ public class GreedyMesher implements Mesher {
             for (int x = 0; x < voxels.length; x++) {
                 for (int y = 0; y < voxels[0].length; y++) {
                     if (voxels[x][y][z] == null) continue;
-                    Vec3i northNeighborPos = chunk.getStartPosition().translate(x, y, z + 1);
-                    Vec3i southNeighborPos = chunk.getStartPosition().translate(x, y, z - 1);
-                    IChunk northNeighborChunk = chunk.getWorld().getChunkAtPosition(northNeighborPos);
-                    IChunk southNeighborChunk = chunk.getWorld().getChunkAtPosition(southNeighborPos);
+                    int northNeighborZ = chunk.getStartPosition().z + z + 1;
+                    int southNeighborZ = chunk.getStartPosition().z + z - 1;
+                    IChunk northNeighborChunk = chunk.getWorld().getChunkAtPosition(chunk.getStartPosition().x + x, northNeighborZ);
+                    IChunk southNeighborChunk = chunk.getWorld().getChunkAtPosition(chunk.getStartPosition().x + x, southNeighborZ);
 
                     if (northNeighborChunk != null) {
-                        Block northNeighborBlock = northNeighborChunk.getBlockAtPosition(northNeighborPos);
+                        Block northNeighborBlock = VoxelGameAPI.instance.getBlockByID(
+                                northNeighborChunk.getBlockIdAtPosition(x, y, northNeighborZ));
                         if (northNeighborBlock == null) {
                             northBlocks[x][y] = voxels[x][y][z];
-                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(northNeighborPos.x, northNeighborPos.y, northNeighborPos.z);
+                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ);
                         } else if (northNeighborBlock.isTransparent() && !voxels[x][y][z].isTransparent()) {
                             northBlocks[x][y] = voxels[x][y][z];
-                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(northNeighborPos.x, northNeighborPos.y, northNeighborPos.z);
+                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ);
                         }
                     } else {
+                        northBlocks[x][y] = voxels[x][y][z];
                         northLightLevels[x][y] = 1;
-                        continue;
                     }
 
                     if (southNeighborChunk != null) {
-                        Block southNeighborBlock = southNeighborChunk.getBlockAtPosition(southNeighborPos);
+                        Block southNeighborBlock = VoxelGameAPI.instance.getBlockByID(
+                                southNeighborChunk.getBlockIdAtPosition(x, y, southNeighborZ));
                         if (southNeighborBlock == null) {
                             southBlocks[x][y] = voxels[x][y][z];
-                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(southNeighborPos.x, southNeighborPos.y, southNeighborPos.z);
+                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ);
                         } else if (southNeighborBlock.isTransparent() && !voxels[x][y][z].isTransparent()) {
                             southBlocks[x][y] = voxels[x][y][z];
-                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(southNeighborPos.x, southNeighborPos.y, southNeighborPos.z);
+                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ);
                         }
                     } else {
                         southLightLevels[x][y] = 1;

@@ -427,7 +427,9 @@ public class VoxelGameClient extends ApplicationAdapter {
         ex.printStackTrace();
         this.done = true;
         Gdx.input.setCursorCatched(false);
-        JOptionPane.showMessageDialog(null, GAME_TITLE + " crashed. " + String.valueOf(ex), GAME_TITLE + " crashed", JOptionPane.ERROR_MESSAGE);
+        if(!android) {
+            JOptionPane.showMessageDialog(null, GAME_TITLE + " crashed. " + String.valueOf(ex), GAME_TITLE + " crashed", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public GuiScreen getCurrentScreen() {

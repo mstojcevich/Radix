@@ -45,7 +45,7 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
         batch.begin();
         currentScreen.render(false, batch);
         batch.end();
-        fbo.unbind();
+        FrameBuffer.unbind();
     }
 
     @Override

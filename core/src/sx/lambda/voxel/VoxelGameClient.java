@@ -58,7 +58,7 @@ public class VoxelGameClient extends ApplicationAdapter {
     private boolean done;
     private Vec3i selectedBlock;
     private Vec3i selectedNextPlace;
-    private Queue<Runnable> glQueue = new ConcurrentLinkedDeque<Runnable>();
+    private Queue<Runnable> glQueue = new ConcurrentLinkedDeque<>();
     private MainMenu mainMenu;
     private IngameHUD hud;
     private GuiScreen currentScreen;
@@ -187,7 +187,7 @@ public class VoxelGameClient extends ApplicationAdapter {
     private void prepareNewFrame() {
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Gdx.gl.glClearColor(0.2f, 0.2f, 1.0f, 1.0f);
-        Gdx.gl.glClear((int) GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Gdx.gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     public void updateSelectedBlock() {

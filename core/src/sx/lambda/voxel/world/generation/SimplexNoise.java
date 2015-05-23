@@ -2,20 +2,16 @@ package sx.lambda.voxel.world.generation;
 
 import java.util.Random;
 
-public class SimplexNoise {
+class SimplexNoise {
 
     private final SimplexNoise_octave[] octaves;
     private double[] frequencys;
     private final double[] amplitudes;
 
-    private final int largestFeature;
     private final double persistence;
-    private final int seed;
 
     public SimplexNoise(int largestFeature, double persistence, int seed) {
-        this.largestFeature = largestFeature;
         this.persistence = persistence;
-        this.seed = seed;
 
         //recieves a number (eg 128) and calculates what power of 2 it is (eg 2^7)
         int numberOfOctaves = (int) Math.ceil(Math.log10(largestFeature) / Math.log10(2));
@@ -28,24 +24,16 @@ public class SimplexNoise {
 
         for (int i = 0; i < numberOfOctaves; i++) {
             octaves[i] = new SimplexNoise_octave(rnd.nextInt());
-
             frequencys[i] = Math.pow(2, i);
             amplitudes[i] = Math.pow(persistence, octaves.length - i);
-
-
         }
 
     }
 
-
     public double getNoise(int x, int y) {
-
         double result = 0;
 
         for (int i = 0; i < octaves.length; i++) {
-            //double frequency = Math.pow(2,i);
-            //double amplitude = Math.pow(persistence,octaves.length-i);
-
             result = result + octaves[i].noise(x / frequencys[i], y / frequencys[i]) * amplitudes[i];
         }
 
@@ -55,7 +43,6 @@ public class SimplexNoise {
     }
 
     public double getNoise(int x, int y, int z) {
-
         double result = 0;
 
         for (int i = 0; i < octaves.length; i++) {
@@ -67,6 +54,5 @@ public class SimplexNoise {
 
 
         return result;
-
     }
 }

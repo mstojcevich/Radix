@@ -63,14 +63,14 @@ public class VoxelGameAPI {
         }
     }
 
-    public void registerBlocks(Block... blocks) throws BlockRegistrationException {
+    private void registerBlocks(Block... blocks) throws BlockRegistrationException {
         for (Block b : blocks) {
             registerBlock(b);
         }
 
     }
 
-    public void registerBlock(Block b) throws BlockRegistrationException {
+    private void registerBlock(Block b) throws BlockRegistrationException {
         if (b.getID() == -1) {
             b.setID(highestID);
             System.err.println("Block ID not defined for " + String.valueOf(b) + ". Using auto generated ID. IF YOU\'RE THE MOD DEVELOPER, FIX THIS!!!");

@@ -1,8 +1,5 @@
 package sx.lambda.voxel.client.gui.transition;
 
-/**
- * Created by marcusant on 3/26/15.
- */
 public abstract class TimedTransitionAnimation implements TransitionAnimation {
 
     private final int length;

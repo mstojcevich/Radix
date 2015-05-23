@@ -21,6 +21,7 @@ public enum ConnectionStage {
 
     private final Class<? extends ClientPacket>[] receivablePackets;
 
+    @SafeVarargs
     ConnectionStage(Class<? extends ClientPacket>... receivablePackets) {
         this.receivablePackets = receivablePackets;
     }

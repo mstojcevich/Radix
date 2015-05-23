@@ -10,16 +10,15 @@ import sx.lambda.voxel.render.NotInitializedException;
 @CompileStatic
 public class NormalBlockRenderer implements IBlockRenderer {
 
-    protected static final float TEXTURE_PERCENTAGE = 0.03125f;
+    private static final float TEXTURE_PERCENTAGE = 0.03125f;
+    private static final int BLOCKS_PER_WIDTH = 1024 / 32;
 
     private static Texture blockMap;
 
-    protected final float u, v;
+    private final float u, v;
     protected final int blockID;
 
     private static boolean initialized;
-
-    final int BLOCKS_PER_WIDTH = 1024 / 32;
 
     public NormalBlockRenderer(int blockID) {
         this.blockID = blockID;

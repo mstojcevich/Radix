@@ -1,18 +1,13 @@
 package sx.lambda.voxel.world;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.IntMap;
 import io.netty.util.internal.ConcurrentSet;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.api.events.worldgen.EventFinishChunkGen;
 import sx.lambda.voxel.block.Block;
-import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.entity.Entity;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.net.packet.client.PacketUnloadChunk;
@@ -55,8 +50,6 @@ public class World implements IWorld {
     private Queue<Vec3i> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
 
     private ModelBatch modelBatch;
-
-    private Material blockMaterial, transparentBlockMaterial;
 
     private boolean shouldUpdateLight, updatingLight;
 
@@ -112,9 +105,6 @@ public class World implements IWorld {
 
         if (modelBatch == null) {
             modelBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
-            blockMaterial = new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()));
-            transparentBlockMaterial = new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
-                    new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA));
         }
 
         if (!updatingLight && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {

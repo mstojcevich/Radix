@@ -194,8 +194,8 @@ public class GreedyMesher implements Mesher {
                 float ll = lls[x][y];
                 if (!used[x][y] && blk != null) {
                     used[x][y] = true;
-                    int startX = x, endX = x + 1;
-                    int startY = y, endY = y + 1;
+                    int endX = x + 1;
+                    int endY = y + 1;
                     while (true) {
                         int newX = endX;
                         if (newX == blks.length) {
@@ -210,13 +210,13 @@ public class GreedyMesher implements Mesher {
                             while (true) {
                                 if (endY == height) break;
                                 boolean allPassed = true;
-                                for (int lx = startX; lx < endX; lx++) {
+                                for (int lx = x; lx < endX; lx++) {
                                     if (blks[lx][endY] != blk || lls[lx][endY] != ll || used[lx][endY]) {
                                         allPassed = false;
                                     }
                                 }
                                 if (allPassed) {
-                                    for (int lx = startX; lx < endX; lx++) {
+                                    for (int lx = x; lx < endX; lx++) {
                                         used[lx][endY] = true;
                                     }
                                 } else {
@@ -227,7 +227,7 @@ public class GreedyMesher implements Mesher {
                             break;
                         }
                     }
-                    outputList.add(new Face(side, blk, ll, startX + offsetX, startY + offsetY, endX + offsetX, endY + offsetY, z));
+                    outputList.add(new Face(side, blk, ll, x + offsetX, y + offsetY, endX + offsetX, endY + offsetY, z));
                 }
             }
         }

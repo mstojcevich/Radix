@@ -151,9 +151,8 @@ public class Vec3i implements Serializable {
             return false;
         if (y != other.y)
             return false;
-        if (z != other.z)
-            return false;
-        return true;
+
+        return z == other.z;
     }
 
     public Vec3i translate(int x, int y, int z) {

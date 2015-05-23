@@ -3,13 +3,13 @@ package sx.lambda.voxel.util;
 import com.badlogic.gdx.math.Vector3;
 
 interface Plot<T> {
-    public boolean next();
+    boolean next();
 
-    public void reset();
+    void reset();
 
-    public void end();
+    void end();
 
-    public T get();
+    T get();
 }
 
 public class PlotCell3f implements Plot<Vec3i> {

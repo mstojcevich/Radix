@@ -19,7 +19,7 @@ import java.util.Random;
  *
  */
 
-public class SimplexNoise_octave {  // Simplex noise in 2D, 3D and 4D
+class SimplexNoise_octave {  // Simplex noise in 2D, 3D and 4D
 
     private static int RANDOMSEED = 0;
     private static int NUMBEROFSWAPS = 400;

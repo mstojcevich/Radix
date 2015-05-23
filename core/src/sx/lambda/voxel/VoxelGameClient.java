@@ -12,10 +12,13 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.netty.channel.ChannelHandlerContext;
 import pw.oxcafebabe.marcusant.eventbus.EventListener;
@@ -35,6 +38,8 @@ import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.entity.EntityRotation;
 import sx.lambda.voxel.entity.player.Player;
 import sx.lambda.voxel.net.packet.client.PacketLeaving;
+import sx.lambda.voxel.net.packet.shared.PacketBreakBlock;
+import sx.lambda.voxel.net.packet.shared.PacketPlaceBlock;
 import sx.lambda.voxel.render.NotInitializedException;
 import sx.lambda.voxel.render.Renderer;
 import sx.lambda.voxel.render.game.GameRenderer;
@@ -89,10 +94,11 @@ public class VoxelGameClient extends ApplicationAdapter {
     // Android specific stuff
     private boolean android;
     private Stage androidStage;
-    private Touchpad moveTouchpad, rotateTouchpad;
-    private Skin touchpadSkin;
+    private Skin androidOverlaySkin;
     private TouchpadStyle touchpadStyle;
     private TextureAtlas touchControlsAtlas;
+    private Touchpad moveTouchpad, rotateTouchpad;
+    private ImageButton jumpButton, placeButton, breakButton;
 
     public static VoxelGameClient getInstance() {
         return theGame;
@@ -130,16 +136,16 @@ public class VoxelGameClient extends ApplicationAdapter {
     private void setupTouchControls() {
         // Create touch control element atlas
         touchControlsAtlas = new TextureAtlas(Gdx.files.internal("textures/gui/touch/touch.atlas"));
-        TextureAtlas.AtlasRegion backgroundRegion = touchControlsAtlas.findRegion("touchpadBackground");
-        TextureAtlas.AtlasRegion knobRegion = touchControlsAtlas.findRegion("touchpadKnob");
+        // Create skin
+        androidOverlaySkin = new Skin();
+        for(TextureAtlas.AtlasRegion r : touchControlsAtlas.getRegions()) {
+            androidOverlaySkin.add(r.name, r, TextureRegion.class);
+        }
 
         // Create touchpad skin/style
-        touchpadSkin = new Skin();
-        touchpadSkin.add("touchBackground", backgroundRegion, TextureRegion.class);
-        touchpadSkin.add("touchKnob", knobRegion, TextureRegion.class);
         touchpadStyle = new TouchpadStyle();
-        touchpadStyle.background = touchpadSkin.getDrawable("touchBackground");
-        touchpadStyle.knob = touchpadSkin.getDrawable("touchKnob");
+        touchpadStyle.background = androidOverlaySkin.getDrawable("touchpadBackground");
+        touchpadStyle.knob = androidOverlaySkin.getDrawable("touchpadKnob");
 
         moveTouchpad = new Touchpad(10, touchpadStyle);
         moveTouchpad.setBounds(15, 15, 200, 200);
@@ -147,10 +153,47 @@ public class VoxelGameClient extends ApplicationAdapter {
         rotateTouchpad = new Touchpad(10, touchpadStyle);
         rotateTouchpad.setBounds(1280 - 200 - 15, 15, 200, 200);
 
+        jumpButton = new ImageButton(androidOverlaySkin.getDrawable("jumpButtonIcon"));
+        jumpButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                movementHandler.jump();
+            }
+        });
+        placeButton = new ImageButton(androidOverlaySkin.getDrawable("placeButtonIcon"));
+        placeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                placeBlock();
+            }
+        });
+        breakButton = new ImageButton(androidOverlaySkin.getDrawable("breakButtonIcon"));
+        breakButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                breakBlock();
+            }
+        });
+        ImageButton[] buttons = new ImageButton[]{
+                jumpButton, placeButton, breakButton
+        };
+        int totalButtonWidth = 0;
+        for(ImageButton button : buttons) {
+            totalButtonWidth += button.getImage().getPrefWidth();
+        }
+        int btnX = 1280/2-totalButtonWidth/2;
+        for(ImageButton button : buttons) {
+            button.setBounds(btnX, 0, button.getImage().getPrefWidth(), button.getImage().getPrefHeight());
+            btnX += button.getImage().getPrefWidth();
+        }
+
         // Setup android stage
         androidStage = new Stage(new FitViewport(1280, 720));
         androidStage.addActor(moveTouchpad);
         androidStage.addActor(rotateTouchpad);
+        for(ImageButton button : buttons) {
+            androidStage.addActor(button);
+        }
     }
 
     private void startHandlers() {
@@ -193,7 +236,7 @@ public class VoxelGameClient extends ApplicationAdapter {
 
         if(android) {
             androidStage.dispose();
-            touchpadSkin.dispose();
+            androidOverlaySkin.dispose();
             touchControlsAtlas.dispose();
         }
     }
@@ -553,11 +596,41 @@ public class VoxelGameClient extends ApplicationAdapter {
         return hudCamera;
     }
 
+    public MovementHandler getMovementHandler() {
+        return movementHandler;
+    }
+
+    public void breakBlock() {
+        if (this.getSelectedBlock() != null && this.currentScreen == this.hud) {
+            if (this.isRemote() && this.serverChanCtx != null) {
+                this.serverChanCtx.writeAndFlush(new PacketBreakBlock(this.getSelectedBlock()));
+            } else {
+                this.getWorld().removeBlock(this.getSelectedBlock());
+            }
+            updateSelectedBlock();
+        }
+    }
+
+    public void placeBlock() {
+        if (this.getNextPlacePos() != null && this.currentScreen == this.hud) {
+            if (this.isRemote() && this.serverChanCtx != null) {
+                this.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
+                        this.getNextPlacePos(),
+                        this.getPlayer().getItemInHand()
+                ));
+            } else {
+                this.getWorld().addBlock(this.getPlayer().getItemInHand(), this.getNextPlacePos());
+            }
+            updateSelectedBlock();
+        }
+    }
+
     private void updatePositionRotationAndroid() {
         if(!MathUtils.isZero(rotateTouchpad.getKnobPercentX()) || !MathUtils.isZero(rotateTouchpad.getKnobPercentY())) {
             float rotMult = 200 * Gdx.graphics.getDeltaTime();
 
             player.getRotation().offset(rotateTouchpad.getKnobPercentY() * rotMult, rotateTouchpad.getKnobPercentX() * rotMult);
+            updateSelectedBlock();
             gameRenderer.calculateFrustum();
         }
 

@@ -10,9 +10,30 @@ touchpadBackground
   orig: 200, 200
   offset: 0, 0
   index: -1
+jumpButtonIcon
+  rotate: false
+  xy: 203, 73
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+breakButtonIcon
+  rotate: false
+  xy: 333, 73
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+placeButtonIcon
+  rotate: false
+  xy: 463, 73
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
 touchpadKnob
   rotate: false
-  xy: 203, 101
+  xy: 593, 101
   size: 100, 100
   orig: 100, 100
   offset: 0, 0

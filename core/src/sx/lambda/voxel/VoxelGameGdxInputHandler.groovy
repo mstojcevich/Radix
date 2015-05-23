@@ -6,8 +6,6 @@ import groovy.transform.CompileStatic
 import sx.lambda.voxel.api.VoxelGameAPI
 import sx.lambda.voxel.client.gui.screens.BlockSelectGUI
 import sx.lambda.voxel.client.keybind.Keybind
-import sx.lambda.voxel.net.packet.shared.PacketBreakBlock
-import sx.lambda.voxel.net.packet.shared.PacketPlaceBlock
 
 @CompileStatic
 public class VoxelGameGdxInputHandler implements InputProcessor {
@@ -24,10 +22,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
             @Override
             void run() {
                 if (game.world != null) {
-                    if (game.getPlayer().onGround) {
-                        game.getPlayer().setYVelocity(0.11f)
-                        game.getPlayer().setOnGround(false)
-                    }
+                    game.movementHandler.jump();
                 }
             }
         }));
@@ -89,28 +84,12 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
         switch (button) {
             case 0:
                 if (game.world != null) {
-                    if (game.getSelectedBlock() != null && game.currentScreen == game.hud) {
-                        if (game.isRemote() && game.serverChanCtx != null) {
-                            game.serverChanCtx.writeAndFlush(new PacketBreakBlock(
-                                    game.getSelectedBlock()))
-                        } else {
-                            game.getWorld().removeBlock(game.getSelectedBlock())
-                        }
-                    }
+                    game.breakBlock();
                 }
                 break;
             case 1:
                 if (game.world != null) {
-                    if (game.getNextPlacePos() != null && game.currentScreen == game.hud) {
-                        if (game.isRemote() && game.serverChanCtx != null) {
-                            game.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
-                                    game.getNextPlacePos(),
-                                    game.getPlayer().getItemInHand()
-                            ));
-                        } else {
-                            game.getWorld().addBlock(game.getPlayer().getItemInHand(), game.getNextPlacePos())
-                        }
-                    }
+                    game.placeBlock();
                 }
                 break
             default:

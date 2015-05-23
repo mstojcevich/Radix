@@ -175,4 +175,11 @@ class MovementHandler implements RepeatedTask {
         return !passed
     }
 
+    public void jump() {
+        if (game.getPlayer().onGround) {
+            game.getPlayer().setYVelocity(0.11f)
+            game.getPlayer().setOnGround(false)
+        }
+    }
+
 }

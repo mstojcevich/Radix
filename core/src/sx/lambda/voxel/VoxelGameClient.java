@@ -571,7 +571,7 @@ public class VoxelGameClient extends ApplicationAdapter {
             newX += yawSine * moveTouchpad.getKnobPercentY() * posMult;
             newZ += -yawCosine * moveTouchpad.getKnobPercentY() * posMult;
             newX += yawCosine * moveTouchpad.getKnobPercentX() * posMult;
-            newZ += -yawSine * moveTouchpad.getKnobPercentX() * posMult;
+            newZ += yawSine * moveTouchpad.getKnobPercentX() * posMult;
 
             int blockX = MathUtils.floor(newX);
             int blockZ = MathUtils.floor(newZ);

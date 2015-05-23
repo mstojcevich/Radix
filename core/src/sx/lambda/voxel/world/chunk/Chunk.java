@@ -425,7 +425,7 @@ public class Chunk implements IChunk {
         sunlightChanged = true;
 
         if (x == 0) {
-            IChunk xMinNeighbor = getWorld().getChunkAtPosition(startPosition.translate(-1, 0, 0));
+            IChunk xMinNeighbor = getWorld().getChunkAtPosition(startPosition.x - 1, startPosition.z);
             if (xMinNeighbor != null) {
                 getWorld().rerenderChunk(xMinNeighbor);
             }
@@ -433,7 +433,7 @@ public class Chunk implements IChunk {
         }
 
         if (x == size - 1) {
-            IChunk xPlNeighbor = getWorld().getChunkAtPosition(startPosition.translate(1, 0, 0));
+            IChunk xPlNeighbor = getWorld().getChunkAtPosition(startPosition.x + 1, startPosition.z);
             if (xPlNeighbor != null) {
                 getWorld().rerenderChunk(xPlNeighbor);
             }
@@ -441,7 +441,7 @@ public class Chunk implements IChunk {
         }
 
         if (z == 0) {
-            IChunk zMinNeighbor = getWorld().getChunkAtPosition(startPosition.translate(0, 0, -1));
+            IChunk zMinNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z - 1);
             if (zMinNeighbor != null) {
                 getWorld().rerenderChunk(zMinNeighbor);
             }
@@ -449,7 +449,7 @@ public class Chunk implements IChunk {
         }
 
         if (z == size - 1) {
-            IChunk zPlNeighbor = getWorld().getChunkAtPosition(startPosition.translate(0, 0, 1));
+            IChunk zPlNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z + 1);
             if (zPlNeighbor != null) {
                 getWorld().rerenderChunk(zPlNeighbor);
             }

@@ -13,6 +13,8 @@ import sx.lambda.voxel.world.chunk.IChunk;
 import java.util.ArrayList;
 import java.util.List;
 
+
+// TODO not meshing the chunk sides causes holes after the neighbor chunk is added.
 public class GreedyMesher implements Mesher {
 
     private final IChunk chunk;

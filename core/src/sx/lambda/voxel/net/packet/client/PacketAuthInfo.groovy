@@ -52,6 +52,7 @@ class PacketAuthInfo implements ClientPacket {
         IChunk[] chunkList = server.getWorld().getChunksInRange(cp.getPosition(), server.config.viewDistance)
         ctx.writeAndFlush(new PacketStartChunkGroup())
         for (IChunk c : chunkList) {
+            System.out.println("Sending a chunk")
             ctx.writeAndFlush(new PacketChunkData(c))
             server.getClient(ctx).hadChunks.add(c)
         }

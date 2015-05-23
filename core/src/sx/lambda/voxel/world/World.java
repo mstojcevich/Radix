@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.utils.IntMap;
 import io.netty.util.internal.ConcurrentSet;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
@@ -35,7 +36,7 @@ public class World implements IWorld {
 
     private static final int SEA_LEVEL = 64;
 
-    private final Map<Vec3i, IChunk> chunkMap = new ConcurrentHashMap<>();
+    private final IntMap<IntMap<IChunk>> chunkMapX = new IntMap<>();
     private final Set<IChunk> chunkList = new ConcurrentSet<>();
 
     private static final float GRAVITY = 4.69f;
@@ -78,12 +79,30 @@ public class World implements IWorld {
     }
 
     public IChunk getChunkAtPosition(Vec3i position) {
-        Vec3i chunkPosition = new Vec3i(
-                getChunkPosition(position.x),
-                0,
-                getChunkPosition(position.z));
+        return getChunkAtPosition(position.x, position.z);
+    }
 
-        return this.chunkMap.get(chunkPosition);
+    public IChunk getChunkAtPosition(int x, int z) {
+        x = getChunkPosition(x);
+        z = getChunkPosition(z);
+
+        IntMap<IChunk> zMap = this.chunkMapX.get(x);
+        if(zMap == null)
+            return null;
+
+        return zMap.get(z);
+    }
+
+    private void removeChunkFromMap(Vec3i pos) {
+        removeChunkFromMap(pos.x, pos.z);
+    }
+
+    private void removeChunkFromMap(int x, int z) {
+        IntMap<IChunk> zMap = this.chunkMapX.get(x);
+        if(zMap == null)
+            return;
+
+        zMap.remove(z);
     }
 
     @Override
@@ -215,7 +234,7 @@ public class World implements IWorld {
 
     @Override
     public IChunk[] getChunksInRange(EntityPosition epos, int viewDistance) {
-        List<IChunk> chunkList = new ArrayList<IChunk>();
+        List<IChunk> chunkList = new ArrayList<>();
         int playerChunkX = getChunkPosition(epos.getX());
         int playerChunkZ = getChunkPosition(epos.getZ());
         int range = viewDistance * CHUNK_SIZE;
@@ -229,14 +248,12 @@ public class World implements IWorld {
 
     @Override
     public void addChunk(final IChunk chunk) {
-        Vec3i pos = chunk.getStartPosition();
-        IChunk c = this.chunkMap.get(pos);
+        IChunk c = getChunkAtPosition(chunk.getStartPosition());
         if (c != null) {
-            this.chunkMap.remove(pos);
+            removeChunkFromMap(chunk.getStartPosition());
             this.chunkList.remove(c);
         }
-        this.chunkMap.put(pos, chunk);
-        this.chunkList.add(chunk);
+        addChunk(chunk, chunk.getStartPosition().x, chunk.getStartPosition().z);
         if (!server) {
             rerenderChunk(chunk);
         }
@@ -251,20 +268,21 @@ public class World implements IWorld {
         int playerChunkX = getChunkPosition(playerPosition.getX());
         int playerChunkZ = getChunkPosition(playerPosition.getZ());
 
-        for (final Map.Entry<Vec3i, IChunk> e : this.chunkMap.entrySet()) {
-            Vec3i b = e.getKey();
-            if (Math.abs(b.x - playerChunkX) > range
-                    || Math.abs(b.z - playerChunkZ) > range) {
-                this.chunkList.remove(e.getValue());
+        for (final IChunk chunk : chunkList) {
+            int x = chunk.getStartPosition().x;
+            int z = chunk.getStartPosition().z;
+            if (Math.abs(x - playerChunkX) > range
+                    || Math.abs(z - playerChunkZ) > range) {
+                this.chunkList.remove(chunk);
                 VoxelGameClient.getInstance().addToGLQueue(new Runnable() {
                     @Override
                     public void run() {
-                        e.getValue().cleanup();
+                        chunk.cleanup();
                     }
                 });
-                this.chunkMap.remove(b);
+                chunkMapX.get(x).remove(z);
                 if (remote) {
-                    VoxelGameClient.getInstance().getServerChanCtx().writeAndFlush(new PacketUnloadChunk(b));
+                    VoxelGameClient.getInstance().getServerChanCtx().writeAndFlush(new PacketUnloadChunk(chunk.getStartPosition()));
                 }
 
             }
@@ -276,14 +294,23 @@ public class World implements IWorld {
         return this.loadedEntities;
     }
 
+    private void addChunk(IChunk chunk, int x, int z) {
+        IntMap<IChunk> foundChunkMapZ = this.chunkMapX.get(x);
+        if(foundChunkMapZ == null) {
+            foundChunkMapZ = new IntMap<>();
+            this.chunkMapX.put(x, foundChunkMapZ);
+        }
+        foundChunkMapZ.put(z, chunk);
+        this.chunkList.add(chunk);
+    }
+
     private IChunk loadChunk(int startX, int startZ) {
         Vec3i pos = new Vec3i(startX, 0, startZ);
-        IChunk foundChunk = chunkMap.get(pos);
+        IChunk foundChunk = getChunkAtPosition(pos);
         if (foundChunk == null && !remote) {
             final IChunk c = new Chunk(this, pos);
             VoxelGameAPI.instance.getEventManager().push(new EventFinishChunkGen(c));
-            this.chunkMap.put(pos, c);
-            this.chunkList.add(c);
+            addChunk(c, startX, startZ);
             addSun(c);
             if (!server) {
                 rerenderChunk(c);

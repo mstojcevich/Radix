@@ -424,33 +424,33 @@ public class World implements IWorld {
                                 }
                             }
                             if (negZNeighborChunk != null) {
-                                Block bl = negZNeighborChunk.getBlockAtPosition(negZ, pos.y, pos.z);
+                                Block bl = negZNeighborChunk.getBlockAtPosition(pos.x, pos.y, negZ);
                                 if (bl == null) {
-                                    if (negZNeighborChunk.getSunlight(negZ, pos.y, pos.z) < nextLL) {
-                                        negZNeighborChunk.setSunlight(negZ, pos.y, pos.z, nextLL);
-                                        sunlightQueue.add(new Vec3i(negZ, pos.y, pos.z));
+                                    if (negZNeighborChunk.getSunlight(pos.x, pos.y, negZ) < nextLL) {
+                                        negZNeighborChunk.setSunlight(pos.x, pos.y, negZ, nextLL);
+                                        sunlightQueue.add(new Vec3i(pos.x, pos.y, negZ));
                                         changedChunks.add(negZNeighborChunk);
                                     }
                                 } else if (bl.isTransparent()) {
-                                    if (negZNeighborChunk.getSunlight(negZ, pos.y, pos.z) < nextLL) {
-                                        negZNeighborChunk.setSunlight(negZ, pos.y, pos.z, nextLL);
-                                        sunlightQueue.add(new Vec3i(negZ, pos.y, pos.z));
+                                    if (negZNeighborChunk.getSunlight(pos.x, pos.y, negZ) < nextLL) {
+                                        negZNeighborChunk.setSunlight(pos.x, pos.y, negZ, nextLL);
+                                        sunlightQueue.add(new Vec3i(pos.x, pos.y, negZ));
                                         changedChunks.add(negZNeighborChunk);
                                     }
                                 }
                             }
                             if (posZNeighborChunk != null) {
-                                Block bl = posZNeighborChunk.getBlockAtPosition(posZ, pos.y, pos.z);
+                                Block bl = posZNeighborChunk.getBlockAtPosition(pos.x, pos.y, posZ);
                                 if (bl == null) {
-                                    if (posZNeighborChunk.getSunlight(posZ, pos.y, pos.z) < nextLL) {
-                                        posZNeighborChunk.setSunlight(posZ, pos.y, pos.z, nextLL);
-                                        sunlightQueue.add(new Vec3i(posZ, pos.y, pos.z));
+                                    if (posZNeighborChunk.getSunlight(pos.x, pos.y, posZ) < nextLL) {
+                                        posZNeighborChunk.setSunlight(pos.x, pos.y, posZ, nextLL);
+                                        sunlightQueue.add(new Vec3i(pos.x, pos.y, posZ));
                                         changedChunks.add(posZNeighborChunk);
                                     }
                                 } else if (bl.isTransparent()) {
-                                    if (posZNeighborChunk.getSunlight(posZ, pos.y, pos.z) < nextLL) {
-                                        posZNeighborChunk.setSunlight(posZ, pos.y, pos.z, nextLL);
-                                        sunlightQueue.add(new Vec3i(posZ, pos.y, pos.z));
+                                    if (posZNeighborChunk.getSunlight(pos.x, pos.y, posZ) < nextLL) {
+                                        posZNeighborChunk.setSunlight(pos.x, pos.y, posZ, nextLL);
+                                        sunlightQueue.add(new Vec3i(pos.x, pos.y, posZ));
                                         changedChunks.add(posZNeighborChunk);
                                     }
                                 }

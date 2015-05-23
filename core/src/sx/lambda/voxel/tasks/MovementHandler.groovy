@@ -50,12 +50,12 @@ class MovementHandler implements RepeatedTask {
                         float deltaY
                         float deltaZ
                         if (threeDMove) {
-                            deltaX = (float) (-Math.cos(Math.toRadians(pitch)) * Math.sin(Math.toRadians(yaw)) * movementMultiplier)
-                            deltaY = (float) (-Math.sin(Math.toRadians(pitch)) * movementMultiplier)
-                            deltaZ = (float) (Math.cos(Math.toRadians(pitch)) * Math.cos(Math.toRadians(yaw)) * movementMultiplier)
+                            deltaX = (float) (-MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier)
+                            deltaY = (float) (-MathUtils.sinDeg(pitch) * movementMultiplier)
+                            deltaZ = (float) (MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier)
                         } else {
-                            deltaX = (float) (-Math.sin(Math.toRadians(yaw)) * movementMultiplier)
-                            deltaZ = (float) (Math.cos(Math.toRadians(yaw)) * movementMultiplier)
+                            deltaX = (float) (-MathUtils.sinDeg(yaw) * movementMultiplier)
+                            deltaZ = (float) (MathUtils.cosDeg(yaw) * movementMultiplier)
                             deltaY = 0
                         }
 
@@ -70,12 +70,12 @@ class MovementHandler implements RepeatedTask {
                         float deltaY
                         float deltaZ
                         if (threeDMove) {
-                            deltaX = (float) (Math.cos(Math.toRadians(pitch)) * Math.sin(Math.toRadians(yaw)) * movementMultiplier)
-                            deltaY = (float) (Math.sin(Math.toRadians(pitch)) * movementMultiplier)
-                            deltaZ = (float) (-Math.cos(Math.toRadians(pitch)) * Math.cos(Math.toRadians(yaw)) * movementMultiplier)
+                            deltaX = (float) (MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier)
+                            deltaY = (float) (MathUtils.sinDeg(pitch) * movementMultiplier)
+                            deltaZ = (float) (-MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier)
                         } else {
-                            deltaX = (float) (Math.sin(Math.toRadians(yaw)) * movementMultiplier)
-                            deltaZ = (float) (-Math.cos(Math.toRadians(yaw)) * movementMultiplier)
+                            deltaX = (float) (MathUtils.sinDeg(yaw) * movementMultiplier)
+                            deltaZ = (float) (-MathUtils.cosDeg(yaw) * movementMultiplier)
                             deltaY = 0
                         }
 
@@ -88,8 +88,8 @@ class MovementHandler implements RepeatedTask {
                         float deltaZ
                         float yaw = player.getRotation().getYaw()
 
-                        deltaX = (float) (-Math.sin(Math.toRadians(yaw - 90)) * movementMultiplier)
-                        deltaZ = (float) (Math.cos(Math.toRadians(yaw - 90)) * movementMultiplier)
+                        deltaX = (float) (-MathUtils.sinDeg((float)yaw - 90) * movementMultiplier)
+                        deltaZ = (float) (MathUtils.cosDeg((float)yaw - 90) * movementMultiplier)
 
                         if (!checkDeltaCollision(player, deltaX, 0, deltaZ)) {
                             player.getPosition().offset(deltaX, 0, deltaZ)
@@ -100,8 +100,8 @@ class MovementHandler implements RepeatedTask {
                         float deltaZ
                         float yaw = player.getRotation().getYaw()
 
-                        deltaX = (float) (-Math.sin(Math.toRadians(yaw + 90)) * movementMultiplier)
-                        deltaZ = (float) (Math.cos(Math.toRadians(yaw + 90)) * movementMultiplier)
+                        deltaX = (float) (-MathUtils.sinDeg((float)yaw + 90) * movementMultiplier)
+                        deltaZ = (float) (MathUtils.cosDeg((float)yaw + 90) * movementMultiplier)
 
                         if (!checkDeltaCollision(player, deltaX, 0, deltaZ)) {
                             player.getPosition().offset(deltaX, 0, deltaZ)

@@ -74,11 +74,11 @@ class Player extends LivingEntity implements Serializable {
     }
 
     public int getBlockInHead(IWorld world) {
-        int x = (int)getPosition().x;
-        int z = (int)getPosition().z;
+        int x = (int)Math.floor(getPosition().x);
+        int z = (int)Math.floor(getPosition().z);
         IChunk chunk = world.getChunkAtPosition(x, z)
         if (chunk != null) {
-            return chunk.getBlockIdAtPosition(x, (int)(getPosition().y + HEIGHT), z)
+            return chunk.getBlockIdAtPosition(x, (int)(Math.floor(getPosition().y + HEIGHT)), z)
         } else {
             return 0
         }

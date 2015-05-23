@@ -27,13 +27,12 @@ class IngameHUD implements GuiScreen {
         Gdx.gl.glEnable(GL_BLEND)
 
         int blockInHead = VoxelGameClient.instance.player.getBlockInHead(VoxelGameClient.instance.world)
-        if (blockInHead != null) {
-            switch (blockInHead) {
-                case BuiltInBlockIds.WATER_ID:
-                    VoxelGameAPI.instance.getBlockByID(blockInHead).getRenderer().render2d(guiBatch, 0, 0, Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()))
-                    // TODO add ability to set transparency with a spritebatcher so that we can render transparent overlay for the water
-                    break;
-            }
+        switch (blockInHead) {
+            case BuiltInBlockIds.WATER_ID:
+                guiBatch.setColor(1, 1, 1, 0.6f);
+                VoxelGameAPI.instance.getBlockByID(blockInHead).getRenderer().render2d(guiBatch, 0, 0, Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()))
+                guiBatch.setColor(1, 1, 1, 1);
+                break;
         }
 
         VoxelGameAPI.instance.getBlockByID(VoxelGameClient.instance.player.itemInHand).renderer.render2d(guiBatch, 0, 0, 50);

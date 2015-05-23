@@ -165,8 +165,10 @@ public class Chunk implements IChunk {
             rerenderNext = false;
         }
 
-        batch.render(opaqueModelInstance);
-        batch.render(transparentModelInstance);
+        if(opaqueModelInstance != null) {
+            batch.render(opaqueModelInstance);
+            batch.render(transparentModelInstance);
+        }
     }
 
     @Override

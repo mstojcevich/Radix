@@ -365,6 +365,12 @@ public class Chunk implements IChunk {
 
     private void setupSunlighting() {
         sunlightLevels = new int[size][height][size];
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
+                sunlightLevels[x][height - 1][z] = 16;
+                parentWorld.addToSunlightQueue(new int[]{startPosition.x + x, height - 1, startPosition.z + z});
+            }
+        }
     }
 
     @Override

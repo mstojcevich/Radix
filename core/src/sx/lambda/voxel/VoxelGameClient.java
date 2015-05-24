@@ -23,7 +23,10 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import org.spacehq.mc.protocol.data.game.ItemStack;
 import org.spacehq.mc.protocol.data.game.Position;
 import org.spacehq.mc.protocol.data.game.values.Face;
+import org.spacehq.mc.protocol.data.game.values.entity.player.PlayerAction;
+import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerActionPacket;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerPlaceBlockPacket;
+import org.spacehq.mc.protocol.packet.ingame.client.player.ClientSwingArmPacket;
 import pw.oxcafebabe.marcusant.eventbus.EventListener;
 import pw.oxcafebabe.marcusant.eventbus.Priority;
 import pw.oxcafebabe.marcusant.eventbus.exceptions.InvalidListenerException;
@@ -597,7 +600,9 @@ public class VoxelGameClient extends ApplicationAdapter {
     public void breakBlock() {
         if (this.getSelectedBlock() != null && this.currentScreen == this.hud) {
             if (this.isRemote()) {
-                // TODO MCPROTO send block break
+                mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
+                mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.START_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.FINISH_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
             } else {
                 this.getWorld().removeBlock(this.getSelectedBlock().x, this.getSelectedBlock().y, this.getSelectedBlock().z);
             }

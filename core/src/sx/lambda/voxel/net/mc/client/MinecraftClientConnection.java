@@ -11,7 +11,9 @@ import org.spacehq.mc.protocol.packet.ingame.server.ServerChatPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
+import org.spacehq.mc.protocol.packet.ingame.server.world.ServerBlockChangePacket;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
+import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiBlockChangePacket;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiChunkDataPacket;
 import org.spacehq.packetlib.Client;
 import org.spacehq.packetlib.event.session.DisconnectedEvent;
@@ -42,13 +44,15 @@ public class MinecraftClientConnection {
         handlerMap.put(ServerMultiChunkDataPacket.class, new MultiChunkDataHandler(game));
         handlerMap.put(ServerPlayerPositionRotationPacket.class, new PlayerPositionHandler(game));
         handlerMap.put(ServerSpawnPlayerPacket.class, new PlayerSpawnHandler(game));
+        handlerMap.put(ServerBlockChangePacket.class, new BlockChangeHandler(game));
+        handlerMap.put(ServerMultiBlockChangePacket.class, new MultiBlockChangeHandler(game));
 
         client.getSession().addListener(new SessionAdapter() {
             @Override
             public void packetReceived(PacketReceivedEvent event) {
-                if(event.getPacket() == null)return;
+                if (event.getPacket() == null) return;
                 PacketHandler handler = handlerMap.get(event.getPacket().getClass());
-                if(handler != null) {
+                if (handler != null) {
                     handler.handle(event.getPacket());
                 }
                 if (event.getPacket() instanceof ServerJoinGamePacket) {

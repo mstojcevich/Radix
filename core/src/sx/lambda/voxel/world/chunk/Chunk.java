@@ -211,7 +211,6 @@ public class Chunk implements IChunk {
         blockList[x][y][z] = -1;
 
         this.addNeighborsToSunlightQueue(x, y, z);
-
     }
 
     private void addNeighborsToSunlightQueue(int x, int y, int z) {// X Y and Z are relative coords, not world coords
@@ -376,18 +375,15 @@ public class Chunk implements IChunk {
 
     private void setupSunlighting() {
         sunlightLevels = new int[size][height][size];
-        for (int x = 0; x < size; x++) {
-            for (int z = 0; z < size; z++) {
-                sunlightLevels[x][height - 1][z] = 16;
-                parentWorld.addToSunlightQueue(new Vec3i(startPosition.x + x, height - 1, startPosition.z + z));
-            }
-
-        }
-
     }
 
     @Override
     public void setSunlight(int x, int y, int z, int level) {
+        setSunlight(x, y, z, level, true);
+    }
+
+    @Override
+    public void setSunlight(int x, int y, int z, int level, boolean updateNeighbors) {
         x %= size;
         z %= size;
         if (x < 0) {
@@ -405,36 +401,37 @@ public class Chunk implements IChunk {
         sunlightChanging = true;
         sunlightChanged = true;
 
-        if (x == 0) {
-            IChunk xMinNeighbor = getWorld().getChunkAtPosition(startPosition.x - 1, startPosition.z);
-            if (xMinNeighbor != null) {
-                getWorld().rerenderChunk(xMinNeighbor);
+        if(updateNeighbors) {
+            if (x == 0) {
+                IChunk xMinNeighbor = getWorld().getChunkAtPosition(startPosition.x - 1, startPosition.z);
+                if (xMinNeighbor != null) {
+                    getWorld().rerenderChunk(xMinNeighbor);
+                }
+
             }
 
-        }
+            if (x == size - 1) {
+                IChunk xPlNeighbor = getWorld().getChunkAtPosition(startPosition.x + 1, startPosition.z);
+                if (xPlNeighbor != null) {
+                    getWorld().rerenderChunk(xPlNeighbor);
+                }
 
-        if (x == size - 1) {
-            IChunk xPlNeighbor = getWorld().getChunkAtPosition(startPosition.x + 1, startPosition.z);
-            if (xPlNeighbor != null) {
-                getWorld().rerenderChunk(xPlNeighbor);
             }
 
-        }
+            if (z == 0) {
+                IChunk zMinNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z - 1);
+                if (zMinNeighbor != null) {
+                    getWorld().rerenderChunk(zMinNeighbor);
+                }
 
-        if (z == 0) {
-            IChunk zMinNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z - 1);
-            if (zMinNeighbor != null) {
-                getWorld().rerenderChunk(zMinNeighbor);
             }
 
-        }
-
-        if (z == size - 1) {
-            IChunk zPlNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z + 1);
-            if (zPlNeighbor != null) {
-                getWorld().rerenderChunk(zPlNeighbor);
+            if (z == size - 1) {
+                IChunk zPlNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z + 1);
+                if (zPlNeighbor != null) {
+                    getWorld().rerenderChunk(zPlNeighbor);
+                }
             }
-
         }
 
     }

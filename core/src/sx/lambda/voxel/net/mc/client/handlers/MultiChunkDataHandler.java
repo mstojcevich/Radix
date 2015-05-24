@@ -49,7 +49,10 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                                     } else {
                                         blockExists = true;
                                     }
-                                    if(!blockExists)id = BuiltInBlockIds.UNKNOWN_ID;
+                                    if(!blockExists) {
+                                        System.out.println(id + " DOESN'T EXIST");
+                                        id = BuiltInBlockIds.UNKNOWN_ID;
+                                    }
                                     ck.addBlock(id, x, cy+y, z, false);
                                     ck.setSunlight(x, cy+y, z, ll, false);
                                 }

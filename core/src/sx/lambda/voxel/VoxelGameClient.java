@@ -546,7 +546,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         addToGLQueue(new Runnable() {
             @Override
             public void run() {
-                Pixmap bi = new Pixmap(1024, 1024, Pixmap.Format.RGB888);
+                Pixmap bi = new Pixmap(1024, 1024, Pixmap.Format.RGBA8888);
                 bi.setColor(1, 1, 1, 1);
                 final int BLOCK_TEX_SIZE = 32;
                 for (Block b : VoxelGameAPI.instance.getBlocks()) {

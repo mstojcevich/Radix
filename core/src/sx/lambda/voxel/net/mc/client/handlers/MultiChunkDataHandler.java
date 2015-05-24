@@ -56,6 +56,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                         }
                         cy += 16;
                     }
+                    ck.finishChangingSunlight();
                 }
             }
         }.start();

@@ -35,6 +35,11 @@ public final class BuiltInBlockIds {
                 FLOWER_THREE_ID = 38,
                 BROWN_MUSHROOM_BLOCK_ID = 99,
                 RED_MUSHROOM_BLOCK_ID = 100,
+                CLAY_ID = 82,
+                SUGAR_CANE_ID = 83,
+                MOSS_STONE_ID = 48,
+                BROWN_MUSHROOM_ID = 39,
+                RED_MUSHROOM_ID = 40,
                 UNKNOWN_ID = 1023;
 
 }

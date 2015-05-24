@@ -448,7 +448,7 @@ public class World implements IWorld {
                                         }
                                     } else {
                                         if (posChunk.getSunlight(x, negY, z) < nextLL) {
-                                            posChunk.setSunlight(x, negY, z, 16);
+                                            posChunk.setSunlight(x, negY, z, nextLL);
                                             sunlightQueue.add(new int[]{x, negY, z});
                                             changedChunks.add(posChunk);
                                         }
@@ -462,7 +462,7 @@ public class World implements IWorld {
                                         }
                                     } else {
                                         if (posChunk.getSunlight(x, negY, z) < nextLL) {
-                                            posChunk.setSunlight(x, negY, z, 16);
+                                            posChunk.setSunlight(x, negY, z, nextLL);
                                             sunlightQueue.add(new int[]{x, negY, z});
                                             changedChunks.add(posChunk);
                                         }

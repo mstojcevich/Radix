@@ -37,7 +37,7 @@ public class MinecraftClientConnection {
 
     public MinecraftClientConnection(final VoxelGameClient game, String hostname, short port) {
         this.game = game;
-        MinecraftProtocol protocol = new MinecraftProtocol("marcusant");
+        MinecraftProtocol protocol = new MinecraftProtocol("marcusant-voxeltest");
         this.client = new Client(hostname, port, protocol, new TcpSessionFactory());
 
         handlerMap.put(ServerChunkDataPacket.class, new ChunkDataHandler(game));

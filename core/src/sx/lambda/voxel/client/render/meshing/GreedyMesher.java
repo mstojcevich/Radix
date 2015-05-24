@@ -32,31 +32,31 @@ public class GreedyMesher implements Mesher {
 
         // Top, bottom
         for (int y = 0; y < voxels[0].length; y++) {
-            Block[][] topBlocks = new Block[voxels.length][voxels[0][0].length];
+            int[][] topBlocks = new int[voxels.length][voxels[0][0].length];
             float[][] topLightLevels = new float[voxels.length][voxels[0][0].length];
-            Block[][] btmBlocks = new Block[voxels.length][voxels[0][0].length];
+            int[][] btmBlocks = new int[voxels.length][voxels[0][0].length];
             float[][] btmLightLevels = new float[voxels.length][voxels[0][0].length];
             for (int x = 0; x < voxels.length; x++) {
                 for (int z = 0; z < voxels[0][0].length; z++) {
                     if (voxels[x][y][z] == null) continue;
                     if (y < voxels[0].length - 1) {
                         if (voxels[x][y + 1][z] == null) {
-                            topBlocks[x][z] = voxels[x][y][z];
+                            topBlocks[x][z] = voxels[x][y][z].getID();
                             topLightLevels[x][z] = lightLevels[x][y + 1][z];
                         } else if (voxels[x][y + 1][z].isTransparent() && !voxels[x][y][z].isTransparent()) {
-                            topBlocks[x][z] = voxels[x][y][z];
+                            topBlocks[x][z] = voxels[x][y][z].getID();
                             topLightLevels[x][z] = lightLevels[x][y + 1][z];
                         }
                     } else {
-                        topBlocks[x][z] = voxels[x][y][z];
+                        topBlocks[x][z] = voxels[x][y][z].getID();
                         topLightLevels[x][z] = 1;
                     }
                     if (y > 0) {
                         if (voxels[x][y - 1][z] == null) {
-                            btmBlocks[x][z] = voxels[x][y][z];
+                            btmBlocks[x][z] = voxels[x][y][z].getID();
                             btmLightLevels[x][z] = lightLevels[x][y - 1][z];
                         } else if (voxels[x][y - 1][z].isTransparent() && !voxels[x][y][z].isTransparent()) {
-                            btmBlocks[x][z] = voxels[x][y][z];
+                            btmBlocks[x][z] = voxels[x][y][z].getID();
                             btmLightLevels[x][z] = lightLevels[x][y - 1][z];
                         }
                     } else {
@@ -71,9 +71,9 @@ public class GreedyMesher implements Mesher {
 
         // East, west
         for (int x = 0; x < voxels.length; x++) {
-            Block[][] westBlocks = new Block[voxels[0][0].length][voxels[0].length];
+            int[][] westBlocks = new int[voxels[0][0].length][voxels[0].length];
             float[][] westLightLevels = new float[voxels[0][0].length][voxels[0].length];
-            Block[][] eastBlocks = new Block[voxels[0][0].length][voxels[0].length];
+            int[][] eastBlocks = new int[voxels[0][0].length][voxels[0].length];
             float[][] eastLightLevels = new float[voxels[0][0].length][voxels[0].length];
             for (int z = 0; z < voxels[0][0].length; z++) {
                 for (int y = 0; y < voxels[0].length; y++) {
@@ -85,10 +85,10 @@ public class GreedyMesher implements Mesher {
                         Block westNeighborBlk = VoxelGameAPI.instance.getBlockByID(
                                 westNeighborChunk.getBlockIdAtPosition(westNeighborX, y, z));
                         if (westNeighborBlk == null) {
-                            westBlocks[z][y] = voxels[x][y][z];
+                            westBlocks[z][y] = voxels[x][y][z].getID();
                             westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX, y, z);
                         } else if (westNeighborBlk.isTransparent() && !voxels[x][y][z].isTransparent()) {
-                            westBlocks[z][y] = voxels[x][y][z];
+                            westBlocks[z][y] = voxels[x][y][z].getID();
                             westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX, y, z);
                         }
                     } else {
@@ -102,10 +102,10 @@ public class GreedyMesher implements Mesher {
                         Block eastNeighborBlk = VoxelGameAPI.instance.getBlockByID(
                                 eastNeighborChunk.getBlockIdAtPosition(eastNeighborX, y, z));
                         if (eastNeighborBlk == null) {
-                            eastBlocks[z][y] = voxels[x][y][z];
+                            eastBlocks[z][y] = voxels[x][y][z].getID();
                             eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX, y, z);
                         } else if (eastNeighborBlk.isTransparent() && !voxels[x][y][z].isTransparent()) {
-                            eastBlocks[z][y] = voxels[x][y][z];
+                            eastBlocks[z][y] = voxels[x][y][z].getID();
                             eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX, y, z);
                         }
                     } else {
@@ -121,9 +121,9 @@ public class GreedyMesher implements Mesher {
 
         // North, south
         for (int z = 0; z < voxels[0][0].length; z++) {
-            Block[][] northBlocks = new Block[voxels.length][voxels[0].length];
+            int[][] northBlocks = new int[voxels.length][voxels[0].length];
             float[][] northLightLevels = new float[voxels.length][voxels[0].length];
-            Block[][] southBlocks = new Block[voxels.length][voxels[0].length];
+            int[][] southBlocks = new int[voxels.length][voxels[0].length];
             float[][] southLightLevels = new float[voxels.length][voxels[0].length];
             for (int x = 0; x < voxels.length; x++) {
                 for (int y = 0; y < voxels[0].length; y++) {
@@ -137,14 +137,14 @@ public class GreedyMesher implements Mesher {
                         Block northNeighborBlock = VoxelGameAPI.instance.getBlockByID(
                                 northNeighborChunk.getBlockIdAtPosition(x, y, northNeighborZ));
                         if (northNeighborBlock == null) {
-                            northBlocks[x][y] = voxels[x][y][z];
+                            northBlocks[x][y] = voxels[x][y][z].getID();
                             northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ);
                         } else if (northNeighborBlock.isTransparent() && !voxels[x][y][z].isTransparent()) {
-                            northBlocks[x][y] = voxels[x][y][z];
+                            northBlocks[x][y] = voxels[x][y][z].getID();
                             northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ);
                         }
                     } else {
-                        northBlocks[x][y] = voxels[x][y][z];
+                        northBlocks[x][y] = voxels[x][y][z].getID();
                         northLightLevels[x][y] = 1;
                     }
 
@@ -152,10 +152,10 @@ public class GreedyMesher implements Mesher {
                         Block southNeighborBlock = VoxelGameAPI.instance.getBlockByID(
                                 southNeighborChunk.getBlockIdAtPosition(x, y, southNeighborZ));
                         if (southNeighborBlock == null) {
-                            southBlocks[x][y] = voxels[x][y][z];
+                            southBlocks[x][y] = voxels[x][y][z].getID();
                             southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ);
                         } else if (southNeighborBlock.isTransparent() && !voxels[x][y][z].isTransparent()) {
-                            southBlocks[x][y] = voxels[x][y][z];
+                            southBlocks[x][y] = voxels[x][y][z].getID();
                             southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ);
                         }
                     } else {
@@ -183,16 +183,16 @@ public class GreedyMesher implements Mesher {
      * @param lls        Light levels of the blocks
      * @param z          Depth on the plane
      */
-    private void greedy(List<Face> outputList, Side side, Block[][] blks, float lls[][], int z, int offsetX, int offsetY) {
+    private void greedy(List<Face> outputList, Side side, int[][] blks, float lls[][], int z, int offsetX, int offsetY) {
         int width = blks.length;
         int height = blks[0].length;
         boolean[][] used = new boolean[blks.length][blks[0].length];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                Block blk = blks[x][y];
+                int blk = blks[x][y];
                 float ll = lls[x][y];
-                if (!used[x][y] && blk != null) {
+                if (!used[x][y] && blk > 0) {
                     used[x][y] = true;
                     int endX = x + 1;
                     int endY = y + 1;
@@ -201,7 +201,7 @@ public class GreedyMesher implements Mesher {
                         if (newX == blks.length) {
                             break;
                         }
-                        Block newBlk = blks[newX][y];
+                        int newBlk = blks[newX][y];
                         float newll = lls[newX][y];
                         if (newBlk == blk && newll == ll && !used[newX][y]) {
                             endX++;
@@ -249,8 +249,8 @@ public class GreedyMesher implements Mesher {
         private final Block block;
         private final float lightLevel;
 
-        public Face(Side side, Block block, float lightLevel, int startX, int startY, int endX, int endY, int z) {
-            this.block = block;
+        public Face(Side side, int block, float lightLevel, int startX, int startY, int endX, int endY, int z) {
+            this.block = VoxelGameAPI.instance.getBlockByID(block);
             this.lightLevel = lightLevel;
             this.x1 = startX;
             this.y1 = startY;

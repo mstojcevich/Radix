@@ -16,13 +16,14 @@ import sx.lambda.voxel.api.events.render.EventChunkRender;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.client.render.meshing.GreedyMesher;
-import sx.lambda.voxel.client.render.meshing.Mesher;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
 
+import java.util.List;
+
 public class Chunk implements IChunk {
 
-    private final transient Mesher mesher;
+    private final transient GreedyMesher mesher;
     private final int size;
     private final int height;
     /**
@@ -43,6 +44,10 @@ public class Chunk implements IChunk {
     private transient boolean sunlightChanged;
     private boolean setup;
     private boolean cleanedUp;
+
+    private List<GreedyMesher.Face> transparentFaces;
+    private List<GreedyMesher.Face> opaqueFaces;
+    private boolean meshing, meshed, meshWhenDone;
 
     public Chunk(IWorld world, Vec3i startPosition, int[][][] ids) {
         this.parentWorld = world;
@@ -118,49 +123,31 @@ public class Chunk implements IChunk {
 
         sunlightChanged = false;
 
-        final Block[][][] transparent = new Block[size][height][size];
-        final Block[][][] opaque = new Block[size][height][size];
-        eachBlock(new EachBlockCallee() {
-            @Override
-            public void call(Block block, int x, int y, int z) {
-                if (block != null) {
-                    if (block.isTransparent())
-                        transparent[x][y][z] = block;
-                    else
-                        opaque[x][y][z] = block;
+        if(meshing) {
+            meshWhenDone = true;
+        } else {
+            meshing = true;
+            new Thread("Chunk Meshing") {
+                @Override
+                public void run() {
+                    updateFaces();
                 }
-            }
-        });
-
-        if(opaqueModel != null)
-            opaqueModel.dispose();
-        if(transparentModel != null)
-            transparentModel.dispose();
-
-        Mesh opaqueMesh = mesher.meshVoxels(meshBuilder, opaque, lightLevels);
-        Mesh transparentMesh = mesher.meshVoxels(meshBuilder, transparent, lightLevels);
-        modelBuilder.begin();
-        modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueMesh, GL20.GL_TRIANGLES,
-                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap())));
-        opaqueModel = modelBuilder.end();
-        modelBuilder.begin();
-        modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), transparentMesh, GL20.GL_TRIANGLES,
-                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
-                        new BlendingAttribute()));
-        transparentModel = modelBuilder.end();
-
-        opaqueModelInstance = new ModelInstance(opaqueModel);
-        transparentModelInstance = new ModelInstance(transparentModel);
-
-        VoxelGameAPI.instance.getEventManager().push(new EventChunkRender(this));
+            }.start();
+        }
     }
 
     @Override
     public void render(ModelBatch batch) {
         if (cleanedUp) return;
 
-        if (sunlightChanged && !sunlightChanging) {
+        if (sunlightChanged && !sunlightChanging || (!meshing && !meshed && meshWhenDone)) {
+            meshWhenDone = false;
             rerender();
+        }
+
+        if(!meshing && meshed) {
+            updateModelInstances();
+            meshed = false;
         }
 
         if(opaqueModelInstance != null) {
@@ -523,6 +510,49 @@ public class Chunk implements IChunk {
         if (y > height - 1) return null;
         if (y < 0) return null;
         return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
+    }
+
+    private void updateModelInstances() {
+        if(opaqueModel != null)
+            opaqueModel.dispose();
+        if(transparentModel != null)
+            transparentModel.dispose();
+
+        Mesh opaqueMesh = mesher.meshFaces(opaqueFaces, meshBuilder);
+        Mesh transparentMesh = mesher.meshFaces(transparentFaces, meshBuilder);
+        modelBuilder.begin();
+        modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueMesh, GL20.GL_TRIANGLES,
+                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap())));
+        opaqueModel = modelBuilder.end();
+        modelBuilder.begin();
+        modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), transparentMesh, GL20.GL_TRIANGLES,
+                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
+                        new BlendingAttribute()));
+        transparentModel = modelBuilder.end();
+
+        opaqueModelInstance = new ModelInstance(opaqueModel);
+        transparentModelInstance = new ModelInstance(transparentModel);
+    }
+
+    private void updateFaces() {
+        final Block[][][] transparent = new Block[size][height][size];
+        final Block[][][] opaque = new Block[size][height][size];
+        eachBlock(new EachBlockCallee() {
+            @Override
+            public void call(Block block, int x, int y, int z) {
+                if (block != null) {
+                    if (block.isTransparent())
+                        transparent[x][y][z] = block;
+                    else
+                        opaque[x][y][z] = block;
+                }
+            }
+        });
+        opaqueFaces = mesher.getFaces(opaque, lightLevels);
+        transparentFaces = mesher.getFaces(transparent, lightLevels);
+        meshing = false;
+        meshed = true;
+        VoxelGameAPI.instance.getEventManager().push(new EventChunkRender(Chunk.this));
     }
 
 }

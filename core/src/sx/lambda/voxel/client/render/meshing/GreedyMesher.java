@@ -25,9 +25,14 @@ public class GreedyMesher implements Mesher {
         this.chunk = chunk;
     }
 
-
     @Override
     public Mesh meshVoxels(MeshBuilder builder, Block[][][] voxels, float[][][] lightLevels) {
+        List<Face> faces = getFaces(voxels, lightLevels);
+
+        return meshFaces(faces, builder);
+    }
+
+    public List<Face> getFaces(Block[][][] voxels, float[][][] lightLevels) {
         List<Face> faces = new ArrayList<>();
 
         // Top, bottom
@@ -169,11 +174,7 @@ public class GreedyMesher implements Mesher {
             greedy(faces, Side.SOUTH, southBlocks, southLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
         }
 
-        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
-        for (Face f : faces) {
-            f.render(builder);
-        }
-        return builder.end();
+        return faces;
     }
 
     /**
@@ -233,6 +234,14 @@ public class GreedyMesher implements Mesher {
         }
     }
 
+    public Mesh meshFaces(List<Face> faces, MeshBuilder builder) {
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        for (Face f : faces) {
+            f.render(builder);
+        }
+        return builder.end();
+    }
+
     @Override
     public void enableAlpha() {
         this.useAlpha = true;
@@ -243,7 +252,7 @@ public class GreedyMesher implements Mesher {
         this.useAlpha = false;
     }
 
-    private static class Face {
+    public static class Face {
         private final Side side;
         private final int x1, y1, x2, y2, z;
         private final Block block;

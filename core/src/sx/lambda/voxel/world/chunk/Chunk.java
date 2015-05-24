@@ -123,7 +123,7 @@ public class Chunk implements IChunk {
 
         sunlightChanged = false;
 
-        if(meshing) {
+        if(meshing || parentWorld.getNumChunksMeshing() >= 2) {
             meshWhenDone = true;
         } else {
             meshing = true;
@@ -535,6 +535,7 @@ public class Chunk implements IChunk {
     }
 
     private void updateFaces() {
+        parentWorld.incrChunksMeshing();
         final Block[][][] transparent = new Block[size][height][size];
         final Block[][][] opaque = new Block[size][height][size];
         eachBlock(new EachBlockCallee() {
@@ -552,6 +553,7 @@ public class Chunk implements IChunk {
         transparentFaces = mesher.getFaces(transparent, lightLevels);
         meshing = false;
         meshed = true;
+        parentWorld.decrChunksMeshing();
         VoxelGameAPI.instance.getEventManager().push(new EventChunkRender(Chunk.this));
     }
 

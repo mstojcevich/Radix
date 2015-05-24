@@ -54,6 +54,8 @@ public class World implements IWorld {
 
     private boolean shouldUpdateLight, updatingLight;
 
+    private int chunksMeshing;
+
     public World(boolean remote, boolean server) {
         this.remote = remote;
         this.server = server;
@@ -625,6 +627,18 @@ public class World implements IWorld {
         }
         modelBatch.dispose();
         modelBatch = null;
+    }
+
+    public int getNumChunksMeshing() {
+        return chunksMeshing;
+    }
+
+    public void incrChunksMeshing() {
+        chunksMeshing++;
+    }
+
+    public void decrChunksMeshing() {
+        chunksMeshing--;
     }
 
 }

@@ -64,4 +64,9 @@ public interface IWorld {
     float getLightLevel(Vec3i pos);
 
     void cleanup();
+
+    int getNumChunksMeshing();
+    void incrChunksMeshing();
+    void decrChunksMeshing();
+
 }

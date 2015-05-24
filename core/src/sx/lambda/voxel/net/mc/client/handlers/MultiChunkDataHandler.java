@@ -39,6 +39,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                             for(int z = 0; z < 16; z++) {
                                 for(int y = 0; y < 16; y++) {
                                     int id = c.getBlocks().getBlock(x, y, z);
+                                    int ll = c.getBlockLight().get(x, y, z);
                                     boolean blockExists = false;
                                     if(id != 0) {
                                         for (Block b : VoxelGameAPI.instance.getBlocks()) {
@@ -49,6 +50,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                                     }
                                     if(!blockExists)id = 0;
                                     ck.addBlock(id, x, cy+y, z, false);
+                                    ck.setSunlight(x, cy+y, z, ll, false);
                                 }
                             }
                         }

@@ -53,7 +53,7 @@ public class MinecraftClientConnection {
                 }
                 if (event.getPacket() instanceof ServerJoinGamePacket) {
                     event.getSession().send(new ClientChatPacket("Hello, this is a test of VoxelTest."));
-                    event.getSession().send(new ClientSettingsPacket("en_US", 2, ChatVisibility.FULL, false, SkinPart.HAT));
+                    event.getSession().send(new ClientSettingsPacket("en_US", 1, ChatVisibility.FULL, false, SkinPart.HAT));
                 } else if (event.getPacket() instanceof ServerChatPacket) {
                     Message message = event.<ServerChatPacket>getPacket().getMessage();
                     System.out.println("Received Message: " + message.getFullText());

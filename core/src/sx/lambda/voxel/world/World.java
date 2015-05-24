@@ -11,7 +11,6 @@ import sx.lambda.voxel.api.events.worldgen.EventFinishChunkGen;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.entity.Entity;
 import sx.lambda.voxel.entity.EntityPosition;
-import sx.lambda.voxel.net.packet.client.PacketUnloadChunk;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.chunk.Chunk;
 import sx.lambda.voxel.world.chunk.IChunk;
@@ -114,18 +113,27 @@ public class World implements IWorld {
             processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
         }
         for (IChunk c : chunksToRerender) {
-            c.rerender();
-            chunksToRerender.remove(c);
+            if(VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                    VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
+                c.rerender();
+                chunksToRerender.remove(c);
+            }
         }
 
         long renderStartNS = System.nanoTime();
 
         modelBatch.begin(VoxelGameClient.getInstance().getCamera());
         for (IChunk c : this.chunkList) {
-            c.render(modelBatch);
+            if(VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                    VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
+                c.render(modelBatch);
+            }
         }
         for (IChunk c : this.chunkList) {
-            c.renderWater(modelBatch);
+            if(VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                    VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
+                c.renderWater(modelBatch);
+            }
         }
         modelBatch.end();
         if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders

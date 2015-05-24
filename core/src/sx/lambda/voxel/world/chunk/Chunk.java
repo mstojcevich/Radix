@@ -43,7 +43,6 @@ public class Chunk implements IChunk {
     private transient boolean sunlightChanged;
     private boolean setup;
     private boolean cleanedUp;
-    private boolean rerenderNext;
 
     public Chunk(IWorld world, Vec3i startPosition, int[][][] ids) {
         this.parentWorld = world;
@@ -160,9 +159,8 @@ public class Chunk implements IChunk {
     public void render(ModelBatch batch) {
         if (cleanedUp) return;
 
-        if ((sunlightChanged && !sunlightChanging) || rerenderNext) {
+        if (sunlightChanged && !sunlightChanging) {
             rerender();
-            rerenderNext = false;
         }
 
         if(opaqueModelInstance != null) {
@@ -477,7 +475,6 @@ public class Chunk implements IChunk {
     @Override
     public void finishChangingSunlight() {
         sunlightChanging = false;
-        rerenderNext = true;
     }
 
     @Override

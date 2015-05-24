@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader
 import com.badlogic.gdx.math.MathUtils
 import groovy.transform.CompileStatic
+import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
 import sx.lambda.voxel.entity.EntityPosition
@@ -54,8 +55,9 @@ class Player extends LivingEntity implements Serializable {
     public void onUpdate() {
         super.onUpdate();
         if (moved) {
-            if (VoxelGameClient.instance.getServerChanCtx() != null) {
-                VoxelGameClient.instance.getServerChanCtx().writeAndFlush(new PacketPlayerPosition(this.getPosition()))
+            if(VoxelGameClient.instance.minecraftConn != null) {
+                VoxelGameClient.instance.minecraftConn.client.session.send(new ClientPlayerPositionRotationPacket(
+                        this.onGround, this.position.x,  this.position.y, this.position.z, this.rotation.yaw, this.rotation.pitch))
             }
             moved = false
         }

@@ -16,13 +16,14 @@ import sx.lambda.voxel.api.events.render.EventChunkRender;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.client.render.meshing.GreedyMesher;
-import sx.lambda.voxel.client.render.meshing.Mesher;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
 
+import java.util.List;
+
 public class Chunk implements IChunk {
 
-    private final transient Mesher mesher;
+    private final transient GreedyMesher mesher;
     private final int size;
     private final int height;
     /**
@@ -43,7 +44,10 @@ public class Chunk implements IChunk {
     private transient boolean sunlightChanged;
     private boolean setup;
     private boolean cleanedUp;
-    private boolean rerenderNext;
+
+    private List<GreedyMesher.Face> transparentFaces;
+    private List<GreedyMesher.Face> opaqueFaces;
+    private boolean meshing, meshed, meshWhenDone;
 
     public Chunk(IWorld world, Vec3i startPosition, int[][][] ids) {
         this.parentWorld = world;
@@ -119,50 +123,31 @@ public class Chunk implements IChunk {
 
         sunlightChanged = false;
 
-        final Block[][][] transparent = new Block[size][height][size];
-        final Block[][][] opaque = new Block[size][height][size];
-        eachBlock(new EachBlockCallee() {
-            @Override
-            public void call(Block block, int x, int y, int z) {
-                if (block != null) {
-                    if (block.isTransparent())
-                        transparent[x][y][z] = block;
-                    else
-                        opaque[x][y][z] = block;
+        if(meshing || parentWorld.getNumChunksMeshing() >= 2) {
+            meshWhenDone = true;
+        } else {
+            meshing = true;
+            new Thread("Chunk Meshing") {
+                @Override
+                public void run() {
+                    updateFaces();
                 }
-            }
-        });
-
-        if(opaqueModel != null)
-            opaqueModel.dispose();
-        if(transparentModel != null)
-            transparentModel.dispose();
-
-        Mesh opaqueMesh = mesher.meshVoxels(meshBuilder, opaque, lightLevels);
-        Mesh transparentMesh = mesher.meshVoxels(meshBuilder, transparent, lightLevels);
-        modelBuilder.begin();
-        modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueMesh, GL20.GL_TRIANGLES,
-                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap())));
-        opaqueModel = modelBuilder.end();
-        modelBuilder.begin();
-        modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), transparentMesh, GL20.GL_TRIANGLES,
-                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
-                        new BlendingAttribute()));
-        transparentModel = modelBuilder.end();
-
-        opaqueModelInstance = new ModelInstance(opaqueModel);
-        transparentModelInstance = new ModelInstance(transparentModel);
-
-        VoxelGameAPI.instance.getEventManager().push(new EventChunkRender(this));
+            }.start();
+        }
     }
 
     @Override
     public void render(ModelBatch batch) {
         if (cleanedUp) return;
 
-        if ((sunlightChanged && !sunlightChanging) || rerenderNext) {
+        if(!meshing && meshed) {
+            updateModelInstances();
+            meshed = false;
+        }
+
+        if (sunlightChanged && !sunlightChanging || (!meshing && !meshed && meshWhenDone)) {
+            meshWhenDone = false;
             rerender();
-            rerenderNext = false;
         }
 
         if(opaqueModelInstance != null) {
@@ -179,7 +164,7 @@ public class Chunk implements IChunk {
     @Override
     public void eachBlock(EachBlockCallee callee) {
         for (int x = 0; x < size; x++) {
-            for (int y = 0; y < height; y++) {
+            for (int y = 0; y < highestPoint+1; y++) {
                 for (int z = 0; z < size; z++) {
                     Block blk = VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
                     callee.call(blk, x, y, z);
@@ -208,10 +193,9 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void removeBlock(Vec3i Vec3i) {
-        int x = Vec3i.x % size;
-        int y = Vec3i.y;
-        int z = Vec3i.z % size;
+    public void removeBlock(int x, int y, int z) {
+        x = x % size;
+        z = z % size;
         if (x < 0) {
             x += size;
         }
@@ -227,7 +211,6 @@ public class Chunk implements IChunk {
         blockList[x][y][z] = -1;
 
         this.addNeighborsToSunlightQueue(x, y, z);
-
     }
 
     private void addNeighborsToSunlightQueue(int x, int y, int z) {// X Y and Z are relative coords, not world coords
@@ -305,10 +288,14 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void addBlock(int block, Vec3i position) {
-        int x = position.x % size;
-        int y = position.y;
-        int z = position.z % size;
+    public void addBlock(int block, int x, int y, int z) {
+        addBlock(block, x, y, z, true);
+    }
+
+    @Override
+    public void addBlock(int block, int x, int y, int z, boolean updateSunlight) {
+        x = x % size;
+        z = z % size;
         if (x < 0) {
             x += size;
         }
@@ -317,17 +304,15 @@ public class Chunk implements IChunk {
             z += size;
         }
 
-
         if (y > height - 1) return;
-
 
         blockList[x][y][z] = block;
         if (block > 0) {
             highestPoint = Math.max(highestPoint, y);
         }
 
-
-        getWorld().addToSunlightRemovalQueue(new int[]{x + startPosition.x, y + startPosition.y, z + startPosition.z});
+        if(updateSunlight)
+            getWorld().addToSunlightRemovalQueue(new int[]{x + startPosition.x, y + startPosition.y, z + startPosition.z});
     }
 
     @Override
@@ -371,29 +356,24 @@ public class Chunk implements IChunk {
         for (int x = 0; x < ints.length; x++) {
             for (int z = 0; z < ints[0][0].length; z++) {
                 for (int y = 0; y < ints[0].length; y++) {
-                    highestPoint = Math.max(y, highestPoint);
+                    if(ints[x][y][z] > 0)
+                        highestPoint = Math.max(y, highestPoint);
                 }
-
             }
-
         }
-
     }
 
     private void setupSunlighting() {
         sunlightLevels = new int[size][height][size];
-        for (int x = 0; x < size; x++) {
-            for (int z = 0; z < size; z++) {
-                sunlightLevels[x][height - 1][z] = 16;
-                parentWorld.addToSunlightQueue(new int[]{startPosition.x + x, height - 1, startPosition.z + z});
-            }
-
-        }
-
     }
 
     @Override
     public void setSunlight(int x, int y, int z, int level) {
+        setSunlight(x, y, z, level, true);
+    }
+
+    @Override
+    public void setSunlight(int x, int y, int z, int level, boolean updateNeighbors) {
         x %= size;
         z %= size;
         if (x < 0) {
@@ -411,36 +391,37 @@ public class Chunk implements IChunk {
         sunlightChanging = true;
         sunlightChanged = true;
 
-        if (x == 0) {
-            IChunk xMinNeighbor = getWorld().getChunkAtPosition(startPosition.x - 1, startPosition.z);
-            if (xMinNeighbor != null) {
-                getWorld().rerenderChunk(xMinNeighbor);
+        if(updateNeighbors) {
+            if (x == 0) {
+                IChunk xMinNeighbor = getWorld().getChunkAtPosition(startPosition.x - 1, startPosition.z);
+                if (xMinNeighbor != null) {
+                    getWorld().rerenderChunk(xMinNeighbor);
+                }
+
             }
 
-        }
+            if (x == size - 1) {
+                IChunk xPlNeighbor = getWorld().getChunkAtPosition(startPosition.x + 1, startPosition.z);
+                if (xPlNeighbor != null) {
+                    getWorld().rerenderChunk(xPlNeighbor);
+                }
 
-        if (x == size - 1) {
-            IChunk xPlNeighbor = getWorld().getChunkAtPosition(startPosition.x + 1, startPosition.z);
-            if (xPlNeighbor != null) {
-                getWorld().rerenderChunk(xPlNeighbor);
             }
 
-        }
+            if (z == 0) {
+                IChunk zMinNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z - 1);
+                if (zMinNeighbor != null) {
+                    getWorld().rerenderChunk(zMinNeighbor);
+                }
 
-        if (z == 0) {
-            IChunk zMinNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z - 1);
-            if (zMinNeighbor != null) {
-                getWorld().rerenderChunk(zMinNeighbor);
             }
 
-        }
-
-        if (z == size - 1) {
-            IChunk zPlNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z + 1);
-            if (zPlNeighbor != null) {
-                getWorld().rerenderChunk(zPlNeighbor);
+            if (z == size - 1) {
+                IChunk zPlNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z + 1);
+                if (zPlNeighbor != null) {
+                    getWorld().rerenderChunk(zPlNeighbor);
+                }
             }
-
         }
 
     }
@@ -467,7 +448,6 @@ public class Chunk implements IChunk {
     @Override
     public void finishChangingSunlight() {
         sunlightChanging = false;
-        rerenderNext = true;
     }
 
     @Override
@@ -516,6 +496,51 @@ public class Chunk implements IChunk {
         if (y > height - 1) return null;
         if (y < 0) return null;
         return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
+    }
+
+    private void updateModelInstances() {
+        if(opaqueModel != null)
+            opaqueModel.dispose();
+        if(transparentModel != null)
+            transparentModel.dispose();
+
+        Mesh opaqueMesh = mesher.meshFaces(opaqueFaces, meshBuilder);
+        Mesh transparentMesh = mesher.meshFaces(transparentFaces, meshBuilder);
+        modelBuilder.begin();
+        modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueMesh, GL20.GL_TRIANGLES,
+                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap())));
+        opaqueModel = modelBuilder.end();
+        modelBuilder.begin();
+        modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), transparentMesh, GL20.GL_TRIANGLES,
+                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
+                        new BlendingAttribute()));
+        transparentModel = modelBuilder.end();
+
+        opaqueModelInstance = new ModelInstance(opaqueModel);
+        transparentModelInstance = new ModelInstance(transparentModel);
+    }
+
+    private void updateFaces() {
+        parentWorld.incrChunksMeshing();
+        final Block[][][] transparent = new Block[size][highestPoint+1][size];
+        final Block[][][] opaque = new Block[size][highestPoint+1][size];
+        eachBlock(new EachBlockCallee() {
+            @Override
+            public void call(Block block, int x, int y, int z) {
+                if (block != null) {
+                    if (block.isTransparent())
+                        transparent[x][y][z] = block;
+                    else
+                        opaque[x][y][z] = block;
+                }
+            }
+        });
+        opaqueFaces = mesher.getFaces(opaque, lightLevels);
+        transparentFaces = mesher.getFaces(transparent, lightLevels);
+        meshing = false;
+        meshed = true;
+        parentWorld.decrChunksMeshing();
+        VoxelGameAPI.instance.getEventManager().push(new EventChunkRender(Chunk.this));
     }
 
 }

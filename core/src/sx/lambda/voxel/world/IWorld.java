@@ -35,9 +35,9 @@ public interface IWorld {
      */
     float applyGravity(float velocity, long ms);
 
-    void removeBlock(Vec3i Vec3i);
+    void removeBlock(int x, int y, int z);
 
-    void addBlock(int block, Vec3i position);
+    void addBlock(int block, int x, int y, int z);
 
     IChunk[] getChunksInRange(EntityPosition pos, int viewDistance);
 
@@ -72,4 +72,9 @@ public interface IWorld {
     float getLightLevel(Vec3i pos);
 
     void cleanup();
+
+    int getNumChunksMeshing();
+    void incrChunksMeshing();
+    void decrChunksMeshing();
+
 }

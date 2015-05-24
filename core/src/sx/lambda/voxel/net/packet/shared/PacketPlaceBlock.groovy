@@ -13,16 +13,16 @@ import sx.lambda.voxel.util.Vec3i
 class PacketPlaceBlock implements SharedPacket {
 
     private final int block
-    private final Vec3i pos
+    private final int x, y, z
 
-    public PacketPlaceBlock(Vec3i pos, int block) {
-        this.pos = pos
+    public PacketPlaceBlock(int x, int y, int z, int block) {
+        this.x = x; this.y = y; this.z = z;
         this.block = block
     }
 
     @Override
     void handleServerReceive(VoxelGameServer server, ChannelHandlerContext ctx) {
-        server.world.addBlock(block, pos)
+        server.world.addBlock(block, x, y, z)
         for (ConnectedClient client : server.getClientList()) {
             if (client.stage == ConnectionStage.PLAY) {
                 client.context.writeAndFlush(this)
@@ -32,7 +32,7 @@ class PacketPlaceBlock implements SharedPacket {
 
     @Override
     void handleClientReceive(ChannelHandlerContext ctx) {
-        VoxelGameClient.instance.world.addBlock(block, pos)
+        VoxelGameClient.instance.world.addBlock(block, x, y, z)
     }
 
 }

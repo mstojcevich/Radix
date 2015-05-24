@@ -33,6 +33,7 @@ allprojects {
         maven { url "http://repo.maven.apache.org/maven2" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven { url "http://repo.spacehq.org/content/repositories/snapshots" }
     }
 }
 
@@ -51,9 +52,9 @@ project(":core") {
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile group: 'io.netty', name: 'netty-codec', version:'5.0.0.Alpha2'
-        compile group: 'io.netty', name: 'netty-handler', version:'5.0.0.Alpha2'
+        compile group: 'io.netty', name: 'netty-all', version:'4.0.28.Final'
         compile group: 'org.codehaus.groovy', name: 'groovy', version:'2.4.3'
+        compile group: "org.spacehq", name: 'mcprotocollib', version:'1.8-SNAPSHOT'
         compile name: 'iridiumeventbus-v0'
     }
 }

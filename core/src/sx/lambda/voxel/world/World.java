@@ -54,6 +54,8 @@ public class World implements IWorld {
 
     private boolean shouldUpdateLight, updatingLight;
 
+    private int chunksMeshing;
+
     public World(boolean remote, boolean server) {
         this.remote = remote;
         this.server = server;
@@ -169,39 +171,37 @@ public class World implements IWorld {
     }
 
     @Override
-    public void removeBlock(final Vec3i position) {
+    public void removeBlock(int x, int y, int z) {
         synchronized (this) {
-            final IChunk c = this.getChunkAtPosition(position);
+            final IChunk c = this.getChunkAtPosition(x, z);
             if (c != null) {
-                c.removeBlock(position);
+                c.removeBlock(x, y, z);
                 if (!server) {
-                    rerenderChunk(c);
-
-                    if (Math.abs(position.x + (position.x < 0 ? 1 : 0)) % 16 == 15) {
-                        if (position.x < 0) {
-                            rerenderChunk(getChunkAtPosition(position.x - 1, position.z));
+                    if (Math.abs(x + (x < 0 ? 1 : 0)) % 16 == 15) {
+                        if (x < 0) {
+                            rerenderChunk(getChunkAtPosition(x - 1, z));
                         } else {
-                            rerenderChunk(getChunkAtPosition(position.x + 1, position.z));
+                            rerenderChunk(getChunkAtPosition(x + 1, z));
                         }
-                    } else if (Math.abs(position.x + (position.x < 0 ? 1 : 0)) % 16 == 0) {
-                        if (position.x < 0) {
-                            rerenderChunk(getChunkAtPosition(position.x + 1, position.z));
+                    } else if (Math.abs(x + (x < 0 ? 1 : 0)) % 16 == 0) {
+                        if (x < 0) {
+                            rerenderChunk(getChunkAtPosition(x + 1, z));
                         } else {
-                            rerenderChunk(getChunkAtPosition(position.x - 1, position.z));
+                            rerenderChunk(getChunkAtPosition(x - 1, z));
                         }
                     }
 
-                    if (Math.abs(position.z + (position.z < 0 ? 1 : 0)) % 16 == 15) {
-                        if (position.z < 0) {
-                            rerenderChunk(getChunkAtPosition(position.x, position.z - 1));
+                    if (Math.abs(z + (z < 0 ? 1 : 0)) % 16 == 15) {
+                        if (z < 0) {
+                            rerenderChunk(getChunkAtPosition(x, z - 1));
                         } else {
-                            rerenderChunk(getChunkAtPosition(position.x, position.z + 1));
+                            rerenderChunk(getChunkAtPosition(x, z + 1));
                         }
-                    } else if (Math.abs(position.z + (position.z < 0 ? 1 : 0)) % 16 == 0) {
-                        if (position.z < 0) {
-                            rerenderChunk(getChunkAtPosition(position.x, position.z + 1));
+                    } else if (Math.abs(z + (z < 0 ? 1 : 0)) % 16 == 0) {
+                        if (z < 0) {
+                            rerenderChunk(getChunkAtPosition(x, z + 1));
                         } else {
-                            rerenderChunk(getChunkAtPosition(position.x, position.z - 1));
+                            rerenderChunk(getChunkAtPosition(x, z - 1));
                         }
                     }
                 }
@@ -210,13 +210,10 @@ public class World implements IWorld {
     }
 
     @Override
-    public void addBlock(int block, final Vec3i position) {
+    public void addBlock(int block, int x, int y, int z) {
         synchronized (this) {
-            final IChunk c = this.getChunkAtPosition(position);
-            c.addBlock(block, position);
-            if (!server) {
-                rerenderChunk(c);
-            }
+            final IChunk c = this.getChunkAtPosition(x, z);
+            c.addBlock(block, x, y, z);
         }
     }
 
@@ -242,9 +239,6 @@ public class World implements IWorld {
             this.chunkList.remove(c);
         }
         addChunk(chunk, chunk.getStartPosition().x, chunk.getStartPosition().z);
-        if (!server) {
-            rerenderChunk(chunk);
-        }
 
         addSun(chunk);
     }
@@ -269,10 +263,6 @@ public class World implements IWorld {
                     }
                 });
                 chunkMapX.get(x).remove(z);
-                if (remote) {
-                    VoxelGameClient.getInstance().getServerChanCtx().writeAndFlush(new PacketUnloadChunk(chunk.getStartPosition()));
-                }
-
             }
         }
     }
@@ -299,9 +289,6 @@ public class World implements IWorld {
             VoxelGameAPI.instance.getEventManager().push(new EventFinishChunkGen(c));
             addChunk(c, startX, startZ);
             addSun(c);
-            if (!server) {
-                rerenderChunk(c);
-            }
             return c;
         } else {
             return foundChunk;
@@ -643,6 +630,18 @@ public class World implements IWorld {
         }
         modelBatch.dispose();
         modelBatch = null;
+    }
+
+    public int getNumChunksMeshing() {
+        return chunksMeshing;
+    }
+
+    public void incrChunksMeshing() {
+        chunksMeshing++;
+    }
+
+    public void decrChunksMeshing() {
+        chunksMeshing--;
     }
 
 }

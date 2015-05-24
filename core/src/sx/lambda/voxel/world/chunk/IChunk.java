@@ -24,9 +24,11 @@ public interface IChunk extends Serializable {
     Block getBlockAtPosition(int x, int y, int z);
     Block getBlockAtPosition(Vec3i position);
 
-    void removeBlock(Vec3i Vec3i);
+    void removeBlock(int x, int y, int z);
 
-    void addBlock(int block, Vec3i position);
+    void addBlock(int block, int x, int y, int z);
+
+    void addBlock(int block, int x, int y, int z, boolean updateSunlight);
 
     Vec3i getStartPosition();
 
@@ -41,6 +43,8 @@ public interface IChunk extends Serializable {
     void eachBlock(EachBlockCallee action);
 
     void setSunlight(int x, int y, int z, int level);
+
+    void setSunlight(int x, int y, int z, int level, boolean updateNeighbors);
 
     int getSunlight(int x, int y, int z);
 

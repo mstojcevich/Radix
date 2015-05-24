@@ -21,6 +21,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.netty.channel.ChannelHandlerContext;
+import org.spacehq.mc.protocol.data.game.ItemStack;
+import org.spacehq.mc.protocol.data.game.Position;
+import org.spacehq.mc.protocol.data.game.values.Face;
+import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerPlaceBlockPacket;
 import pw.oxcafebabe.marcusant.eventbus.EventListener;
 import pw.oxcafebabe.marcusant.eventbus.Priority;
 import pw.oxcafebabe.marcusant.eventbus.exceptions.InvalidListenerException;
@@ -33,10 +37,10 @@ import sx.lambda.voxel.client.gui.screens.IngameHUD;
 import sx.lambda.voxel.client.gui.screens.MainMenu;
 import sx.lambda.voxel.client.gui.transition.SlideUpAnimation;
 import sx.lambda.voxel.client.gui.transition.TransitionAnimation;
-import sx.lambda.voxel.client.net.ClientConnection;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.entity.EntityRotation;
 import sx.lambda.voxel.entity.player.Player;
+import sx.lambda.voxel.net.mc.client.MinecraftClientConnection;
 import sx.lambda.voxel.net.packet.client.PacketLeaving;
 import sx.lambda.voxel.net.packet.shared.PacketBreakBlock;
 import sx.lambda.voxel.net.packet.shared.PacketPlaceBlock;
@@ -81,12 +85,13 @@ public class VoxelGameClient extends ApplicationAdapter {
     private Renderer renderer;
     private TransitionAnimation transitionAnimation;
     private boolean remote;
-    private ChannelHandlerContext serverChanCtx;
     private GameRenderer gameRenderer;
     private Texture blockTextureAtlas;
     private PerspectiveCamera camera;
     private OrthographicCamera hudCamera;
     private SpriteBatch guiBatch;
+
+    private MinecraftClientConnection mcClientConn;
 
     private MovementHandler movementHandler = new MovementHandler(this);
     private RepeatedTask[] handlers = new RepeatedTask[]{new WorldLoader(this), movementHandler, new EntityUpdater(this), new LightUpdater(this)};
@@ -229,9 +234,9 @@ public class VoxelGameClient extends ApplicationAdapter {
     public void dispose() {
         super.dispose();
         done = true;
-        if (isRemote() && this.serverChanCtx != null) {
-            this.serverChanCtx.writeAndFlush(new PacketLeaving("Game closed"));
-            this.serverChanCtx.disconnect();
+        if (isRemote()) {
+            if(mcClientConn != null)
+                mcClientConn.getClient().getSession().disconnect("Closing game");
         }
 
         if(android) {
@@ -415,12 +420,8 @@ public class VoxelGameClient extends ApplicationAdapter {
         return remote;
     }
 
-    public ChannelHandlerContext getServerChanCtx() {
-        return serverChanCtx;
-    }
-
-    public void setServerChanCtx(ChannelHandlerContext ctx) {
-        serverChanCtx = ctx;
+    public MinecraftClientConnection getMinecraftConn() {
+        return mcClientConn;
     }
 
     public void handleCriticalException(Exception ex) {
@@ -472,7 +473,7 @@ public class VoxelGameClient extends ApplicationAdapter {
             @Override
             public void run() {
                 try {
-                    new ClientConnection(hostname, port).start();
+                    (mcClientConn = new MinecraftClientConnection(VoxelGameClient.this, hostname, port)).start();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -493,12 +494,7 @@ public class VoxelGameClient extends ApplicationAdapter {
                 setRenderer(null);
                 getWorld().cleanup();
                 if (isRemote()) {
-                    if (getServerChanCtx() != null) {
-                        getServerChanCtx().writeAndFlush(new PacketLeaving("Leaving"));
-                        getServerChanCtx().disconnect();
-                        setServerChanCtx(null);
-                    }
-
+                    mcClientConn.getClient().getSession().disconnect("Exiting world");
                 }
 
                 world = null;
@@ -604,10 +600,10 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     public void breakBlock() {
         if (this.getSelectedBlock() != null && this.currentScreen == this.hud) {
-            if (this.isRemote() && this.serverChanCtx != null) {
-                this.serverChanCtx.writeAndFlush(new PacketBreakBlock(this.getSelectedBlock()));
+            if (this.isRemote()) {
+                // TODO MCPROTO send block break
             } else {
-                this.getWorld().removeBlock(this.getSelectedBlock());
+                this.getWorld().removeBlock(this.getSelectedBlock().x, this.getSelectedBlock().y, this.getSelectedBlock().z);
             }
             updateSelectedBlock();
         }
@@ -615,13 +611,12 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     public void placeBlock() {
         if (this.getNextPlacePos() != null && this.currentScreen == this.hud) {
-            if (this.isRemote() && this.serverChanCtx != null) {
-                this.serverChanCtx.writeAndFlush(new PacketPlaceBlock(
-                        this.getNextPlacePos(),
-                        this.getPlayer().getItemInHand()
-                ));
+            if (this.isRemote() && this.mcClientConn != null) {
+                this.mcClientConn.getClient().getSession().send(new ClientPlayerPlaceBlockPacket(
+                        new Position(this.getNextPlacePos().x, this.getNextPlacePos().y, this.getNextPlacePos().z),
+                        Face.TOP /* TODO MCPROTO send correct face */, new ItemStack(player.getItemInHand()), 0, 0, 0));
             } else {
-                this.getWorld().addBlock(this.getPlayer().getItemInHand(), this.getNextPlacePos());
+                this.getWorld().addBlock(this.getPlayer().getItemInHand(), this.getNextPlacePos().x, this.getNextPlacePos().y, this.getNextPlacePos().z);
             }
             updateSelectedBlock();
         }

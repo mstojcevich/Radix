@@ -2,7 +2,6 @@ package sx.lambda.voxel.net.mc.client.handlers;
 
 import org.spacehq.mc.protocol.data.game.Chunk;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
-
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.block.Block;
@@ -19,6 +18,10 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
 
     @Override
     public void handle(ServerChunkDataPacket scdp) {
+        if(scdp.getChunks().length == 0) {
+            VoxelGameClient.getInstance().getWorld().rmChunk(VoxelGameClient.getInstance().getWorld().getChunkAtPosition(scdp.getX(), scdp.getZ()));
+        }
+
         int cx = scdp.getX()*16;
         int cz = scdp.getZ()*16;
         IChunk ck = game.getWorld().getChunkAtPosition(cx, cz);

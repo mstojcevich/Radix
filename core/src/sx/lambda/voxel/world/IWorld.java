@@ -42,7 +42,7 @@ public interface IWorld {
     IChunk[] getChunksInRange(EntityPosition pos, int viewDistance);
 
     void addChunk(IChunk chunk);
-    
+
     List<Entity> getLoadedEntities();
 
     void addEntity(Entity e);
@@ -74,5 +74,7 @@ public interface IWorld {
     int getNumChunksMeshing();
     void incrChunksMeshing();
     void decrChunksMeshing();
+
+    void rmChunk(IChunk chunk);
 
 }

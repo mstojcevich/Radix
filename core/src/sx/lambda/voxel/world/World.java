@@ -627,4 +627,11 @@ public class World implements IWorld {
         chunksMeshing--;
     }
 
+    @Override
+    public void rmChunk(IChunk chunk) {
+        if(chunk == null)return;
+        removeChunkFromMap(chunk.getStartPosition());
+        this.chunkList.remove(chunk);
+    }
+
 }

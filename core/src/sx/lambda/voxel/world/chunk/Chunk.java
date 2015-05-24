@@ -193,10 +193,9 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void removeBlock(Vec3i Vec3i) {
-        int x = Vec3i.x % size;
-        int y = Vec3i.y;
-        int z = Vec3i.z % size;
+    public void removeBlock(int x, int y, int z) {
+        x = x % size;
+        z = z % size;
         if (x < 0) {
             x += size;
         }
@@ -300,10 +299,14 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void addBlock(int block, Vec3i position) {
-        int x = position.x % size;
-        int y = position.y;
-        int z = position.z % size;
+    public void addBlock(int block, int x, int y, int z) {
+        addBlock(block, x, y, z, true);
+    }
+
+    @Override
+    public void addBlock(int block, int x, int y, int z, boolean updateSunlight) {
+        x = x % size;
+        z = z % size;
         if (x < 0) {
             x += size;
         }
@@ -319,7 +322,8 @@ public class Chunk implements IChunk {
             highestPoint = Math.max(highestPoint, y);
         }
 
-        getWorld().addToSunlightRemovalQueue(new Vec3i(x + startPosition.x, y + startPosition.y, z + startPosition.z));
+        if(updateSunlight)
+            getWorld().addToSunlightRemovalQueue(new Vec3i(x + startPosition.x, y + startPosition.y, z + startPosition.z));
     }
 
     @Override

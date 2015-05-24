@@ -43,7 +43,7 @@ public class MainMenu implements GuiScreen {
 
     private Closure enterMPLocal = {
         println("Entering local mp")
-        VoxelGameClient.instance.enterRemoteWorld("127.0.0.1", (short) 31173)
+        VoxelGameClient.instance.enterRemoteWorld("127.0.0.1", (short) 25565)
     }
 
     private Closure enterMPLambda = {

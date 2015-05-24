@@ -12,15 +12,17 @@ import sx.lambda.voxel.util.Vec3i
 @CompileStatic
 class PacketBreakBlock implements SharedPacket {
 
-    private final Vec3i blockPos
+    private final int x, y, z;
 
-    public PacketBreakBlock(Vec3i blockPos) {
-        this.blockPos = blockPos
+    public PacketBreakBlock(int x, int y, int z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 
     @Override
     void handleServerReceive(VoxelGameServer server, ChannelHandlerContext ctx) {
-        server.world.removeBlock(blockPos)
+        server.world.removeBlock(x, y, z)
         for (ConnectedClient client : server.getClientList()) {
             if (client.stage == ConnectionStage.PLAY) {
                 client.context.writeAndFlush(this)
@@ -30,7 +32,7 @@ class PacketBreakBlock implements SharedPacket {
 
     @Override
     void handleClientReceive(ChannelHandlerContext ctx) {
-        VoxelGameClient.instance.world.removeBlock(blockPos)
+        VoxelGameClient.instance.world.removeBlock(x, y, z)
     }
 
 }

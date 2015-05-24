@@ -385,6 +385,7 @@ public class Chunk implements IChunk {
         }
 
 
+
         sunlightLevels[x][y][z] = level;
         lightLevels[x][y][z] = lightLevelMap[level];
 

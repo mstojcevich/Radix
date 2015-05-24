@@ -151,12 +151,21 @@ class MovementHandler implements RepeatedTask {
     }
 
     public boolean checkDeltaCollision(LivingEntity e, float deltaX, float deltaY, float deltaZ) {
-        int newX = MathUtils.floor((float)e.getPosition().getX() + deltaX)
-        int newY = MathUtils.floor((float)e.getPosition().getY() - 0.1f + deltaY)
-        int newY2 = MathUtils.floor((float)e.getPosition().getY() + e.getHeight() - 0.1f + deltaY)
-        int newZ = MathUtils.floor((float)e.getPosition().getZ() + deltaZ)
+        float newX = (float)e.getPosition().getX() + deltaX
+        float newY = (float)e.getPosition().getY() + deltaY
+        float newZ = (float)e.getPosition().getZ() + deltaZ
 
-        return checkCollision(newX, newY2, newZ) || checkCollision(newX, newY, newZ);
+        boolean collideSuccess = false;
+
+        for(float y = newY; y <= newY + 1.8f; y += 1.8f) {
+            for(float x = newX - 0.2; x < newX + 0.4; x += 0.4) {
+                for(float z = newZ - 0.2; z < newZ + 0.4; z += 0.4) {
+                    collideSuccess |= checkCollision(MathUtils.floor(x), MathUtils.floor(y), MathUtils.floor(z));
+                }
+            }
+        }
+
+        return collideSuccess
     }
 
     public boolean checkCollision(int x, int y, int z) {
@@ -171,7 +180,6 @@ class MovementHandler implements RepeatedTask {
                 passed = false
             }
         }
-
         return !passed
     }
 

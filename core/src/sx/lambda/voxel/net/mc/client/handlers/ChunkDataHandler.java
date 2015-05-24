@@ -3,6 +3,7 @@ package sx.lambda.voxel.net.mc.client.handlers;
 import org.spacehq.mc.protocol.data.game.Chunk;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
@@ -48,7 +49,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                         } else {
                             blockExists = true;
                         }
-                        if(!blockExists)id = 0;
+                        if(!blockExists)id = BuiltInBlockIds.UNKNOWN_ID;
                         ck.addBlock(id, x, cy+y, z, false);
                         ck.setSunlight(x, cy+y, z, ll, false);
                     }

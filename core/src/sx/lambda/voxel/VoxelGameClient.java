@@ -20,7 +20,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import io.netty.channel.ChannelHandlerContext;
 import org.spacehq.mc.protocol.data.game.ItemStack;
 import org.spacehq.mc.protocol.data.game.Position;
 import org.spacehq.mc.protocol.data.game.values.Face;
@@ -41,9 +40,6 @@ import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.entity.EntityRotation;
 import sx.lambda.voxel.entity.player.Player;
 import sx.lambda.voxel.net.mc.client.MinecraftClientConnection;
-import sx.lambda.voxel.net.packet.client.PacketLeaving;
-import sx.lambda.voxel.net.packet.shared.PacketBreakBlock;
-import sx.lambda.voxel.net.packet.shared.PacketPlaceBlock;
 import sx.lambda.voxel.render.NotInitializedException;
 import sx.lambda.voxel.render.Renderer;
 import sx.lambda.voxel.render.game.GameRenderer;
@@ -555,7 +551,7 @@ public class VoxelGameClient extends ApplicationAdapter {
                 final int BLOCK_TEX_SIZE = 32;
                 for (Block b : VoxelGameAPI.instance.getBlocks()) {
                     int x = b.getID() * BLOCK_TEX_SIZE % bi.getWidth();
-                    int y = b.getID() * BLOCK_TEX_SIZE / bi.getWidth();
+                    int y = BLOCK_TEX_SIZE*((b.getID() * BLOCK_TEX_SIZE) / bi.getWidth());
                     Pixmap tex = new Pixmap(Gdx.files.internal(b.getTextureLocation()));
                     bi.drawPixmap(tex, x, y);
                     tex.dispose();

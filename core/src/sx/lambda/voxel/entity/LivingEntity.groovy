@@ -2,6 +2,7 @@ package sx.lambda.voxel.entity
 
 import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.math.collision.BoundingBox
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.tasks.MovementHandler
 import sx.lambda.voxel.world.IWorld
@@ -67,6 +68,10 @@ public abstract class LivingEntity extends Entity implements Serializable {
         } else {
             return 0
         }
+    }
+
+    public BoundingBox getBoundingBox() {
+        return boundingBox;
     }
 
 }

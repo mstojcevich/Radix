@@ -10,6 +10,7 @@ public final class BuiltInBlockIds {
                 WATER_ID = 9,
                 PLANKS_ID = 5,
                 STONE_BRICK_ID = 98,
+                TALL_GRASS_ID = 31,
                 UNKNOWN_ID = 1023;
 
 }

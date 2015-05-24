@@ -164,7 +164,7 @@ public class Chunk implements IChunk {
     @Override
     public void eachBlock(EachBlockCallee callee) {
         for (int x = 0; x < size; x++) {
-            for (int y = 0; y < height; y++) {
+            for (int y = 0; y < highestPoint+1; y++) {
                 for (int z = 0; z < size; z++) {
                     Block blk = VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
                     callee.call(blk, x, y, z);
@@ -312,15 +312,12 @@ public class Chunk implements IChunk {
             z += size;
         }
 
-
         if (y > height - 1) return;
-
 
         blockList[x][y][z] = block;
         if (block > 0) {
             highestPoint = Math.max(highestPoint, y);
         }
-
 
         getWorld().addToSunlightRemovalQueue(new Vec3i(x + startPosition.x, y + startPosition.y, z + startPosition.z));
     }
@@ -366,13 +363,11 @@ public class Chunk implements IChunk {
         for (int x = 0; x < ints.length; x++) {
             for (int z = 0; z < ints[0][0].length; z++) {
                 for (int y = 0; y < ints[0].length; y++) {
-                    highestPoint = Math.max(y, highestPoint);
+                    if(ints[x][y][z] > 0)
+                        highestPoint = Math.max(y, highestPoint);
                 }
-
             }
-
         }
-
     }
 
     private void setupSunlighting() {
@@ -536,8 +531,8 @@ public class Chunk implements IChunk {
 
     private void updateFaces() {
         parentWorld.incrChunksMeshing();
-        final Block[][][] transparent = new Block[size][height][size];
-        final Block[][][] opaque = new Block[size][height][size];
+        final Block[][][] transparent = new Block[size][highestPoint+1][size];
+        final Block[][][] opaque = new Block[size][highestPoint+1][size];
         eachBlock(new EachBlockCallee() {
             @Override
             public void call(Block block, int x, int y, int z) {

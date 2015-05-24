@@ -42,9 +42,7 @@ public interface IWorld {
     IChunk[] getChunksInRange(EntityPosition pos, int viewDistance);
 
     void addChunk(IChunk chunk);
-
-    void gcChunks(EntityPosition playerPos, int viewDistance);
-
+    
     List<Entity> getLoadedEntities();
 
     void addEntity(Entity e);

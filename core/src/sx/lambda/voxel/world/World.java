@@ -150,7 +150,6 @@ public class World implements IWorld {
             this.getChunksInRange(playerPosition, viewDistance);
         }
 
-        gcChunks(playerPosition, viewDistance);
     }
 
     @Override
@@ -249,30 +248,6 @@ public class World implements IWorld {
         addChunk(chunk, chunk.getStartPosition().x, chunk.getStartPosition().z);
 
         addSun(chunk);
-    }
-
-    @Override
-    public void gcChunks(EntityPosition playerPosition, int viewDistance) {
-        int range = viewDistance * CHUNK_SIZE;
-
-        int playerChunkX = getChunkPosition(playerPosition.getX());
-        int playerChunkZ = getChunkPosition(playerPosition.getZ());
-
-        for (final IChunk chunk : chunkList) {
-            int x = chunk.getStartPosition().x;
-            int z = chunk.getStartPosition().z;
-            if (Math.abs(x - playerChunkX) > range
-                    || Math.abs(z - playerChunkZ) > range) {
-                this.chunkList.remove(chunk);
-                VoxelGameClient.getInstance().addToGLQueue(new Runnable() {
-                    @Override
-                    public void run() {
-                        chunk.cleanup();
-                    }
-                });
-                chunkMapX.get(x).remove(z);
-            }
-        }
     }
 
     @Override

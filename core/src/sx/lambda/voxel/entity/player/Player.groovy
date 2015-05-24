@@ -11,7 +11,6 @@ import sx.lambda.voxel.api.BuiltInBlockIds
 import sx.lambda.voxel.entity.EntityPosition
 import sx.lambda.voxel.entity.EntityRotation
 import sx.lambda.voxel.entity.LivingEntity
-import sx.lambda.voxel.net.packet.shared.PacketPlayerPosition
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.chunk.IChunk
 
@@ -57,7 +56,7 @@ class Player extends LivingEntity implements Serializable {
         if (moved) {
             if(VoxelGameClient.instance.minecraftConn != null) {
                 VoxelGameClient.instance.minecraftConn.client.session.send(new ClientPlayerPositionRotationPacket(
-                        this.onGround, this.position.x,  this.position.y, this.position.z, this.rotation.yaw, this.rotation.pitch))
+                        this.onGround, this.position.x, this.position.y - 0.1, this.position.z, 180-this.rotation.yaw, 360-this.rotation.pitch))
             }
             moved = false
         }

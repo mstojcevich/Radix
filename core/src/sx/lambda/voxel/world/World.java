@@ -54,6 +54,8 @@ public class World implements IWorld {
 
     private boolean shouldUpdateLight, updatingLight;
 
+    private int chunksMeshing;
+
     public World(boolean remote, boolean server) {
         this.remote = remote;
         this.server = server;
@@ -175,8 +177,6 @@ public class World implements IWorld {
             if (c != null) {
                 c.removeBlock(position);
                 if (!server) {
-                    rerenderChunk(c);
-
                     if (Math.abs(position.x + (position.x < 0 ? 1 : 0)) % 16 == 15) {
                         if (position.x < 0) {
                             rerenderChunk(getChunkAtPosition(position.x - 1, position.z));
@@ -214,9 +214,6 @@ public class World implements IWorld {
         synchronized (this) {
             final IChunk c = this.getChunkAtPosition(position);
             c.addBlock(block, position);
-            if (!server) {
-                rerenderChunk(c);
-            }
         }
     }
 
@@ -242,9 +239,6 @@ public class World implements IWorld {
             this.chunkList.remove(c);
         }
         addChunk(chunk, chunk.getStartPosition().x, chunk.getStartPosition().z);
-        if (!server) {
-            rerenderChunk(chunk);
-        }
 
         addSun(chunk);
     }
@@ -299,9 +293,6 @@ public class World implements IWorld {
             VoxelGameAPI.instance.getEventManager().push(new EventFinishChunkGen(c));
             addChunk(c, startX, startZ);
             addSun(c);
-            if (!server) {
-                rerenderChunk(c);
-            }
             return c;
         } else {
             return foundChunk;
@@ -643,6 +634,18 @@ public class World implements IWorld {
         }
         modelBatch.dispose();
         modelBatch = null;
+    }
+
+    public int getNumChunksMeshing() {
+        return chunksMeshing;
+    }
+
+    public void incrChunksMeshing() {
+        chunksMeshing++;
+    }
+
+    public void decrChunksMeshing() {
+        chunksMeshing--;
     }
 
 }

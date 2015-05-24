@@ -140,14 +140,14 @@ public class Chunk implements IChunk {
     public void render(ModelBatch batch) {
         if (cleanedUp) return;
 
-        if (sunlightChanged && !sunlightChanging || (!meshing && !meshed && meshWhenDone)) {
-            meshWhenDone = false;
-            rerender();
-        }
-
         if(!meshing && meshed) {
             updateModelInstances();
             meshed = false;
+        }
+
+        if (sunlightChanged && !sunlightChanging || (!meshing && !meshed && meshWhenDone)) {
+            meshWhenDone = false;
+            rerender();
         }
 
         if(opaqueModelInstance != null) {

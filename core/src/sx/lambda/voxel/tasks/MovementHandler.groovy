@@ -164,7 +164,7 @@ class MovementHandler implements RepeatedTask {
         boolean collideSuccess = false;
 
         for(float y = newY - 0.1f; y <= newY + 1.8f; y += 0.2f) {
-            for(float x = newX - 0.4; x < newX + 0.8; x += 0.4) {
+            for(float x = newX - 0.4; x < newX + 0.4; x += 0.4) {
                 for(float z = newZ - 0.4; z < newZ + 0.4; z += 0.4) {
                     collideSuccess |= checkCollision(MathUtils.floor(x), MathUtils.floor(y), MathUtils.floor(z));
                 }

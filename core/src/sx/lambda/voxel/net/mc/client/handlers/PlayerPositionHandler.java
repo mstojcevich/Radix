@@ -14,6 +14,6 @@ public class PlayerPositionHandler implements PacketHandler<ServerPlayerPosition
     @Override
     public void handle(ServerPlayerPositionRotationPacket packet) {
         game.getPlayer().getPosition().setPos((float)packet.getX(), (float)packet.getY(), (float)packet.getZ());
-        //game.getPlayer().getRotation().setRot(360-packet.getPitch(), 180-packet.getYaw());
+        game.getPlayer().getRotation().setRot(360-packet.getPitch(), 180-packet.getYaw());
     }
 }

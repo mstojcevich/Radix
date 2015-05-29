@@ -204,11 +204,11 @@ public class Chunk implements IChunk {
             z += size;
         }
 
-
         if (y > height - 1) return;
 
-
         blockList[x][y][z] = -1;
+
+        getWorld().rerenderChunk(this);
 
         this.addNeighborsToSunlightQueue(x, y, z);
     }

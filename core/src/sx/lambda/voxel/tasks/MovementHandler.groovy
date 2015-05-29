@@ -59,8 +59,14 @@ class MovementHandler implements RepeatedTask {
                             deltaY = 0
                         }
 
-                        if (!checkDeltaCollision(player, deltaX, deltaY, deltaZ)) {
-                            player.getPosition().offset(deltaX, deltaY, deltaZ)
+                        if (!checkDeltaCollision(player, 0, 0, deltaZ)) {
+                            player.getPosition().offset(0, 0, deltaZ)
+                        }
+                        if (!checkDeltaCollision(player, deltaX, 0, 0)) {
+                            player.getPosition().offset(deltaX, 0, 0)
+                        }
+                        if (!checkDeltaCollision(player, 0, deltaY, 0)) {
+                            player.getPosition().offset(0, deltaY, 0)
                         }
                     }
                     if (Gdx.input.isKeyPressed(Keys.S)) {
@@ -157,9 +163,9 @@ class MovementHandler implements RepeatedTask {
 
         boolean collideSuccess = false;
 
-        for(float y = newY; y <= newY + 1.8f; y += 1.8f) {
-            for(float x = newX - 0.2; x < newX + 0.4; x += 0.4) {
-                for(float z = newZ - 0.2; z < newZ + 0.4; z += 0.4) {
+        for(float y = newY - 0.1f; y <= newY + 1.8f; y += 0.2f) {
+            for(float x = newX - 0.4; x < newX + 0.8; x += 0.4) {
+                for(float z = newZ - 0.4; z < newZ + 0.4; z += 0.4) {
                     collideSuccess |= checkCollision(MathUtils.floor(x), MathUtils.floor(y), MathUtils.floor(z));
                 }
             }

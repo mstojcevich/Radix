@@ -32,6 +32,7 @@ public class MinecraftClientConnection {
 
     private final VoxelGameClient game;
     private final Client client;
+    private final ChatHandler chatHandler;
 
     private final Map<Class<? extends Packet>, PacketHandler> handlerMap = new HashMap<>();
 
@@ -39,6 +40,7 @@ public class MinecraftClientConnection {
         this.game = game;
         MinecraftProtocol protocol = new MinecraftProtocol("voxeltest-dev");
         this.client = new Client(hostname, port, protocol, new TcpSessionFactory());
+        this.chatHandler = new ChatHandler(game);
 
         handlerMap.put(ServerChunkDataPacket.class, new ChunkDataHandler(game));
         handlerMap.put(ServerMultiChunkDataPacket.class, new MultiChunkDataHandler(game));
@@ -46,6 +48,7 @@ public class MinecraftClientConnection {
         handlerMap.put(ServerSpawnPlayerPacket.class, new PlayerSpawnHandler(game));
         handlerMap.put(ServerBlockChangePacket.class, new BlockChangeHandler(game));
         handlerMap.put(ServerMultiBlockChangePacket.class, new MultiBlockChangeHandler(game));
+        handlerMap.put(ServerChatPacket.class, chatHandler);
 
         client.getSession().addListener(new SessionAdapter() {
             @Override
@@ -79,5 +82,9 @@ public class MinecraftClientConnection {
     }
 
     public Client getClient() { return client; }
+
+    public ChatHandler getChatHandler() {
+        return this.chatHandler;
+    }
 
 }

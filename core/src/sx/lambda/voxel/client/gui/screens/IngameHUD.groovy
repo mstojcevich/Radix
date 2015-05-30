@@ -44,6 +44,8 @@ class IngameHUD implements GuiScreen {
         int crosshairSize = 32
         float halfCrosshairSize = crosshairSize / 2f as float
         this.drawTexture(guiBatch, 0, MathUtils.round((float)centerX - halfCrosshairSize), MathUtils.round((float)centerY + halfCrosshairSize), crosshairSize, crosshairSize)
+
+        VoxelGameClient.instance.chatGUI.renderHud(guiBatch)
     }
 
     @Override

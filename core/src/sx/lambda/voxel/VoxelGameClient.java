@@ -35,6 +35,7 @@ import sx.lambda.voxel.api.events.EventEarlyInit;
 import sx.lambda.voxel.api.events.EventWorldStart;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.client.gui.GuiScreen;
+import sx.lambda.voxel.client.gui.screens.ChatGUI;
 import sx.lambda.voxel.client.gui.screens.IngameHUD;
 import sx.lambda.voxel.client.gui.screens.MainMenu;
 import sx.lambda.voxel.client.gui.transition.SlideUpAnimation;
@@ -78,6 +79,7 @@ public class VoxelGameClient extends ApplicationAdapter {
     private Queue<Runnable> glQueue = new ConcurrentLinkedDeque<>();
     private MainMenu mainMenu;
     private IngameHUD hud;
+    private ChatGUI chatGUI;
     private GuiScreen currentScreen;
     private TextureManager textureManager = new TextureManager();
     private ShaderManager shaderManager = new ShaderManager();
@@ -131,6 +133,8 @@ public class VoxelGameClient extends ApplicationAdapter {
 
         gameRenderer = new GameRenderer(this);
         hud = new IngameHUD();
+        chatGUI = new ChatGUI();
+        chatGUI.init();
         mainMenu = new MainMenu();
         setCurrentScreen(mainMenu);
 
@@ -461,6 +465,10 @@ public class VoxelGameClient extends ApplicationAdapter {
         return this.hud;
     }
 
+    public ChatGUI getChatGUI() {
+        return this.chatGUI;
+    }
+
     public GameRenderer getGameRenderer() {
         return this.gameRenderer;
     }
@@ -473,6 +481,7 @@ public class VoxelGameClient extends ApplicationAdapter {
             public void run() {
                 try {
                     (mcClientConn = new MinecraftClientConnection(VoxelGameClient.this, hostname, port)).start();
+                    chatGUI.setup(mcClientConn);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

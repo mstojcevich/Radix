@@ -10,9 +10,13 @@ import sx.lambda.voxel.client.keybind.Keybind
 @CompileStatic
 public class VoxelGameGdxInputHandler implements InputProcessor {
 
+    private static final float mouseSensitivity = 0.03f //TODO Config - allow changeable mouse sensitivity
+
     private final VoxelGameClient game;
 
     private final List<Keybind> keybindList = Collections.synchronizedList(new ArrayList<Keybind>());
+
+    private int lastMouseX = -Integer.MAX_VALUE, lastMouseY = -Integer.MAX_VALUE;
 
     public VoxelGameGdxInputHandler(final VoxelGameClient game) {
         this.game = game;
@@ -110,7 +114,32 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        return false;
+        if(game.onAndroid())
+            return false;
+
+        if(lastMouseX > -Integer.MAX_VALUE) {
+            if ((game.world != null || game.player != null) && (game.currentScreen == null || game.currentScreen == game.hud)) {
+                int deltaX = screenX - lastMouseX
+                int deltaY = screenY - lastMouseY
+                float deltaYaw = deltaX * mouseSensitivity;
+                float deltaPitch = -deltaY * mouseSensitivity;
+
+                float newPitch = Math.abs(game.player.rotation.pitch + deltaPitch);
+                if (newPitch > 90) {
+                    deltaPitch = 0;
+                }
+                game.getPlayer().getRotation().offset(deltaPitch, deltaYaw);
+
+                if (Math.abs(deltaPitch) > 0 || Math.abs(deltaYaw) > 0) {
+                    game.player.rotation.offset(deltaPitch, deltaYaw);
+                    game.updateSelectedBlock();
+                    game.gameRenderer.calculateFrustum();
+                }
+            }
+        }
+        lastMouseX = screenX;
+        lastMouseY = screenY;
+        return true;
     }
 
     @Override

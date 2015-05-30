@@ -96,10 +96,6 @@ class GameRenderer implements Renderer {
     }
 
     private void prepareWorldRender() {
-        if(!game.onAndroid()) {
-            updateRotation()
-        }
-
         if (shouldCalcFrustum()) {
             game.camera.position.set(game.player.position.x, game.player.position.y + game.player.eyeHeight, game.player.position.z)
             game.camera.up.set(0, 1, 0);
@@ -196,25 +192,6 @@ class GameRenderer implements Renderer {
         String threadsStr = "Active threads: " + Thread.activeCount()
         GlyphLayout threadsGl = activeThreadsRender.setText(threadsStr, 0, 0)
         activeThreadsRender.setPosition(Gdx.graphics.width - threadsGl.width, (float) (Gdx.graphics.height - currentHeight))
-    }
-
-    private void updateRotation() {
-        if ((game.world != null || game.player != null) && (game.currentScreen == null || game.currentScreen == game.hud)) {
-            float deltaYaw = Gdx.input.getDeltaX() * mouseSensitivity;
-            float deltaPitch = -Gdx.input.getDeltaY() * mouseSensitivity;
-
-            float newPitch = Math.abs(game.getPlayer().getRotation().getPitch() + deltaPitch);
-            if (newPitch > 90) {
-                deltaPitch = 0;
-            }
-            game.getPlayer().getRotation().offset(deltaPitch, deltaYaw);
-
-            if (Math.abs(deltaPitch) > 0 || Math.abs(deltaYaw) > 0) {
-                game.getPlayer().getRotation().offset(deltaPitch, deltaYaw);
-                game.updateSelectedBlock();
-                calculateFrustum();
-            }
-        }
     }
 
 }

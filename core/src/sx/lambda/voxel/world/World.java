@@ -86,7 +86,14 @@ public class World implements IWorld {
         if(zMap == null)
             return null;
 
-        return zMap.get(z);
+        IChunk chunk = null;
+        try {
+            chunk = zMap.get(z);
+        } catch(ArrayIndexOutOfBoundsException ex) { // Sometimes the libgdx intmap will give aioob. Not sure why.
+            ex.printStackTrace();
+        }
+
+        return chunk;
     }
 
     private void removeChunkFromMap(Vec3i pos) {

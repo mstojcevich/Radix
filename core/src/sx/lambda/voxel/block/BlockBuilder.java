@@ -8,6 +8,7 @@ public class BlockBuilder {
     private boolean transparent = false;
     private IBlockRenderer renderer;
     private boolean solid = true;
+    private boolean lightPassthrough = false;
 
     public BlockBuilder setHumanName(String hn) {
         this.humanName = hn;
@@ -34,6 +35,14 @@ public class BlockBuilder {
         return this;
     }
 
+    /**
+     * Set whether light passes through the block (as if it was air)
+     */
+    public BlockBuilder setLightPassthrough(boolean passthrough) {
+        this.lightPassthrough = passthrough;
+        return this;
+    }
+
     public BlockBuilder setBlockRenderer(IBlockRenderer renderer) {
         this.renderer = renderer;
         return this;
@@ -44,7 +53,7 @@ public class BlockBuilder {
         if (renderer == null) {
             renderer = new NormalBlockRenderer(id);
         }
-        return new Block(id, humanName, renderer, textureLocation, transparent, solid);
+        return new Block(id, humanName, renderer, textureLocation, transparent, solid, lightPassthrough);
     }
 
     public class MissingElementException extends Exception {

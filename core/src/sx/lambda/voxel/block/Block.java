@@ -6,17 +6,18 @@ public class Block {
 
     private int id;
     private final transient IBlockRenderer renderer;
-    private final boolean transparent, solid;
+    private final boolean transparent, solid, lightPassthrough;
     private final String humanName;
     private final String textureLocation;
 
-    Block(int id, String humanName, IBlockRenderer renderer, String textureLocation, boolean transparent, boolean solid) {
+    Block(int id, String humanName, IBlockRenderer renderer, String textureLocation, boolean transparent, boolean solid, boolean lightPassthrough) {
         this.id = id;
         this.renderer = renderer;
         this.transparent = transparent;
         this.solid = solid;
         this.humanName = humanName;
         this.textureLocation = textureLocation;
+        this.lightPassthrough = lightPassthrough;
     }
 
     public IBlockRenderer getRenderer() {
@@ -33,6 +34,10 @@ public class Block {
 
     public boolean isSolid() {
         return this.solid;
+    }
+
+    public boolean doesLightPassThrough() {
+        return this.lightPassthrough;
     }
 
     public void setID(int id) {

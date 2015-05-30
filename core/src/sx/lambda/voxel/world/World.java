@@ -361,7 +361,7 @@ public class World implements IWorld {
                                         sunlightQueue.add(new int[]{negX, y, z});
                                         changedChunks.add(negXNeighborChunk);
                                     }
-                                } else if (bl.isTransparent()) {
+                                } else if (bl.doesLightPassThrough()) {
                                     if (negXNeighborChunk.getSunlight(negX, y, z) < nextLL) {
                                         negXNeighborChunk.setSunlight(negX, y, z, nextLL);
                                         sunlightQueue.add(new int[]{negX, y, z});
@@ -377,7 +377,7 @@ public class World implements IWorld {
                                         sunlightQueue.add(new int[]{posX, y, z});
                                         changedChunks.add(posXNeighborChunk);
                                     }
-                                } else if (bl.isTransparent()) {
+                                } else if (bl.doesLightPassThrough()) {
                                     if (posXNeighborChunk.getSunlight(posX, y, z) < nextLL) {
                                         posXNeighborChunk.setSunlight(posX, y, z, nextLL);
                                         sunlightQueue.add(new int[]{posX, y, z});
@@ -393,7 +393,7 @@ public class World implements IWorld {
                                         sunlightQueue.add(new int[]{x, y, negZ});
                                         changedChunks.add(negZNeighborChunk);
                                     }
-                                } else if (bl.isTransparent()) {
+                                } else if (bl.doesLightPassThrough()) {
                                     if (negZNeighborChunk.getSunlight(x, y, negZ) < nextLL) {
                                         negZNeighborChunk.setSunlight(x, y, negZ, nextLL);
                                         sunlightQueue.add(new int[]{x, y, negZ});
@@ -409,7 +409,7 @@ public class World implements IWorld {
                                         sunlightQueue.add(new int[]{x, y, posZ});
                                         changedChunks.add(posZNeighborChunk);
                                     }
-                                } else if (bl.isTransparent()) {
+                                } else if (bl.doesLightPassThrough()) {
                                     if (posZNeighborChunk.getSunlight(x, y, posZ) < nextLL) {
                                         posZNeighborChunk.setSunlight(x, y, posZ, nextLL);
                                         sunlightQueue.add(new int[]{x, y, posZ});
@@ -427,7 +427,7 @@ public class World implements IWorld {
                                         sunlightQueue.add(new int[]{x, posY, z});
                                         changedChunks.add(posChunk);
                                     }
-                                } else if (posYBlock.isTransparent()) {
+                                } else if (posYBlock.doesLightPassThrough()) {
                                     if (nextLL > posChunk.getSunlight(x, posY, z)) {
                                         posChunk.setSunlight(x, posY, z, nextLL);
                                         sunlightQueue.add(new int[]{x, posY, z});
@@ -453,7 +453,7 @@ public class World implements IWorld {
                                             changedChunks.add(posChunk);
                                         }
                                     }
-                                } else if (negYBlock.isTransparent()) {
+                                } else if (negYBlock.doesLightPassThrough()) {
                                     if (ll == 16) {
                                         if (posChunk.getSunlight(x, negY, z) < 16) {
                                             posChunk.setSunlight(x, negY, z, 16);
@@ -510,13 +510,13 @@ public class World implements IWorld {
                     if (bll < ll && bll != 0) {
                         if (bl == null) {
                             sunlightRemovalQueue.add(new int[]{negX, y, z});
-                        } else if (bl.isTransparent()) {
+                        } else if (bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{negX, y, z});
                         }
                     } else if (bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(new int[]{negX, y, z});
-                        } else if (bl.isTransparent()) {
+                        } else if (bl.doesLightPassThrough()) {
                             sunlightQueue.add(new int[]{negX, y, z});
                         }
                     }
@@ -527,13 +527,13 @@ public class World implements IWorld {
                     if (bll < ll && bll != 0) {
                         if (bl == null) {
                             sunlightRemovalQueue.add(new int[]{posX, y, z});
-                        } else if (bl.isTransparent()) {
+                        } else if (bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{posX, y, z});
                         }
                     } else if (bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(new int[]{posX, y, z});
-                        } else if (bl.isTransparent()) {
+                        } else if (bl.doesLightPassThrough()) {
                             sunlightQueue.add(new int[]{posX, y, z});
                         }
                     }
@@ -544,13 +544,13 @@ public class World implements IWorld {
                     if (bll < ll && bll != 0) {
                         if (bl == null) {
                             sunlightRemovalQueue.add(new int[]{x, y, negZ});
-                        } else if (bl.isTransparent()) {
+                        } else if (bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{x, y, negZ});
                         }
                     } else if (bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(new int[]{x, y, negZ});
-                        } else if (bl.isTransparent()) {
+                        } else if (bl.doesLightPassThrough()) {
                             sunlightQueue.add(new int[]{x, y, negZ});
                         }
                     }
@@ -561,13 +561,13 @@ public class World implements IWorld {
                     if (bll < ll && bll != 0) {
                         if (bl == null) {
                             sunlightRemovalQueue.add(new int[]{x, y, posZ});
-                        } else if (bl.isTransparent()) {
+                        } else if (bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{x, y, posZ});
                         }
                     } else if (bll >= ll) {
                         if (bl == null) {
                             sunlightQueue.add(new int[]{x, y, posZ});
-                        } else if (bl.isTransparent()) {
+                        } else if (bl.doesLightPassThrough()) {
                             sunlightQueue.add(new int[]{x, y, posZ});
                         }
                     }
@@ -580,7 +580,7 @@ public class World implements IWorld {
                         if (posChunk.getSunlight(x, negY, z) != 0) {
                             sunlightRemovalQueue.add(new int[]{x, negY, z});
                         }
-                    } else if (negYBlock.isTransparent()) {
+                    } else if (negYBlock.doesLightPassThrough()) {
                         if (posChunk.getSunlight(x, negY, z) != 0) {
                             sunlightRemovalQueue.add(new int[]{x, negY, z});
                         }

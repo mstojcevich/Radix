@@ -33,6 +33,9 @@ public class World implements IWorld {
 
     private final IntMap<IntMap<IChunk>> chunkMapX = new IntMap<>();
     private final Set<IChunk> chunkList = new ConcurrentSet<>();
+    private List<IChunk> sortedChunkList;
+
+    private IChunk lastPlayerChunk;
 
     private static final float GRAVITY = 4.69f;
 
@@ -132,28 +135,56 @@ public class World implements IWorld {
             }
         }
 
-        long renderStartNS = System.nanoTime();
+        final IChunk playerChunk = getChunkAtPosition(
+                MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getX()),
+                MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getZ()));
+        if(playerChunk != lastPlayerChunk) {
+            sortedChunkList = new ArrayList<>();
+            for(IChunk c : chunkList) {
+                sortedChunkList.add(c);
+            }
+            Collections.sort(sortedChunkList, new Comparator<IChunk>() {
+                @Override
+                public int compare(IChunk c1, IChunk c2) {
+                    int distTo2 = MathUtils.floorPositive((float)
+                            Math.sqrt(
+                                    Math.pow(playerChunk.getStartPosition().x - c2.getStartPosition().x, 2)
+                                    + Math.pow(playerChunk.getStartPosition().z - c2.getStartPosition().z, 2)
+                            ));
+                    int distTo1 = MathUtils.floorPositive((float)
+                            Math.sqrt(
+                                    Math.pow(playerChunk.getStartPosition().x - c1.getStartPosition().x, 2)
+                                            + Math.pow(playerChunk.getStartPosition().z - c1.getStartPosition().z, 2)
+                            ));
+                    return distTo2 - distTo1;
+                }
+            });
+            lastPlayerChunk = playerChunk;
+        }
 
-        modelBatch.begin(VoxelGameClient.getInstance().getCamera());
-        for (IChunk c : this.chunkList) {
-            if(VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                    VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
-                c.render(modelBatch);
+        if(sortedChunkList != null) {
+            long renderStartNS = System.nanoTime();
+            modelBatch.begin(VoxelGameClient.getInstance().getCamera());
+            for (IChunk c : sortedChunkList) {
+                if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                        VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
+                    c.render(modelBatch);
+                }
             }
-        }
-        for (IChunk c : this.chunkList) {
-            if(VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                    VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
-                c.renderWater(modelBatch);
+            for (IChunk c : sortedChunkList) {
+                if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                        VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
+                    c.renderWater(modelBatch);
+                }
             }
+            modelBatch.end();
+            if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
+                VoxelGameClient.getInstance().numChunkRenders = 0;
+                VoxelGameClient.getInstance().chunkRenderTimes = 0;
+            }
+            VoxelGameClient.getInstance().chunkRenderTimes += (int) (System.nanoTime() - renderStartNS);
+            VoxelGameClient.getInstance().numChunkRenders++;
         }
-        modelBatch.end();
-        if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
-            VoxelGameClient.getInstance().numChunkRenders = 0;
-            VoxelGameClient.getInstance().chunkRenderTimes = 0;
-        }
-        VoxelGameClient.getInstance().chunkRenderTimes += (int) (System.nanoTime() - renderStartNS);
-        VoxelGameClient.getInstance().numChunkRenders++;
     }
 
     @Override

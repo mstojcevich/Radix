@@ -178,7 +178,12 @@ void main() {
     vec2 uvMult = fract(vec2(dot(texGetNormal.zxy, v_position),
                            dot(texGetNormal.yzx, v_position)));
     vec2 uvStart = vec2(mod(blockId, float(blocksPerRow))*uPerBlock, float(int(floor(blockId+0.5) / float(blocksPerRow)))*vPerBlock);
-    vec2 v_diffuseUV = uvStart+vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
+    vec2 v_diffuseUV;
+    if(normal.x != 0.0) {
+    	v_diffuseUV = uvStart+vec2(vPerBlock*uvMult.y, uPerBlock*uvMult.x);
+    } else {
+    	v_diffuseUV = uvStart+vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
+    }
 	#endif
 
 	#if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)

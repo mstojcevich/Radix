@@ -5,7 +5,7 @@ public class BlockBuilder {
     private String humanName = "Undefined";
     private String textureLocation = "textures/block/undefined.png";
     private int id = -1;
-    private boolean transparent = false;
+    private boolean translucent = false;
     private IBlockRenderer renderer;
     private boolean solid = true;
     private boolean lightPassthrough = false;
@@ -25,8 +25,8 @@ public class BlockBuilder {
         return this;
     }
 
-    public BlockBuilder setTransparent(boolean transparent) {
-        this.transparent = transparent;
+    public BlockBuilder setTranslucent(boolean translucent) {
+        this.translucent = translucent;
         return this;
     }
 
@@ -53,7 +53,7 @@ public class BlockBuilder {
         if (renderer == null) {
             renderer = new NormalBlockRenderer(id);
         }
-        return new Block(id, humanName, renderer, textureLocation, transparent, solid, lightPassthrough);
+        return new Block(id, humanName, renderer, textureLocation, translucent, solid, lightPassthrough);
     }
 
     public class MissingElementException extends Exception {

@@ -121,14 +121,14 @@ public class PlainMesher implements Mesher {
                             if (adjChunk != null) {
                                 Block adjBlock = adjChunk.getBlockAtPosition(adjPos);
                                 if (adjBlock != null) {
-                                    if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    if (!adjBlock.isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                         shouldRenderTop[x][y][z] = false;
                                         visFaceCount--;
                                     }
                                 }
                             }
                         } else if (blockList[x][y][z + 1] != null) {
-                            if (!blockList[x][y][z + 1].isTransparent() || blockList[x][y][z].isTransparent()) {
+                            if (!blockList[x][y][z + 1].isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                 shouldRenderTop[x][y][z] = false;
                                 visFaceCount--;
                             }
@@ -144,14 +144,14 @@ public class PlainMesher implements Mesher {
                             if (adjChunk != null) {
                                 Block adjBlock = adjChunk.getBlockAtPosition(adjPos);
                                 if (adjBlock != null) {
-                                    if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    if (!adjBlock.isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                         shouldRenderLeft[x][y][z] = false;
                                         visFaceCount--;
                                     }
                                 }
                             }
                         } else if (blockList[x - 1][y][z] != null) {
-                            if (!blockList[x - 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                            if (!blockList[x - 1][y][z].isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                 shouldRenderLeft[x][y][z] = false;
                                 visFaceCount--;
                             }
@@ -167,14 +167,14 @@ public class PlainMesher implements Mesher {
                             if (adjChunk != null) {
                                 Block adjBlock = adjChunk.getBlockAtPosition(adjPos);
                                 if (adjBlock != null) {
-                                    if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    if (!adjBlock.isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                         shouldRenderRight[x][y][z] = false;
                                         visFaceCount--;
                                     }
                                 }
                             }
                         } else if (blockList[x + 1][y][z] != null) {
-                            if (!blockList[x + 1][y][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                            if (!blockList[x + 1][y][z].isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                 shouldRenderRight[x][y][z] = false;
                                 visFaceCount--;
                             }
@@ -185,7 +185,7 @@ public class PlainMesher implements Mesher {
                         if (y == 0)
                             shouldRenderFront[x][y][z] = true;
                         else if (blockList[x][y - 1][z] != null) {
-                            if (!blockList[x][y - 1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                            if (!blockList[x][y - 1][z].isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                 shouldRenderFront[x][y][z] = false;
                                 visFaceCount--;
                             }
@@ -196,7 +196,7 @@ public class PlainMesher implements Mesher {
                         if (y == height - 1)
                             shouldRenderBack[x][y][z] = true;
                         else if (blockList[x][y + 1][z] != null) {
-                            if (!blockList[x][y + 1][z].isTransparent() || blockList[x][y][z].isTransparent()) {
+                            if (!blockList[x][y + 1][z].isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                 shouldRenderBack[x][y][z] = false;
                                 visFaceCount--;
                             }
@@ -212,14 +212,14 @@ public class PlainMesher implements Mesher {
                             if (adjChunk != null) {
                                 Block adjBlock = adjChunk.getBlockAtPosition(adjPos);
                                 if (adjBlock != null) {
-                                    if (!adjBlock.isTransparent() || blockList[x][y][z].isTransparent()) {
+                                    if (!adjBlock.isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                         shouldRenderBottom[x][y][z] = false;
                                         visFaceCount--;
                                     }
                                 }
                             }
                         } else if (blockList[x][y][z - 1] != null) {
-                            if (!blockList[x][y][z - 1].isTransparent() || blockList[x][y][z].isTransparent()) {
+                            if (!blockList[x][y][z - 1].isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                 shouldRenderBottom[x][y][z] = false;
                                 visFaceCount--;
                             }

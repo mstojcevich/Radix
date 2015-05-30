@@ -36,7 +36,7 @@ public interface IChunk extends Serializable {
 
     float getLightLevel(int x, int y, int z);
 
-    void renderWater(ModelBatch batch);
+    void renderTranslucent(ModelBatch batch);
 
     int[][][] blocksToIdInt();
 

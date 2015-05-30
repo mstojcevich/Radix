@@ -174,7 +174,7 @@ public class World implements IWorld {
             for (IChunk c : sortedChunkList) {
                 if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
                         VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
-                    c.renderWater(modelBatch);
+                    c.renderTranslucent(modelBatch);
                 }
             }
             modelBatch.end();
@@ -347,7 +347,7 @@ public class World implements IWorld {
 
     /**
      * Add a block to a list of blocks to process sunlight for
-     * The block at the position passed should be transparent or null and have a sunlight level greater than 0
+     * The block at the position passed should be translucent or null and have a sunlight level greater than 0
      */
     @Override
     public void addToSunlightQueue(int[] pos) {

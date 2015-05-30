@@ -34,8 +34,8 @@ public class Chunk implements IChunk {
     private transient IWorld parentWorld;
     private transient MeshBuilder meshBuilder;
     private transient ModelBuilder modelBuilder;
-    private transient Model opaqueModel, transparentModel;
-    private transient ModelInstance opaqueModelInstance, transparentModelInstance;
+    private transient Model opaqueModel, translucentModel;
+    private transient ModelInstance opaqueModelInstance, translucentModelInstance;
     private final Vec3i startPosition;
     private int highestPoint;
     private final transient float[][][] lightLevels;
@@ -45,7 +45,7 @@ public class Chunk implements IChunk {
     private boolean setup;
     private boolean cleanedUp;
 
-    private List<GreedyMesher.Face> transparentFaces;
+    private List<GreedyMesher.Face> translucentFaces;
     private List<GreedyMesher.Face> opaqueFaces;
     private boolean meshing, meshed, meshWhenDone;
 
@@ -152,12 +152,12 @@ public class Chunk implements IChunk {
 
         if(opaqueModelInstance != null) {
             batch.render(opaqueModelInstance);
-            batch.render(transparentModelInstance);
+            batch.render(translucentModelInstance);
         }
     }
 
     @Override
-    public void renderWater(ModelBatch batch) {
+    public void renderTranslucent(ModelBatch batch) {
 
     }
 
@@ -232,7 +232,7 @@ public class Chunk implements IChunk {
                 Block bl = negXNeighborChunk.getBlockAtPosition(negX, y, z);
                 if (bl == null) {
                     parentWorld.addToSunlightQueue(new int[]{negX, y, z});
-                } else if (bl.isTransparent()) {
+                } else if (bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{negX, y, z});
                 }
             }
@@ -244,7 +244,7 @@ public class Chunk implements IChunk {
                 Block bl = posXNeighborChunk.getBlockAtPosition(posX, y, z);
                 if (bl == null) {
                     parentWorld.addToSunlightQueue(new int[]{posX, y, z});
-                } else if (bl.isTransparent()) {
+                } else if (bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{posX, y, z});
                 }
             }
@@ -256,7 +256,7 @@ public class Chunk implements IChunk {
                 Block bl = negZNeighborChunk.getBlockAtPosition(x, y, negZ);
                 if (bl == null) {
                     parentWorld.addToSunlightQueue(new int[]{x, y, negZ});
-                } else if (bl.isTransparent()) {
+                } else if (bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{x, y, negZ});
                 }
             }
@@ -268,7 +268,7 @@ public class Chunk implements IChunk {
                 Block bl = posZNeighborChunk.getBlockAtPosition(x, y, posZ);
                 if (bl == null) {
                     parentWorld.addToSunlightQueue(new int[]{x, y, posZ});
-                } else if (bl.isTransparent()) {
+                } else if (bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{x, y, posZ});
                 }
             }
@@ -279,7 +279,7 @@ public class Chunk implements IChunk {
             if (getSunlight(x, y + 1, z) > 1) {
                 if (posYBlock == null) {
                     parentWorld.addToSunlightQueue(new int[]{x, posY, z});
-                } else if (posYBlock.isTransparent()) {
+                } else if (posYBlock.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{x, posY, z});
                 }
             }
@@ -466,8 +466,8 @@ public class Chunk implements IChunk {
     public void cleanup() {
         if(opaqueModel != null)
             opaqueModel.dispose();
-        if(transparentModel != null)
-            transparentModel.dispose();
+        if(translucentModel != null)
+            translucentModel.dispose();
         cleanedUp = true;
     }
 
@@ -508,42 +508,42 @@ public class Chunk implements IChunk {
     private void updateModelInstances() {
         if(opaqueModel != null)
             opaqueModel.dispose();
-        if(transparentModel != null)
-            transparentModel.dispose();
+        if(translucentModel != null)
+            translucentModel.dispose();
 
         Mesh opaqueMesh = mesher.meshFaces(opaqueFaces, meshBuilder);
-        Mesh transparentMesh = mesher.meshFaces(transparentFaces, meshBuilder);
+        Mesh translucentMesh = mesher.meshFaces(translucentFaces, meshBuilder);
         modelBuilder.begin();
         modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueMesh, GL20.GL_TRIANGLES,
                 new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap())));
         opaqueModel = modelBuilder.end();
         modelBuilder.begin();
-        modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), transparentMesh, GL20.GL_TRIANGLES,
+        modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), translucentMesh, GL20.GL_TRIANGLES,
                 new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
                         new BlendingAttribute()));
-        transparentModel = modelBuilder.end();
+        translucentModel = modelBuilder.end();
 
         opaqueModelInstance = new ModelInstance(opaqueModel);
-        transparentModelInstance = new ModelInstance(transparentModel);
+        translucentModelInstance = new ModelInstance(translucentModel);
     }
 
     private void updateFaces() {
         parentWorld.incrChunksMeshing();
-        final Block[][][] transparent = new Block[size][height][size];
+        final Block[][][] translucent = new Block[size][height][size];
         final Block[][][] opaque = new Block[size][height][size];
         eachBlock(new EachBlockCallee() {
             @Override
             public void call(Block block, int x, int y, int z) {
                 if (block != null) {
-                    if (block.isTransparent())
-                        transparent[x][y][z] = block;
+                    if (block.isTranslucent())
+                        translucent[x][y][z] = block;
                     else
                         opaque[x][y][z] = block;
                 }
             }
         });
         opaqueFaces = mesher.getFaces(opaque, lightLevels);
-        transparentFaces = mesher.getFaces(transparent, lightLevels);
+        translucentFaces = mesher.getFaces(translucent, lightLevels);
         meshing = false;
         meshed = true;
         parentWorld.decrChunksMeshing();

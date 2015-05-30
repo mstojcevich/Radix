@@ -60,3 +60,6 @@ gradle-app.setting
 
 ## OS Specific
 .DS_Store
+
+## VoxelTest
+core/assets/conf

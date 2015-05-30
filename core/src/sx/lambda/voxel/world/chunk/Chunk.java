@@ -164,7 +164,7 @@ public class Chunk implements IChunk {
     @Override
     public void eachBlock(EachBlockCallee callee) {
         for (int x = 0; x < size; x++) {
-            for (int y = 0; y < highestPoint+1; y++) {
+            for (int y = 0; y < height; y++) {
                 for (int z = 0; z < size; z++) {
                     Block blk = VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
                     callee.call(blk, x, y, z);
@@ -529,8 +529,8 @@ public class Chunk implements IChunk {
 
     private void updateFaces() {
         parentWorld.incrChunksMeshing();
-        final Block[][][] transparent = new Block[size][highestPoint+1][size];
-        final Block[][][] opaque = new Block[size][highestPoint+1][size];
+        final Block[][][] transparent = new Block[size][height][size];
+        final Block[][][] opaque = new Block[size][height][size];
         eachBlock(new EachBlockCallee() {
             @Override
             public void call(Block block, int x, int y, int z) {

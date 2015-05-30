@@ -367,13 +367,7 @@ public class World implements IWorld {
 
                             if (negXNeighborChunk != null) {
                                 Block bl = negXNeighborChunk.getBlockAtPosition(negX, y, z);
-                                if (bl == null) {
-                                    if (negXNeighborChunk.getSunlight(negX, y, z) < nextLL) {
-                                        negXNeighborChunk.setSunlight(negX, y, z, nextLL);
-                                        sunlightQueue.add(new int[]{negX, y, z});
-                                        changedChunks.add(negXNeighborChunk);
-                                    }
-                                } else if (bl.doesLightPassThrough()) {
+                                if (bl == null || bl.doesLightPassThrough()) {
                                     if (negXNeighborChunk.getSunlight(negX, y, z) < nextLL) {
                                         negXNeighborChunk.setSunlight(negX, y, z, nextLL);
                                         sunlightQueue.add(new int[]{negX, y, z});
@@ -383,13 +377,7 @@ public class World implements IWorld {
                             }
                             if (posXNeighborChunk != null) {
                                 Block bl = posXNeighborChunk.getBlockAtPosition(posX, y, z);
-                                if (bl == null) {
-                                    if (posXNeighborChunk.getSunlight(posX, y, z) < nextLL) {
-                                        posXNeighborChunk.setSunlight(posX, y, z, nextLL);
-                                        sunlightQueue.add(new int[]{posX, y, z});
-                                        changedChunks.add(posXNeighborChunk);
-                                    }
-                                } else if (bl.doesLightPassThrough()) {
+                                if (bl == null || bl.doesLightPassThrough()) {
                                     if (posXNeighborChunk.getSunlight(posX, y, z) < nextLL) {
                                         posXNeighborChunk.setSunlight(posX, y, z, nextLL);
                                         sunlightQueue.add(new int[]{posX, y, z});
@@ -399,13 +387,7 @@ public class World implements IWorld {
                             }
                             if (negZNeighborChunk != null) {
                                 Block bl = negZNeighborChunk.getBlockAtPosition(x, y, negZ);
-                                if (bl == null) {
-                                    if (negZNeighborChunk.getSunlight(x, y, negZ) < nextLL) {
-                                        negZNeighborChunk.setSunlight(x, y, negZ, nextLL);
-                                        sunlightQueue.add(new int[]{x, y, negZ});
-                                        changedChunks.add(negZNeighborChunk);
-                                    }
-                                } else if (bl.doesLightPassThrough()) {
+                                if (bl == null || bl.doesLightPassThrough()) {
                                     if (negZNeighborChunk.getSunlight(x, y, negZ) < nextLL) {
                                         negZNeighborChunk.setSunlight(x, y, negZ, nextLL);
                                         sunlightQueue.add(new int[]{x, y, negZ});
@@ -415,13 +397,7 @@ public class World implements IWorld {
                             }
                             if (posZNeighborChunk != null) {
                                 Block bl = posZNeighborChunk.getBlockAtPosition(x, y, posZ);
-                                if (bl == null) {
-                                    if (posZNeighborChunk.getSunlight(x, y, posZ) < nextLL) {
-                                        posZNeighborChunk.setSunlight(x, y, posZ, nextLL);
-                                        sunlightQueue.add(new int[]{x, y, posZ});
-                                        changedChunks.add(posZNeighborChunk);
-                                    }
-                                } else if (bl.doesLightPassThrough()) {
+                                if (bl == null || bl.doesLightPassThrough()) {
                                     if (posZNeighborChunk.getSunlight(x, y, posZ) < nextLL) {
                                         posZNeighborChunk.setSunlight(x, y, posZ, nextLL);
                                         sunlightQueue.add(new int[]{x, y, posZ});
@@ -433,13 +409,7 @@ public class World implements IWorld {
                             if (y < WORLD_HEIGHT - 2) {
                                 int posY = y + 1;
                                 Block posYBlock = posChunk.getBlockAtPosition(x, posY, z);
-                                if (posYBlock == null) {
-                                    if (nextLL > posChunk.getSunlight(x, posY, z)) {
-                                        posChunk.setSunlight(x, posY, z, nextLL);
-                                        sunlightQueue.add(new int[]{x, posY, z});
-                                        changedChunks.add(posChunk);
-                                    }
-                                } else if (posYBlock.doesLightPassThrough()) {
+                                if (posYBlock == null || posYBlock.doesLightPassThrough()) {
                                     if (nextLL > posChunk.getSunlight(x, posY, z)) {
                                         posChunk.setSunlight(x, posY, z, nextLL);
                                         sunlightQueue.add(new int[]{x, posY, z});
@@ -451,33 +421,12 @@ public class World implements IWorld {
                             if (y > 0) {
                                 int negY = y - 1;
                                 Block negYBlock = posChunk.getBlockAtPosition(x, negY, z);
-                                if (negYBlock == null) {
-                                    if (ll == 16) {
-                                        if (posChunk.getSunlight(x, negY, z) < 16) {
-                                            posChunk.setSunlight(x, negY, z, 16);
-                                            sunlightQueue.add(new int[]{x, negY, z});
-                                            changedChunks.add(posChunk);
-                                        }
-                                    } else {
-                                        if (posChunk.getSunlight(x, negY, z) < nextLL) {
-                                            posChunk.setSunlight(x, negY, z, nextLL);
-                                            sunlightQueue.add(new int[]{x, negY, z});
-                                            changedChunks.add(posChunk);
-                                        }
-                                    }
-                                } else if (negYBlock.doesLightPassThrough()) {
-                                    if (ll == 16) {
-                                        if (posChunk.getSunlight(x, negY, z) < 16) {
-                                            posChunk.setSunlight(x, negY, z, 16);
-                                            sunlightQueue.add(new int[]{x, negY, z});
-                                            changedChunks.add(posChunk);
-                                        }
-                                    } else {
-                                        if (posChunk.getSunlight(x, negY, z) < nextLL) {
-                                            posChunk.setSunlight(x, negY, z, nextLL);
-                                            sunlightQueue.add(new int[]{x, negY, z});
-                                            changedChunks.add(posChunk);
-                                        }
+                                if (negYBlock == null || negYBlock.doesLightPassThrough()) {
+                                    boolean maxLL = ll == 16;
+                                    if (posChunk.getSunlight(x, negY, z) < (maxLL ? 16 : nextLL)) {
+                                        posChunk.setSunlight(x, negY, z, (maxLL ? 16 : nextLL));
+                                        sunlightQueue.add(new int[]{x, negY, z});
+                                        changedChunks.add(posChunk);
                                     }
                                 }
                             }
@@ -520,15 +469,11 @@ public class World implements IWorld {
                     Block bl = negXNeighborChunk.getBlockAtPosition(negX, y, z);
                     int bll = negXNeighborChunk.getSunlight(negX, y, z);
                     if (bll < ll && bll != 0) {
-                        if (bl == null) {
-                            sunlightRemovalQueue.add(new int[]{negX, y, z});
-                        } else if (bl.doesLightPassThrough()) {
+                        if (bl == null || bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{negX, y, z});
                         }
                     } else if (bll >= ll) {
-                        if (bl == null) {
-                            sunlightQueue.add(new int[]{negX, y, z});
-                        } else if (bl.doesLightPassThrough()) {
+                        if (bl == null || bl.doesLightPassThrough()) {
                             sunlightQueue.add(new int[]{negX, y, z});
                         }
                     }
@@ -537,15 +482,11 @@ public class World implements IWorld {
                     Block bl = posXNeighborChunk.getBlockAtPosition(posX, y, z);
                     int bll = posXNeighborChunk.getSunlight(posX, y, z);
                     if (bll < ll && bll != 0) {
-                        if (bl == null) {
-                            sunlightRemovalQueue.add(new int[]{posX, y, z});
-                        } else if (bl.doesLightPassThrough()) {
+                        if (bl == null || bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{posX, y, z});
                         }
                     } else if (bll >= ll) {
-                        if (bl == null) {
-                            sunlightQueue.add(new int[]{posX, y, z});
-                        } else if (bl.doesLightPassThrough()) {
+                        if (bl == null || bl.doesLightPassThrough()) {
                             sunlightQueue.add(new int[]{posX, y, z});
                         }
                     }
@@ -554,15 +495,11 @@ public class World implements IWorld {
                     Block bl = negZNeighborChunk.getBlockAtPosition(x, y, negZ);
                     int bll = negZNeighborChunk.getSunlight(x, y, negZ);
                     if (bll < ll && bll != 0) {
-                        if (bl == null) {
-                            sunlightRemovalQueue.add(new int[]{x, y, negZ});
-                        } else if (bl.doesLightPassThrough()) {
+                        if (bl == null || bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{x, y, negZ});
                         }
                     } else if (bll >= ll) {
-                        if (bl == null) {
-                            sunlightQueue.add(new int[]{x, y, negZ});
-                        } else if (bl.doesLightPassThrough()) {
+                        if (bl == null || bl.doesLightPassThrough()) {
                             sunlightQueue.add(new int[]{x, y, negZ});
                         }
                     }
@@ -571,15 +508,11 @@ public class World implements IWorld {
                     Block bl = posZNeighborChunk.getBlockAtPosition(x, y, posZ);
                     int bll = posZNeighborChunk.getSunlight(x, y, posZ);
                     if (bll < ll && bll != 0) {
-                        if (bl == null) {
-                            sunlightRemovalQueue.add(new int[]{x, y, posZ});
-                        } else if (bl.doesLightPassThrough()) {
+                        if (bl == null || bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{x, y, posZ});
                         }
                     } else if (bll >= ll) {
-                        if (bl == null) {
-                            sunlightQueue.add(new int[]{x, y, posZ});
-                        } else if (bl.doesLightPassThrough()) {
+                        if (bl == null || bl.doesLightPassThrough()) {
                             sunlightQueue.add(new int[]{x, y, posZ});
                         }
                     }
@@ -588,11 +521,7 @@ public class World implements IWorld {
                 if (y > 0) {
                     int negY = y - 1;
                     Block negYBlock = posChunk.getBlockAtPosition(x, negY, z);
-                    if (negYBlock == null) {
-                        if (posChunk.getSunlight(x, negY, z) != 0) {
-                            sunlightRemovalQueue.add(new int[]{x, negY, z});
-                        }
-                    } else if (negYBlock.doesLightPassThrough()) {
+                    if (negYBlock == null || negYBlock.doesLightPassThrough()) {
                         if (posChunk.getSunlight(x, negY, z) != 0) {
                             sunlightRemovalQueue.add(new int[]{x, negY, z});
                         }

@@ -34,7 +34,7 @@ public class GreedyMesher implements Mesher {
         return meshFaces(faces, builder);
     }
 
-    public List<Face> getFaces(Block[][][] voxels, float[][][] lightLevels) {
+    public List<Face> getFaces(Block[][][] voxels, float[][][] lightLevels, OccludeCondition ocCond) {
         List<Face> faces = new ArrayList<>();
 
         // Top, bottom
@@ -47,10 +47,7 @@ public class GreedyMesher implements Mesher {
                 for (int z = 0; z < voxels[0][0].length; z++) {
                     if (voxels[x][y][z] == null) continue;
                     if (y < voxels[0].length - 1) {
-                        if (voxels[x][y + 1][z] == null) {
-                            topBlocks[x][z] = voxels[x][y][z].getID();
-                            topLightLevels[x][z] = lightLevels[x][y + 1][z];
-                        } else if (voxels[x][y + 1][z].isTransparent() && !voxels[x][y][z].isTransparent()) {
+                        if (!ocCond.shouldOcclude(voxels[x][y][z], voxels[x][y + 1][z])) {
                             topBlocks[x][z] = voxels[x][y][z].getID();
                             topLightLevels[x][z] = lightLevels[x][y + 1][z];
                         }
@@ -59,10 +56,7 @@ public class GreedyMesher implements Mesher {
                         topLightLevels[x][z] = 1;
                     }
                     if (y > 0) {
-                        if (voxels[x][y - 1][z] == null) {
-                            btmBlocks[x][z] = voxels[x][y][z].getID();
-                            btmLightLevels[x][z] = lightLevels[x][y - 1][z];
-                        } else if (voxels[x][y - 1][z].isTransparent() && !voxels[x][y][z].isTransparent()) {
+                        if(!ocCond.shouldOcclude(voxels[x][y][z], voxels[x][y - 1][z])) {
                             btmBlocks[x][z] = voxels[x][y][z].getID();
                             btmLightLevels[x][z] = lightLevels[x][y - 1][z];
                         }
@@ -91,10 +85,7 @@ public class GreedyMesher implements Mesher {
                     if (westNeighborChunk != null) {
                         Block westNeighborBlk = VoxelGameAPI.instance.getBlockByID(
                                 westNeighborChunk.getBlockIdAtPosition(westNeighborX, y, z));
-                        if (westNeighborBlk == null) {
-                            westBlocks[z][y] = voxels[x][y][z].getID();
-                            westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX, y, z);
-                        } else if (westNeighborBlk.isTransparent() && !voxels[x][y][z].isTransparent()) {
+                        if (!ocCond.shouldOcclude(voxels[x][y][z], westNeighborBlk)) {
                             westBlocks[z][y] = voxels[x][y][z].getID();
                             westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX, y, z);
                         }
@@ -108,10 +99,7 @@ public class GreedyMesher implements Mesher {
                     if (eastNeighborChunk != null) {
                         Block eastNeighborBlk = VoxelGameAPI.instance.getBlockByID(
                                 eastNeighborChunk.getBlockIdAtPosition(eastNeighborX, y, z));
-                        if (eastNeighborBlk == null) {
-                            eastBlocks[z][y] = voxels[x][y][z].getID();
-                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX, y, z);
-                        } else if (eastNeighborBlk.isTransparent() && !voxels[x][y][z].isTransparent()) {
+                        if (!ocCond.shouldOcclude(voxels[x][y][z], eastNeighborBlk)) {
                             eastBlocks[z][y] = voxels[x][y][z].getID();
                             eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX, y, z);
                         }
@@ -143,25 +131,19 @@ public class GreedyMesher implements Mesher {
                     if (northNeighborChunk != null) {
                         Block northNeighborBlock = VoxelGameAPI.instance.getBlockByID(
                                 northNeighborChunk.getBlockIdAtPosition(x, y, northNeighborZ));
-                        if (northNeighborBlock == null) {
-                            northBlocks[x][y] = voxels[x][y][z].getID();
-                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ);
-                        } else if (northNeighborBlock.isTransparent() && !voxels[x][y][z].isTransparent()) {
+                        if (!ocCond.shouldOcclude(voxels[x][y][z], northNeighborBlock)) {
                             northBlocks[x][y] = voxels[x][y][z].getID();
                             northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ);
                         }
                     } else {
-                        northBlocks[x][y] = voxels[x][y][z].getID();
                         northLightLevels[x][y] = 1;
+                        continue;
                     }
 
                     if (southNeighborChunk != null) {
                         Block southNeighborBlock = VoxelGameAPI.instance.getBlockByID(
                                 southNeighborChunk.getBlockIdAtPosition(x, y, southNeighborZ));
-                        if (southNeighborBlock == null) {
-                            southBlocks[x][y] = voxels[x][y][z].getID();
-                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ);
-                        } else if (southNeighborBlock.isTransparent() && !voxels[x][y][z].isTransparent()) {
+                        if (!ocCond.shouldOcclude(voxels[x][y][z], southNeighborBlock)) {
                             southBlocks[x][y] = voxels[x][y][z].getID();
                             southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ);
                         }
@@ -177,6 +159,20 @@ public class GreedyMesher implements Mesher {
         }
 
         return faces;
+    }
+
+    public List<Face> getFaces(Block[][][] voxels, float[][][] lightLevels) {
+        return getFaces(voxels, lightLevels, new OccludeCondition() {
+            @Override
+            public boolean shouldOcclude(Block curBlock, Block blockToSide) {
+                if (blockToSide == null) {
+                    return false;
+                } else if (blockToSide.isTransparent() && !curBlock.isTransparent()) {
+                    return false;
+                }
+                return true;
+            }
+        });
     }
 
     /**
@@ -297,4 +293,14 @@ public class GreedyMesher implements Mesher {
             }
         }
     }
+
+    public interface OccludeCondition {
+        /**
+         * @param curBlock Current block being checked
+         * @param blockToSide Block the the side of the current block
+         * @return True if the side of the curBlock should be occluded
+         */
+        boolean shouldOcclude(Block curBlock, Block blockToSide);
+    }
+
 }

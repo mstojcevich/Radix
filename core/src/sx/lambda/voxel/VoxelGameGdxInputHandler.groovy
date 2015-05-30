@@ -109,18 +109,34 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
+        if(!game.onAndroid())
+            updateRotation(screenX, screenY)
+
         return false;
     }
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        if(game.onAndroid())
-            return false;
+        if(!game.onAndroid())
+            updateRotation(screenX, screenY)
 
+        return true;
+    }
+
+    @Override
+    public boolean scrolled(int amount) {
+        return false;
+    }
+
+    public void registerKeybind(Keybind kb) {
+        this.keybindList.add(kb)
+    }
+
+    private void updateRotation(int newMouseX, int newMouseY) {
         if(lastMouseX > -Integer.MAX_VALUE) {
             if ((game.world != null || game.player != null) && (game.currentScreen == null || game.currentScreen == game.hud)) {
-                int deltaX = screenX - lastMouseX
-                int deltaY = screenY - lastMouseY
+                int deltaX = newMouseX - lastMouseX
+                int deltaY = newMouseY - lastMouseY
                 float deltaYaw = deltaX * mouseSensitivity;
                 float deltaPitch = -deltaY * mouseSensitivity;
 
@@ -137,18 +153,8 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
                 }
             }
         }
-        lastMouseX = screenX;
-        lastMouseY = screenY;
-        return true;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
-    }
-
-    public void registerKeybind(Keybind kb) {
-        this.keybindList.add(kb)
+        lastMouseX = newMouseX;
+        lastMouseY = newMouseY;
     }
 
 }

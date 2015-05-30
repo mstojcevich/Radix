@@ -138,7 +138,7 @@ public class World implements IWorld {
         final IChunk playerChunk = getChunkAtPosition(
                 MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getX()),
                 MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getZ()));
-        if(playerChunk != lastPlayerChunk || chunkList.size() != sortedChunkList.size()) {
+        if(playerChunk != lastPlayerChunk || (sortedChunkList != null && chunkList.size() != sortedChunkList.size())) {
             sortedChunkList = new ArrayList<>();
             for(IChunk c : chunkList) {
                 sortedChunkList.add(c);

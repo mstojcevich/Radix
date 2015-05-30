@@ -52,7 +52,7 @@ public class FoliageBlockRenderer extends NormalBlockRenderer {
         // POSITIVE X
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
         builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
-        builder.rect(x, y1, z1,
+        builder.rect(x - 0.5f, y1, z1,
                 x - 0.5f, y2, z1,
                 x - 0.5f, y2, z2,
                 x - 0.5f, y1, z2,

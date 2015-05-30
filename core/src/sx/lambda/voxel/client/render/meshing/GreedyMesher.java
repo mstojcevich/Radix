@@ -168,12 +168,7 @@ public class GreedyMesher implements Mesher {
         return getFaces(voxels, lightLevels, new OccludeCondition() {
             @Override
             public boolean shouldOcclude(Block curBlock, Block blockToSide) {
-                if (blockToSide == null) {
-                    return false;
-                } else if (blockToSide.isTransparent() && !curBlock.isTransparent()) {
-                    return false;
-                }
-                return true;
+                return !(blockToSide == null || (blockToSide.isTransparent() && !curBlock.isTransparent()));
             }
         });
     }

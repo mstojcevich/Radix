@@ -82,7 +82,12 @@ public class World implements IWorld {
         x = getChunkPosition(x);
         z = getChunkPosition(z);
 
-        IntMap<IChunk> zMap = this.chunkMapX.get(x);
+        IntMap<IChunk> zMap = null;
+        try {
+            zMap = this.chunkMapX.get(x);
+        } catch(ArrayIndexOutOfBoundsException ex) { // Sometimes the libgdx intmap will give aioob. Not sure why.
+            ex.printStackTrace();
+        }
         if(zMap == null)
             return null;
 

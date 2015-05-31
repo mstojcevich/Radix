@@ -6,12 +6,12 @@ public class Block {
 
     private int id;
     private final transient IBlockRenderer renderer;
-    private final boolean translucent, solid, lightPassthrough, selectable;
+    private final boolean translucent, solid, lightPassthrough, selectable, occludeCovered;
     private final String humanName;
     private final String textureLocation;
 
     Block(int id, String humanName, IBlockRenderer renderer, String textureLocation,
-          boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable) {
+          boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered) {
         this.id = id;
         this.renderer = renderer;
         this.translucent = translucent;
@@ -20,6 +20,7 @@ public class Block {
         this.textureLocation = textureLocation;
         this.lightPassthrough = lightPassthrough;
         this.selectable = selectable;
+        this.occludeCovered = occludeCovered;
     }
 
     public IBlockRenderer getRenderer() {
@@ -59,5 +60,12 @@ public class Block {
      */
     public boolean isSelectable() {
         return this.selectable;
+    }
+
+    /**
+     * @return True if covered sides of the block should be occluded when rendering
+     */
+    public boolean occludeCovered() {
+        return occludeCovered;
     }
 }

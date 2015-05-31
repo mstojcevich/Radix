@@ -10,6 +10,7 @@ public class BlockBuilder {
     private boolean solid = true;
     private boolean lightPassthrough = false;
     private boolean selectable = true;
+    private boolean occludeCovered = true;
 
     /**
      * Set the display name for the block
@@ -82,6 +83,19 @@ public class BlockBuilder {
         return this;
     }
 
+    /**
+     * Set whether to occlude (hide) sides that are blocked by other blocks.
+     * This would typically be set to false on blocks like tall grass where sides can be seen even if "covered".
+     *
+     * This is implied false for translucent blocks only when checking against non-translucent blocks.
+     *
+     * Defaults to true
+     */
+    public BlockBuilder setOccludeCovered(boolean occlude) {
+        this.occludeCovered = occlude;
+        return this;
+    }
+
     public BlockBuilder setBlockRenderer(IBlockRenderer renderer) {
         this.renderer = renderer;
         return this;
@@ -92,7 +106,7 @@ public class BlockBuilder {
         if (renderer == null) {
             renderer = new NormalBlockRenderer(id);
         }
-        return new Block(id, humanName, renderer, textureLocation, translucent, solid, lightPassthrough, selectable);
+        return new Block(id, humanName, renderer, textureLocation, translucent, solid, lightPassthrough, selectable, occludeCovered);
     }
 
     public class MissingElementException extends Exception {

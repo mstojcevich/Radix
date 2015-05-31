@@ -392,8 +392,6 @@ public class Chunk implements IChunk {
             z += size;
         }
 
-
-
         sunlightLevels[x][y][z] = level;
         lightLevels[x][y][z] = lightLevelMap[level];
 
@@ -406,7 +404,6 @@ public class Chunk implements IChunk {
                 if (xMinNeighbor != null) {
                     getWorld().rerenderChunk(xMinNeighbor);
                 }
-
             }
 
             if (x == size - 1) {
@@ -414,7 +411,6 @@ public class Chunk implements IChunk {
                 if (xPlNeighbor != null) {
                     getWorld().rerenderChunk(xPlNeighbor);
                 }
-
             }
 
             if (z == 0) {
@@ -422,7 +418,6 @@ public class Chunk implements IChunk {
                 if (zMinNeighbor != null) {
                     getWorld().rerenderChunk(zMinNeighbor);
                 }
-
             }
 
             if (z == size - 1) {
@@ -483,7 +478,6 @@ public class Chunk implements IChunk {
         if (z < 0) {
             z += size;
         }
-
 
         if (y > height - 1) return 0;
         if (y < 0) return 0;

@@ -330,18 +330,17 @@ public class VoxelGameClient extends ApplicationAdapter {
             Vec3i bp = new Vec3i(v.x, v.y, v.z);
             IChunk theChunk = world.getChunkAtPosition(bp);
             if (theChunk != null) {
-                if (theChunk.getBlockAtPosition(bp) != null) {
+                Block b = theChunk.getBlockAtPosition(bp);
+                if (b != null && b.isSelectable()) {
                     selectedBlock = bp;
                     if (last != null) {
                         if (theChunk.getBlockAtPosition(last) == null) {
                             selectedNextPlace = last;
                         }
-
                     }
 
                     plotter.end();
                     return;
-
                 }
 
                 last = bp;
@@ -607,7 +606,9 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     public void breakBlock() {
-        if (this.getSelectedBlock() != null && this.currentScreen == this.hud) {
+        if (this.getSelectedBlock() != null
+                && world.getChunkAtPosition(selectedBlock).getBlockAtPosition(selectedBlock).isSelectable()
+                && this.currentScreen == this.hud) {
             if (this.isRemote()) {
                 mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
                 mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.START_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));

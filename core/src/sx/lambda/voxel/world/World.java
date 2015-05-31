@@ -146,17 +146,13 @@ public class World implements IWorld {
             Collections.sort(sortedChunkList, new Comparator<IChunk>() {
                 @Override
                 public int compare(IChunk c1, IChunk c2) {
-                    int distTo2 = MathUtils.floorPositive((float)
-                            Math.sqrt(
-                                    Math.pow(playerChunk.getStartPosition().x - c2.getStartPosition().x, 2)
-                                    + Math.pow(playerChunk.getStartPosition().z - c2.getStartPosition().z, 2)
-                            ));
-                    int distTo1 = MathUtils.floorPositive((float)
-                            Math.sqrt(
-                                    Math.pow(playerChunk.getStartPosition().x - c1.getStartPosition().x, 2)
-                                            + Math.pow(playerChunk.getStartPosition().z - c1.getStartPosition().z, 2)
-                            ));
-                    return distTo2 - distTo1;
+                    int xDiff1 = playerChunk.getStartPosition().x - c1.getStartPosition().x;
+                    int zDiff1 = playerChunk.getStartPosition().z - c1.getStartPosition().z;
+                    int xDiff2 = playerChunk.getStartPosition().x - c2.getStartPosition().x;
+                    int zDiff2 = playerChunk.getStartPosition().z - c2.getStartPosition().z;
+                    int sqDist2 = xDiff2*xDiff2 + zDiff2*zDiff2;
+                    int sqDist1 = xDiff1*xDiff1 + zDiff1*zDiff1;
+                    return sqDist2 - sqDist1;
                 }
             });
             lastPlayerChunk = playerChunk;

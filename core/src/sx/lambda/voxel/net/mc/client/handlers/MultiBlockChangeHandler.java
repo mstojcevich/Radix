@@ -19,12 +19,10 @@ public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockCh
             int x = r.getPosition().getX();
             int y = r.getPosition().getY();
             int z = r.getPosition().getZ();
-            IChunk ck = game.getWorld().getChunkAtPosition(x, z);
-            if(ck == null)return;
             if(r.getBlock() > 0) {
-                ck.addBlock(r.getBlock(), x, y, z);
+                game.getWorld().addBlock(r.getBlock(), x, y, z);
             } else {
-                ck.removeBlock(x, y, z);
+                game.getWorld().removeBlock(x, y, z);
             }
         }
     }

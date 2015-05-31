@@ -17,12 +17,10 @@ public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket
         int x = packet.getRecord().getPosition().getX();
         int y = packet.getRecord().getPosition().getY();
         int z = packet.getRecord().getPosition().getZ();
-        IChunk ck = game.getWorld().getChunkAtPosition(x, z);
-        if(ck == null)return;
         if(packet.getRecord().getBlock() > 0) {
-            ck.addBlock(packet.getRecord().getBlock(), x, y, z);
+            game.getWorld().addBlock(packet.getRecord().getBlock(), x, y, z);
         } else {
-            ck.removeBlock(x, y, z);
+            game.getWorld().removeBlock(x, y, z);
         }
     }
 }

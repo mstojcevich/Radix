@@ -54,7 +54,9 @@ public class World implements IWorld {
 
     private ModelBatch modelBatch;
 
-    private boolean shouldUpdateLight, updatingLight;
+    private boolean shouldUpdateLight;
+
+    private int lightUpdaters;
 
     private int chunksMeshing;
 
@@ -124,7 +126,7 @@ public class World implements IWorld {
             modelBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
         }
 
-        if (!updatingLight && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
+        if (lightUpdaters < 2 && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
             processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
         }
         for (IChunk c : chunksToRerender) {
@@ -360,12 +362,12 @@ public class World implements IWorld {
     @Override
     public void processLightQueue() {
         shouldUpdateLight = true;
-        if (!updatingLight) {
+        if (lightUpdaters < 2) {
+            lightUpdaters++;
             new Thread("Light update") {
                 @Override
                 public void run() {
                     shouldUpdateLight = false;
-                    updatingLight = true;
 
                     processLightRemovalQueue();
 
@@ -463,7 +465,7 @@ public class World implements IWorld {
                             changedChunk.finishChangingSunlight();
                         }
                     }
-                    updatingLight = false;
+                    lightUpdaters--;
                 }
             }.start();
         }

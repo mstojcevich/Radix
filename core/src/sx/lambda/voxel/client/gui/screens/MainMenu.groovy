@@ -120,6 +120,12 @@ public class MainMenu implements GuiScreen {
     }
 
     @Override
+    void keyTyped(char c) {
+
+    }
+
+
+    @Override
     public void finish() {
         if (mmPrerenderFbo != null)
             mmPrerenderFbo.dispose()

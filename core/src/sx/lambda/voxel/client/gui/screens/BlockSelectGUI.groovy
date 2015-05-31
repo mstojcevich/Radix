@@ -71,6 +71,11 @@ class BlockSelectGUI implements GuiScreen {
         }
     }
 
+    @Override
+    void keyTyped(char c) {
+
+    }
+
     /**
      * Get the block ID at a certain position on the screen
      */

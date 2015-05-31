@@ -57,6 +57,12 @@ class IngameHUD implements GuiScreen {
     void onMouseClick(int clickType) {}
 
     @Override
+    void keyTyped(char c) {
+
+    }
+
+
+    @Override
     public void init() {
         this.icons = new Texture(Gdx.files.internal("textures/gui/icons.png"))
     }

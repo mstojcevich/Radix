@@ -25,7 +25,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
         registerKeybind(new Keybind("voxeltest.movement.jump", "Jump", Input.Keys.SPACE, new Runnable() {
             @Override
             void run() {
-                if (game.world != null) {
+                if (game.world != null && game.currentScreen == game.hud) {
                     game.movementHandler.jump();
                 }
             }
@@ -60,6 +60,21 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
                 }
             }
         }));
+        registerKeybind(new Keybind("voxeltest.gui.chat", "Open Chat", Input.Keys.T, new Runnable() {
+            @Override
+            void run() {
+                if (game.world != null) {
+                    if (game.currentScreen == game.hud) {
+                        game.addToGLQueue(new Runnable() {
+                            @Override
+                            void run() {
+                                game.setCurrentScreen(game.chatGUI)
+                            }
+                        })
+                    }
+                }
+            }
+        }));
     }
 
     @Override
@@ -79,6 +94,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
+        VoxelGameClient.instance.currentScreen.keyTyped(character)
         return false;
     }
 

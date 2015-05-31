@@ -43,74 +43,76 @@ class MovementHandler implements RepeatedTask {
                     float movementMultiplier = moveDiffMS * 0.0045
                     final boolean threeDMove = false;
                     EntityPosition lastPosition = player.getPosition().clone()
-                    if (Gdx.input.isKeyPressed(Keys.W)) { // Forward TODO Config - Make keys configurable
-                        float yaw = player.getRotation().getYaw()
-                        float pitch = player.getRotation().getPitch()
-                        float deltaX
-                        float deltaY
-                        float deltaZ
-                        if (threeDMove) {
-                            deltaX = (float) (-MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier)
-                            deltaY = (float) (-MathUtils.sinDeg(pitch) * movementMultiplier)
-                            deltaZ = (float) (MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier)
-                        } else {
-                            deltaX = (float) (-MathUtils.sinDeg(yaw) * movementMultiplier)
-                            deltaZ = (float) (MathUtils.cosDeg(yaw) * movementMultiplier)
-                            deltaY = 0
-                        }
+                    if(game.currentScreen == game.hud) {
+                        if (Gdx.input.isKeyPressed(Keys.W)) { // Forward TODO Config - Make keys configurable
+                            float yaw = player.getRotation().getYaw()
+                            float pitch = player.getRotation().getPitch()
+                            float deltaX
+                            float deltaY
+                            float deltaZ
+                            if (threeDMove) {
+                                deltaX = (float) (-MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier)
+                                deltaY = (float) (-MathUtils.sinDeg(pitch) * movementMultiplier)
+                                deltaZ = (float) (MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier)
+                            } else {
+                                deltaX = (float) (-MathUtils.sinDeg(yaw) * movementMultiplier)
+                                deltaZ = (float) (MathUtils.cosDeg(yaw) * movementMultiplier)
+                                deltaY = 0
+                            }
 
-                        if (!checkDeltaCollision(player, 0, 0, deltaZ)) {
-                            player.getPosition().offset(0, 0, deltaZ)
+                            if (!checkDeltaCollision(player, 0, 0, deltaZ)) {
+                                player.getPosition().offset(0, 0, deltaZ)
+                            }
+                            if (!checkDeltaCollision(player, deltaX, 0, 0)) {
+                                player.getPosition().offset(deltaX, 0, 0)
+                            }
+                            if (!checkDeltaCollision(player, 0, deltaY, 0)) {
+                                player.getPosition().offset(0, deltaY, 0)
+                            }
                         }
-                        if (!checkDeltaCollision(player, deltaX, 0, 0)) {
-                            player.getPosition().offset(deltaX, 0, 0)
-                        }
-                        if (!checkDeltaCollision(player, 0, deltaY, 0)) {
-                            player.getPosition().offset(0, deltaY, 0)
-                        }
-                    }
-                    if (Gdx.input.isKeyPressed(Keys.S)) {
-                        float yaw = player.getRotation().getYaw()
-                        float pitch = player.getRotation().getPitch()
-                        float deltaX
-                        float deltaY
-                        float deltaZ
-                        if (threeDMove) {
-                            deltaX = (float) (MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier)
-                            deltaY = (float) (MathUtils.sinDeg(pitch) * movementMultiplier)
-                            deltaZ = (float) (-MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier)
-                        } else {
-                            deltaX = (float) (MathUtils.sinDeg(yaw) * movementMultiplier)
-                            deltaZ = (float) (-MathUtils.cosDeg(yaw) * movementMultiplier)
-                            deltaY = 0
-                        }
+                        if (Gdx.input.isKeyPressed(Keys.S)) {
+                            float yaw = player.getRotation().getYaw()
+                            float pitch = player.getRotation().getPitch()
+                            float deltaX
+                            float deltaY
+                            float deltaZ
+                            if (threeDMove) {
+                                deltaX = (float) (MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier)
+                                deltaY = (float) (MathUtils.sinDeg(pitch) * movementMultiplier)
+                                deltaZ = (float) (-MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier)
+                            } else {
+                                deltaX = (float) (MathUtils.sinDeg(yaw) * movementMultiplier)
+                                deltaZ = (float) (-MathUtils.cosDeg(yaw) * movementMultiplier)
+                                deltaY = 0
+                            }
 
-                        if (!checkDeltaCollision(player, deltaX, deltaY, deltaZ)) {
-                            player.getPosition().offset(deltaX, deltaY, deltaZ)
+                            if (!checkDeltaCollision(player, deltaX, deltaY, deltaZ)) {
+                                player.getPosition().offset(deltaX, deltaY, deltaZ)
+                            }
                         }
-                    }
-                    if (Gdx.input.isKeyPressed(Keys.A)) { //Strafe left
-                        float deltaX
-                        float deltaZ
-                        float yaw = player.getRotation().getYaw()
+                        if (Gdx.input.isKeyPressed(Keys.A)) { //Strafe left
+                            float deltaX
+                            float deltaZ
+                            float yaw = player.getRotation().getYaw()
 
-                        deltaX = (float) (-MathUtils.sinDeg((float)yaw - 90) * movementMultiplier)
-                        deltaZ = (float) (MathUtils.cosDeg((float)yaw - 90) * movementMultiplier)
+                            deltaX = (float) (-MathUtils.sinDeg((float) yaw - 90) * movementMultiplier)
+                            deltaZ = (float) (MathUtils.cosDeg((float) yaw - 90) * movementMultiplier)
 
-                        if (!checkDeltaCollision(player, deltaX, 0, deltaZ)) {
-                            player.getPosition().offset(deltaX, 0, deltaZ)
+                            if (!checkDeltaCollision(player, deltaX, 0, deltaZ)) {
+                                player.getPosition().offset(deltaX, 0, deltaZ)
+                            }
                         }
-                    }
-                    if (Gdx.input.isKeyPressed(Keys.D)) { //Strafe right
-                        float deltaX
-                        float deltaZ
-                        float yaw = player.getRotation().getYaw()
+                        if (Gdx.input.isKeyPressed(Keys.D)) { //Strafe right
+                            float deltaX
+                            float deltaZ
+                            float yaw = player.getRotation().getYaw()
 
-                        deltaX = (float) (-MathUtils.sinDeg((float)yaw + 90) * movementMultiplier)
-                        deltaZ = (float) (MathUtils.cosDeg((float)yaw + 90) * movementMultiplier)
+                            deltaX = (float) (-MathUtils.sinDeg((float) yaw + 90) * movementMultiplier)
+                            deltaZ = (float) (MathUtils.cosDeg((float) yaw + 90) * movementMultiplier)
 
-                        if (!checkDeltaCollision(player, deltaX, 0, deltaZ)) {
-                            player.getPosition().offset(deltaX, 0, deltaZ)
+                            if (!checkDeltaCollision(player, deltaX, 0, deltaZ)) {
+                                player.getPosition().offset(deltaX, 0, deltaZ)
+                            }
                         }
                     }
 

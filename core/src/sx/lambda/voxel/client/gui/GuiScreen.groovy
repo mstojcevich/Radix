@@ -22,4 +22,6 @@ public interface GuiScreen {
 
     void onMouseClick(int button)
 
+    void keyTyped(char c)
+
 }

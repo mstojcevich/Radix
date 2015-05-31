@@ -342,7 +342,7 @@ public class World implements IWorld {
 
     @Override
     public void processLightQueue() {
-        if (sunlightQueue.isEmpty())
+        if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty())
             return;
         shouldUpdateLight = true;
         if (lightUpdaters < 2) {

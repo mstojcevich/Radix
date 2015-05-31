@@ -263,7 +263,7 @@ void main() {
 	#endif
 
 	#if defined(normalFlag)
-	gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(normal, beach)), gl_FragColor.w);
+	gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(normal, groove)), gl_FragColor.w);
 	#endif
 
 }

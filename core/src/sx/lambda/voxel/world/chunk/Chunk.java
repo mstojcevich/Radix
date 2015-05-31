@@ -176,37 +176,20 @@ public class Chunk implements IChunk {
     }
 
     public Block getBlockAtPosition(Vec3i position) {
-        int x = position.x % size;
         int y = position.y;
-        int z = position.z % size;
-        if (x < 0) {
-            x += size;
-        }
-
-        if (z < 0) {
-            z += size;
-        }
-
-
         if (y > height - 1) return null;
         if (y < 0) return null;
+
+        int x = Math.floorMod(position.x, size);
+        int z = Math.floorMod(position.z, size);
 
         return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
     }
 
     @Override
     public void removeBlock(int x, int y, int z) {
-        x = x % size;
-        z = z % size;
-        if (x < 0) {
-            x += size;
-        }
-
-        if (z < 0) {
-            z += size;
-        }
-
-        if (y > height - 1) return;
+        x = Math.floorMod(x, size);
+        z = Math.floorMod(z, size);
 
         blockList[x][y][z] = -1;
 
@@ -296,17 +279,10 @@ public class Chunk implements IChunk {
 
     @Override
     public void addBlock(int block, int x, int y, int z, boolean updateSunlight) {
-        x = x % size;
-        z = z % size;
-        if (x < 0) {
-            x += size;
-        }
-
-        if (z < 0) {
-            z += size;
-        }
-
         if (y > height - 1) return;
+
+        x = Math.floorMod(x, size);
+        z = Math.floorMod(z, size);
 
         blockList[x][y][z] = block;
         if (block > 0) {
@@ -329,15 +305,8 @@ public class Chunk implements IChunk {
 
     @Override
     public float getLightLevel(int x, int y, int z) {
-        x %= size;
-        z %= size;
-        if (x < 0) {
-            x += size;
-        }
-
-        if (z < 0) {
-            z += size;
-        }
+        x = Math.floorMod(x, size);
+        z = Math.floorMod(z, size);
 
         if (y > height - 1 || y < 0) {
             return 1;
@@ -382,15 +351,8 @@ public class Chunk implements IChunk {
 
     @Override
     public void setSunlight(int x, int y, int z, int level, boolean updateNeighbors) {
-        x %= size;
-        z %= size;
-        if (x < 0) {
-            x += size;
-        }
-
-        if (z < 0) {
-            z += size;
-        }
+        x = Math.floorMod(x, size);
+        z = Math.floorMod(z, size);
 
         sunlightLevels[x][y][z] = level;
         lightLevels[x][y][z] = lightLevelMap[level];
@@ -432,15 +394,8 @@ public class Chunk implements IChunk {
 
     @Override
     public int getSunlight(int x, int y, int z) {
-        x %= size;
-        z %= size;
-        if (x < 0) {
-            x += size;
-        }
-
-        if (z < 0) {
-            z += size;
-        }
+        x = Math.floorMod(x, size);
+        z = Math.floorMod(z, size);
 
         if (y > height - 1 || y < 0) {
             return -1;
@@ -469,15 +424,8 @@ public class Chunk implements IChunk {
     }
 
     public int getBlockIdAtPosition(int x, int y, int z) {
-        x = x % size;
-        z = z % size;
-        if (x < 0) {
-            x += size;
-        }
-
-        if (z < 0) {
-            z += size;
-        }
+        x = Math.floorMod(x, size);
+        z = Math.floorMod(z, size);
 
         if (y > height - 1) return 0;
         if (y < 0) return 0;
@@ -486,18 +434,12 @@ public class Chunk implements IChunk {
 
     @Override
     public Block getBlockAtPosition(int x, int y, int z) {
-        x = x % size;
-        z = z % size;
-        if (x < 0) {
-            x += size;
-        }
-
-        if (z < 0) {
-            z += size;
-        }
-        
         if (y > height - 1) return null;
         if (y < 0) return null;
+
+        x = Math.floorMod(x, size);
+        z = Math.floorMod(z, size);
+
         return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
     }
 

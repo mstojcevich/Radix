@@ -200,10 +200,7 @@ public class World implements IWorld {
 
     @Override
     public int getChunkPosition(float value) {
-        int subtraction = MathUtils.floor(value % CHUNK_SIZE);
-        if (value < 0 && subtraction != 0) {
-            subtraction = CHUNK_SIZE + subtraction;
-        }
+        int subtraction = Math.floorMod(MathUtils.floor(value), CHUNK_SIZE);
         return MathUtils.floor(value - subtraction);
     }
 
@@ -225,32 +222,16 @@ public class World implements IWorld {
             if (c != null) {
                 c.removeBlock(x, y, z);
                 if (!server) {
-                    if (Math.abs(x + (x < 0 ? 1 : 0)) % 16 == 15) {
-                        if (x < 0) {
-                            rerenderChunk(getChunkAtPosition(x - 1, z));
-                        } else {
-                            rerenderChunk(getChunkAtPosition(x + 1, z));
-                        }
-                    } else if (Math.abs(x + (x < 0 ? 1 : 0)) % 16 == 0) {
-                        if (x < 0) {
-                            rerenderChunk(getChunkAtPosition(x + 1, z));
-                        } else {
-                            rerenderChunk(getChunkAtPosition(x - 1, z));
-                        }
+                    if (Math.floorMod(x, CHUNK_SIZE) == CHUNK_SIZE-1) {
+                        rerenderChunk(getChunkAtPosition(x + 1, z));
+                    } else if (x % CHUNK_SIZE == 0) {
+                        rerenderChunk(getChunkAtPosition(x - 1, z));
                     }
 
-                    if (Math.abs(z + (z < 0 ? 1 : 0)) % 16 == 15) {
-                        if (z < 0) {
-                            rerenderChunk(getChunkAtPosition(x, z - 1));
-                        } else {
-                            rerenderChunk(getChunkAtPosition(x, z + 1));
-                        }
-                    } else if (Math.abs(z + (z < 0 ? 1 : 0)) % 16 == 0) {
-                        if (z < 0) {
-                            rerenderChunk(getChunkAtPosition(x, z + 1));
-                        } else {
-                            rerenderChunk(getChunkAtPosition(x, z - 1));
-                        }
+                    if (Math.floorMod(z, CHUNK_SIZE) == CHUNK_SIZE-1) {
+                        rerenderChunk(getChunkAtPosition(x, z + 1));
+                    } else if (z % CHUNK_SIZE == 0) {
+                        rerenderChunk(getChunkAtPosition(x, z - 1));
                     }
                 }
             }
@@ -389,10 +370,20 @@ public class World implements IWorld {
                             int posX = x + 1;
                             int negZ = z - 1;
                             int posZ = z + 1;
-                            IChunk negXNeighborChunk = getChunkAtPosition(negX, z);
-                            IChunk posXNeighborChunk = getChunkAtPosition(posX, z);
-                            IChunk negZNeighborChunk = getChunkAtPosition(x, negZ);
-                            IChunk posZNeighborChunk = getChunkAtPosition(x, posZ);
+                            IChunk negXNeighborChunk = posChunk;
+                            IChunk posXNeighborChunk = posChunk;
+                            IChunk negZNeighborChunk = posChunk;
+                            IChunk posZNeighborChunk = posChunk;
+                            if(x % CHUNK_SIZE == 0) {
+                                negXNeighborChunk = getChunkAtPosition(negX, z);
+                            } else if(Math.floorMod(x, CHUNK_SIZE) == CHUNK_SIZE-1) {
+                                posXNeighborChunk = getChunkAtPosition(posX, z);
+                            }
+                            if(z % CHUNK_SIZE == 0) {
+                                negZNeighborChunk = getChunkAtPosition(x, negZ);
+                            } else if(Math.floorMod(z, CHUNK_SIZE) == CHUNK_SIZE-1) {
+                                posZNeighborChunk = getChunkAtPosition(x, posZ);
+                            }
 
                             if (negXNeighborChunk != null) {
                                 Block bl = negXNeighborChunk.getBlockAtPosition(negX, y, z);

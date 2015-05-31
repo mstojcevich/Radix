@@ -560,12 +560,17 @@ public class VoxelGameClient extends ApplicationAdapter {
                 Pixmap bi = new Pixmap(1024, 1024, Pixmap.Format.RGBA8888);
                 bi.setColor(1, 1, 1, 1);
                 final int BLOCK_TEX_SIZE = 32;
+                int textureIndex = 0;
                 for (Block b : VoxelGameAPI.instance.getBlocks()) {
-                    int x = b.getID() * BLOCK_TEX_SIZE % bi.getWidth();
-                    int y = BLOCK_TEX_SIZE*((b.getID() * BLOCK_TEX_SIZE) / bi.getWidth());
-                    Pixmap tex = new Pixmap(Gdx.files.internal(b.getTextureLocation()));
-                    bi.drawPixmap(tex, x, y);
-                    tex.dispose();
+                    b.setTextureIndex(textureIndex);
+                    for(String texLoc : b.getTextureLocations()) {
+                        int x = textureIndex * BLOCK_TEX_SIZE % bi.getWidth();
+                        int y = BLOCK_TEX_SIZE * ((textureIndex * BLOCK_TEX_SIZE) / bi.getWidth());
+                        Pixmap tex = new Pixmap(Gdx.files.internal(texLoc));
+                        bi.drawPixmap(tex, x, y);
+                        tex.dispose();
+                        textureIndex++;
+                    }
                 }
 
                 blockTextureAtlas = new Texture(bi);

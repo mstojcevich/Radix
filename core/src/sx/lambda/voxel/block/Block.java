@@ -8,16 +8,17 @@ public class Block {
     private final transient IBlockRenderer renderer;
     private final boolean translucent, solid, lightPassthrough, selectable, occludeCovered;
     private final String humanName;
-    private final String textureLocation;
+    private final String[] textureLocations;
+    private int textureIndex;
 
-    Block(int id, String humanName, IBlockRenderer renderer, String textureLocation,
+    Block(int id, String humanName, IBlockRenderer renderer, String textureLocations[],
           boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered) {
         this.id = id;
         this.renderer = renderer;
         this.translucent = translucent;
         this.solid = solid;
         this.humanName = humanName;
-        this.textureLocation = textureLocation;
+        this.textureLocations = textureLocations;
         this.lightPassthrough = lightPassthrough;
         this.selectable = selectable;
         this.occludeCovered = occludeCovered;
@@ -52,7 +53,30 @@ public class Block {
     }
 
     public String getTextureLocation() {
-        return textureLocation;
+        return textureLocations[0];
+    }
+
+    public String[] getTextureLocations() {
+        return textureLocations;
+    }
+
+    /**
+     * Set the beginning index in the texture map for the texture set for the block
+     *
+     * THIS IS USED INTERNALLY BY THE TEXTURING SYSTEM
+     * YOU PROBABLY DO NOT WANT TO CALL THIS
+     *
+     * @param index Number of the first texture of the block in the texture map
+     */
+    public void setTextureIndex(int index) {
+        this.textureIndex = index;
+    }
+
+    /**
+     * @return The index at which you can find the first texture of the block in the texture map
+     */
+    public int getTextureIndex() {
+        return this.textureIndex;
     }
 
     /**

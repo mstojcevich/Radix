@@ -271,22 +271,22 @@ public class GreedyMesher implements Mesher {
 
             switch (side) {
                 case TOP:
-                    renderer.renderTop(x1, y1, x2, y2, z + 1, lightLevel, builder);
+                    renderer.renderTop(block.getTextureIndex(), x1, y1, x2, y2, z + 1, lightLevel, builder);
                     break;
                 case BOTTOM:
-                    renderer.renderBottom(x1, y1, x2, y2, z, lightLevel, builder);
+                    renderer.renderBottom(block.getTextureIndex(), x1, y1, x2, y2, z, lightLevel, builder);
                     break;
                 case NORTH:
-                    renderer.renderNorth(x1, y1, x2, y2, z + 1, lightLevel, builder);
+                    renderer.renderNorth(block.getTextureIndex(), x1, y1, x2, y2, z + 1, lightLevel, builder);
                     break;
                 case SOUTH:
-                    renderer.renderSouth(x1, y1, x2, y2, z, lightLevel, builder);
+                    renderer.renderSouth(block.getTextureIndex(), x1, y1, x2, y2, z, lightLevel, builder);
                     break;
                 case EAST:
-                    renderer.renderEast(x1, y1, x2, y2, z + 1, lightLevel, builder);
+                    renderer.renderEast(block.getTextureIndex(), x1, y1, x2, y2, z + 1, lightLevel, builder);
                     break;
                 case WEST:
-                    renderer.renderWest(x1, y1, x2, y2, z, lightLevel, builder);
+                    renderer.renderWest(block.getTextureIndex(), x1, y1, x2, y2, z, lightLevel, builder);
                     break;
 
             }

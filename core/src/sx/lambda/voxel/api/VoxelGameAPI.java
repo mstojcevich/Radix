@@ -6,6 +6,7 @@ import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.BlockBuilder;
 import sx.lambda.voxel.block.FoliageBlockRenderer;
+import sx.lambda.voxel.block.IBlockRenderer;
 import sx.lambda.voxel.server.VoxelGameServer;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class VoxelGameAPI {
      */
     public void registerBuiltinBlocks() throws BlockRegistrationException {
         try {
+            IBlockRenderer foliageRenderer = new FoliageBlockRenderer();
             registerBlocks(
                     new BlockBuilder().setID(BuiltInBlockIds.DIRT_ID).setHumanName("Dirt").setTextureLocation("textures/block/dirt.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHumanName("Grass").setTextureLocation("textures/block/grass.png").build(),
@@ -64,10 +66,10 @@ public class VoxelGameAPI {
                     new BlockBuilder().setID(BuiltInBlockIds.LAVA_FLOW_ID).setHumanName("Lava (Flowing)").setSolid(false).setSelectable(false).setTextureLocation("textures/block/lava.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.PLANKS_ID).setHumanName("Planks").setTextureLocation("textures/block/planks.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.STONE_BRICK_ID).setHumanName("Stone Brick").setTextureLocation("textures/block/stonebrick.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.TALL_GRASS_ID).setHumanName("Tall Grass").setTextureLocation("textures/block/tallgrass.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(new FoliageBlockRenderer(BuiltInBlockIds.TALL_GRASS_ID)).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.FLOWER_ID).setHumanName("Flower").setTextureLocation("textures/block/flower_tulip_orange.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(new FoliageBlockRenderer(BuiltInBlockIds.FLOWER_ID)).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.FLOWER_TWO_ID).setHumanName("Flower").setTextureLocation("textures/block/flower_rose.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(new FoliageBlockRenderer(BuiltInBlockIds.FLOWER_TWO_ID)).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.FLOWER_THREE_ID).setHumanName("Flower").setTextureLocation("textures/block/shrub.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(new FoliageBlockRenderer(BuiltInBlockIds.FLOWER_THREE_ID)).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.TALL_GRASS_ID).setHumanName("Tall Grass").setTextureLocation("textures/block/tallgrass.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.FLOWER_ID).setHumanName("Flower").setTextureLocation("textures/block/flower_tulip_orange.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.FLOWER_TWO_ID).setHumanName("Flower").setTextureLocation("textures/block/flower_rose.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.FLOWER_THREE_ID).setHumanName("Flower").setTextureLocation("textures/block/shrub.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.SUGAR_CANE_ID).setHumanName("Sugar Cane").setTextureLocation("textures/block/sugarcane.png").setSolid(false).setTranslucent(true).setLightPassthrough(true).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.LOG_ID).setHumanName("Log").setTextureLocation("textures/block/log_oak.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.LOG_TWO_ID).setHumanName("Log").setTextureLocation("textures/block/log_oak.png").build(),

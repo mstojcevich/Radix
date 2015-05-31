@@ -15,32 +15,27 @@ public class NormalBlockRenderer implements IBlockRenderer {
 
     private static Texture blockMap;
 
-    private final float u, v;
-    protected final int blockID;
-
     private static boolean initialized;
 
-    public NormalBlockRenderer(int blockID) {
-        this.blockID = blockID;
-        u = ((blockID % BLOCKS_PER_WIDTH) * TEXTURE_PERCENTAGE);
-        v = ((blockID / BLOCKS_PER_WIDTH) * TEXTURE_PERCENTAGE);
-    }
+    public NormalBlockRenderer() {}
 
     @Override
-    public void render2d(SpriteBatch batcher, int x, int y, int width) {
+    public void render2d(SpriteBatch batcher, int atlasIndex, int x, int y, int width) {
         if (!initialized) {
             initialize();
         }
+        float u = getU(atlasIndex);
+        float v = getV(atlasIndex);
         float u2 = u + TEXTURE_PERCENTAGE - .001f;
         float v2 = v + TEXTURE_PERCENTAGE - .001f;
         batcher.draw(getBlockMap(), x, y, width, width, u, v, u2, v2);
     }
 
     @Override
-    public void renderNorth(int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
+    public void renderNorth(int atlasIndex, int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
         // POSITIVE Z
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
+        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x1, y1, z,
                 x2, y1, z,
                 x2, y2, z,
@@ -49,10 +44,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderSouth(int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
+    public void renderSouth(int atlasIndex, int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Z
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
+        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x1, y2, z,
                 x2, y2, z,
                 x2, y1, z,
@@ -61,10 +56,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderWest(int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
+    public void renderWest(int atlasIndex, int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
         // NEGATIVE X
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
+        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x, y1, z2,
                 x, y2, z2,
                 x, y2, z1,
@@ -73,10 +68,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderEast(int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
+    public void renderEast(int atlasIndex, int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
         // POSITIVE X
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
+        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x, y1, z1,
                 x, y2, z1,
                 x, y2, z2,
@@ -85,10 +80,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderTop(int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
+    public void renderTop(int atlasIndex, int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
         // POSITIVE Y
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
+        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x1, y, z2,
                 x2, y, z2,
                 x2, y, z1,
@@ -97,10 +92,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderBottom(int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
+    public void renderBottom(int atlasIndex, int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Y
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
-        builder.setUVRange(blockID / 100.0f, blockID / 100.0f, blockID / 100.0f, blockID / 100.0f);
+        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x1, y, z1,
                 x2, y, z1,
                 x2, y, z2,
@@ -123,5 +118,13 @@ public class NormalBlockRenderer implements IBlockRenderer {
             initialize();
         }
         return blockMap;
+    }
+
+    public static float getU(int atlasIndex) {
+        return ((atlasIndex % BLOCKS_PER_WIDTH) * TEXTURE_PERCENTAGE);
+    }
+
+    public static float getV(int atlasIndex) {
+        return ((atlasIndex / BLOCKS_PER_WIDTH) * TEXTURE_PERCENTAGE);
     }
 }

@@ -50,7 +50,7 @@ class BlockSelectGUI implements GuiScreen {
             final int x = PADDING + (currentBlockNum * SLOT_SIZE) % USABLE_WIDTH
             final int regularY = PADDING + (int) ((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)
             final int y = Gdx.graphics.height - (regularY + SLOT_SIZE)
-            b.renderer.render2d(batch, x + BLOCK_RENDER_OFFSET - 2, y + BLOCK_RENDER_OFFSET - 2, BLOCK_SIZE)
+            b.renderer.render2d(batch, b.getTextureIndex(), x + BLOCK_RENDER_OFFSET - 2, y + BLOCK_RENDER_OFFSET - 2, BLOCK_SIZE)
             currentBlockNum++
             idPositions.put(new Vector2(x, regularY), b.ID)
         }

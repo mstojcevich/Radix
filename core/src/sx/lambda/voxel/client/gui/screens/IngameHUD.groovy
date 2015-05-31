@@ -8,6 +8,7 @@ import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
 import sx.lambda.voxel.api.BuiltInBlockIds
 import sx.lambda.voxel.api.VoxelGameAPI
+import sx.lambda.voxel.block.Block
 import sx.lambda.voxel.client.gui.GuiScreen
 
 import static com.badlogic.gdx.graphics.GL20.GL_BLEND
@@ -31,12 +32,14 @@ class IngameHUD implements GuiScreen {
         switch (blockInHead) {
             case BuiltInBlockIds.WATER_ID:
                 guiBatch.setColor(1, 1, 1, 0.6f);
-                VoxelGameAPI.instance.getBlockByID(blockInHead).getRenderer().render2d(guiBatch, 0, 0, Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()))
+                Block bl = VoxelGameAPI.instance.getBlockByID(blockInHead);
+                bl.getRenderer().render2d(guiBatch, bl.getTextureIndex(), 0, 0, Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()))
                 guiBatch.setColor(1, 1, 1, 1);
                 break;
         }
 
-        VoxelGameAPI.instance.getBlockByID(VoxelGameClient.instance.player.itemInHand).renderer.render2d(guiBatch, 0, 0, 50);
+        Block handBlock = VoxelGameAPI.instance.getBlockByID(VoxelGameClient.instance.player.itemInHand);
+        handBlock.renderer.render2d(guiBatch, handBlock.getTextureIndex(), 0, 0, 50);
 
         // Draw crosshair (after guiBatcher render because it needs to render with its own blending mode
         float centerX = Gdx.graphics.getWidth() / 2f as float

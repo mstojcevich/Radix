@@ -2,8 +2,10 @@ package sx.lambda.voxel.block;
 
 public class BlockBuilder {
 
+    private static IBlockRenderer defaultRenderer;
+
     private String humanName = "Undefined";
-    private String textureLocation = "textures/block/undefined.png";
+    private String[] textureLocations = new String[]{"textures/block/undefined.png"};
     private int id = -1;
     private boolean translucent = false;
     private IBlockRenderer renderer;
@@ -29,7 +31,17 @@ public class BlockBuilder {
      * @param tl Location, relative to the assets directory
      */
     public BlockBuilder setTextureLocation(String tl) {
-        this.textureLocation = tl;
+        this.textureLocations[0] = tl;
+        return this;
+    }
+
+    /**
+     * Set the texture locations for a multi-texture block
+     *
+     * @param tls List of locations relative to the assets directory
+     */
+    public BlockBuilder setTextureLocations(String ... tls) {
+        this.textureLocations = tls;
         return this;
     }
 
@@ -104,9 +116,12 @@ public class BlockBuilder {
     public Block build() throws MissingElementException {
         if (id == -1) throw new MissingElementException("id");
         if (renderer == null) {
-            renderer = new NormalBlockRenderer(id);
+            if(defaultRenderer == null) {
+                defaultRenderer = new NormalBlockRenderer();
+            }
+            renderer = defaultRenderer;
         }
-        return new Block(id, humanName, renderer, textureLocation, translucent, solid, lightPassthrough, selectable, occludeCovered);
+        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered);
     }
 
     public class MissingElementException extends Exception {

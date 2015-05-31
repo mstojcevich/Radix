@@ -174,10 +174,10 @@ void main() {
 
     #if defined(diffuseTextureFlag)
     vec3 texGetNormal = -abs(normal);
-	float blockId = v_rawUV.x*100.0;
+	float texIndex = v_rawUV.x*100.0;
     vec2 uvMult = fract(vec2(dot(texGetNormal.zxy, v_position),
                            dot(texGetNormal.yzx, v_position)));
-    vec2 uvStart = vec2(mod(blockId, float(blocksPerRow))*uPerBlock, float(int(floor(blockId+0.5) / float(blocksPerRow)))*vPerBlock);
+    vec2 uvStart = vec2(mod(texIndex, float(blocksPerRow))*uPerBlock, float(int(floor(texIndex+0.5) / float(blocksPerRow)))*vPerBlock);
     vec2 v_diffuseUV;
     if(normal.x != 0.0) {
     	v_diffuseUV = uvStart+vec2(vPerBlock*uvMult.y, uPerBlock*uvMult.x);

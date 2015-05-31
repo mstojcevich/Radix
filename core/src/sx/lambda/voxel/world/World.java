@@ -242,7 +242,8 @@ public class World implements IWorld {
     public void addBlock(int block, int x, int y, int z) {
         synchronized (this) {
             final IChunk c = this.getChunkAtPosition(x, z);
-            c.addBlock(block, x, y, z);
+            if(c != null)
+                c.addBlock(block, x, y, z);
         }
     }
 

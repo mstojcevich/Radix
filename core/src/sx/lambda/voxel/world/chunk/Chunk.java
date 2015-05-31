@@ -31,7 +31,7 @@ public class Chunk implements IChunk {
      */
     private final float[] lightLevelMap = new float[17];
     private int[][][] blockList;
-    private transient IWorld parentWorld;
+    private final transient IWorld parentWorld;
     private transient MeshBuilder meshBuilder;
     private transient ModelBuilder modelBuilder;
     private transient Model opaqueModel, translucentModel;
@@ -111,12 +111,6 @@ public class Chunk implements IChunk {
 
         if(sunlightChanging)
             return;
-
-        if (this.parentWorld == null) {
-            if (VoxelGameClient.getInstance() != null) {// We're a client
-                this.parentWorld = VoxelGameClient.getInstance().getWorld();
-            }
-        }
 
         if (!setup) {
             meshBuilder = new MeshBuilder();

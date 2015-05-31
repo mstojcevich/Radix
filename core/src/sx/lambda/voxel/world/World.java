@@ -37,7 +37,7 @@ public class World implements IWorld {
 
     private IChunk lastPlayerChunk;
 
-    private static final float GRAVITY = 4.69f;
+    private static final float GRAVITY = 6f;
 
     private static final float TERMINAL_VELOCITY = 56;
 

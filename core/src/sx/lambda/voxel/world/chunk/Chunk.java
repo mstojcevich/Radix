@@ -108,6 +108,8 @@ public class Chunk implements IChunk {
     public void rerender() {
         if (cleanedUp) return;
 
+        if(sunlightChanging)return;
+
         if (this.parentWorld == null) {
             if (VoxelGameClient.getInstance() != null) {// We're a client
                 this.parentWorld = VoxelGameClient.getInstance().getWorld();

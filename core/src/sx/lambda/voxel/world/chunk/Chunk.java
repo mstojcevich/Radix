@@ -106,9 +106,11 @@ public class Chunk implements IChunk {
 
     @Override
     public void rerender() {
-        if (cleanedUp) return;
+        if (cleanedUp)
+            return;
 
-        if(sunlightChanging)return;
+        if(sunlightChanging)
+            return;
 
         if (this.parentWorld == null) {
             if (VoxelGameClient.getInstance() != null) {// We're a client
@@ -206,18 +208,26 @@ public class Chunk implements IChunk {
         int negZ = z-1;
         int posZ = z+1;
         int posY = y+1;
-        IChunk negXNeighborChunk = parentWorld.getChunkAtPosition(negX, z);
-        IChunk posXNeighborChunk = parentWorld.getChunkAtPosition(posX, z);
-        IChunk negZNeighborChunk = parentWorld.getChunkAtPosition(x, negZ);
-        IChunk posZNeighborChunk = parentWorld.getChunkAtPosition(x, posZ);
+        IChunk negXNeighborChunk = this;
+        IChunk posXNeighborChunk = this;
+        IChunk negZNeighborChunk = this;
+        IChunk posZNeighborChunk = this;
+        if(x % size == 0) {
+            negXNeighborChunk = parentWorld.getChunkAtPosition(negX, z);
+        } else if(Math.floorMod(x, size) == size-1) {
+            posXNeighborChunk = parentWorld.getChunkAtPosition(posX, z);
+        }
+        if(z % size == 0) {
+            negZNeighborChunk = parentWorld.getChunkAtPosition(x, negZ);
+        } else if(Math.floorMod(z, size) == size-1) {
+            posZNeighborChunk = parentWorld.getChunkAtPosition(x, posZ);
+        }
 
         if (negXNeighborChunk != null) {
             int negXSunlight = negXNeighborChunk.getSunlight(negX, y, z);
             if (negXSunlight > 1) {
                 Block bl = negXNeighborChunk.getBlockAtPosition(negX, y, z);
-                if (bl == null) {
-                    parentWorld.addToSunlightQueue(new int[]{negX, y, z});
-                } else if (bl.isTranslucent()) {
+                if (bl == null || bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{negX, y, z});
                 }
             }
@@ -227,9 +237,7 @@ public class Chunk implements IChunk {
             int posXSunlight = posXNeighborChunk.getSunlight(posX, y, z);
             if (posXSunlight > 1) {
                 Block bl = posXNeighborChunk.getBlockAtPosition(posX, y, z);
-                if (bl == null) {
-                    parentWorld.addToSunlightQueue(new int[]{posX, y, z});
-                } else if (bl.isTranslucent()) {
+                if (bl == null || bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{posX, y, z});
                 }
             }
@@ -239,9 +247,7 @@ public class Chunk implements IChunk {
             int negZSunlight = negZNeighborChunk.getSunlight(x, y, negZ);
             if (negZSunlight > 1) {
                 Block bl = negZNeighborChunk.getBlockAtPosition(x, y, negZ);
-                if (bl == null) {
-                    parentWorld.addToSunlightQueue(new int[]{x, y, negZ});
-                } else if (bl.isTranslucent()) {
+                if (bl == null || bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{x, y, negZ});
                 }
             }
@@ -251,9 +257,7 @@ public class Chunk implements IChunk {
             int posZSunlight = posZNeighborChunk.getSunlight(x, y, posZ);
             if (posZSunlight > 1) {
                 Block bl = posZNeighborChunk.getBlockAtPosition(x, y, posZ);
-                if (bl == null) {
-                    parentWorld.addToSunlightQueue(new int[]{x, y, posZ});
-                } else if (bl.isTranslucent()) {
+                if (bl == null || bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{x, y, posZ});
                 }
             }
@@ -262,9 +266,7 @@ public class Chunk implements IChunk {
         if (y < height - 1) {
             Block posYBlock = VoxelGameAPI.instance.getBlockByID(blockList[x - startPosition.x][posY][z - startPosition.z]);
             if (getSunlight(x, y + 1, z) > 1) {
-                if (posYBlock == null) {
-                    parentWorld.addToSunlightQueue(new int[]{x, posY, z});
-                } else if (posYBlock.isTranslucent()) {
+                if (posYBlock == null || posYBlock.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{x, posY, z});
                 }
             }

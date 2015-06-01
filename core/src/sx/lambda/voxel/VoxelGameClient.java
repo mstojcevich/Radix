@@ -121,6 +121,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         } catch (VoxelGameAPI.BlockRegistrationException e) {
             e.printStackTrace();
         }
+        VoxelGameAPI.instance.registerMinecraftBiomes();
         try {
             VoxelGameAPI.instance.getEventManager().register(this);
         } catch (InvalidListenerException e) {

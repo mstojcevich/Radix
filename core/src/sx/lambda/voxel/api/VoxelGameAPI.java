@@ -5,6 +5,7 @@ import pw.oxcafebabe.marcusant.eventbus.managers.iridium.IridiumEventManager;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.block.*;
 import sx.lambda.voxel.server.VoxelGameServer;
+import sx.lambda.voxel.world.biome.Biome;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ public class VoxelGameAPI {
     private final EventManager eventManager;
     private List<Block> registeredBlocks = new ArrayList<>();
     private Block[] registeredBlockArray = new Block[Short.MAX_VALUE];
+    private Biome[] registeredBiomeArray = new Biome[Short.MAX_VALUE];
     private int highestID = 0;
 
     public VoxelGameAPI() {
@@ -95,11 +97,80 @@ public class VoxelGameAPI {
         }
     }
 
+    public void registerMinecraftBiomes() {
+        registerBiomes(
+                /*
+                Temperature and rainfall values taken from http://minecraft.gamepedia.com/Biome
+                 */
+                new Biome(0, "Ocean", 0.5f, 0.5f),
+                new Biome(1, "Plains", 0.8f, 0.4f),
+                new Biome(2, "Desert", 2.0f, 0.0f),
+                new Biome(3, "Extreme Hills", 0.2f, 0.3f),
+                new Biome(4, "Forest", 0.7f, 0.8f),
+                new Biome(5, "Taiga", 0.05f, 0.8f),
+                new Biome(6, "Swampland", 0.8f, 0.9f),
+                new Biome(7, "River", 0.5f, 0.5f),
+                new Biome(8, "Nether", 2.0f, 0.0f),
+                new Biome(9, "End", 0.5f, 0.5f),
+                new Biome(10, "Frozen Ocean", 0.0f, 0.5f),
+                new Biome(11, "Frozen River", 0.0f, 0.5f),
+                new Biome(12, "Ice Plains", 0.0f, 0.5f),
+                new Biome(13, "Ice Mountains", 0.0f, 0.5f),
+                new Biome(14, "Mushroom Island", 0.9f, 1.0f),
+                new Biome(15, "Mushroom Island Shore", 0.9f, 1.0f),
+                new Biome(16, "Beach", 0.8f, 0.4f),
+                new Biome(17, "Desert Hills", 0.8f, 0.4f),
+                new Biome(18, "Forest Hills", 0.7f, 0.8f),
+                new Biome(19, "Taiga Hills", 0.2f, 0.7f),
+                new Biome(20, "Extreme Hills Edge", 0.2f, 0.3f),
+                new Biome(21, "Jungle", 1.2f, 0.9f),
+                new Biome(22, "Jungle Hills", 1.2f, 0.9f),
+                new Biome(23, "Jungle Edge", 0.95f, 0.8f),
+                new Biome(24, "Deep Ocean", 0.5f, 0.5f),
+                new Biome(25, "Stone Beach", 0.2f, 0.3f),
+                new Biome(26, "Cold Beach", 0.05f, 0.3f),
+                new Biome(27, "Birch Forest", 0.6f, 0.6f),
+                new Biome(28, "Birch Forest Hills", 0.6f, 0.6f),
+                new Biome(29, "Roofed Forest", 0.7f, 0.8f),
+                new Biome(30, "Cold Taiga", -0.5f, 0.4f),
+                new Biome(31, "Cold Taiga Hills", -0.5f, 0.4f),
+                new Biome(32, "Mega Taiga", 0.3f, 0.8f),
+                new Biome(33, "Mega Taiga Hills", 0.3f, 0.8f),
+                new Biome(34, "Extreme Hills+", 0.2f, 0.3f),
+                new Biome(35, "Savanna", 1.2f, 0.0f),
+                new Biome(36, "Savanna Plateau", 1.0f, 0.0f),
+                new Biome(37, "Mesa", 2.0f, 0.0f),
+                new Biome(38, "Mesa Plateau F", 2.0f, 0.0f),
+                new Biome(39, "Mesa Plateau", 2.0f, 0.0f)
+
+        );
+    }
+
+    private void registerBiomes(Biome... biomes) {
+        for(Biome b : biomes) {
+            registerBiome(b);
+        }
+    }
+
+    private void registerBiome(Biome biome) {
+        registeredBiomeArray[biome.getID()] = biome;
+    }
+
+    /**
+     * Gets the biome with the specific ID
+     *
+     * If using Minecraft IDs, try the id-128 as variations are usually just parent+128
+     */
+    public Biome getBiomeByID(int id) {
+        if(id >= registeredBiomeArray.length || id < 0)
+            return null;
+        return registeredBiomeArray[id];
+    }
+
     private void registerBlocks(Block... blocks) throws BlockRegistrationException {
         for (Block b : blocks) {
             registerBlock(b);
         }
-
     }
 
     private void registerBlock(Block b) throws BlockRegistrationException {

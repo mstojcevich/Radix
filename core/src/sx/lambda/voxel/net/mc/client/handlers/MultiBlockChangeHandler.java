@@ -18,11 +18,15 @@ public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockCh
             int x = r.getPosition().getX();
             int y = r.getPosition().getY();
             int z = r.getPosition().getZ();
-            if(r.getBlock() > 0) {
-                game.getWorld().addBlock(r.getBlock(), x, y, z);
+            int block = r.getBlock();
+            int id = block >> 4;
+            int meta = block & 15;
+            if(id > 0) {
+                game.getWorld().addBlock(id, x, y, z);
+                game.getWorld().getChunkAtPosition(x, z).setMeta((short) meta, x, y, z);
             } else {
                 game.getWorld().removeBlock(x, y, z);
-                game.getWorld().getChunkAtPosition(x, z).setMeta((short)0, x, y, z);
+                game.getWorld().getChunkAtPosition(x, z).setMeta((short) 0, x, y, z);
             }
         }
     }

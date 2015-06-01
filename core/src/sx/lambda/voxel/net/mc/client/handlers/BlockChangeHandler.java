@@ -16,8 +16,12 @@ public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket
         int x = packet.getRecord().getPosition().getX();
         int y = packet.getRecord().getPosition().getY();
         int z = packet.getRecord().getPosition().getZ();
-        if(packet.getRecord().getBlock() > 0) {
-            game.getWorld().addBlock(packet.getRecord().getBlock(), x, y, z);
+        int block = packet.getRecord().getBlock();
+        int id = block >> 4;
+        int meta = block & 15;
+        if(id > 0) {
+            game.getWorld().addBlock(id, x, y, z);
+            game.getWorld().getChunkAtPosition(x, z).setMeta((short) meta, x, y, z);
         } else {
             game.getWorld().removeBlock(x, y, z);
             game.getWorld().getChunkAtPosition(x, z).setMeta((short) 0, x, y, z);

@@ -140,7 +140,7 @@ public class World implements IWorld {
         final IChunk playerChunk = getChunkAtPosition(
                 MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getX()),
                 MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getZ()));
-        if(playerChunk != lastPlayerChunk || (sortedChunkList != null && chunkList.size() != sortedChunkList.size())) {
+        if(playerChunk != null && (playerChunk != lastPlayerChunk || (sortedChunkList != null && chunkList.size() != sortedChunkList.size()))) {
             sortedChunkList = new ArrayList<>();
             for(IChunk c : chunkList) {
                 if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=

@@ -201,6 +201,8 @@ public class GreedyMesher implements Mesher {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int blk = blks[x][y];
+                if(blk == 0)
+                    continue;
                 float ll = lls[x][y];
                 short meta = metadata[x][y];
                 if (!used[x][y] && blk > 0) {

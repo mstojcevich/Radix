@@ -30,6 +30,7 @@ class IngameHUD implements GuiScreen {
 
         int blockInHead = VoxelGameClient.instance.player.getBlockInHead(VoxelGameClient.instance.world)
         switch (blockInHead) {
+            case BuiltInBlockIds.WATER_FLOW_ID:
             case BuiltInBlockIds.WATER_ID:
                 guiBatch.setColor(1, 1, 1, 0.6f);
                 Block bl = VoxelGameAPI.instance.getBlockByID(blockInHead);

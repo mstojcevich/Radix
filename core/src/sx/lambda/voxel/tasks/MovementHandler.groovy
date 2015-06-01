@@ -131,7 +131,8 @@ class MovementHandler implements RepeatedTask {
                             }
                         }
 
-                        if (player.getBlockInFeet(world) == BuiltInBlockIds.WATER_ID) {
+                        int blockInFeet = player.getBlockInFeet(world);
+                        if (blockInFeet == BuiltInBlockIds.WATER_ID || blockInFeet == BuiltInBlockIds.WATER_FLOW_ID) {
                             if (!Gdx.input.isKeyPressed(Keys.SPACE)) {
                                 player.setYVelocity(-0.05f);
                             }

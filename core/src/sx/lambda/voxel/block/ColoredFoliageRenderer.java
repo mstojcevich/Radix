@@ -103,7 +103,6 @@ public class ColoredFoliageRenderer extends NormalBlockRenderer {
         float g = color[1]/255f;
         float b = color[2]/255f;
         builder.setColor(r*lightLevel, g*lightLevel, b*lightLevel, 1);
-        builder.setColor(lightLevel, lightLevel, lightLevel, 1);
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x1, y, z1,
                 x2, y, z1,

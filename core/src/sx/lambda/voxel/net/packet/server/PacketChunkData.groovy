@@ -3,6 +3,7 @@ package sx.lambda.voxel.net.packet.server
 import groovy.transform.CompileStatic
 import io.netty.channel.ChannelHandlerContext
 import sx.lambda.voxel.VoxelGameClient
+import sx.lambda.voxel.api.VoxelGameAPI
 import sx.lambda.voxel.net.packet.ServerPacket
 import sx.lambda.voxel.util.Vec3i
 import sx.lambda.voxel.world.chunk.Chunk
@@ -28,7 +29,7 @@ class PacketChunkData implements ServerPacket {
             @Override
             public void run() {
                 try {
-                    VoxelGameClient.instance.getWorld().addChunk(new Chunk(VoxelGameClient.instance.getWorld(), new Vec3i(x, y, z), ids))
+                    VoxelGameClient.instance.getWorld().addChunk(new Chunk(VoxelGameClient.instance.getWorld(), new Vec3i(x, y, z), ids, VoxelGameAPI.instance.getBiomeByID(0)))
                 } catch (Exception ex) {
                     VoxelGameClient.instance.handleCriticalException(ex)
                 }

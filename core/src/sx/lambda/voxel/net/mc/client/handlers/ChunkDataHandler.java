@@ -7,6 +7,7 @@ import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
+import sx.lambda.voxel.world.biome.Biome;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
@@ -23,11 +24,18 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
             VoxelGameClient.getInstance().getWorld().rmChunk(VoxelGameClient.getInstance().getWorld().getChunkAtPosition(scdp.getX(), scdp.getZ()));
         }
 
+        int biomeID = scdp.getBiomeData()[0];
+        Biome biome = VoxelGameAPI.instance.getBiomeByID(biomeID);
+        if(biome == null)
+            biome = VoxelGameAPI.instance.getBiomeByID(biomeID-128);
+        if(biome == null)
+            biome = VoxelGameAPI.instance.getBiomeByID(0);
+
         int cx = scdp.getX()*16;
         int cz = scdp.getZ()*16;
         IChunk ck = game.getWorld().getChunkAtPosition(cx, cz);
         if(ck == null) {
-            ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16]);
+            ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16], biome);
             game.getWorld().addChunk(ck);
         }
         int cy = 0;

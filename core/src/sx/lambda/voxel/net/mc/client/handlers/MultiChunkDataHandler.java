@@ -7,6 +7,7 @@ import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
+import sx.lambda.voxel.world.biome.Biome;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkDataPacket> {
@@ -25,9 +26,15 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                 for(int column = 0; column < packet.getColumns(); column++) {
                     int cx = packet.getX(column)*16;
                     int cz = packet.getZ(column)*16;
+                    int biomeID = packet.getBiomeData(column)[0];
+                    Biome biome = VoxelGameAPI.instance.getBiomeByID(biomeID);
+                    if(biome == null)
+                        biome = VoxelGameAPI.instance.getBiomeByID(biomeID-128);
+                    if(biome == null)
+                        biome = VoxelGameAPI.instance.getBiomeByID(0);
                     IChunk ck = game.getWorld().getChunkAtPosition(cx, cz);
                     if(ck == null) {
-                        ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16]);
+                        ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16], biome);
                         game.getWorld().addChunk(ck);
                     }
                     int cy = 0;

@@ -54,7 +54,7 @@ public class VoxelGameAPI {
             IBlockRenderer foliageRenderer = new FoliageBlockRenderer();
             registerBlocks(
                     new BlockBuilder().setID(BuiltInBlockIds.DIRT_ID).setHumanName("Dirt").setTextureLocation("textures/block/dirt.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHumanName("Grass").setTextureLocations("textures/block/grass.png", "textures/block/grass_side.png", "textures/block/dirt.png").setBlockRenderer(new GrassRenderer()).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHumanName("Grass").setTextureLocations("textures/block/grass_top.png", "textures/block/grass_side.png", "textures/block/dirt.png").setBlockRenderer(new GrassRenderer()).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.STONE_ID).setHumanName("Stone").setTextureLocation("textures/block/stone.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.COBBLESTONE_ID).setHumanName("Cobblestone").setTextureLocation("textures/block/cobblestone.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.MOSS_STONE_ID).setHumanName("Mossy Cobblestone").setTextureLocation("textures/block/moss_stone.png").build(),

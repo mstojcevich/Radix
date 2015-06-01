@@ -19,6 +19,7 @@ import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.client.render.meshing.GreedyMesher;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
+import sx.lambda.voxel.world.biome.Biome;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ public class Chunk implements IChunk {
     private final float[] lightLevelMap = new float[17];
     private int[][][] blockList;
     private final transient IWorld parentWorld;
+    private final Biome biome;
     private transient MeshBuilder meshBuilder;
     private transient ModelBuilder modelBuilder;
     private transient Model opaqueModel, translucentModel;
@@ -50,9 +52,10 @@ public class Chunk implements IChunk {
     private List<GreedyMesher.Face> opaqueFaces;
     private boolean meshing, meshed, meshWhenDone;
 
-    public Chunk(IWorld world, Vec3i startPosition, int[][][] ids) {
+    public Chunk(IWorld world, Vec3i startPosition, int[][][] ids, Biome biome) {
         this.parentWorld = world;
         this.startPosition = startPosition;
+        this.biome = biome;
         this.size = world.getChunkSize();
         this.height = world.getHeight();
 
@@ -77,11 +80,12 @@ public class Chunk implements IChunk {
         setupSunlighting();
     }
 
-    public Chunk(IWorld world, Vec3i startPosition) {
+    public Chunk(IWorld world, Vec3i startPosition, Biome biome) {
         this.parentWorld = world;
         this.startPosition = startPosition;
         this.size = world.getChunkSize();
         this.height = world.getHeight();
+        this.biome = biome;
 
         for (int i = 0; i < 17; i++) {
             int reduction = 16 - i;
@@ -484,6 +488,11 @@ public class Chunk implements IChunk {
         meshed = true;
         parentWorld.decrChunksMeshing();
         VoxelGameAPI.instance.getEventManager().push(new EventChunkRender(Chunk.this));
+    }
+
+    @Override
+    public Biome getBiome() {
+        return this.biome;
     }
 
     @Override

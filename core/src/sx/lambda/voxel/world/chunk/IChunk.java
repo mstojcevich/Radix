@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
+import sx.lambda.voxel.world.biome.Biome;
 
 import java.io.Serializable;
 
@@ -53,6 +54,8 @@ public interface IChunk extends Serializable {
     IWorld getWorld();
 
     void cleanup();
+
+    Biome getBiome();
 
     interface EachBlockCallee {
         void call(Block block, int x, int y, int z);

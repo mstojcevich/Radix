@@ -1,9 +1,12 @@
 package sx.lambda.voxel.block;
 
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.world.biome.Biome;
 
 /**
- * Renderer for blocks like grass with different top, sides, and bottom textures
+ * Renderer for blocks like grass with different top, sides, and bottom textures.
+ * Also colors based on biome.
  *
  * Expects the block its rendering to have 3 textures.
  */
@@ -36,7 +39,18 @@ public class GrassRenderer extends NormalBlockRenderer {
 
     @Override
     public void renderTop(int atlasIndex, int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
-        super.renderTop(atlasIndex + TOP_OFFSET, x1, z1, x2, z2, y, lightLevel, builder);
+        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition(x1, z1).getBiome();
+        int[] color = biome.getGrassColor(y - 1);
+        float r = color[0]/255f;
+        float g = color[1]/255f;
+        float b = color[2]/255f;
+        builder.setColor(r*lightLevel, g*lightLevel, b*lightLevel, 1);
+        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
+        builder.rect(x1, y, z2,
+                x2, y, z2,
+                x2, y, z1,
+                x1, y, z1,
+                0, 1, 0);
     }
 
     @Override

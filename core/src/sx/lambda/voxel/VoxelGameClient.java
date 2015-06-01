@@ -565,7 +565,7 @@ public class VoxelGameClient extends ApplicationAdapter {
                 int textureIndex = 0;
                 for (Block b : VoxelGameAPI.instance.getBlocks()) {
                     b.setTextureIndex(textureIndex);
-                    for(String texLoc : b.getTextureLocations()) {
+                    for (String texLoc : b.getTextureLocations()) {
                         int x = textureIndex * BLOCK_TEX_SIZE % bi.getWidth();
                         int y = BLOCK_TEX_SIZE * ((textureIndex * BLOCK_TEX_SIZE) / bi.getWidth());
                         Pixmap tex = new Pixmap(Gdx.files.internal(texLoc));
@@ -614,17 +614,21 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     public void breakBlock() {
         if (this.getSelectedBlock() != null
-                && world.getChunkAtPosition(selectedBlock) != null
-                && world.getChunkAtPosition(selectedBlock).getBlockAtPosition(selectedBlock).isSelectable()
                 && this.currentScreen == this.hud) {
-            if (this.isRemote()) {
-                mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
-                mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.START_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
-                mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.FINISH_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
-            } else {
-                this.getWorld().removeBlock(this.getSelectedBlock().x, this.getSelectedBlock().y, this.getSelectedBlock().z);
+            IChunk chunk = world.getChunkAtPosition(selectedBlock);
+            if(chunk != null) {
+                Block block = chunk.getBlockAtPosition(selectedBlock);
+                if(block.isSelectable()) {
+                    if (this.isRemote()) {
+                        mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
+                        mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.START_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                        mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.FINISH_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                    } else {
+                        this.getWorld().removeBlock(this.getSelectedBlock().x, this.getSelectedBlock().y, this.getSelectedBlock().z);
+                    }
+                    updateSelectedBlock();
+                }
             }
-            updateSelectedBlock();
         }
     }
 

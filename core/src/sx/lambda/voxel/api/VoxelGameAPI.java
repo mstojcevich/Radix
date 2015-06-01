@@ -52,6 +52,7 @@ public class VoxelGameAPI {
     public void registerBuiltinBlocks() throws BlockRegistrationException {
         try {
             IBlockRenderer foliageRenderer = new FoliageBlockRenderer();
+            IBlockRenderer coloredFoliageRenderer = new ColoredFoliageRenderer();
             registerBlocks(
                     new BlockBuilder().setID(BuiltInBlockIds.DIRT_ID).setHumanName("Dirt").setTextureLocation("textures/block/dirt.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHumanName("Grass").setTextureLocations("textures/block/grass_top.png", "textures/block/grass_side.png", "textures/block/dirt.png").setBlockRenderer(new GrassRenderer()).build(),
@@ -72,8 +73,8 @@ public class VoxelGameAPI {
                     new BlockBuilder().setID(BuiltInBlockIds.SUGAR_CANE_ID).setHumanName("Sugar Cane").setTextureLocation("textures/block/sugarcane.png").setSolid(false).setTranslucent(true).setLightPassthrough(true).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.LOG_ID).setHumanName("Log").setTextureLocation("textures/block/log_oak.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.LOG_TWO_ID).setHumanName("Log").setTextureLocation("textures/block/log_oak.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.LEAVES_ID).setHumanName("Leaves").setTextureLocation("textures/block/leaves_oak.png").setTranslucent(true).setOccludeCovered(false).setDecreaseLight(false).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.LEAVES_TWO_ID).setHumanName("Leaves").setTextureLocation("textures/block/leaves_oak.png").setTranslucent(true).setOccludeCovered(false).setDecreaseLight(false).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.LEAVES_ID).setHumanName("Leaves").setTextureLocation("textures/block/leaves_oak.png").setBlockRenderer(coloredFoliageRenderer).setTranslucent(true).setOccludeCovered(false).setDecreaseLight(false).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.LEAVES_TWO_ID).setHumanName("Leaves").setTextureLocation("textures/block/leaves_oak.png").setBlockRenderer(coloredFoliageRenderer).setTranslucent(true).setOccludeCovered(false).setDecreaseLight(false).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.BEDROCK_ID).setHumanName("Bedrock").setTextureLocation("textures/block/bedrock.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.IRON_ORE_ID).setHumanName("Iron Ore").setTextureLocation("textures/block/iron_ore.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.COAL_ORE_ID).setHumanName("Coal Ore").setTextureLocation("textures/block/coal_ore.png").build(),

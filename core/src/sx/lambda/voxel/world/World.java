@@ -333,6 +333,8 @@ public class World implements IWorld {
 
     @Override
     public void rerenderChunk(IChunk c) {
+        if(c == null)
+            return;
         chunksToRerender.add(c);
     }
 

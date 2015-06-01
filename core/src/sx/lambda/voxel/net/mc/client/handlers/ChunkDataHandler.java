@@ -24,7 +24,10 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
             VoxelGameClient.getInstance().getWorld().rmChunk(VoxelGameClient.getInstance().getWorld().getChunkAtPosition(scdp.getX(), scdp.getZ()));
         }
 
-        int biomeID = scdp.getBiomeData()[0];
+        int biomeID = 0;
+        if(scdp.getBiomeData() != null) {
+            biomeID = scdp.getBiomeData()[0];
+        }
         Biome biome = VoxelGameAPI.instance.getBiomeByID(biomeID);
         if(biome == null)
             biome = VoxelGameAPI.instance.getBiomeByID(biomeID-128);

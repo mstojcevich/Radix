@@ -163,6 +163,8 @@ public class World implements IWorld {
         if(sortedChunkList != null) {
             long renderStartNS = System.nanoTime();
             modelBatch.begin(VoxelGameClient.getInstance().getCamera());
+            if(VoxelGameClient.getInstance().isWireframe())
+                Gdx.gl.glLineWidth(5);
             for (IChunk c : sortedChunkList) {
                 if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
                         VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
@@ -577,6 +579,16 @@ public class World implements IWorld {
         }
         modelBatch.dispose();
         modelBatch = null;
+    }
+
+    @Override
+    public void rerenderChunks() {
+        for(IChunk c : chunkList) {
+            if(VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                    VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
+                rerenderChunk(c);
+            }
+        }
     }
 
     public int getNumChunksMeshing() {

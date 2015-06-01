@@ -71,6 +71,8 @@ public interface IWorld {
 
     void cleanup();
 
+    void rerenderChunks();
+
     int getNumChunksMeshing();
     void incrChunksMeshing();
     void decrChunksMeshing();

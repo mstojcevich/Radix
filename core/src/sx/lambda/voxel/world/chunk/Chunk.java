@@ -2,13 +2,12 @@ package sx.lambda.voxel.world.chunk;
 
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import sx.lambda.voxel.VoxelGameClient;
@@ -486,8 +485,32 @@ public class Chunk implements IChunk {
                         FloatAttribute.createAlphaTest(0.25f)));
         translucentModel = modelBuilder.end();
 
-        opaqueModelInstance = new ModelInstance(opaqueModel);
-        translucentModelInstance = new ModelInstance(translucentModel);
+        opaqueModelInstance = new ModelInstance(opaqueModel) {
+            @Override
+            public Renderable getRenderable(final Renderable out, final Node node,
+                                            final NodePart nodePart) {
+                super.getRenderable(out, node, nodePart);
+                if(VoxelGameClient.getInstance().isWireframe()) {
+                    out.primitiveType = GL20.GL_LINES;
+                } else {
+                    out.primitiveType = GL20.GL_TRIANGLES;
+                }
+                return out;
+            }
+        };
+        translucentModelInstance = new ModelInstance(translucentModel) {
+            @Override
+            public Renderable getRenderable(final Renderable out, final Node node,
+                                            final NodePart nodePart) {
+                super.getRenderable(out, node, nodePart);
+                if(VoxelGameClient.getInstance().isWireframe()) {
+                    out.primitiveType = GL20.GL_LINES;
+                } else {
+                    out.primitiveType = GL20.GL_TRIANGLES;
+                }
+                return out;
+            }
+        };
     }
 
     private void updateFaces() {

@@ -106,6 +106,8 @@ public class VoxelGameClient extends ApplicationAdapter {
     private Touchpad moveTouchpad, rotateTouchpad;
     private ImageButton jumpButton, placeButton, breakButton;
 
+    private boolean wireframe;
+
     public static VoxelGameClient getInstance() {
         return theGame;
     }
@@ -535,7 +537,6 @@ public class VoxelGameClient extends ApplicationAdapter {
                     world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance());
                 }
 
-
                 VoxelGameAPI.instance.getEventManager().push(new EventWorldStart());
                 // Delays are somewhere in this function. Above here.
             }
@@ -671,6 +672,14 @@ public class VoxelGameClient extends ApplicationAdapter {
                 gameRenderer.calculateFrustum();
             }
         }
+    }
+
+    public boolean isWireframe() {
+        return wireframe;
+    }
+
+    public void setWireframe(boolean wireframe) {
+        this.wireframe = wireframe;
     }
 
 }

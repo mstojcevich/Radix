@@ -75,6 +75,21 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
                 }
             }
         }));
+        registerKeybind(new Keybind("voxeltest.debug.wire", "Enable Wireframe", Input.Keys.X, new Runnable() {
+            @Override
+            void run() {
+                if (game.world != null) {
+                    if (game.currentScreen == game.hud) {
+                        game.addToGLQueue(new Runnable() {
+                            @Override
+                            void run() {
+                                game.setWireframe(!game.isWireframe())
+                            }
+                        })
+                    }
+                }
+            }
+        }));
     }
 
     @Override

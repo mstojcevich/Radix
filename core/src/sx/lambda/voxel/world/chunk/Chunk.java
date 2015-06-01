@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -454,7 +455,8 @@ public class Chunk implements IChunk {
         modelBuilder.begin();
         modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), translucentMesh, GL20.GL_TRIANGLES,
                 new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
-                        new BlendingAttribute()));
+                        new BlendingAttribute(),
+                        FloatAttribute.createAlphaTest(0.25f)));
         translucentModel = modelBuilder.end();
 
         opaqueModelInstance = new ModelInstance(opaqueModel);

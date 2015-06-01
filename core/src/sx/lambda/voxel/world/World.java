@@ -442,9 +442,11 @@ public class World implements IWorld {
 
                         if (y > 0) {
                             int negY = y - 1;
+                            Block bl = posChunk.getBlockAtPosition(x, y, z);
                             Block negYBlock = posChunk.getBlockAtPosition(x, negY, z);
-                            if (negYBlock == null || negYBlock.doesLightPassThrough()) {
-                                boolean maxLL = ll == 16;
+                            if (negYBlock == null || negYBlock.doesLightPassThrough() ||
+                                    !negYBlock.decreasesLight()) {
+                                boolean maxLL = ll == 16 && (bl == null || bl.decreasesLight());
                                 if (posChunk.getSunlight(x, negY, z) < (maxLL ? 16 : nextLL)) {
                                     posChunk.setSunlight(x, negY, z, (maxLL ? 16 : nextLL));
                                     sunlightQueue.add(new int[]{x, negY, z});

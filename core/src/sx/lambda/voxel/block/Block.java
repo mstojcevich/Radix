@@ -6,13 +6,13 @@ public class Block {
 
     private int id;
     private final transient IBlockRenderer renderer;
-    private final boolean translucent, solid, lightPassthrough, selectable, occludeCovered;
+    private final boolean translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight;
     private final String humanName;
     private final String[] textureLocations;
     private int textureIndex;
 
     Block(int id, String humanName, IBlockRenderer renderer, String textureLocations[],
-          boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered) {
+          boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered, boolean decreaseLight) {
         this.id = id;
         this.renderer = renderer;
         this.translucent = translucent;
@@ -22,6 +22,7 @@ public class Block {
         this.lightPassthrough = lightPassthrough;
         this.selectable = selectable;
         this.occludeCovered = occludeCovered;
+        this.decreaseLight = decreaseLight;
     }
 
     public IBlockRenderer getRenderer() {
@@ -92,4 +93,12 @@ public class Block {
     public boolean occludeCovered() {
         return occludeCovered;
     }
+
+    /**
+     * @return True if, when going down to another non-air block, light is decreased
+     */
+    public boolean decreasesLight() {
+        return this.decreaseLight;
+    }
+
 }

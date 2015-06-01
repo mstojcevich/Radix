@@ -13,6 +13,7 @@ public class BlockBuilder {
     private boolean lightPassthrough = false;
     private boolean selectable = true;
     private boolean occludeCovered = true;
+    private boolean decreaseLight = true;
 
     /**
      * Set the display name for the block
@@ -108,6 +109,17 @@ public class BlockBuilder {
         return this;
     }
 
+    /**
+     * Set whether to decrease light when passing down onto air.
+     * Setting to false creates the Minecraft-like effect of being able to see other leaves through leaves but still casting a shadow.
+     *
+     * Defaults to true
+     */
+    public BlockBuilder setDecreaseLight(boolean decreaseLight) {
+        this.decreaseLight = decreaseLight;
+        return this;
+    }
+
     public BlockBuilder setBlockRenderer(IBlockRenderer renderer) {
         this.renderer = renderer;
         return this;
@@ -121,7 +133,7 @@ public class BlockBuilder {
             }
             renderer = defaultRenderer;
         }
-        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered);
+        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight);
     }
 
     public class MissingElementException extends Exception {

@@ -37,7 +37,7 @@ public interface IChunk extends Serializable {
 
     Vec3i getStartPosition();
 
-    float getHighestPoint();
+    int getHighestPoint();
 
     float getLightLevel(int x, int y, int z);
 

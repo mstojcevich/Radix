@@ -322,7 +322,7 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public float getHighestPoint() {
+    public int getHighestPoint() {
         return highestPoint;
     }
 

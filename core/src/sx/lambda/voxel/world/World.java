@@ -143,7 +143,10 @@ public class World implements IWorld {
         if(playerChunk != lastPlayerChunk || (sortedChunkList != null && chunkList.size() != sortedChunkList.size())) {
             sortedChunkList = new ArrayList<>();
             for(IChunk c : chunkList) {
-                sortedChunkList.add(c);
+                if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                        VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
+                    sortedChunkList.add(c);
+                }
             }
             Collections.sort(sortedChunkList, new Comparator<IChunk>() {
                 @Override
@@ -165,17 +168,28 @@ public class World implements IWorld {
             modelBatch.begin(VoxelGameClient.getInstance().getCamera());
             if(VoxelGameClient.getInstance().isWireframe())
                 Gdx.gl.glLineWidth(5);
+            boolean[] chunkVisible = new boolean[sortedChunkList.size()];
+            int chunkNum = 0;
             for (IChunk c : sortedChunkList) {
-                if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                        VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
+                int x = c.getStartPosition().x;
+                int z = c.getStartPosition().z;
+                int halfWidth = getChunkSize()/2;
+                int midX = x + halfWidth;
+                int midZ = z + halfWidth;
+                int midY = c.getHighestPoint()/2;
+                boolean visible = VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
+                chunkVisible[chunkNum] = visible;
+                chunkNum++;
+                if(visible) {
                     c.render(modelBatch);
                 }
             }
+            chunkNum = 0;
             for (IChunk c : sortedChunkList) {
-                if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                        VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
+                if(chunkVisible[chunkNum]) {
                     c.renderTranslucent(modelBatch);
                 }
+                chunkNum++;
             }
             modelBatch.end();
             if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders

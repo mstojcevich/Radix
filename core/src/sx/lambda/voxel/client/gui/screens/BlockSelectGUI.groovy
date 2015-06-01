@@ -39,7 +39,7 @@ class BlockSelectGUI implements GuiScreen {
         for(Block b : blocks) {
             if (b == null) continue;
             final int x = PADDING + (currentBlockNum * SLOT_SIZE) % USABLE_WIDTH
-            final int regularY = PADDING + (int) ((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)
+            final int regularY = PADDING + (int) ((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)*SLOT_SIZE
             final int y = Gdx.graphics.height - (regularY + SLOT_SIZE)
             batch.draw(guiTexture, x, y, SLOT_SIZE - PADDING, SLOT_SIZE - PADDING, 0.05f, 0, 0.1f, 0.05f)
             currentBlockNum++
@@ -48,7 +48,7 @@ class BlockSelectGUI implements GuiScreen {
         for (Block b : blocks) {
             if (b == null) continue;
             final int x = PADDING + (currentBlockNum * SLOT_SIZE) % USABLE_WIDTH
-            final int regularY = PADDING + (int) ((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)
+            final int regularY = PADDING + (int) ((currentBlockNum * SLOT_SIZE) / USABLE_WIDTH)*SLOT_SIZE
             final int y = Gdx.graphics.height - (regularY + SLOT_SIZE)
             b.renderer.render2d(batch, b.getTextureIndex(), x + BLOCK_RENDER_OFFSET - 2, y + BLOCK_RENDER_OFFSET - 2, BLOCK_SIZE)
             currentBlockNum++

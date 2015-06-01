@@ -82,8 +82,6 @@ class BlockSelectGUI implements GuiScreen {
     private Integer getBlockID(int x, int y) {
         x = x - (x % SLOT_SIZE) + PADDING
         y = y - (y % SLOT_SIZE) + PADDING
-        println(x)
-        println(y)
         return idPositions.get(new Vector2(x, y))
     }
 

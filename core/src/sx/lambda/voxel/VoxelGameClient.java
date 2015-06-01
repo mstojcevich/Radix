@@ -613,6 +613,7 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     public void breakBlock() {
         if (this.getSelectedBlock() != null
+                && world.getChunkAtPosition(selectedBlock) != null
                 && world.getChunkAtPosition(selectedBlock).getBlockAtPosition(selectedBlock).isSelectable()
                 && this.currentScreen == this.hud) {
             if (this.isRemote()) {

@@ -3,7 +3,6 @@ package sx.lambda.voxel.net.mc.client.handlers;
 import org.spacehq.mc.protocol.data.game.values.world.block.BlockChangeRecord;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiBlockChangePacket;
 import sx.lambda.voxel.VoxelGameClient;
-import sx.lambda.voxel.world.chunk.IChunk;
 
 public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockChangePacket> {
 
@@ -23,6 +22,7 @@ public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockCh
                 game.getWorld().addBlock(r.getBlock(), x, y, z);
             } else {
                 game.getWorld().removeBlock(x, y, z);
+                game.getWorld().getChunkAtPosition(x, z).setMeta((short)0, x, y, z);
             }
         }
     }

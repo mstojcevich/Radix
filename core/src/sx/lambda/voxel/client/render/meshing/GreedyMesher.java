@@ -28,20 +28,22 @@ public class GreedyMesher implements Mesher {
     }
 
     @Override
-    public Mesh meshVoxels(MeshBuilder builder, Block[][][] voxels, float[][][] lightLevels) {
-        List<Face> faces = getFaces(voxels, lightLevels);
+    public Mesh meshVoxels(MeshBuilder builder, Block[][][] voxels, short[][][] metadata, float[][][] lightLevels) {
+        List<Face> faces = getFaces(voxels, metadata, lightLevels);
 
         return meshFaces(faces, builder);
     }
 
-    public List<Face> getFaces(Block[][][] voxels, float[][][] lightLevels, OccludeCondition ocCond) {
+    public List<Face> getFaces(Block[][][] voxels, short[][][] metadata, float[][][] lightLevels, OccludeCondition ocCond) {
         List<Face> faces = new ArrayList<>();
 
         // Top, bottom
         for (int y = 0; y < voxels[0].length; y++) {
             int[][] topBlocks = new int[voxels.length][voxels[0][0].length];
+            short[][] topMeta = new short[voxels.length][voxels[0][0].length];
             float[][] topLightLevels = new float[voxels.length][voxels[0][0].length];
             int[][] btmBlocks = new int[voxels.length][voxels[0][0].length];
+            short[][] btmMeta = new short[voxels.length][voxels[0][0].length];
             float[][] btmLightLevels = new float[voxels.length][voxels[0][0].length];
             for (int x = 0; x < voxels.length; x++) {
                 for (int z = 0; z < voxels[0][0].length; z++) {
@@ -50,6 +52,7 @@ public class GreedyMesher implements Mesher {
                     if (y < voxels[0].length - 1) {
                         if (!ocCond.shouldOcclude(curBlock, voxels[x][y + 1][z])) {
                             topBlocks[x][z] = curBlock.getID();
+                            topMeta[x][z] = metadata[x][y][z];
                             topLightLevels[x][z] = lightLevels[x][y + 1][z];
                         }
                     } else {
@@ -59,6 +62,7 @@ public class GreedyMesher implements Mesher {
                     if (y > 0) {
                         if(!ocCond.shouldOcclude(curBlock, voxels[x][y - 1][z])) {
                             btmBlocks[x][z] = curBlock.getID();
+                            btmMeta[x][z] = metadata[x][y][z];
                             btmLightLevels[x][z] = lightLevels[x][y - 1][z];
                         }
                     } else {
@@ -67,15 +71,17 @@ public class GreedyMesher implements Mesher {
                     }
                 }
             }
-            greedy(faces, Side.TOP, topBlocks, topLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
-            greedy(faces, Side.BOTTOM, btmBlocks, btmLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
+            greedy(faces, Side.TOP, topBlocks, topMeta, topLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
+            greedy(faces, Side.BOTTOM, btmBlocks, btmMeta, btmLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
         }
 
         // East, west
         for (int x = 0; x < voxels.length; x++) {
             int[][] westBlocks = new int[voxels[0][0].length][voxels[0].length];
+            short[][] westMeta = new short[voxels[0][0].length][voxels[0].length];
             float[][] westLightLevels = new float[voxels[0][0].length][voxels[0].length];
             int[][] eastBlocks = new int[voxels[0][0].length][voxels[0].length];
+            short[][] eastMeta = new short[voxels[0][0].length][voxels[0].length];
             float[][] eastLightLevels = new float[voxels[0][0].length][voxels[0].length];
             for (int z = 0; z < voxels[0][0].length; z++) {
                 for (int y = 0; y < voxels[0].length; y++) {
@@ -89,6 +95,7 @@ public class GreedyMesher implements Mesher {
                                 westNeighborChunk.getBlockIdAtPosition(westNeighborX, y, z));
                         if (!ocCond.shouldOcclude(curBlock, westNeighborBlk)) {
                             westBlocks[z][y] = curBlock.getID();
+                            westMeta[z][y] = metadata[x][y][z];
                             westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX, y, z);
                         }
                     } else {
@@ -103,6 +110,7 @@ public class GreedyMesher implements Mesher {
                                 eastNeighborChunk.getBlockIdAtPosition(eastNeighborX, y, z));
                         if (!ocCond.shouldOcclude(curBlock, eastNeighborBlk)) {
                             eastBlocks[z][y] = curBlock.getID();
+                            eastMeta[z][y] = metadata[x][y][z];
                             eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX, y, z);
                         }
                     } else {
@@ -112,15 +120,17 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.EAST, eastBlocks, eastLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
-            greedy(faces, Side.WEST, westBlocks, westLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.EAST, eastBlocks, eastMeta, eastLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.WEST, westBlocks, westMeta, westLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
         }
 
         // North, south
         for (int z = 0; z < voxels[0][0].length; z++) {
             int[][] northBlocks = new int[voxels.length][voxels[0].length];
+            short[][] northMeta = new short[voxels.length][voxels[0].length];
             float[][] northLightLevels = new float[voxels.length][voxels[0].length];
             int[][] southBlocks = new int[voxels.length][voxels[0].length];
+            short[][] southMeta = new short[voxels.length][voxels[0].length];
             float[][] southLightLevels = new float[voxels.length][voxels[0].length];
             for (int x = 0; x < voxels.length; x++) {
                 for (int y = 0; y < voxels[0].length; y++) {
@@ -136,6 +146,7 @@ public class GreedyMesher implements Mesher {
                                 northNeighborChunk.getBlockIdAtPosition(x, y, northNeighborZ));
                         if (!ocCond.shouldOcclude(curBlock, northNeighborBlock)) {
                             northBlocks[x][y] = curBlock.getID();
+                            northMeta[x][y] = metadata[x][y][z];
                             northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ);
                         }
                     } else {
@@ -148,6 +159,7 @@ public class GreedyMesher implements Mesher {
                                 southNeighborChunk.getBlockIdAtPosition(x, y, southNeighborZ));
                         if (!ocCond.shouldOcclude(curBlock, southNeighborBlock)) {
                             southBlocks[x][y] = curBlock.getID();
+                            southMeta[x][y] = metadata[x][y][z];
                             southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ);
                         }
                     } else {
@@ -157,15 +169,15 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.NORTH, northBlocks, northLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
-            greedy(faces, Side.SOUTH, southBlocks, southLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
+            greedy(faces, Side.NORTH, northBlocks, northMeta, northLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
+            greedy(faces, Side.SOUTH, southBlocks, southMeta, southLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
         }
 
         return faces;
     }
 
-    public List<Face> getFaces(Block[][][] voxels, float[][][] lightLevels) {
-        return getFaces(voxels, lightLevels, new OccludeCondition() {
+    public List<Face> getFaces(Block[][][] voxels, short[][][] metadata, float[][][] lightLevels) {
+        return getFaces(voxels, metadata, lightLevels, new OccludeCondition() {
             @Override
             public boolean shouldOcclude(Block curBlock, Block blockToSide) {
                 return !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
@@ -181,7 +193,7 @@ public class GreedyMesher implements Mesher {
      * @param lls        Light levels of the blocks
      * @param z          Depth on the plane
      */
-    private void greedy(List<Face> outputList, Side side, int[][] blks, float lls[][], int z, int offsetX, int offsetY) {
+    private void greedy(List<Face> outputList, Side side, int[][] blks, short metadata[][], float lls[][], int z, int offsetX, int offsetY) {
         int width = blks.length;
         int height = blks[0].length;
         boolean[][] used = new boolean[blks.length][blks[0].length];
@@ -190,6 +202,7 @@ public class GreedyMesher implements Mesher {
             for (int x = 0; x < width; x++) {
                 int blk = blks[x][y];
                 float ll = lls[x][y];
+                short meta = metadata[x][y];
                 if (!used[x][y] && blk > 0) {
                     used[x][y] = true;
                     int endX = x + 1;
@@ -201,7 +214,8 @@ public class GreedyMesher implements Mesher {
                         }
                         int newBlk = blks[newX][y];
                         float newll = lls[newX][y];
-                        if (newBlk == blk && newll == ll && !used[newX][y]) {
+                        short newMeta = metadata[newX][y];
+                        if (newBlk == blk && newll == ll && newMeta == meta && !used[newX][y]) {
                             endX++;
                             used[newX][y] = true;
                         } else {
@@ -209,7 +223,7 @@ public class GreedyMesher implements Mesher {
                                 if (endY == height) break;
                                 boolean allPassed = true;
                                 for (int lx = x; lx < endX; lx++) {
-                                    if (blks[lx][endY] != blk || lls[lx][endY] != ll || used[lx][endY]) {
+                                    if (blks[lx][endY] != blk || metadata[lx][endY] != meta || lls[lx][endY] != ll || used[lx][endY]) {
                                         allPassed = false;
                                     }
                                 }

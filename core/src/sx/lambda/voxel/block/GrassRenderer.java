@@ -18,29 +18,29 @@ public class GrassRenderer extends NormalBlockRenderer {
             BOTTOM_OFFSET = 2;
 
     @Override
-    public void renderNorth(int atlasIndex, int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
+    public void renderNorth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         super.renderNorth(atlasIndex + SIDE_OFFSET, x1, y1, x2, y2, z, lightLevel, builder);
     }
 
     @Override
-    public void renderSouth(int atlasIndex, int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
+    public void renderSouth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         super.renderSouth(atlasIndex + SIDE_OFFSET, x1, y1, x2, y2, z, lightLevel, builder);
     }
 
     @Override
-    public void renderEast(int atlasIndex, int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
+    public void renderEast(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         super.renderEast(atlasIndex + SIDE_OFFSET, z1, y1, z2, y2, x, lightLevel, builder);
     }
 
     @Override
-    public void renderWest(int atlasIndex, int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
+    public void renderWest(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         super.renderWest(atlasIndex + SIDE_OFFSET, z1, y1, z2, y2, x, lightLevel, builder);
     }
 
     @Override
-    public void renderTop(int atlasIndex, int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
-        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition(x1, z1).getBiome();
-        int[] color = biome.getGrassColor(y - 1);
+    public void renderTop(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, MeshBuilder builder) {
+        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition((int)x1, (int)z1).getBiome();
+        int[] color = biome.getGrassColor((int)y - 1);
         float r = color[0]/255f;
         float g = color[1]/255f;
         float b = color[2]/255f;

@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 public class FoliageBlockRenderer extends NormalBlockRenderer {
 
     @Override
-    public void renderNorth(int atlasIndex, int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
+    public void renderNorth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         // POSITIVE Z
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
@@ -20,7 +20,7 @@ public class FoliageBlockRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderSouth(int atlasIndex, int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
+    public void renderSouth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Z
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
@@ -32,7 +32,7 @@ public class FoliageBlockRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderWest(int atlasIndex, int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
+    public void renderWest(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         // NEGATIVE X
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
@@ -44,7 +44,7 @@ public class FoliageBlockRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderEast(int atlasIndex, int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
+    public void renderEast(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         // POSITIVE X
         builder.setColor(lightLevel, lightLevel, lightLevel, 1);
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
@@ -56,7 +56,7 @@ public class FoliageBlockRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderTop(int atlasIndex, int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {}
+    public void renderTop(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, MeshBuilder builder) {}
     @Override
     public void renderBottom(int atlasIndex, int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {}
 

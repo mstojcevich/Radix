@@ -33,6 +33,7 @@ public class Chunk implements IChunk {
      */
     private final float[] lightLevelMap = new float[17];
     private int[][][] blockList;
+    private final short[][][] metadata;
     private final transient IWorld parentWorld;
     private final Biome biome;
     private transient MeshBuilder meshBuilder;
@@ -52,12 +53,13 @@ public class Chunk implements IChunk {
     private List<GreedyMesher.Face> opaqueFaces;
     private boolean meshing, meshed, meshWhenDone;
 
-    public Chunk(IWorld world, Vec3i startPosition, int[][][] ids, Biome biome) {
+    public Chunk(IWorld world, Vec3i startPosition, int[][][] ids, short[][][] meta, Biome biome) {
         this.parentWorld = world;
         this.startPosition = startPosition;
         this.biome = biome;
         this.size = world.getChunkSize();
         this.height = world.getHeight();
+        this.metadata = meta;
 
         for (int i = 0; i < 17; i++) {
             int reduction = 16 - i;
@@ -86,6 +88,7 @@ public class Chunk implements IChunk {
         this.size = world.getChunkSize();
         this.height = world.getHeight();
         this.biome = biome;
+        this.metadata = new short[size][height][size];
 
         for (int i = 0; i < 17; i++) {
             int reduction = 16 - i;
@@ -295,6 +298,26 @@ public class Chunk implements IChunk {
     }
 
     @Override
+    public void setMeta(short meta, int x, int y, int z) {
+        if (y > height - 1) return;
+
+        x = Math.floorMod(x, size);
+        z = Math.floorMod(z, size);
+
+        metadata[x][y][z] = meta;
+    }
+
+    @Override
+    public short getMeta(int x, int y, int z) {
+        if (y > height - 1) return 0;
+
+        x = Math.floorMod(x, size);
+        z = Math.floorMod(z, size);
+
+        return metadata[x][y][z];
+    }
+
+    @Override
     public Vec3i getStartPosition() {
         return this.startPosition;
     }
@@ -482,8 +505,8 @@ public class Chunk implements IChunk {
                 }
             }
         });
-        opaqueFaces = mesher.getFaces(opaque, lightLevels);
-        translucentFaces = mesher.getFaces(translucent, lightLevels);
+        opaqueFaces = mesher.getFaces(opaque, metadata, lightLevels);
+        translucentFaces = mesher.getFaces(translucent, metadata, lightLevels);
         meshing = false;
         meshed = true;
         parentWorld.decrChunksMeshing();

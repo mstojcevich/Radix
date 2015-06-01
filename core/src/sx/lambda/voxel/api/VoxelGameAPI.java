@@ -85,7 +85,7 @@ public class VoxelGameAPI {
                     new BlockBuilder().setID(BuiltInBlockIds.EMERALD_ORE_ID).setHumanName("Emerald Ore").setTextureLocation("textures/block/emerald_ore.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.OBSIDIAN_ID).setHumanName("Obsidian").setTextureLocation("textures/block/obsidian.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.GRAVEL_ID).setHumanName("Gravel").setTextureLocation("textures/block/gravel.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.SNOW_ID).setHumanName("Snow").setTextureLocation("textures/block/snow.png").build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.SNOW_ID).setHumanName("Snow").setTextureLocation("textures/block/snow.png").setBlockRenderer(new MetadataHeightRenderer(7)).setOccludeCovered(false).setLightPassthrough(true).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.STONE_MONSTER_EGG_ID).setHumanName("Stone (Monster Egg)").setTextureLocation("textures/block/stone.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.RED_MUSHROOM_BLOCK_ID).setHumanName("Red Mushroom Block").setTextureLocation("textures/block/mushroom_block_skin_red.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.BROWN_MUSHROOM_BLOCK_ID).setHumanName("Brown Mushroom Block").setTextureLocation("textures/block/mushroom_block_skin_brown.png").build(),

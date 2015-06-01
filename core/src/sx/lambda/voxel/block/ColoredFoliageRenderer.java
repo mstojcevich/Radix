@@ -11,10 +11,10 @@ import sx.lambda.voxel.world.biome.Biome;
 public class ColoredFoliageRenderer extends NormalBlockRenderer {
 
     @Override
-    public void renderNorth(int atlasIndex, int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
+    public void renderNorth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         // POSITIVE Z
-        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition(x1, z).getBiome();
-        int[] color = biome.getFoliageColor(y1);
+        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition((int)x1, (int)z).getBiome();
+        int[] color = biome.getFoliageColor((int)y1);
         float r = color[0]/255f;
         float g = color[1]/255f;
         float b = color[2]/255f;
@@ -28,10 +28,10 @@ public class ColoredFoliageRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderSouth(int atlasIndex, int x1, int y1, int x2, int y2, int z, float lightLevel, MeshBuilder builder) {
+    public void renderSouth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Z
-        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition(x1, z).getBiome();
-        int[] color = biome.getFoliageColor(y1);
+        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition((int)x1, (int)z).getBiome();
+        int[] color = biome.getFoliageColor((int)y1);
         float r = color[0]/255f;
         float g = color[1]/255f;
         float b = color[2]/255f;
@@ -45,10 +45,10 @@ public class ColoredFoliageRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderWest(int atlasIndex, int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
+    public void renderWest(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         // NEGATIVE X
-        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition(x, z1).getBiome();
-        int[] color = biome.getFoliageColor(y1);
+        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition((int)x, (int)z1).getBiome();
+        int[] color = biome.getFoliageColor((int)y1);
         float r = color[0]/255f;
         float g = color[1]/255f;
         float b = color[2]/255f;
@@ -62,10 +62,10 @@ public class ColoredFoliageRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderEast(int atlasIndex, int z1, int y1, int z2, int y2, int x, float lightLevel, MeshBuilder builder) {
+    public void renderEast(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         // POSITIVE X
-        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition(x, z1).getBiome();
-        int[] color = biome.getFoliageColor(y1);
+        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition((int)x, (int)z1).getBiome();
+        int[] color = biome.getFoliageColor((int)y1);
         float r = color[0]/255f;
         float g = color[1]/255f;
         float b = color[2]/255f;
@@ -79,10 +79,10 @@ public class ColoredFoliageRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderTop(int atlasIndex, int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
+    public void renderTop(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, MeshBuilder builder) {
         // POSITIVE Y
-        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition(x1, z1).getBiome();
-        int[] color = biome.getFoliageColor(y - 1);
+        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition((int)x1, (int)z1).getBiome();
+        int[] color = biome.getFoliageColor((int)y - 1);
         float r = color[0]/255f;
         float g = color[1]/255f;
         float b = color[2]/255f;

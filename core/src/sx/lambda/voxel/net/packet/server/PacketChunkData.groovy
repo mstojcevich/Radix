@@ -29,7 +29,7 @@ class PacketChunkData implements ServerPacket {
             @Override
             public void run() {
                 try {
-                    VoxelGameClient.instance.getWorld().addChunk(new Chunk(VoxelGameClient.instance.getWorld(), new Vec3i(x, y, z), ids, VoxelGameAPI.instance.getBiomeByID(0)))
+                    VoxelGameClient.instance.getWorld().addChunk(new Chunk(VoxelGameClient.instance.getWorld(), new Vec3i(x, y, z), ids, new short[ids.length][ids[0].length][ids[0][0].length], VoxelGameAPI.instance.getBiomeByID(0)))
                 } catch (Exception ex) {
                     VoxelGameClient.instance.handleCriticalException(ex)
                 }

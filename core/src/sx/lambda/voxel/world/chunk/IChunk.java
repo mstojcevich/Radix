@@ -31,6 +31,10 @@ public interface IChunk extends Serializable {
 
     void addBlock(int block, int x, int y, int z, boolean updateSunlight);
 
+    void setMeta(short meta, int x, int y, int z);
+
+    short getMeta(int x, int y, int z);
+
     Vec3i getStartPosition();
 
     float getHighestPoint();

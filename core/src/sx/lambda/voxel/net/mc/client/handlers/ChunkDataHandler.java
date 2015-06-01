@@ -35,7 +35,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
         int cz = scdp.getZ()*16;
         IChunk ck = game.getWorld().getChunkAtPosition(cx, cz);
         if(ck == null) {
-            ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16], biome);
+            ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16], new short[16][256][16], biome);
             game.getWorld().addChunk(ck);
         }
         int cy = 0;
@@ -48,6 +48,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                 for (int z = 0; z < 16; z++) {
                     for (int y = 0; y < 16; y++) {
                         int id = c.getBlocks().getBlock(x, y, z);
+                        short meta = (short)c.getBlocks().getData(x, y, z);
                         boolean blockExists = false;
                         if(id != 0) {
                             for (Block b : VoxelGameAPI.instance.getBlocks()) {
@@ -58,6 +59,8 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                         }
                         if(!blockExists)id = BuiltInBlockIds.UNKNOWN_ID;
                         ck.addBlock(id, x, cy+y, z, false);
+                        if(meta > 0)
+                            ck.setMeta(meta, x, cy+y, z);
                     }
                 }
             }

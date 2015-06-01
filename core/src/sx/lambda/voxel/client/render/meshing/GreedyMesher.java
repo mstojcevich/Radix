@@ -215,7 +215,7 @@ public class GreedyMesher implements Mesher {
                         int newBlk = blks[newX][y];
                         float newll = lls[newX][y];
                         short newMeta = metadata[newX][y];
-                        if (newBlk == blk && newll == ll && newMeta == meta && !used[newX][y]) {
+                        if (((newBlk == blk && newMeta == meta) || (newll == 0 && newBlk != 0)) && newll == ll && !used[newX][y]) {
                             endX++;
                             used[newX][y] = true;
                         } else {

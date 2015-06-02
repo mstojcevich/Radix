@@ -417,9 +417,6 @@ public class World implements IWorld {
                                     break;
                                 case BOTTOM:
                                     sy -= 1;
-                                    // When spreading down, lighting at max level does not decay
-                                    if(ll == 16)
-                                        nextLL = 16;
                                     break;
                                 case WEST:
                                     sx -= 1;
@@ -464,7 +461,13 @@ public class World implements IWorld {
 
                             // Spread lighting
                             Block sBlock = sChunk.getBlock(scx, sy, scz);
-                            if(sBlock == null || sBlock.doesLightPassThrough()) {
+                            // When spreading down, lighting at max level does not decay
+                            if(s == Side.BOTTOM) {
+                                Block block = posChunk.getBlock(cx, y, cz); // Block being spread from
+                                if (ll == 16 && (block == null || block.decreasesLight()))
+                                    nextLL = 16;
+                            }
+                            if(sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
                                 if(sChunk.getSunlight(scx, sy, scz) < nextLL) {
                                     sChunk.setSunlight(scx, sy, scz, nextLL);
                                     addToSunlightQueue(sx, sy, sz);

@@ -33,10 +33,11 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                     if(biome == null)
                         biome = VoxelGameAPI.instance.getBiomeByID(0);
                     IChunk ck = game.getWorld().getChunkAtPosition(cx, cz);
-                    if(ck == null) {
-                        ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16], new short[16][256][16], biome);
-                        game.getWorld().addChunk(ck);
+                    if(ck != null) {
+                        game.getWorld().rmChunk(ck);
                     }
+                    ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16], new short[16][256][16], biome);
+                    game.getWorld().addChunk(ck);
                     int cy = 0;
                     for(Chunk c : packet.getChunks(column)) {
                         if(c == null) {
@@ -59,7 +60,8 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                                     if(!blockExists) {
                                         id = BuiltInBlockIds.UNKNOWN_ID;
                                     }
-                                    ck.setBlock(id, x, cy + y, z, false);
+                                    if(id > 0)
+                                        ck.setBlock(id, x, cy + y, z, false);
                                     if(meta > 0)
                                         ck.setMeta(meta, x, cy+y, z);
                                 }

@@ -230,7 +230,7 @@ public class Chunk implements IChunk {
             if (negXSunlight > 1) {
                 Block bl = negXNeighborChunk.getBlock(negX & (size-1), y, z & (size-1));
                 if (bl == null || bl.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(new int[]{negX, y, z});
+                    parentWorld.addToSunlightQueue(negX, y, z);
                 }
             }
         }
@@ -240,7 +240,7 @@ public class Chunk implements IChunk {
             if (posXSunlight > 1) {
                 Block bl = posXNeighborChunk.getBlock(posX & (size-1), y, z & (size-1));
                 if (bl == null || bl.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(new int[]{posX, y, z});
+                    parentWorld.addToSunlightQueue(posX, y, z);
                 }
             }
         }
@@ -250,7 +250,7 @@ public class Chunk implements IChunk {
             if (negZSunlight > 1) {
                 Block bl = negZNeighborChunk.getBlock(x & (size-1), y, negZ & (size-1));
                 if (bl == null || bl.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(new int[]{x, y, negZ});
+                    parentWorld.addToSunlightQueue(x, y, negZ);
                 }
             }
         }
@@ -260,7 +260,7 @@ public class Chunk implements IChunk {
             if (posZSunlight > 1) {
                 Block bl = posZNeighborChunk.getBlock(x & (size-1), y, posZ & (size-1));
                 if (bl == null || bl.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(new int[]{x, y, posZ});
+                    parentWorld.addToSunlightQueue(x, y, posZ);
                 }
             }
         }
@@ -269,7 +269,7 @@ public class Chunk implements IChunk {
             Block posYBlock = getBlock(x - startPosition.x, posY, z - startPosition.z);
             if (getSunlight(x & (size-1), y + 1, z & (size-1)) > 1) {
                 if (posYBlock == null || posYBlock.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(new int[]{x, posY, z});
+                    parentWorld.addToSunlightQueue(x, posY, z);
                 }
             }
         }
@@ -296,7 +296,7 @@ public class Chunk implements IChunk {
         }
 
         if(updateSunlight)
-            getWorld().addToSunlightRemovalQueue(new int[]{x + startPosition.x, y + startPosition.y, z + startPosition.z});
+            getWorld().addToSunlightRemovalQueue(x + startPosition.x, y + startPosition.y, z + startPosition.z);
     }
 
     @Override
@@ -353,7 +353,7 @@ public class Chunk implements IChunk {
         for (int x = 0; x < size; x++) {
             for (int z = 0; z < size; z++) {
                 sunlightLevels[x][height - 1][z] = 16;
-                parentWorld.addToSunlightQueue(new int[]{startPosition.x + x, height - 1, startPosition.z + z});
+                parentWorld.addToSunlightQueue(startPosition.x + x, height - 1, startPosition.z + z);
             }
         }
     }

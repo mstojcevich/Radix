@@ -20,6 +20,7 @@ import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.api.events.worldgen.EventFinishChunkGen;
 import sx.lambda.voxel.block.Block;
+import sx.lambda.voxel.block.Side;
 import sx.lambda.voxel.entity.Entity;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.util.Vec3i;
@@ -334,7 +335,7 @@ public class World implements IWorld {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
                 c.setSunlight(x, WORLD_HEIGHT - 1, z, 16);
-                addToSunlightQueue(new int[]{c.getStartPosition().x + x, WORLD_HEIGHT - 1, c.getStartPosition().z + z});
+                addToSunlightQueue(c.getStartPosition().x + x, WORLD_HEIGHT - 1, c.getStartPosition().z + z);
             }
         }
         c.finishChangingSunlight();
@@ -343,6 +344,7 @@ public class World implements IWorld {
     public void addEntity(Entity e) {
         loadedEntities.add(e);
     }
+
 
     @Override
     public void rerenderChunk(IChunk c) {
@@ -361,15 +363,13 @@ public class World implements IWorld {
      * The block at the position passed should be translucent or null and have a sunlight level greater than 0
      */
     @Override
-    public void addToSunlightQueue(int[] pos) {
-        assert pos.length == 3;
-        sunlightQueue.add(pos);
+    public void addToSunlightQueue(int x, int y, int z) {
+        sunlightQueue.add(new int[]{x, y, z});
     }
 
     @Override
-    public void addToSunlightRemovalQueue(int[] pos) {
-        assert pos.length == 3;
-        sunlightRemovalQueue.add(pos);
+    public void addToSunlightRemovalQueue(int x, int y, int z) {
+        sunlightRemovalQueue.add(new int[]{x, y, z});
     }
 
     @Override
@@ -399,91 +399,77 @@ public class World implements IWorld {
                             continue;
                         }
                         int ll = posChunk.getSunlight(cx, y, cz);
-                        int nextLL = ll - 1;
 
-                        int negX = x - 1;
-                        int posX = x + 1;
-                        int negZ = z - 1;
-                        int posZ = z + 1;
-                        IChunk negXNeighborChunk = posChunk;
-                        IChunk posXNeighborChunk = posChunk;
-                        IChunk negZNeighborChunk = posChunk;
-                        IChunk posZNeighborChunk = posChunk;
-                        if(cx == 0) {
-                            negXNeighborChunk = getChunkAtPosition(negX, z);
-                        } else if(cx == CHUNK_SIZE-1) {
-                            posXNeighborChunk = getChunkAtPosition(posX, z);
-                        }
-                        if(cz == 0) {
-                            negZNeighborChunk = getChunkAtPosition(x, negZ);
-                        } else if(cz == CHUNK_SIZE-1) {
-                            posZNeighborChunk = getChunkAtPosition(x, posZ);
-                        }
+                        // Spread off to each side
+                        for(Side s : Side.values()) {
+                            int nextLL = ll - 1; // Decayed light level for the spread
+                            int sx = x; // Side x coord
+                            int sy = y; // Side y coord
+                            int sz = z; // Side z coord
+                            int scx = cx; // Chunk-relative side x coord
+                            int scz = cz; // Chunk-relative side z coord
+                            IChunk sChunk = posChunk;
 
-                        if (negXNeighborChunk != null) {
-                            Block bl = negXNeighborChunk.getBlock(negX & (CHUNK_SIZE - 1), y, cz);
-                            if (bl == null || bl.doesLightPassThrough()) {
-                                if (negXNeighborChunk.getSunlight(negX & (CHUNK_SIZE-1), y, cz) < nextLL) {
-                                    negXNeighborChunk.setSunlight(negX & (CHUNK_SIZE-1), y, cz, nextLL);
-                                    sunlightQueue.add(new int[]{negX, y, z});
-                                    changedChunks.add(negXNeighborChunk);
-                                }
+                            // Offset values based on side
+                            switch(s) {
+                                case TOP:
+                                    sy += 1;
+                                    break;
+                                case BOTTOM:
+                                    sy -= 1;
+                                    // When spreading down, lighting at max level does not decay
+                                    if(ll == 16)
+                                        nextLL = 16;
+                                    break;
+                                case WEST:
+                                    sx -= 1;
+                                    scx -= 1;
+                                    break;
+                                case EAST:
+                                    sx += 1;
+                                    scx += 1;
+                                    break;
+                                case NORTH:
+                                    sz += 1;
+                                    scz += 1;
+                                    break;
+                                case SOUTH:
+                                    sz -= 1;
+                                    scz -= 1;
+                                    break;
                             }
-                        }
-                        if (posXNeighborChunk != null) {
-                            Block bl = posXNeighborChunk.getBlock(posX & (CHUNK_SIZE - 1), y, cz);
-                            if (bl == null || bl.doesLightPassThrough()) {
-                                if (posXNeighborChunk.getSunlight(posX & (CHUNK_SIZE-1), y, cz) < nextLL) {
-                                    posXNeighborChunk.setSunlight(posX & (CHUNK_SIZE-1), y, cz, nextLL);
-                                    sunlightQueue.add(new int[]{posX, y, z});
-                                    changedChunks.add(posXNeighborChunk);
-                                }
-                            }
-                        }
-                        if (negZNeighborChunk != null) {
-                            Block bl = negZNeighborChunk.getBlock(cx, y, negZ & (CHUNK_SIZE - 1));
-                            if (bl == null || bl.doesLightPassThrough()) {
-                                if (negZNeighborChunk.getSunlight(cx, y, negZ & (CHUNK_SIZE-1)) < nextLL) {
-                                    negZNeighborChunk.setSunlight(cx, y, negZ & (CHUNK_SIZE-1), nextLL);
-                                    sunlightQueue.add(new int[]{x, y, negZ});
-                                    changedChunks.add(negZNeighborChunk);
-                                }
-                            }
-                        }
-                        if (posZNeighborChunk != null) {
-                            Block bl = posZNeighborChunk.getBlock(cx, y, posZ & (CHUNK_SIZE - 1));
-                            if (bl == null || bl.doesLightPassThrough()) {
-                                if (posZNeighborChunk.getSunlight(cx, y, posZ & (CHUNK_SIZE-1)) < nextLL) {
-                                    posZNeighborChunk.setSunlight(cx, y, posZ & (CHUNK_SIZE-1), nextLL);
-                                    sunlightQueue.add(new int[]{x, y, posZ});
-                                    changedChunks.add(posZNeighborChunk);
-                                }
-                            }
-                        }
+                            if(sy < 0)
+                                continue;
+                            if(sy > WORLD_HEIGHT-1)
+                                continue;
 
-                        if (y < WORLD_HEIGHT - 2) {
-                            int posY = y + 1;
-                            Block posYBlock = posChunk.getBlock(cx, posY, cz);
-                            if (posYBlock == null || posYBlock.doesLightPassThrough()) {
-                                if (nextLL > posChunk.getSunlight(cx, posY, cz)) {
-                                    posChunk.setSunlight(cx, posY, cz, nextLL);
-                                    sunlightQueue.add(new int[]{x, posY, z});
-                                    changedChunks.add(posChunk);
-                                }
+                            // Select the correct chunk
+                            if(scz < 0) {
+                                scz += CHUNK_SIZE;
+                                sChunk = getChunkAtPosition(sx, sz);
+                            } else if(scz > CHUNK_SIZE-1) {
+                                scz -= CHUNK_SIZE;
+                                sChunk = getChunkAtPosition(sx, sz);
                             }
-                        }
+                            if(scx < 0) {
+                                scx += CHUNK_SIZE;
+                                sChunk = getChunkAtPosition(sx, sz);
+                            } else if(scx > CHUNK_SIZE-1) {
+                                scx -= CHUNK_SIZE;
+                                sChunk = getChunkAtPosition(sx, sz);
+                            }
 
-                        if (y > 0) {
-                            int negY = y - 1;
-                            Block bl = posChunk.getBlock(cx, y, cz);
-                            Block negYBlock = posChunk.getBlock(cx, negY, cz);
-                            if (negYBlock == null || negYBlock.doesLightPassThrough() ||
-                                    !negYBlock.decreasesLight()) {
-                                boolean maxLL = ll == 16 && (bl == null || bl.decreasesLight());
-                                if (posChunk.getSunlight(cx, negY, cz) < (maxLL ? 16 : nextLL)) {
-                                    posChunk.setSunlight(cx, negY, cz, (maxLL ? 16 : nextLL));
-                                    sunlightQueue.add(new int[]{x, negY, z});
-                                    changedChunks.add(posChunk);
+                            if(sChunk == null)
+                                continue;
+
+                            // Spread lighting
+                            Block sBlock = sChunk.getBlock(scx, sy, scz);
+                            if(sBlock == null || sBlock.doesLightPassThrough()) {
+                                if(sChunk.getSunlight(scx, sy, scz) < nextLL) {
+                                    sChunk.setSunlight(scx, sy, scz, nextLL);
+                                    addToSunlightQueue(sx, sy, sz);
+                                    if(!changedChunks.contains(sChunk))
+                                        changedChunks.add(sChunk);
                                 }
                             }
                         }

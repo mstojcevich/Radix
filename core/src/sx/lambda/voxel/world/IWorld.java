@@ -55,15 +55,13 @@ public interface IWorld {
 
     /**
      * Add a position to the sunlight queue
-     * @param pos int[] {x, y, z}
      */
-    void addToSunlightQueue(int[] pos);
+    void addToSunlightQueue(int x, int y, int z);
 
     /**
      * Add a position to the sunlight removal queue
-     * @param pos int[] {x, y, z}
      */
-    void addToSunlightRemovalQueue(int[] pos);
+    void addToSunlightRemovalQueue(int x, int y, int z);
 
     void processLightQueue();
 

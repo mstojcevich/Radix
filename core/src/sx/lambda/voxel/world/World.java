@@ -480,95 +480,96 @@ public class World implements IWorld {
 
     private void processLightRemovalQueue() {
         if (!sunlightRemovalQueue.isEmpty()) {
-            Queue<IChunk> changedChunks = new LinkedBlockingDeque<>();
+            Side[] sides = Side.values();
+
+            List<IChunk> changedChunks = new ArrayList<>();
             int[] pos;
             while ((pos = sunlightRemovalQueue.poll()) != null) {
                 int x = pos[0];
+                int cx = x & (CHUNK_SIZE-1);
                 int y = pos[1];
                 int z = pos[2];
+                int cz = z & (CHUNK_SIZE-1);
                 IChunk posChunk = getChunkAtPosition(x, z);
                 if (posChunk == null) {
                     continue;
                 }
                 int ll = posChunk.getSunlight(x & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
 
-                int negX = x - 1;
-                int posX = x + 1;
-                int negZ = x - 1;
-                int posZ = x + 1;
-                IChunk negXNeighborChunk = getChunkAtPosition(negX, z);
-                IChunk posXNeighborChunk = getChunkAtPosition(posX, z);
-                IChunk negZNeighborChunk = getChunkAtPosition(x, negZ);
-                IChunk posZNeighborChunk = getChunkAtPosition(x, posZ);
+                // Spread off to each side
+                for(Side s : sides) {
+                    int sx = x; // Side x coord
+                    int sy = y; // Side y coord
+                    int sz = z; // Side z coord
+                    int scx = cx; // Chunk-relative side x coord
+                    int scz = cz; // Chunk-relative side z coord
+                    IChunk sChunk = posChunk;
 
-                if (negXNeighborChunk != null) {
-                    Block bl = negXNeighborChunk.getBlock(negX & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
-                    int bll = negXNeighborChunk.getSunlight(negX & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
-                    if (bll < ll && bll != 0) {
-                        if (bl == null || bl.doesLightPassThrough()) {
-                            sunlightRemovalQueue.add(new int[]{negX, y, z});
-                        }
-                    } else if (bll >= ll) {
-                        if (bl == null || bl.doesLightPassThrough()) {
-                            sunlightQueue.add(new int[]{negX, y, z});
-                        }
+                    // Offset values based on side
+                    switch (s) {
+                        case TOP:
+                            sy += 1;
+                            break;
+                        case BOTTOM:
+                            sy -= 1;
+                            break;
+                        case WEST:
+                            sx -= 1;
+                            scx -= 1;
+                            break;
+                        case EAST:
+                            sx += 1;
+                            scx += 1;
+                            break;
+                        case NORTH:
+                            sz += 1;
+                            scz += 1;
+                            break;
+                        case SOUTH:
+                            sz -= 1;
+                            scz -= 1;
+                            break;
                     }
-                }
-                if (posXNeighborChunk != null) {
-                    Block bl = posXNeighborChunk.getBlock(posX & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
-                    int bll = posXNeighborChunk.getSunlight(posX & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
-                    if (bll < ll && bll != 0) {
-                        if (bl == null || bl.doesLightPassThrough()) {
-                            sunlightRemovalQueue.add(new int[]{posX, y, z});
-                        }
-                    } else if (bll >= ll) {
-                        if (bl == null || bl.doesLightPassThrough()) {
-                            sunlightQueue.add(new int[]{posX, y, z});
-                        }
-                    }
-                }
-                if (negZNeighborChunk != null) {
-                    Block bl = negZNeighborChunk.getBlock(x & (CHUNK_SIZE-1), y, negZ & (CHUNK_SIZE-1));
-                    int bll = negZNeighborChunk.getSunlight(x & (CHUNK_SIZE-1), y, negZ & (CHUNK_SIZE-1));
-                    if (bll < ll && bll != 0) {
-                        if (bl == null || bl.doesLightPassThrough()) {
-                            sunlightRemovalQueue.add(new int[]{x, y, negZ});
-                        }
-                    } else if (bll >= ll) {
-                        if (bl == null || bl.doesLightPassThrough()) {
-                            sunlightQueue.add(new int[]{x, y, negZ});
-                        }
-                    }
-                }
-                if (posZNeighborChunk != null) {
-                    Block bl = posZNeighborChunk.getBlock(x & (CHUNK_SIZE-1), y, posZ & (CHUNK_SIZE-1));
-                    int bll = posZNeighborChunk.getSunlight(x & (CHUNK_SIZE-1), y, posZ & (CHUNK_SIZE-1));
-                    if (bll < ll && bll != 0) {
-                        if (bl == null || bl.doesLightPassThrough()) {
-                            sunlightRemovalQueue.add(new int[]{x, y, posZ});
-                        }
-                    } else if (bll >= ll) {
-                        if (bl == null || bl.doesLightPassThrough()) {
-                            sunlightQueue.add(new int[]{x, y, posZ});
-                        }
-                    }
-                }
+                    if (sy < 0)
+                        continue;
+                    if (sy > WORLD_HEIGHT - 1)
+                        continue;
 
-                if (y > 0) {
-                    int negY = y - 1;
-                    Block negYBlock = posChunk.getBlock(x & (CHUNK_SIZE-1), negY, z & (CHUNK_SIZE-1));
-                    if (negYBlock == null || negYBlock.doesLightPassThrough()) {
-                        if (posChunk.getSunlight(x & (CHUNK_SIZE-1), negY, z & (CHUNK_SIZE-1)) != 0) {
-                            sunlightRemovalQueue.add(new int[]{x, negY, z});
+                    // Select the correct chunk
+                    if(scz < 0) {
+                        scz += CHUNK_SIZE;
+                        sChunk = getChunkAtPosition(sx, sz);
+                    } else if(scz > CHUNK_SIZE-1) {
+                        scz -= CHUNK_SIZE;
+                        sChunk = getChunkAtPosition(sx, sz);
+                    }
+                    if(scx < 0) {
+                        scx += CHUNK_SIZE;
+                        sChunk = getChunkAtPosition(sx, sz);
+                    } else if(scx > CHUNK_SIZE-1) {
+                        scx -= CHUNK_SIZE;
+                        sChunk = getChunkAtPosition(sx, sz);
+                    }
+
+                    if(sChunk == null)
+                        continue;
+
+                    Block sBlock = sChunk.getBlock(scx, sy, scz);
+                    int sSunlight = sChunk.getSunlight(scx, sy, scz);
+                    if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
+                        if ((sSunlight < ll || s == Side.BOTTOM) && sSunlight != 0) { // Reset lighting for blocks affected by this block
+                            addToSunlightRemovalQueue(sx, sy, sz);
+                        } else if (sSunlight >= ll && s != Side.BOTTOM) { // Add surrounding blocks to queue to restore lighting of the reset blocks
+                            addToSunlightQueue(sx, sy, sz);
                         }
                     }
                 }
 
-                posChunk.setSunlight(x & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1), 0);
+                // Reset lighting for the block
+                posChunk.setSunlight(cx, y, cz, 0);
                 changedChunks.add(posChunk);
             }
-            IChunk changedChunk;
-            while ((changedChunk = changedChunks.poll()) != null) {
+            for(IChunk changedChunk : changedChunks) {
                 changedChunk.finishChangingSunlight();
             }
         }

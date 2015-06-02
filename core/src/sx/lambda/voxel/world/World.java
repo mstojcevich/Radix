@@ -695,9 +695,9 @@ public class World implements IWorld {
             for (int z = 0; z < CHUNK_SIZE; z++) {
                 for(int y = WORLD_HEIGHT-1; y >= 0; y--) {
                     if(c.getBlockId(x, y, z) > 0) {
-                        addToSunlightQueue(c.getStartPosition().x + x, y + 1, c.getStartPosition().z + z);
                         break;
                     }
+                    addToSunlightQueue(c.getStartPosition().x + x, y, c.getStartPosition().z + z);
                     c.setSunlight(x, y, z, 16);
                 }
             }

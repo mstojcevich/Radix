@@ -14,7 +14,7 @@ class VisualSettings implements Serializable {
     /**
      * Whether to draw internal leaves of trees
      */
-    private boolean fancyTrees = false
+    private boolean fancyTrees = true
 
     public int getViewDistance() { viewDistance }
 

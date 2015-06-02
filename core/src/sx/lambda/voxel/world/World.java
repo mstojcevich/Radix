@@ -39,7 +39,7 @@ public class World implements IWorld {
 
     private static final int CHUNK_SIZE = 16;
 
-    private static final int WORLD_HEIGHT = 128;
+    private static final int WORLD_HEIGHT = 256;
 
     private static final int SEA_LEVEL = 64;
 

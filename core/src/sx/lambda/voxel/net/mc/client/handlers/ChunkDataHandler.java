@@ -54,11 +54,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                         int id = c.getBlocks().getBlock(x, y, z);
                         short meta = (short)c.getBlocks().getData(x, y, z);
                         boolean blockExists = false;
-                        if(id != 0) {
-                            for (Block b : VoxelGameAPI.instance.getBlocks()) {
-                                if (b.getID() == id) blockExists = true;
-                            }
-                        } else {
+                        if(id <= 0 || VoxelGameAPI.instance.getBlockByID(id) != null) {
                             blockExists = true;
                         }
                         if(!blockExists)id = BuiltInBlockIds.UNKNOWN_ID;

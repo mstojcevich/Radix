@@ -471,8 +471,7 @@ public class World implements IWorld {
                                 if(sChunk.getSunlight(scx, sy, scz) < nextLL) {
                                     sChunk.setSunlight(scx, sy, scz, nextLL);
                                     addToSunlightQueue(sx, sy, sz);
-                                    if(!changedChunks.contains(sChunk))
-                                        changedChunks.add(sChunk);
+                                    changedChunks.add(sChunk);
                                 }
                             }
                         }

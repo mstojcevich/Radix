@@ -225,7 +225,9 @@ public class GreedyMesher implements Mesher {
                                 if (endY == height) break;
                                 boolean allPassed = true;
                                 for (int lx = x; lx < endX; lx++) {
-                                    if (blks[lx][endY] != blk || metadata[lx][endY] != meta || lls[lx][endY] != ll || used[lx][endY]) {
+                                    int lblk = blks[lx][endY];
+                                    float llight = lls[lx][endY];
+                                    if (((lblk != blk || metadata[lx][endY] != meta) && (llight != 0 || lblk == 0)) || llight != ll || used[lx][endY]) {
                                         allPassed = false;
                                     }
                                 }

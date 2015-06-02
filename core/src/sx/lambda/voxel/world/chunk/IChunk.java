@@ -139,6 +139,10 @@ public interface IChunk extends Serializable, Disposable {
      */
     Biome getBiome();
 
+    boolean isLighted();
+
+    void setLighted(boolean b);
+
     interface EachBlockCallee {
         void call(Block block, int x, int y, int z);
     }

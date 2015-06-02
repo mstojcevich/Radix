@@ -48,6 +48,7 @@ public class Chunk implements IChunk {
     private transient boolean sunlightChanged;
     private boolean setup;
     private boolean cleanedUp;
+    private boolean lighted;
 
     private List<GreedyMesher.Face> translucentFaces;
     private List<GreedyMesher.Face> opaqueFaces;
@@ -477,6 +478,16 @@ public class Chunk implements IChunk {
         hash = 71 * hash + this.startPosition.x;
         hash = 71 * hash + this.startPosition.z;
         return hash;
+    }
+
+    @Override
+    public boolean isLighted() {
+        return lighted;
+    }
+
+    @Override
+    public void setLighted(boolean lighted) {
+        this.lighted = lighted;
     }
 
 }

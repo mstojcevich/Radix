@@ -316,8 +316,6 @@ public class World implements IWorld {
         }
         foundChunkMapZ.put(z, chunk);
         this.chunkList.add(chunk);
-
-        setupSunlighting(chunk);
     }
 
     private IChunk loadChunk(int startX, int startZ) {
@@ -365,6 +363,14 @@ public class World implements IWorld {
 
     @Override
     public void processLightQueue() {
+        for(IChunk c : chunkList) {
+            if(!c.isLighted()) {
+                if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <= VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
+                    setupSunlighting(c);
+                    c.setLighted(true);
+                }
+            }
+        }
         if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty())
             return;
         shouldUpdateLight = true;
@@ -379,7 +385,7 @@ public class World implements IWorld {
 
                     Side[] sides = Side.values();
 
-                    List<IChunk> changedChunks = new ArrayList<>();
+                    Set<IChunk> changedChunks = new HashSet<IChunk>();
                     int[] pos;
                     while ((pos = sunlightQueue.poll()) != null) {
                         int x = pos[0];
@@ -693,16 +699,14 @@ public class World implements IWorld {
     private void setupSunlighting(IChunk c) {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
-                for(int y = WORLD_HEIGHT-1; y >= 0; y--) {
-                    if(c.getBlockId(x, y, z) > 0) {
-                        break;
-                    }
-                    addToSunlightQueue(c.getStartPosition().x + x, y, c.getStartPosition().z + z);
-                    c.setSunlight(x, y, z, 16);
+                int y = WORLD_HEIGHT-1;
+                if(c.getBlockId(x, y, z) > 0) {
+                    break;
                 }
+                addToSunlightQueue(c.getStartPosition().x + x, y, c.getStartPosition().z + z);
+                c.setSunlight(x, y, z, 16);
             }
         }
-        c.finishChangingSunlight();
     }
 
 }

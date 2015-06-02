@@ -37,7 +37,6 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                         game.getWorld().rmChunk(ck);
                     }
                     ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16], new short[16][256][16], biome);
-                    game.getWorld().addChunk(ck);
                     int cy = 0;
                     for(Chunk c : packet.getChunks(column)) {
                         if(c == null) {
@@ -65,6 +64,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                         }
                         cy += 16;
                     }
+                    game.getWorld().addChunk(ck);
                 }
             }
         }.start();

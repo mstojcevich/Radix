@@ -41,7 +41,6 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
             game.getWorld().rmChunk(ck);
         }
         ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), new int[16][256][16], new short[16][256][16], biome);
-        game.getWorld().addChunk(ck);
         int cy = 0;
         for (Chunk c : scdp.getChunks()) {
             if (c == null) {
@@ -67,6 +66,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
             }
             cy += 16;
         }
+        game.getWorld().addChunk(ck);
     }
 
 }

@@ -301,8 +301,6 @@ public class World implements IWorld {
             this.chunkList.remove(c);
         }
         addChunk(chunk, chunk.getStartPosition().x, chunk.getStartPosition().z);
-
-        addSun(chunk);
     }
 
     @Override
@@ -318,6 +316,8 @@ public class World implements IWorld {
         }
         foundChunkMapZ.put(z, chunk);
         this.chunkList.add(chunk);
+
+        setupSunlighting(chunk);
     }
 
     private IChunk loadChunk(int startX, int startZ) {
@@ -326,21 +326,10 @@ public class World implements IWorld {
             final IChunk c = new Chunk(this, new Vec3i(startX, 0, startZ), VoxelGameAPI.instance.getBiomeByID(0));
             VoxelGameAPI.instance.getEventManager().push(new EventFinishChunkGen(c));
             addChunk(c, startX, startZ);
-            addSun(c);
             return c;
         } else {
             return foundChunk;
         }
-    }
-
-    private void addSun(IChunk c) {
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int z = 0; z < CHUNK_SIZE; z++) {
-                c.setSunlight(x, WORLD_HEIGHT - 1, z, 16);
-                addToSunlightQueue(c.getStartPosition().x + x, WORLD_HEIGHT - 1, c.getStartPosition().z + z);
-            }
-        }
-        c.finishChangingSunlight();
     }
 
     public void addEntity(Entity e) {
@@ -699,6 +688,21 @@ public class World implements IWorld {
         modelBuilder.part("skybox", skybox, GL20.GL_TRIANGLES, new Material(
                 TextureAttribute.createDiffuse(skyboxTexture)));
         return new ModelInstance(skyboxModel = modelBuilder.end());
+    }
+
+    private void setupSunlighting(IChunk c) {
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                for(int y = WORLD_HEIGHT-1; y >= 0; y--) {
+                    if(c.getBlockId(x, y, z) > 0) {
+                        addToSunlightQueue(c.getStartPosition().x + x, y + 1, c.getStartPosition().z + z);
+                        break;
+                    }
+                    c.setSunlight(x, y, z, 16);
+                }
+            }
+        }
+        c.finishChangingSunlight();
     }
 
 }

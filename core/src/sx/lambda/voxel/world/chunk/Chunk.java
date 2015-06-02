@@ -78,8 +78,6 @@ public class Chunk implements IChunk {
         this.loadIdInts(ids);
 
         lightLevels = new float[size][height][size];
-
-        setupSunlighting();
     }
 
     public Chunk(IWorld world, Vec3i startPosition, Biome biome) {
@@ -108,8 +106,6 @@ public class Chunk implements IChunk {
         highestPoint = world.getChunkGen().generate(startPosition, blockList);
 
         lightLevels = new float[size][height][size];
-
-        setupSunlighting();
     }
 
     @Override
@@ -342,19 +338,9 @@ public class Chunk implements IChunk {
         for (int x = 0; x < ints.length; x++) {
             for (int z = 0; z < ints[0][0].length; z++) {
                 for (int y = 0; y < ints[0].length; y++) {
-                    if(ints[x][y][z] > 0)
+                    if (ints[x][y][z] > 0)
                         highestPoint = Math.max(y, highestPoint);
                 }
-            }
-        }
-    }
-
-    private void setupSunlighting() {
-        sunlightLevels = new int[size][height][size];
-        for (int x = 0; x < size; x++) {
-            for (int z = 0; z < size; z++) {
-                sunlightLevels[x][height - 1][z] = 16;
-                parentWorld.addToSunlightQueue(startPosition.x + x, height - 1, startPosition.z + z);
             }
         }
     }

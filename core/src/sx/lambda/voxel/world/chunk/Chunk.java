@@ -15,6 +15,7 @@ import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.api.events.render.EventChunkRender;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.NormalBlockRenderer;
+import sx.lambda.voxel.block.Side;
 import sx.lambda.voxel.client.render.meshing.GreedyMesher;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
@@ -203,77 +204,77 @@ public class Chunk implements IChunk {
     private void addNeighborsToSunlightQueue(int x, int y, int z) {// X Y and Z are relative coords, not world coords
         assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
+        int cx = x;
+        int cz = z;
         x += startPosition.x;
         z += startPosition.z;
-        int negX = x-1;
-        int posX = x+1;
-        int negZ = z-1;
-        int posZ = z+1;
-        int posY = y+1;
-        IChunk negXNeighborChunk = this;
-        IChunk posXNeighborChunk = this;
-        IChunk negZNeighborChunk = this;
-        IChunk posZNeighborChunk = this;
-        if(x % size == 0) {
-            negXNeighborChunk = parentWorld.getChunkAtPosition(negX, z);
-        } else if(Math.floorMod(x, size) == size-1) {
-            posXNeighborChunk = parentWorld.getChunkAtPosition(posX, z);
-        }
-        if(z % size == 0) {
-            negZNeighborChunk = parentWorld.getChunkAtPosition(x, negZ);
-        } else if(Math.floorMod(z, size) == size-1) {
-            posZNeighborChunk = parentWorld.getChunkAtPosition(x, posZ);
-        }
 
-        if (negXNeighborChunk != null) {
-            int negXSunlight = negXNeighborChunk.getSunlight(negX & (size-1), y, z & (size-1));
-            if (negXSunlight > 1) {
-                Block bl = negXNeighborChunk.getBlock(negX & (size-1), y, z & (size-1));
-                if (bl == null || bl.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(negX, y, z);
+        Side[] sides = Side.values();
+        for(Side s : sides) {
+            int sx = x; // Side x coord
+            int sy = y; // Side y coord
+            int sz = z; // Side z coord
+            int scx = cx; // Chunk-relative side x coord
+            int scz = cz; // Chunk-relative side z coord
+            IChunk sChunk = this;
+
+            // Offset values based on side
+            switch(s) {
+                case TOP:
+                    sy += 1;
+                    break;
+                case BOTTOM:
+                    sy -= 1;
+                    break;
+                case WEST:
+                    sx -= 1;
+                    scx -= 1;
+                    break;
+                case EAST:
+                    sx += 1;
+                    scx += 1;
+                    break;
+                case NORTH:
+                    sz += 1;
+                    scz += 1;
+                    break;
+                case SOUTH:
+                    sz -= 1;
+                    scz -= 1;
+                    break;
+            }
+            if(sy < 0)
+                continue;
+            if(sy > height-1)
+                continue;
+
+            // Select the correct chunk
+            if(scz < 0) {
+                scz += size;
+                sChunk = parentWorld.getChunkAtPosition(sx, sz);
+            } else if(scz > size-1) {
+                scz -= size;
+                sChunk = parentWorld.getChunkAtPosition(sx, sz);
+            }
+            if(scx < 0) {
+                scx += size;
+                sChunk = parentWorld.getChunkAtPosition(sx, sz);
+            } else if(scx > size-1) {
+                scx -= size;
+                sChunk = parentWorld.getChunkAtPosition(sx, sz);
+            }
+
+            if(sChunk == null)
+                continue;
+
+            int sSunlight = sChunk.getSunlight(scx, sy, scz);
+            if (sSunlight > 1) {
+                Block sBlock = sChunk.getBlock(scx, sy, scz);
+                if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
+                    parentWorld.addToSunlightQueue(sx, sy, sz);
                 }
             }
         }
-
-        if (posXNeighborChunk != null) {
-            int posXSunlight = posXNeighborChunk.getSunlight(posX & (size-1), y, z & (size-1));
-            if (posXSunlight > 1) {
-                Block bl = posXNeighborChunk.getBlock(posX & (size-1), y, z & (size-1));
-                if (bl == null || bl.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(posX, y, z);
-                }
-            }
-        }
-
-        if (negZNeighborChunk != null) {
-            int negZSunlight = negZNeighborChunk.getSunlight(x & (size-1), y, negZ & (size-1));
-            if (negZSunlight > 1) {
-                Block bl = negZNeighborChunk.getBlock(x & (size-1), y, negZ & (size-1));
-                if (bl == null || bl.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(x, y, negZ);
-                }
-            }
-        }
-
-        if (posZNeighborChunk != null) {
-            int posZSunlight = posZNeighborChunk.getSunlight(x & (size-1), y, posZ & (size-1));
-            if (posZSunlight > 1) {
-                Block bl = posZNeighborChunk.getBlock(x & (size-1), y, posZ & (size-1));
-                if (bl == null || bl.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(x, y, posZ);
-                }
-            }
-        }
-
-        if (y < height - 1) {
-            Block posYBlock = getBlock(x - startPosition.x, posY, z - startPosition.z);
-            if (getSunlight(x & (size-1), y + 1, z & (size-1)) > 1) {
-                if (posYBlock == null || posYBlock.isTranslucent()) {
-                    parentWorld.addToSunlightQueue(x, posY, z);
-                }
-            }
-        }
-
     }
 
     @Override

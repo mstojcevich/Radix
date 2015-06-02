@@ -379,7 +379,7 @@ public class World implements IWorld {
 
                     Side[] sides = Side.values();
 
-                    Queue<IChunk> changedChunks = new LinkedBlockingDeque<>();
+                    List<IChunk> changedChunks = new ArrayList<>();
                     int[] pos;
                     while ((pos = sunlightQueue.poll()) != null) {
                         int x = pos[0];
@@ -469,8 +469,7 @@ public class World implements IWorld {
                             }
                         }
                     }
-                    IChunk changedChunk;
-                    while ((changedChunk = changedChunks.poll()) != null) {
+                    for(IChunk changedChunk : changedChunks) {
                         changedChunk.finishChangingSunlight();
                     }
                     lightUpdaters--;

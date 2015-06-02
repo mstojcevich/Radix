@@ -43,7 +43,7 @@ public class World implements IWorld {
 
     private static final int SEA_LEVEL = 64;
 
-    private static final int LIGHTING_WORKERS = 4;
+    private static final int LIGHTING_WORKERS = 2;
 
     private final IntMap<IntMap<IChunk>> chunkMapX = new IntMap<>();
     private final Set<IChunk> chunkList = new ConcurrentSet<>();

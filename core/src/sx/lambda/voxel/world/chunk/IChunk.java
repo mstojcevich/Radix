@@ -115,16 +115,6 @@ public interface IChunk extends Serializable, Disposable {
     void setSunlight(int x, int y, int z, int level);
 
     /**
-     * Set the sunlight at the specified position
-     * @param x X value, relative to the chunk. 0->(chunk size - 1)
-     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
-     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
-     * @param level Value between 0 and 16 for sunlight
-     * @param updateNeighbors Whether to update neighboring chunks
-     */
-    void setSunlight(int x, int y, int z, int level, boolean updateNeighbors);
-
-    /**
      * Render the translucent parts of the chunk
      * @param batch Batch to render onto
      */

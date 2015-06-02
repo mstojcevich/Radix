@@ -360,11 +360,6 @@ public class Chunk implements IChunk {
 
     @Override
     public void setSunlight(int x, int y, int z, int level) {
-        setSunlight(x, y, z, level, true);
-    }
-
-    @Override
-    public void setSunlight(int x, int y, int z, int level, boolean updateNeighbors) {
         assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
         assert level >= 0 && level < 17;
 
@@ -373,37 +368,6 @@ public class Chunk implements IChunk {
 
         sunlightChanging = true;
         sunlightChanged = true;
-
-        if(updateNeighbors) {
-            if (x == 0) {
-                IChunk xMinNeighbor = getWorld().getChunkAtPosition(startPosition.x - 1, startPosition.z);
-                if (xMinNeighbor != null) {
-                    getWorld().rerenderChunk(xMinNeighbor);
-                }
-            }
-
-            if (x == size - 1) {
-                IChunk xPlNeighbor = getWorld().getChunkAtPosition(startPosition.x + 1, startPosition.z);
-                if (xPlNeighbor != null) {
-                    getWorld().rerenderChunk(xPlNeighbor);
-                }
-            }
-
-            if (z == 0) {
-                IChunk zMinNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z - 1);
-                if (zMinNeighbor != null) {
-                    getWorld().rerenderChunk(zMinNeighbor);
-                }
-            }
-
-            if (z == size - 1) {
-                IChunk zPlNeighbor = getWorld().getChunkAtPosition(startPosition.x, startPosition.z + 1);
-                if (zPlNeighbor != null) {
-                    getWorld().rerenderChunk(zPlNeighbor);
-                }
-            }
-        }
-
     }
 
     @Override

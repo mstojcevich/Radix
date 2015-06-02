@@ -4,7 +4,6 @@ import pw.oxcafebabe.marcusant.eventbus.EventManager;
 import pw.oxcafebabe.marcusant.eventbus.managers.iridium.IridiumEventManager;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.block.*;
-import sx.lambda.voxel.server.VoxelGameServer;
 import sx.lambda.voxel.world.biome.Biome;
 
 import java.util.ArrayList;
@@ -31,14 +30,7 @@ public class VoxelGameAPI {
     }
 
     /**
-     * @return Whether the current game is a server
-     */
-    public boolean isServer() {
-        return VoxelGameServer.instance != null;
-    }
-
-    /**
-     * @return Whether the current game is a client\
+     * @return Whether the current game is a client
      */
     public boolean isClient() {
         return VoxelGameClient.getInstance() != null;

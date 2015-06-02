@@ -8,30 +8,16 @@ class VisualSettings implements Serializable {
 
     /**
      * Distance, in chunks, to load the world
-     * Defaults to 2
+     * Defaults to 4
      */
     private int viewDistance = 4
     /**
-     * Whether to run the game in fullscreen
+     * Whether to draw internal leaves of trees
      */
-    private boolean fullscreen = false
-    private int maxFPS = VoxelGameClient.DEBUG ? 10 : 0 //Save my battery life pls
-    private int windowWidth = 640, windowHeight = 480
-    private boolean postProcess = false
-    private boolean peasantMode = false
+    private boolean fancyTrees = false
 
     public int getViewDistance() { viewDistance }
 
-    public int getMaxFPS() { maxFPS }
-
-    public boolean isFullscreen() { fullscreen }
-
-    public int getWindowWidth() { windowWidth }
-
-    public int getWindowHeight() { windowHeight }
-
-    public boolean isPostProcessEnabled() { return postProcess }
-
-    public boolean isPeasantModeEnabled() { peasantMode }
+    public boolean isFancyTreesEnabled() { fancyTrees }
 
 }

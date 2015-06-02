@@ -30,6 +30,7 @@ import org.spacehq.mc.protocol.packet.ingame.client.player.ClientSwingArmPacket;
 import pw.oxcafebabe.marcusant.eventbus.EventListener;
 import pw.oxcafebabe.marcusant.eventbus.Priority;
 import pw.oxcafebabe.marcusant.eventbus.exceptions.InvalidListenerException;
+import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.api.events.EventEarlyInit;
 import sx.lambda.voxel.api.events.EventWorldStart;
@@ -115,11 +116,16 @@ public class VoxelGameClient extends ApplicationAdapter {
     @Override
     public void create() {
         theGame = this;
+        settingsManager = new SettingsManager();
 
         this.android = Gdx.app.getType().equals(Application.ApplicationType.Android);
 
         try {
             VoxelGameAPI.instance.registerBuiltinBlocks();
+            if(!settingsManager.getVisualSettings().isFancyTreesEnabled()) {
+                VoxelGameAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_ID).setOccludeCovered(true);
+                VoxelGameAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_TWO_ID).setOccludeCovered(true);
+            }
         } catch (VoxelGameAPI.BlockRegistrationException e) {
             e.printStackTrace();
         }
@@ -131,7 +137,6 @@ public class VoxelGameClient extends ApplicationAdapter {
         }
         VoxelGameAPI.instance.getEventManager().push(new EventEarlyInit());
 
-        settingsManager = new SettingsManager();
         this.setupOGL();
 
         gameRenderer = new GameRenderer(this);

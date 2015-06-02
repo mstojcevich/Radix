@@ -6,7 +6,7 @@ public class Block {
 
     private int id;
     private final transient IBlockRenderer renderer;
-    private final boolean translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight;
+    private boolean translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight;
     private final String humanName;
     private final String[] textureLocations;
     private int textureIndex;
@@ -99,6 +99,48 @@ public class Block {
      */
     public boolean decreasesLight() {
         return this.decreaseLight;
+    }
+
+    /**
+     * Set whether you can select the block in the world
+     */
+    public void setSelectable(boolean selectable) {
+        this.selectable = selectable;
+    }
+
+    /**
+     * Set whether light should decrease when passing through this block to other blocks
+     */
+    public void setDecreaseLight(boolean decrease) {
+        this.decreaseLight = decrease;
+    }
+
+    /**
+     * Set whether light should always ignore this block
+     */
+    public void setLightPassthrough(boolean passthrough) {
+        this.lightPassthrough = passthrough;
+    }
+
+    /**
+     * Set whether the block can be walked through
+     */
+    public void setSolid(boolean solid) {
+        this.solid = solid;
+    }
+
+    /**
+     * Set whether to consider the block translucent and to render it after opaque blocks
+     */
+    public void setTranslucent(boolean translucent) {
+        this.translucent = translucent;
+    }
+
+    /**
+     * Set whether to occlude neighbors that the block is covering
+     */
+    public void setOccludeCovered(boolean occludeCovered) {
+        this.occludeCovered = occludeCovered;
     }
 
 }

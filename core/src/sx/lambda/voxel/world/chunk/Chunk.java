@@ -178,21 +178,20 @@ public class Chunk implements IChunk {
         }
     }
 
-    public Block getBlockAtPosition(Vec3i position) {
-        int y = position.y;
-        if (y > height - 1) return null;
-        if (y < 0) return null;
-
-        int x = Math.floorMod(position.x, size);
-        int z = Math.floorMod(position.z, size);
-
-        return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
-    }
-
     @Override
     public void removeBlock(int x, int y, int z) {
-        x = Math.floorMod(x, size);
-        z = Math.floorMod(z, size);
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+
+        if(x == size - 1) {
+            getWorld().rerenderChunk(getWorld().getChunkAtPosition(getStartPosition().x + size, getStartPosition().z));
+        } else if(x == 0) {
+            getWorld().rerenderChunk(getWorld().getChunkAtPosition(getStartPosition().x - size, getStartPosition().z));
+        }
+        if(z == size - 1) {
+            getWorld().rerenderChunk(getWorld().getChunkAtPosition(getStartPosition().x, getStartPosition().z + size));
+        } else if(z == 0) {
+            getWorld().rerenderChunk(getWorld().getChunkAtPosition(getStartPosition().x, getStartPosition().z - size));
+        }
 
         blockList[x][y][z] = -1;
 
@@ -202,6 +201,8 @@ public class Chunk implements IChunk {
     }
 
     private void addNeighborsToSunlightQueue(int x, int y, int z) {// X Y and Z are relative coords, not world coords
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+
         x += startPosition.x;
         z += startPosition.z;
         int negX = x-1;
@@ -225,9 +226,9 @@ public class Chunk implements IChunk {
         }
 
         if (negXNeighborChunk != null) {
-            int negXSunlight = negXNeighborChunk.getSunlight(negX, y, z);
+            int negXSunlight = negXNeighborChunk.getSunlight(negX & (size-1), y, z & (size-1));
             if (negXSunlight > 1) {
-                Block bl = negXNeighborChunk.getBlockAtPosition(negX, y, z);
+                Block bl = negXNeighborChunk.getBlock(negX & (size-1), y, z & (size-1));
                 if (bl == null || bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{negX, y, z});
                 }
@@ -235,9 +236,9 @@ public class Chunk implements IChunk {
         }
 
         if (posXNeighborChunk != null) {
-            int posXSunlight = posXNeighborChunk.getSunlight(posX, y, z);
+            int posXSunlight = posXNeighborChunk.getSunlight(posX & (size-1), y, z & (size-1));
             if (posXSunlight > 1) {
-                Block bl = posXNeighborChunk.getBlockAtPosition(posX, y, z);
+                Block bl = posXNeighborChunk.getBlock(posX & (size-1), y, z & (size-1));
                 if (bl == null || bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{posX, y, z});
                 }
@@ -245,9 +246,9 @@ public class Chunk implements IChunk {
         }
 
         if (negZNeighborChunk != null) {
-            int negZSunlight = negZNeighborChunk.getSunlight(x, y, negZ);
+            int negZSunlight = negZNeighborChunk.getSunlight(x & (size-1), y, negZ & (size-1));
             if (negZSunlight > 1) {
-                Block bl = negZNeighborChunk.getBlockAtPosition(x, y, negZ);
+                Block bl = negZNeighborChunk.getBlock(x & (size-1), y, negZ & (size-1));
                 if (bl == null || bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{x, y, negZ});
                 }
@@ -255,9 +256,9 @@ public class Chunk implements IChunk {
         }
 
         if (posZNeighborChunk != null) {
-            int posZSunlight = posZNeighborChunk.getSunlight(x, y, posZ);
+            int posZSunlight = posZNeighborChunk.getSunlight(x & (size-1), y, posZ & (size-1));
             if (posZSunlight > 1) {
-                Block bl = posZNeighborChunk.getBlockAtPosition(x, y, posZ);
+                Block bl = posZNeighborChunk.getBlock(x & (size-1), y, posZ & (size-1));
                 if (bl == null || bl.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{x, y, posZ});
                 }
@@ -265,8 +266,8 @@ public class Chunk implements IChunk {
         }
 
         if (y < height - 1) {
-            Block posYBlock = VoxelGameAPI.instance.getBlockByID(blockList[x - startPosition.x][posY][z - startPosition.z]);
-            if (getSunlight(x, y + 1, z) > 1) {
+            Block posYBlock = getBlock(x - startPosition.x, posY, z - startPosition.z);
+            if (getSunlight(x & (size-1), y + 1, z & (size-1)) > 1) {
                 if (posYBlock == null || posYBlock.isTranslucent()) {
                     parentWorld.addToSunlightQueue(new int[]{x, posY, z});
                 }
@@ -276,16 +277,18 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void addBlock(int block, int x, int y, int z) {
-        addBlock(block, x, y, z, true);
+    public void setBlock(int block, int x, int y, int z) {
+        setBlock(block, x, y, z, true);
     }
 
     @Override
-    public void addBlock(int block, int x, int y, int z, boolean updateSunlight) {
-        if (y > height - 1) return;
+    public void setBlock(int block, int x, int y, int z, boolean updateSunlight) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
-        x = Math.floorMod(x, size);
-        z = Math.floorMod(z, size);
+        if(block == 0) {
+            removeBlock(x, y, z);
+            return;
+        }
 
         blockList[x][y][z] = block;
         if (block > 0) {
@@ -298,20 +301,14 @@ public class Chunk implements IChunk {
 
     @Override
     public void setMeta(short meta, int x, int y, int z) {
-        if (y > height - 1) return;
-
-        x = Math.floorMod(x, size);
-        z = Math.floorMod(z, size);
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
         metadata[x][y][z] = meta;
     }
 
     @Override
     public short getMeta(int x, int y, int z) {
-        if (y > height - 1) return 0;
-
-        x = Math.floorMod(x, size);
-        z = Math.floorMod(z, size);
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
         return metadata[x][y][z];
     }
@@ -328,19 +325,13 @@ public class Chunk implements IChunk {
 
     @Override
     public float getLightLevel(int x, int y, int z) {
-        x = Math.floorMod(x, size);
-        z = Math.floorMod(z, size);
-
-        if (y > height - 1 || y < 0) {
-            return 1;
-        }
-
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
         return lightLevels[x][y][z];
     }
 
     @Override
-    public int[][][] blocksToIdInt() {
+    public int[][][] getBlockIds() {
         return blockList;
     }
 
@@ -374,8 +365,8 @@ public class Chunk implements IChunk {
 
     @Override
     public void setSunlight(int x, int y, int z, int level, boolean updateNeighbors) {
-        x = Math.floorMod(x, size);
-        z = Math.floorMod(z, size);
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+        assert level >= 0 && level < 17;
 
         sunlightLevels[x][y][z] = level;
         lightLevels[x][y][z] = lightLevelMap[level];
@@ -417,14 +408,9 @@ public class Chunk implements IChunk {
 
     @Override
     public int getSunlight(int x, int y, int z) {
-        x = Math.floorMod(x, size);
-        z = Math.floorMod(z, size);
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
-        if (y > height - 1 || y < 0) {
-            return -1;
-        }
-
-        return (sunlightLevels[x][y][z]);
+        return sunlightLevels[x][y][z];
     }
 
     @Override
@@ -438,7 +424,7 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void cleanup() {
+    public void dispose() {
         if(opaqueModel != null)
             opaqueModel.dispose();
         if(translucentModel != null)
@@ -446,22 +432,15 @@ public class Chunk implements IChunk {
         cleanedUp = true;
     }
 
-    public int getBlockIdAtPosition(int x, int y, int z) {
-        x = Math.floorMod(x, size);
-        z = Math.floorMod(z, size);
+    public int getBlockId(int x, int y, int z) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
-        if (y > height - 1) return 0;
-        if (y < 0) return 0;
         return blockList[x][y][z];
     }
 
     @Override
-    public Block getBlockAtPosition(int x, int y, int z) {
-        if (y > height - 1) return null;
-        if (y < 0) return null;
-
-        x = Math.floorMod(x, size);
-        z = Math.floorMod(z, size);
+    public Block getBlock(int x, int y, int z) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
         return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
     }

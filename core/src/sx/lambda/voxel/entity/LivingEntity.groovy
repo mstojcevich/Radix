@@ -64,7 +64,10 @@ public abstract class LivingEntity extends Entity implements Serializable {
     public int getBlockInFeet(IWorld world) {
         IChunk chunk = world.getChunkAtPosition(MathUtils.floor(position.x), MathUtils.floor(position.z))
         if (chunk != null) {
-            return chunk.getBlockIdAtPosition(MathUtils.floor(position.x), MathUtils.floor(position.y), MathUtils.floor(position.z))
+            return chunk.getBlockId(
+                    MathUtils.floor(position.x) & (world.getChunkSize()-1),
+                    MathUtils.floor(position.y),
+                    MathUtils.floor(position.z) & (world.getChunkSize()-1))
         } else {
             return 0
         }

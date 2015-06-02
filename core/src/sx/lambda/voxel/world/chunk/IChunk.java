@@ -1,6 +1,7 @@
 package sx.lambda.voxel.world.chunk;
 
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.utils.Disposable;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
@@ -8,7 +9,10 @@ import sx.lambda.voxel.world.biome.Biome;
 
 import java.io.Serializable;
 
-public interface IChunk extends Serializable {
+/**
+ * Broken-up piece of the world made up of blocks
+ */
+public interface IChunk extends Serializable, Disposable {
 
     /**
      * Redraws all of the blocks in the chunk
@@ -20,45 +24,129 @@ public interface IChunk extends Serializable {
      */
     void render(ModelBatch batch);
 
-    int getBlockIdAtPosition(int x, int y, int z);
+    int getBlockId(int x, int y, int z);
 
-    Block getBlockAtPosition(int x, int y, int z);
-    Block getBlockAtPosition(Vec3i position);
+    /**
+     * Get the block at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
+    Block getBlock(int x, int y, int z);
 
+    /**
+     * Remove the block at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
     void removeBlock(int x, int y, int z);
 
-    void addBlock(int block, int x, int y, int z);
+    /**
+     * Set the block at the specified position
+     * @param block New block to set to
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
+    void setBlock(int block, int x, int y, int z);
 
-    void addBlock(int block, int x, int y, int z, boolean updateSunlight);
+    /**
+     * Set the block at the specified position
+     * @param block New block to set to
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     * @param updateSunlight Whether to update sunlight values for the new block
+     */
+    void setBlock(int block, int x, int y, int z, boolean updateSunlight);
 
+    /**
+     * Set the metadata for the block at the specified position
+     * @param meta Metadata value to set to
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
     void setMeta(short meta, int x, int y, int z);
 
+    /**
+     * Get the metadata value at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
     short getMeta(int x, int y, int z);
 
+    /**
+     * Gets the starting position of the chunk
+     */
     Vec3i getStartPosition();
 
+    /**
+     * @return The y-value of the highest block in the chunk
+     */
     int getHighestPoint();
 
+    /**
+     * Gets the light value at the specified location
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
     float getLightLevel(int x, int y, int z);
 
+    /**
+     * Get sunlight at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     * @return Sunlight value, between 0 and 16
+     */
+    int getSunlight(int x, int y, int z);
+
+    /**
+     * Set the sunlight at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     * @param level Value between 0 and 16 for sunlight
+     */
+    void setSunlight(int x, int y, int z, int level);
+
+    /**
+     * Set the sunlight at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     * @param level Value between 0 and 16 for sunlight
+     * @param updateNeighbors Whether to update neighboring chunks
+     */
+    void setSunlight(int x, int y, int z, int level, boolean updateNeighbors);
+
+    /**
+     * Render the translucent parts of the chunk
+     * @param batch Batch to render onto
+     */
     void renderTranslucent(ModelBatch batch);
 
-    int[][][] blocksToIdInt();
+    int[][][] getBlockIds();
 
     void eachBlock(EachBlockCallee action);
 
-    void setSunlight(int x, int y, int z, int level);
-
-    void setSunlight(int x, int y, int z, int level, boolean updateNeighbors);
-
-    int getSunlight(int x, int y, int z);
-
+    /**
+     * Update the state of the chunk to represent changed sunlight
+     */
     void finishChangingSunlight();
 
+    /**
+     * Get the parent world of the chunk
+     */
     IWorld getWorld();
 
-    void cleanup();
-
+    /**
+     * Get the biome type of the chunk
+     */
     Biome getBiome();
 
     interface EachBlockCallee {

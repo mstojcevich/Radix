@@ -61,7 +61,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                             blockExists = true;
                         }
                         if(!blockExists)id = BuiltInBlockIds.UNKNOWN_ID;
-                        ck.addBlock(id, x, cy+y, z, false);
+                        ck.setBlock(id, x, cy + y, z, false);
                         if(meta > 0)
                             ck.setMeta(meta, x, cy+y, z);
                     }

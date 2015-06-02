@@ -183,7 +183,7 @@ class GameRenderer implements Renderer {
         IChunk playerChunk = game.world.getChunkAtPosition(playerX, playerZ)
         if (playerChunk != null) {
             String llStr = String.format("Light Level @ Feet: "
-                    + playerChunk.getSunlight(playerX, MathUtils.floor(game.player.position.y), playerZ))
+                    + playerChunk.getSunlight(playerX & (game.world.chunkSize-1), MathUtils.floor(game.player.position.y), playerZ & (game.world.chunkSize-1)))
             GlyphLayout llGl = lightlevelRender.setText(llStr, 0, 0)
             lightlevelRender.setPosition(Gdx.graphics.width - llGl.width, (float) (Gdx.graphics.height - currentHeight))
             currentHeight += debugTextRenderer.getLineHeight()

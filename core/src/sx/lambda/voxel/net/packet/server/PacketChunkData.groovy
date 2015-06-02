@@ -16,7 +16,7 @@ class PacketChunkData implements ServerPacket {
     private final int x, y, z
 
     public PacketChunkData(IChunk chunk) {
-        this.ids = chunk.blocksToIdInt()
+        this.ids = chunk.getBlockIds()
         Vec3i chunkStartPosition = chunk.getStartPosition()
         this.x = chunkStartPosition.x
         this.y = chunkStartPosition.y

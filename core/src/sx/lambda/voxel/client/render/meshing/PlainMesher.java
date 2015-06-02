@@ -119,7 +119,7 @@ public class PlainMesher implements Mesher {
                             Vec3i askWorld = new Vec3i(chunk.getStartPosition().x, y, chunk.getStartPosition().z + length);
                             IChunk adjChunk = world.getChunkAtPosition(askWorld);
                             if (adjChunk != null) {
-                                Block adjBlock = adjChunk.getBlockAtPosition(adjPos);
+                                Block adjBlock = adjChunk.getBlock(adjPos);
                                 if (adjBlock != null) {
                                     if (!adjBlock.isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                         shouldRenderTop[x][y][z] = false;
@@ -142,7 +142,7 @@ public class PlainMesher implements Mesher {
                             Vec3i askWorld = new Vec3i(chunk.getStartPosition().x - 1, y, chunk.getStartPosition().z);
                             IChunk adjChunk = world.getChunkAtPosition(askWorld);
                             if (adjChunk != null) {
-                                Block adjBlock = adjChunk.getBlockAtPosition(adjPos);
+                                Block adjBlock = adjChunk.getBlock(adjPos);
                                 if (adjBlock != null) {
                                     if (!adjBlock.isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                         shouldRenderLeft[x][y][z] = false;
@@ -165,7 +165,7 @@ public class PlainMesher implements Mesher {
                             Vec3i askWorld = new Vec3i(chunk.getStartPosition().x + width, y, chunk.getStartPosition().z);
                             IChunk adjChunk = world.getChunkAtPosition(askWorld);
                             if (adjChunk != null) {
-                                Block adjBlock = adjChunk.getBlockAtPosition(adjPos);
+                                Block adjBlock = adjChunk.getBlock(adjPos);
                                 if (adjBlock != null) {
                                     if (!adjBlock.isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                         shouldRenderRight[x][y][z] = false;
@@ -210,7 +210,7 @@ public class PlainMesher implements Mesher {
                             Vec3i askWorld = new Vec3i(chunk.getStartPosition().x, y, chunk.getStartPosition().z - 1);
                             IChunk adjChunk = world.getChunkAtPosition(askWorld);
                             if (adjChunk != null) {
-                                Block adjBlock = adjChunk.getBlockAtPosition(adjPos);
+                                Block adjBlock = adjChunk.getBlock(adjPos);
                                 if (adjBlock != null) {
                                     if (!adjBlock.isTranslucent() || blockList[x][y][z].isTranslucent()) {
                                         shouldRenderBottom[x][y][z] = false;

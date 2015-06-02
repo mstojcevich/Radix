@@ -59,7 +59,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                                     if(!blockExists) {
                                         id = BuiltInBlockIds.UNKNOWN_ID;
                                     }
-                                    ck.addBlock(id, x, cy+y, z, false);
+                                    ck.setBlock(id, x, cy + y, z, false);
                                     if(meta > 0)
                                         ck.setMeta(meta, x, cy+y, z);
                                 }

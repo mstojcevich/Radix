@@ -239,7 +239,7 @@ public class World implements IWorld {
 
     @Override
     public int getChunkPosition(float value) {
-        int subtraction = Math.floorMod(MathUtils.floor(value), CHUNK_SIZE);
+        int subtraction = MathUtils.floor(value) & (CHUNK_SIZE-1);
         return MathUtils.floor(value - subtraction);
     }
 
@@ -259,20 +259,10 @@ public class World implements IWorld {
         synchronized (this) {
             final IChunk c = this.getChunkAtPosition(x, z);
             if (c != null) {
+                x &= getChunkSize()-1;
+                y &= getChunkSize()-1;
                 c.removeBlock(x, y, z);
-                if (!server) {
-                    if (Math.floorMod(x, CHUNK_SIZE) == CHUNK_SIZE-1) {
-                        rerenderChunk(getChunkAtPosition(x + 1, z));
-                    } else if (x % CHUNK_SIZE == 0) {
-                        rerenderChunk(getChunkAtPosition(x - 1, z));
-                    }
-
-                    if (Math.floorMod(z, CHUNK_SIZE) == CHUNK_SIZE-1) {
-                        rerenderChunk(getChunkAtPosition(x, z + 1));
-                    } else if (z % CHUNK_SIZE == 0) {
-                        rerenderChunk(getChunkAtPosition(x, z - 1));
-                    }
-                }
+                c.setMeta((short) 0, x, y, z);
             }
         }
     }
@@ -282,7 +272,7 @@ public class World implements IWorld {
         synchronized (this) {
             final IChunk c = this.getChunkAtPosition(x, z);
             if(c != null)
-                c.addBlock(block, x, y, z);
+                c.setBlock(block, x & (getChunkSize() - 1), y, z * (getChunkSize() - 1));
         }
     }
 
@@ -400,13 +390,15 @@ public class World implements IWorld {
                     int[] pos;
                     while ((pos = sunlightQueue.poll()) != null) {
                         int x = pos[0];
+                        int cx = x & (CHUNK_SIZE-1);
                         int y = pos[1];
                         int z = pos[2];
+                        int cz = z & (CHUNK_SIZE-1);
                         IChunk posChunk = getChunkAtPosition(x, z);
                         if (posChunk == null) {
                             continue;
                         }
-                        int ll = posChunk.getSunlight(x, y, z);
+                        int ll = posChunk.getSunlight(cx, y, cz);
                         int nextLL = ll - 1;
 
                         int negX = x - 1;
@@ -417,52 +409,52 @@ public class World implements IWorld {
                         IChunk posXNeighborChunk = posChunk;
                         IChunk negZNeighborChunk = posChunk;
                         IChunk posZNeighborChunk = posChunk;
-                        if(x % CHUNK_SIZE == 0) {
+                        if(cx == 0) {
                             negXNeighborChunk = getChunkAtPosition(negX, z);
-                        } else if(Math.floorMod(x, CHUNK_SIZE) == CHUNK_SIZE-1) {
+                        } else if(cx == CHUNK_SIZE-1) {
                             posXNeighborChunk = getChunkAtPosition(posX, z);
                         }
-                        if(z % CHUNK_SIZE == 0) {
+                        if(cz == 0) {
                             negZNeighborChunk = getChunkAtPosition(x, negZ);
-                        } else if(Math.floorMod(z, CHUNK_SIZE) == CHUNK_SIZE-1) {
+                        } else if(cz == CHUNK_SIZE-1) {
                             posZNeighborChunk = getChunkAtPosition(x, posZ);
                         }
 
                         if (negXNeighborChunk != null) {
-                            Block bl = negXNeighborChunk.getBlockAtPosition(negX, y, z);
+                            Block bl = negXNeighborChunk.getBlock(negX & (CHUNK_SIZE - 1), y, cz);
                             if (bl == null || bl.doesLightPassThrough()) {
-                                if (negXNeighborChunk.getSunlight(negX, y, z) < nextLL) {
-                                    negXNeighborChunk.setSunlight(negX, y, z, nextLL);
-                                    sunlightQueue.add(new int[]{negX, y, z});
+                                if (negXNeighborChunk.getSunlight(negX & (CHUNK_SIZE-1), y, cz) < nextLL) {
+                                    negXNeighborChunk.setSunlight(negX & (CHUNK_SIZE-1), y, cz, nextLL);
+                                    sunlightQueue.add(new int[]{negX, y, cz});
                                     changedChunks.add(negXNeighborChunk);
                                 }
                             }
                         }
                         if (posXNeighborChunk != null) {
-                            Block bl = posXNeighborChunk.getBlockAtPosition(posX, y, z);
+                            Block bl = posXNeighborChunk.getBlock(posX & (CHUNK_SIZE - 1), y, cz);
                             if (bl == null || bl.doesLightPassThrough()) {
-                                if (posXNeighborChunk.getSunlight(posX, y, z) < nextLL) {
-                                    posXNeighborChunk.setSunlight(posX, y, z, nextLL);
+                                if (posXNeighborChunk.getSunlight(posX & (CHUNK_SIZE-1), y, cz) < nextLL) {
+                                    posXNeighborChunk.setSunlight(posX & (CHUNK_SIZE-1), y, cz, nextLL);
                                     sunlightQueue.add(new int[]{posX, y, z});
                                     changedChunks.add(posXNeighborChunk);
                                 }
                             }
                         }
                         if (negZNeighborChunk != null) {
-                            Block bl = negZNeighborChunk.getBlockAtPosition(x, y, negZ);
+                            Block bl = negZNeighborChunk.getBlock(cx, y, negZ & (CHUNK_SIZE - 1));
                             if (bl == null || bl.doesLightPassThrough()) {
-                                if (negZNeighborChunk.getSunlight(x, y, negZ) < nextLL) {
-                                    negZNeighborChunk.setSunlight(x, y, negZ, nextLL);
+                                if (negZNeighborChunk.getSunlight(cx, y, negZ & (CHUNK_SIZE-1)) < nextLL) {
+                                    negZNeighborChunk.setSunlight(cx, y, negZ & (CHUNK_SIZE-1), nextLL);
                                     sunlightQueue.add(new int[]{x, y, negZ});
                                     changedChunks.add(negZNeighborChunk);
                                 }
                             }
                         }
                         if (posZNeighborChunk != null) {
-                            Block bl = posZNeighborChunk.getBlockAtPosition(x, y, posZ);
+                            Block bl = posZNeighborChunk.getBlock(cx, y, posZ & (CHUNK_SIZE - 1));
                             if (bl == null || bl.doesLightPassThrough()) {
-                                if (posZNeighborChunk.getSunlight(x, y, posZ) < nextLL) {
-                                    posZNeighborChunk.setSunlight(x, y, posZ, nextLL);
+                                if (posZNeighborChunk.getSunlight(cx, y, posZ & (CHUNK_SIZE-1)) < nextLL) {
+                                    posZNeighborChunk.setSunlight(cx, y, posZ & (CHUNK_SIZE-1), nextLL);
                                     sunlightQueue.add(new int[]{x, y, posZ});
                                     changedChunks.add(posZNeighborChunk);
                                 }
@@ -471,10 +463,10 @@ public class World implements IWorld {
 
                         if (y < WORLD_HEIGHT - 2) {
                             int posY = y + 1;
-                            Block posYBlock = posChunk.getBlockAtPosition(x, posY, z);
+                            Block posYBlock = posChunk.getBlock(cx, posY, cz);
                             if (posYBlock == null || posYBlock.doesLightPassThrough()) {
-                                if (nextLL > posChunk.getSunlight(x, posY, z)) {
-                                    posChunk.setSunlight(x, posY, z, nextLL);
+                                if (nextLL > posChunk.getSunlight(cx, posY, cz)) {
+                                    posChunk.setSunlight(cx, posY, cz, nextLL);
                                     sunlightQueue.add(new int[]{x, posY, z});
                                     changedChunks.add(posChunk);
                                 }
@@ -483,13 +475,13 @@ public class World implements IWorld {
 
                         if (y > 0) {
                             int negY = y - 1;
-                            Block bl = posChunk.getBlockAtPosition(x, y, z);
-                            Block negYBlock = posChunk.getBlockAtPosition(x, negY, z);
+                            Block bl = posChunk.getBlock(cx, y, cz);
+                            Block negYBlock = posChunk.getBlock(cx, negY, cz);
                             if (negYBlock == null || negYBlock.doesLightPassThrough() ||
                                     !negYBlock.decreasesLight()) {
                                 boolean maxLL = ll == 16 && (bl == null || bl.decreasesLight());
-                                if (posChunk.getSunlight(x, negY, z) < (maxLL ? 16 : nextLL)) {
-                                    posChunk.setSunlight(x, negY, z, (maxLL ? 16 : nextLL));
+                                if (posChunk.getSunlight(cx, negY, cz) < (maxLL ? 16 : nextLL)) {
+                                    posChunk.setSunlight(cx, negY, cz, (maxLL ? 16 : nextLL));
                                     sunlightQueue.add(new int[]{x, negY, z});
                                     changedChunks.add(posChunk);
                                 }
@@ -518,7 +510,7 @@ public class World implements IWorld {
                 if (posChunk == null) {
                     continue;
                 }
-                int ll = posChunk.getSunlight(x, y, z);
+                int ll = posChunk.getSunlight(x & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
 
                 int negX = x - 1;
                 int posX = x + 1;
@@ -530,8 +522,8 @@ public class World implements IWorld {
                 IChunk posZNeighborChunk = getChunkAtPosition(x, posZ);
 
                 if (negXNeighborChunk != null) {
-                    Block bl = negXNeighborChunk.getBlockAtPosition(negX, y, z);
-                    int bll = negXNeighborChunk.getSunlight(negX, y, z);
+                    Block bl = negXNeighborChunk.getBlock(negX & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
+                    int bll = negXNeighborChunk.getSunlight(negX & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
                     if (bll < ll && bll != 0) {
                         if (bl == null || bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{negX, y, z});
@@ -543,8 +535,8 @@ public class World implements IWorld {
                     }
                 }
                 if (posXNeighborChunk != null) {
-                    Block bl = posXNeighborChunk.getBlockAtPosition(posX, y, z);
-                    int bll = posXNeighborChunk.getSunlight(posX, y, z);
+                    Block bl = posXNeighborChunk.getBlock(posX & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
+                    int bll = posXNeighborChunk.getSunlight(posX & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
                     if (bll < ll && bll != 0) {
                         if (bl == null || bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{posX, y, z});
@@ -556,8 +548,8 @@ public class World implements IWorld {
                     }
                 }
                 if (negZNeighborChunk != null) {
-                    Block bl = negZNeighborChunk.getBlockAtPosition(x, y, negZ);
-                    int bll = negZNeighborChunk.getSunlight(x, y, negZ);
+                    Block bl = negZNeighborChunk.getBlock(x & (CHUNK_SIZE-1), y, negZ & (CHUNK_SIZE-1));
+                    int bll = negZNeighborChunk.getSunlight(x & (CHUNK_SIZE-1), y, negZ & (CHUNK_SIZE-1));
                     if (bll < ll && bll != 0) {
                         if (bl == null || bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{x, y, negZ});
@@ -569,8 +561,8 @@ public class World implements IWorld {
                     }
                 }
                 if (posZNeighborChunk != null) {
-                    Block bl = posZNeighborChunk.getBlockAtPosition(x, y, posZ);
-                    int bll = posZNeighborChunk.getSunlight(x, y, posZ);
+                    Block bl = posZNeighborChunk.getBlock(x & (CHUNK_SIZE-1), y, posZ & (CHUNK_SIZE-1));
+                    int bll = posZNeighborChunk.getSunlight(x & (CHUNK_SIZE-1), y, posZ & (CHUNK_SIZE-1));
                     if (bll < ll && bll != 0) {
                         if (bl == null || bl.doesLightPassThrough()) {
                             sunlightRemovalQueue.add(new int[]{x, y, posZ});
@@ -584,15 +576,15 @@ public class World implements IWorld {
 
                 if (y > 0) {
                     int negY = y - 1;
-                    Block negYBlock = posChunk.getBlockAtPosition(x, negY, z);
+                    Block negYBlock = posChunk.getBlock(x & (CHUNK_SIZE-1), negY, z & (CHUNK_SIZE-1));
                     if (negYBlock == null || negYBlock.doesLightPassThrough()) {
-                        if (posChunk.getSunlight(x, negY, z) != 0) {
+                        if (posChunk.getSunlight(x & (CHUNK_SIZE-1), negY, z & (CHUNK_SIZE-1)) != 0) {
                             sunlightRemovalQueue.add(new int[]{x, negY, z});
                         }
                     }
                 }
 
-                posChunk.setSunlight(x, y, z, 0);
+                posChunk.setSunlight(x & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1), 0);
                 changedChunks.add(posChunk);
             }
             IChunk changedChunk;
@@ -608,13 +600,13 @@ public class World implements IWorld {
         if (chunk == null) {
             return 1;
         }
-        return chunk.getLightLevel(pos.x, pos.y, pos.z);
+        return chunk.getLightLevel(pos.x & (CHUNK_SIZE-1), pos.y, pos.z & (CHUNK_SIZE-1));
     }
 
     @Override
     public void cleanup() {
         for (IChunk c : chunkList) {
-            c.cleanup();
+            c.dispose();
         }
         modelBatch.dispose();
         modelBatch = null;

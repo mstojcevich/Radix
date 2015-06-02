@@ -92,11 +92,11 @@ public class GreedyMesher implements Mesher {
                     IChunk westNeighborChunk = chunk.getWorld().getChunkAtPosition(westNeighborX, chunk.getStartPosition().z + z);
                     if (westNeighborChunk != null) {
                         Block westNeighborBlk = VoxelGameAPI.instance.getBlockByID(
-                                westNeighborChunk.getBlockIdAtPosition(westNeighborX, y, z));
+                                westNeighborChunk.getBlockId(westNeighborX & (voxels.length - 1), y, z));
                         if (!ocCond.shouldOcclude(curBlock, westNeighborBlk)) {
                             westBlocks[z][y] = curBlock.getID();
                             westMeta[z][y] = metadata[x][y][z];
-                            westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX, y, z);
+                            westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX & (voxels.length-1), y, z);
                         }
                     } else {
                         westLightLevels[z][y] = 1;
@@ -107,11 +107,11 @@ public class GreedyMesher implements Mesher {
                     IChunk eastNeighborChunk = chunk.getWorld().getChunkAtPosition(eastNeighborX, chunk.getStartPosition().z + z);
                     if (eastNeighborChunk != null) {
                         Block eastNeighborBlk = VoxelGameAPI.instance.getBlockByID(
-                                eastNeighborChunk.getBlockIdAtPosition(eastNeighborX, y, z));
+                                eastNeighborChunk.getBlockId(eastNeighborX & (voxels.length - 1), y, z));
                         if (!ocCond.shouldOcclude(curBlock, eastNeighborBlk)) {
                             eastBlocks[z][y] = curBlock.getID();
                             eastMeta[z][y] = metadata[x][y][z];
-                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX, y, z);
+                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX & (voxels.length-1), y, z);
                         }
                     } else {
                         eastLightLevels[z][y] = 1;
@@ -143,11 +143,11 @@ public class GreedyMesher implements Mesher {
 
                     if (northNeighborChunk != null) {
                         Block northNeighborBlock = VoxelGameAPI.instance.getBlockByID(
-                                northNeighborChunk.getBlockIdAtPosition(x, y, northNeighborZ));
+                                northNeighborChunk.getBlockId(x, y, northNeighborZ & (voxels[0][0].length-1)));
                         if (!ocCond.shouldOcclude(curBlock, northNeighborBlock)) {
                             northBlocks[x][y] = curBlock.getID();
                             northMeta[x][y] = metadata[x][y][z];
-                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ);
+                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ & (voxels[0][0].length-1));
                         }
                     } else {
                         northLightLevels[x][y] = 1;
@@ -156,11 +156,11 @@ public class GreedyMesher implements Mesher {
 
                     if (southNeighborChunk != null) {
                         Block southNeighborBlock = VoxelGameAPI.instance.getBlockByID(
-                                southNeighborChunk.getBlockIdAtPosition(x, y, southNeighborZ));
+                                southNeighborChunk.getBlockId(x, y, southNeighborZ & (voxels[0][0].length-1)));
                         if (!ocCond.shouldOcclude(curBlock, southNeighborBlock)) {
                             southBlocks[x][y] = curBlock.getID();
                             southMeta[x][y] = metadata[x][y][z];
-                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ);
+                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ & (voxels[0][0].length-1));
                         }
                     } else {
                         southLightLevels[x][y] = 1;

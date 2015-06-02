@@ -17,17 +17,19 @@ public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket
         int x = packet.getRecord().getPosition().getX();
         int y = packet.getRecord().getPosition().getY();
         int z = packet.getRecord().getPosition().getZ();
+        int chunkRelativeX = x & (game.getWorld().getChunkSize()-1);
+        int chunkRelativeZ = z & (game.getWorld().getChunkSize()-1);
         int block = packet.getRecord().getBlock();
         int id = block >> 4;
         int meta = block & 15;
         IChunk chunk = game.getWorld().getChunkAtPosition(x, z);
         if(chunk != null) {
             if (id > 0) {
-                chunk.addBlock(id, x, y, z);
-                chunk.setMeta((short) meta, x, y, z);
+                chunk.setBlock(id, chunkRelativeX, y, chunkRelativeZ);
+                chunk.setMeta((short) meta, chunkRelativeX, y, chunkRelativeZ);
             } else {
-                chunk.removeBlock(x, y, z);
-                chunk.setMeta((short) 0, x, y, z);
+                chunk.removeBlock(chunkRelativeX, y, chunkRelativeZ);
+                chunk.setMeta((short) 0, chunkRelativeX, y, chunkRelativeZ);
             }
         }
     }

@@ -43,6 +43,8 @@ public class World implements IWorld {
 
     private static final int SEA_LEVEL = 64;
 
+    private static final int LIGHTING_WORKERS = 4;
+
     private final IntMap<IntMap<IChunk>> chunkMapX = new IntMap<>();
     private final Set<IChunk> chunkList = new ConcurrentSet<>();
     private List<IChunk> sortedChunkList;
@@ -144,7 +146,7 @@ public class World implements IWorld {
             skybox = createSkybox();
         }
 
-        if (lightUpdaters < 2 && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
+        if (lightUpdaters < LIGHTING_WORKERS && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
             processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
         }
         for (IChunk c : chunksToRerender) {
@@ -377,7 +379,7 @@ public class World implements IWorld {
         if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty())
             return;
         shouldUpdateLight = true;
-        if (lightUpdaters < 2) {
+        while (lightUpdaters < LIGHTING_WORKERS) {
             lightUpdaters++;
             new Thread("Light update") {
                 @Override

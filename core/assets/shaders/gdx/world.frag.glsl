@@ -173,6 +173,7 @@ void main() {
 	#endif // normalFlag
 
     #if defined(diffuseTextureFlag)
+    #if defined(normalFlag)
     vec3 texGetNormal = -abs(normal);
 	float texIndex = v_rawUV.x*100.0;
     vec2 uvMult = fract(vec2(dot(texGetNormal.zxy, v_position),
@@ -184,6 +185,7 @@ void main() {
     } else {
     	v_diffuseUV = uvStart+vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
     }
+    #endif
 	#endif
 
 	#if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)

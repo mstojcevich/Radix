@@ -1,7 +1,18 @@
 package sx.lambda.voxel.world;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.IntMap;
 import io.netty.util.internal.ConcurrentSet;
@@ -53,6 +64,9 @@ public class World implements IWorld {
     private Queue<int[]> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
 
     private ModelBatch modelBatch;
+    private ModelInstance skybox;
+    private Model skyboxModel;
+    private Texture skyboxTexture;
 
     private boolean shouldUpdateLight;
 
@@ -125,6 +139,9 @@ public class World implements IWorld {
         if (modelBatch == null) {
             modelBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
         }
+        if(skybox == null) {
+            skybox = createSkybox();
+        }
 
         if (lightUpdaters < 2 && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
             processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
@@ -166,6 +183,12 @@ public class World implements IWorld {
         if(sortedChunkList != null) {
             long renderStartNS = System.nanoTime();
             modelBatch.begin(VoxelGameClient.getInstance().getCamera());
+            float playerX = VoxelGameClient.getInstance().getPlayer().getPosition().getX(),
+                    playerY = VoxelGameClient.getInstance().getPlayer().getPosition().getY(),
+                    playerZ = VoxelGameClient.getInstance().getPlayer().getPosition().getZ();
+            skybox.transform.translate(playerX, playerY, playerZ);
+            modelBatch.render(skybox);
+            skybox.transform.translate(-playerX, -playerY, -playerZ);
             if(VoxelGameClient.getInstance().isWireframe())
                 Gdx.gl.glLineWidth(5);
             boolean[] chunkVisible = new boolean[sortedChunkList.size()];
@@ -595,6 +618,10 @@ public class World implements IWorld {
         }
         modelBatch.dispose();
         modelBatch = null;
+        skyboxTexture.dispose();
+        skyboxTexture = null;
+        skyboxModel.dispose();
+        skyboxModel = null;
     }
 
     @Override
@@ -624,6 +651,70 @@ public class World implements IWorld {
         if(chunk == null)return;
         removeChunkFromMap(chunk.getStartPosition());
         this.chunkList.remove(chunk);
+    }
+
+    private ModelInstance createSkybox() {
+        if(skyboxModel != null) {
+            skyboxModel.dispose();
+        }
+        if(skyboxTexture == null) {
+            skyboxTexture = new Texture(Gdx.files.internal("textures/world/skybox.png"));
+        }
+
+        MeshBuilder builder = new MeshBuilder();
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates, GL20.GL_TRIANGLES);
+
+        int x1 = -256;
+        int y1 = -256;
+        int z1 = -256;
+        int x2 = 256;
+        int y2 = 256;
+        int z2 = 256;
+        float sideU1 = 0;
+        float sideU2 = 1/3f;
+        float sideV1 = 0;
+        float sideV2 = 1;
+        float topU1 = sideU2;
+        float topU2 = topU1+sideU2;
+        float bottomU1 = topU2+sideU2;
+        float bottomU2 = bottomU1+sideU2;
+        float topV1 = 0;
+        float topV2 = 1;
+        float bottomV1 = 0;
+        float bottomV2 = 1;
+        MeshPartBuilder.VertexInfo bottomLeftBack = new MeshPartBuilder.VertexInfo().setPos(x1, y1, z1).setUV(sideU1, sideV2);
+        MeshPartBuilder.VertexInfo bottomRightBack = new MeshPartBuilder.VertexInfo().setPos(x2, y1, z1).setUV(sideU2, sideV2);
+        MeshPartBuilder.VertexInfo bottomRightFront = new MeshPartBuilder.VertexInfo().setPos(x2, y1, z2).setUV(sideU1, sideV2);
+        MeshPartBuilder.VertexInfo bottomLeftFront = new MeshPartBuilder.VertexInfo().setPos(x1, y1, z2).setUV(sideU2, sideV2);
+        MeshPartBuilder.VertexInfo topLeftBack = new MeshPartBuilder.VertexInfo().setPos(x1, y2, z1).setUV(sideU1, sideV1);
+        MeshPartBuilder.VertexInfo topRightBack = new MeshPartBuilder.VertexInfo().setPos(x2, y2, z1).setUV(sideU2, sideV1);
+        MeshPartBuilder.VertexInfo topRightFront = new MeshPartBuilder.VertexInfo().setPos(x2, y2, z2).setUV(sideU1, sideV1);
+        MeshPartBuilder.VertexInfo topLeftFront = new MeshPartBuilder.VertexInfo().setPos(x1, y2, z2).setUV(sideU2, sideV1);
+        // Negative Z
+        builder.rect(bottomLeftBack, bottomRightBack, topRightBack, topLeftBack);
+        // Positive Z
+        builder.rect(topLeftFront, topRightFront, bottomRightFront, bottomLeftFront);
+        // Negative X
+        builder.rect(bottomLeftBack, topLeftBack, topLeftFront, bottomLeftFront);
+        // Positive X
+        builder.rect(bottomRightFront, topRightFront, topRightBack, bottomRightBack);
+        // Positive Y
+        builder.rect(topLeftBack.setUV(topU1, topV1),
+                topRightBack.setUV(topU2, topV1),
+                topRightFront.setUV(topU2, topV2),
+                topLeftFront.setUV(topU1, topV2));
+        // Negative Y
+        builder.rect(bottomLeftFront.setUV(bottomU1, bottomV2),
+                bottomRightFront.setUV(bottomU2, bottomV2),
+                bottomRightBack.setUV(bottomU2, bottomV1),
+                bottomLeftBack.setUV(bottomU1, bottomV1));
+        Mesh skybox = builder.end();
+
+        ModelBuilder modelBuilder = new ModelBuilder();
+        modelBuilder.begin();
+        modelBuilder.part("skybox", skybox, GL20.GL_TRIANGLES, new Material(
+                TextureAttribute.createDiffuse(skyboxTexture)));
+        return new ModelInstance(skyboxModel = modelBuilder.end());
     }
 
 }

@@ -222,7 +222,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         camera.position.set(10f, 150f, 10f);
         camera.lookAt(0, 0, 0);
         camera.near = 0.1f;
-        camera.far = 300f;
+        camera.far = 500f;
         camera.update();
         hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 

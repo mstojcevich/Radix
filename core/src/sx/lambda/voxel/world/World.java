@@ -386,6 +386,8 @@ public class World implements IWorld {
 
                     processLightRemovalQueue();
 
+                    Side[] sides = Side.values();
+
                     Queue<IChunk> changedChunks = new LinkedBlockingDeque<>();
                     int[] pos;
                     while ((pos = sunlightQueue.poll()) != null) {
@@ -401,7 +403,7 @@ public class World implements IWorld {
                         int ll = posChunk.getSunlight(cx, y, cz);
 
                         // Spread off to each side
-                        for(Side s : Side.values()) {
+                        for(Side s : sides) {
                             int nextLL = ll - 1; // Decayed light level for the spread
                             int sx = x; // Side x coord
                             int sy = y; // Side y coord

@@ -5,15 +5,14 @@ import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.world.biome.Biome;
 
 /**
- * Renderer for biome-colored foliage (full-block, not x-shaped).
- * Usually used for leaves.
+ * Renderer for tall grass
  */
-public class ColoredFoliageRenderer extends NormalBlockRenderer {
+public class TallGrassRenderer extends FlatFoliageRenderer {
 
     @Override
     protected Color getColor(int x, int y, int z, float lightLevel) {
         Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition(x, z).getBiome();
-        int[] color = biome.getFoliageColor(y);
+        int[] color = biome.getGrassColor(y);
         float r = color[0]/255f;
         float g = color[1]/255f;
         float b = color[2]/255f;

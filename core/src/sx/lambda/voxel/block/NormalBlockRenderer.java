@@ -1,5 +1,6 @@
 package sx.lambda.voxel.block;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
@@ -34,7 +35,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
     @Override
     public void renderNorth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         // POSITIVE Z
-        builder.setColor(lightLevel, lightLevel, lightLevel, 1);
+        builder.setColor(getColor((int)x1, (int)y1, (int)z, lightLevel));
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x1, y1, z,
                 x2, y1, z,
@@ -46,7 +47,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
     @Override
     public void renderSouth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Z
-        builder.setColor(lightLevel, lightLevel, lightLevel, 1);
+        builder.setColor(getColor((int)x1, (int)y1, (int)z, lightLevel));
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x1, y2, z,
                 x2, y2, z,
@@ -58,7 +59,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
     @Override
     public void renderWest(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         // NEGATIVE X
-        builder.setColor(lightLevel, lightLevel, lightLevel, 1);
+        builder.setColor(getColor((int)x, (int)y1, (int)z1, lightLevel));
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x, y1, z2,
                 x, y2, z2,
@@ -70,7 +71,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
     @Override
     public void renderEast(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         // POSITIVE X
-        builder.setColor(lightLevel, lightLevel, lightLevel, 1);
+        builder.setColor(getColor((int)x, (int)y1, (int)z1, lightLevel));
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x, y1, z1,
                 x, y2, z1,
@@ -82,7 +83,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
     @Override
     public void renderTop(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, MeshBuilder builder) {
         // POSITIVE Y
-        builder.setColor(lightLevel, lightLevel, lightLevel, 1);
+        builder.setColor(getColor((int)x1, (int)y-1, (int)z1, lightLevel));
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x1, y, z2,
                 x2, y, z2,
@@ -92,15 +93,19 @@ public class NormalBlockRenderer implements IBlockRenderer {
     }
 
     @Override
-    public void renderBottom(int atlasIndex, int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
+    public void renderBottom(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Y
-        builder.setColor(lightLevel, lightLevel, lightLevel, 1);
+        builder.setColor(getColor((int)x1, (int)y, (int)z1, lightLevel));
         builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
         builder.rect(x1, y, z1,
                 x2, y, z1,
                 x2, y, z2,
                 x1, y, z2,
                 0, -1, 0);
+    }
+
+    protected Color getColor(int x, int y, int z, float lightLevel) {
+        return new Color(lightLevel, lightLevel, lightLevel, 1);
     }
 
     private static void initialize() {

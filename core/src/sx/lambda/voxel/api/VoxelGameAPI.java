@@ -51,7 +51,7 @@ public class VoxelGameAPI {
      */
     public void registerBuiltinBlocks() throws BlockRegistrationException {
         try {
-            IBlockRenderer foliageRenderer = new FoliageBlockRenderer();
+            IBlockRenderer foliageRenderer = new FlatFoliageRenderer();
             IBlockRenderer coloredFoliageRenderer = new ColoredFoliageRenderer();
             IBlockRenderer liquidHeightRenderer = new MetadataHeightRenderer(15, true);
             registerBlocks(
@@ -68,7 +68,7 @@ public class VoxelGameAPI {
                     new BlockBuilder().setID(BuiltInBlockIds.LAVA_FLOW_ID).setHumanName("Lava (Flowing)").setBlockRenderer(liquidHeightRenderer).setSolid(false).setSelectable(false).setTextureLocation("textures/block/lava.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.PLANKS_ID).setHumanName("Planks").setTextureLocation("textures/block/planks.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.STONE_BRICK_ID).setHumanName("Stone Brick").setTextureLocation("textures/block/stonebrick.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.TALL_GRASS_ID).setHumanName("Tall Grass").setTextureLocation("textures/block/tallgrass.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.TALL_GRASS_ID).setHumanName("Tall Grass").setTextureLocation("textures/block/tallgrass.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(new TallGrassRenderer()).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.FLOWER_ID).setHumanName("Flower").setTextureLocation("textures/block/flower_tulip_orange.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.FLOWER_TWO_ID).setHumanName("Flower").setTextureLocation("textures/block/flower_rose.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.FLOWER_THREE_ID).setHumanName("Flower").setTextureLocation("textures/block/shrub.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),

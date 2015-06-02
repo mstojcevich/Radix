@@ -54,7 +54,7 @@ public class GrassRenderer extends NormalBlockRenderer {
     }
 
     @Override
-    public void renderBottom(int atlasIndex, int x1, int z1, int x2, int z2, int y, float lightLevel, MeshBuilder builder) {
+    public void renderBottom(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, MeshBuilder builder) {
         super.renderBottom(atlasIndex + BOTTOM_OFFSET, x1, z1, x2, z2, y, lightLevel, builder);
     }
 

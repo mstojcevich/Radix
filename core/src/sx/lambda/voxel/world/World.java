@@ -425,7 +425,7 @@ public class World implements IWorld {
                             if (bl == null || bl.doesLightPassThrough()) {
                                 if (negXNeighborChunk.getSunlight(negX & (CHUNK_SIZE-1), y, cz) < nextLL) {
                                     negXNeighborChunk.setSunlight(negX & (CHUNK_SIZE-1), y, cz, nextLL);
-                                    sunlightQueue.add(new int[]{negX, y, cz});
+                                    sunlightQueue.add(new int[]{negX, y, z});
                                     changedChunks.add(negXNeighborChunk);
                                 }
                             }

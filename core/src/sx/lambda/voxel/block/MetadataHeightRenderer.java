@@ -29,7 +29,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int xi = MathUtils.floor(x1);
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
-        IChunk chunk = world.getChunkAtPosition(xi, zi);
+        IChunk chunk = world.getChunk(xi, zi);
         short meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
         super.renderNorth(atlasIndex, x1, y1, x2, y1 + getHeight(meta), z, lightLevel, builder);
     }
@@ -40,7 +40,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int xi = MathUtils.floor(x1);
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
-        IChunk chunk = world.getChunkAtPosition(xi, zi);
+        IChunk chunk = world.getChunk(xi, zi);
         short meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
         super.renderSouth(atlasIndex, x1, y1, x2, y1 + getHeight(meta), z, lightLevel, builder);
     }
@@ -51,7 +51,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int xi = MathUtils.floor(x);
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
-        IChunk chunk = world.getChunkAtPosition(xi, zi);
+        IChunk chunk = world.getChunk(xi, zi);
         short meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
         super.renderWest(atlasIndex, z1, y1, z2, y1 + getHeight(meta), x, lightLevel, builder);
     }
@@ -62,7 +62,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int xi = MathUtils.floor(x);
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
-        IChunk chunk = world.getChunkAtPosition(xi, zi);
+        IChunk chunk = world.getChunk(xi, zi);
         short meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
         super.renderEast(atlasIndex, z1, y1, z2, y1 + getHeight(meta), x, lightLevel, builder);
     }
@@ -73,7 +73,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int xi = MathUtils.floor(x1);
         int yi = MathUtils.floor(y - 1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
-        IChunk chunk = world.getChunkAtPosition(xi, zi);
+        IChunk chunk = world.getChunk(xi, zi);
         short meta = chunk.getMeta(xi & (world.getChunkSize()-1), yi, zi & (world.getChunkSize()-1));
         super.renderTop(atlasIndex, x1, z1, x2, z2, y - (1 - getHeight(meta)), lightLevel, builder);
     }

@@ -336,9 +336,9 @@ public class VoxelGameClient extends ApplicationAdapter {
         while (plotter.next()) {
             Vec3i v = plotter.get();
             Vec3i bp = new Vec3i(v.x, v.y, v.z);
-            IChunk theChunk = world.getChunkAtPosition(bp);
+            IChunk theChunk = world.getChunk(bp);
             if (theChunk != null) {
-                Block b = theChunk.getBlock(bp.x & (world.getChunkSize() - 1), bp.y, bp.z & (world.getChunkSize()-1));
+                Block b = theChunk.getBlock(bp.x & (world.getChunkSize() - 1), bp.y, bp.z & (world.getChunkSize() - 1));
                 if (b != null && b.isSelectable()) {
                     selectedBlock = bp;
                     if (last != null) {
@@ -621,9 +621,9 @@ public class VoxelGameClient extends ApplicationAdapter {
     public void breakBlock() {
         if (this.getSelectedBlock() != null
                 && this.currentScreen == this.hud) {
-            IChunk chunk = world.getChunkAtPosition(selectedBlock);
+            IChunk chunk = world.getChunk(selectedBlock);
             if(chunk != null) {
-                Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize()-1), selectedBlock.y, selectedBlock.z & (world.getChunkSize()-1));
+                Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y, selectedBlock.z & (world.getChunkSize() - 1));
                 if(block != null && block.isSelectable()) {
                     if (this.isRemote()) {
                         mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());

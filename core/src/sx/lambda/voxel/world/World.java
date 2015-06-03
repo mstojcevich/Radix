@@ -30,10 +30,7 @@ import sx.lambda.voxel.world.generation.ChunkGenerator;
 import sx.lambda.voxel.world.generation.SimplexChunkGenerator;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.*;
 
 public class World implements IWorld {
 
@@ -43,7 +40,7 @@ public class World implements IWorld {
 
     private static final int SEA_LEVEL = 64;
 
-    private static final int LIGHTING_WORKERS = 2;
+    private static final int LIGHTING_WORKERS = 4;
 
     private final IntMap<IntMap<IChunk>> chunkMapX = new IntMap<>();
     private final Set<IChunk> chunkList = new ConcurrentSet<>();
@@ -63,17 +60,14 @@ public class World implements IWorld {
 
     private Set<IChunk> chunksToRerender = Collections.newSetFromMap(new ConcurrentHashMap<IChunk, Boolean>());
 
-    private Queue<int[]> sunlightQueue = new ConcurrentLinkedQueue<>();
-    private Queue<int[]> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
+    private final ExecutorService lightUpdatePoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
+    private final Queue<int[]> sunlightQueue = new LinkedBlockingDeque<>();
+    private final Queue<int[]> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
 
     private ModelBatch modelBatch;
     private ModelInstance skybox;
     private Model skyboxModel;
     private Texture skyboxTexture;
-
-    private boolean shouldUpdateLight;
-
-    private int lightUpdaters;
 
     private int chunksMeshing;
 
@@ -85,6 +79,10 @@ public class World implements IWorld {
         } else {
             this.chunkGen = null;
         }
+
+        for(int i = 0; i < LIGHTING_WORKERS; i++) {
+            lightUpdatePoolExecutor.submit(new LightQueueWorker(this, sunlightQueue));
+        }
     }
 
     public int getChunkSize() {
@@ -95,12 +93,12 @@ public class World implements IWorld {
         return WORLD_HEIGHT;
     }
 
-    public IChunk getChunkAtPosition(Vec3i position) {
-        return getChunkAtPosition(position.x, position.z);
+    public IChunk getChunk(Vec3i position) {
+        return getChunk(position.x, position.z);
     }
 
     @Override
-    public IChunk getChunkAtPosition(int x, int z) {
+    public IChunk getChunk(int x, int z) {
         x = getChunkPosition(x);
         z = getChunkPosition(z);
 
@@ -146,9 +144,7 @@ public class World implements IWorld {
             skybox = createSkybox();
         }
 
-        if (lightUpdaters < LIGHTING_WORKERS && (sunlightQueue.size() > 0 || sunlightRemovalQueue.size() > 0 || shouldUpdateLight)) {
-            processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
-        }
+        processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
         for (IChunk c : chunksToRerender) {
             if(VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
                     VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
@@ -157,7 +153,7 @@ public class World implements IWorld {
             }
         }
 
-        final IChunk playerChunk = getChunkAtPosition(
+        final IChunk playerChunk = getChunk(
                 MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getX()),
                 MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getZ()));
         if(playerChunk != null && (playerChunk != lastPlayerChunk || (sortedChunkList != null && chunkList.size() != sortedChunkList.size()))) {
@@ -260,7 +256,7 @@ public class World implements IWorld {
     @Override
     public void removeBlock(int x, int y, int z) {
         synchronized (this) {
-            final IChunk c = this.getChunkAtPosition(x, z);
+            final IChunk c = this.getChunk(x, z);
             if (c != null) {
                 x &= getChunkSize()-1;
                 y &= getChunkSize()-1;
@@ -273,7 +269,7 @@ public class World implements IWorld {
     @Override
     public void addBlock(int block, int x, int y, int z) {
         synchronized (this) {
-            final IChunk c = this.getChunkAtPosition(x, z);
+            final IChunk c = this.getChunk(x, z);
             if(c != null)
                 c.setBlock(block, x & (getChunkSize() - 1), y, z * (getChunkSize() - 1));
         }
@@ -295,7 +291,7 @@ public class World implements IWorld {
 
     @Override
     public void addChunk(final IChunk chunk) {
-        IChunk c = getChunkAtPosition(chunk.getStartPosition());
+        IChunk c = getChunk(chunk.getStartPosition());
         if (c != null) {
             removeChunkFromMap(chunk.getStartPosition());
             this.chunkList.remove(c);
@@ -319,7 +315,7 @@ public class World implements IWorld {
     }
 
     private IChunk loadChunk(int startX, int startZ) {
-        IChunk foundChunk = getChunkAtPosition(startX, startZ);
+        IChunk foundChunk = getChunk(startX, startZ);
         if (foundChunk == null && !remote) {
             final IChunk c = new Chunk(this, new Vec3i(startX, 0, startZ), VoxelGameAPI.instance.getBiomeByID(0));
             VoxelGameAPI.instance.getEventManager().push(new EventFinishChunkGen(c));
@@ -354,6 +350,9 @@ public class World implements IWorld {
     @Override
     public void addToSunlightQueue(int x, int y, int z) {
         sunlightQueue.add(new int[]{x, y, z});
+        synchronized(sunlightQueue) {
+            sunlightQueue.notify();
+        }
     }
 
     @Override
@@ -371,117 +370,15 @@ public class World implements IWorld {
                 }
             }
         }
-        if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty())
-            return;
-        shouldUpdateLight = true;
-        while (lightUpdaters < LIGHTING_WORKERS) {
-            lightUpdaters++;
-            new Thread("Light update") {
-                @Override
-                public void run() {
-                    shouldUpdateLight = false;
-
-                    processLightRemovalQueue();
-
-                    Side[] sides = Side.values();
-
-                    Set<IChunk> changedChunks = new HashSet<IChunk>();
-                    int[] pos;
-                    while ((pos = sunlightQueue.poll()) != null) {
-                        int x = pos[0];
-                        int cx = x & (CHUNK_SIZE-1);
-                        int y = pos[1];
-                        int z = pos[2];
-                        int cz = z & (CHUNK_SIZE-1);
-                        IChunk posChunk = getChunkAtPosition(x, z);
-                        if (posChunk == null) {
-                            continue;
-                        }
-                        int ll = posChunk.getSunlight(cx, y, cz);
-
-                        // Spread off to each side
-                        for(Side s : sides) {
-                            int nextLL = ll - 1; // Decayed light level for the spread
-                            int sx = x; // Side x coord
-                            int sy = y; // Side y coord
-                            int sz = z; // Side z coord
-                            int scx = cx; // Chunk-relative side x coord
-                            int scz = cz; // Chunk-relative side z coord
-                            IChunk sChunk = posChunk;
-
-                            // Offset values based on side
-                            switch(s) {
-                                case TOP:
-                                    sy += 1;
-                                    break;
-                                case BOTTOM:
-                                    sy -= 1;
-                                    break;
-                                case WEST:
-                                    sx -= 1;
-                                    scx -= 1;
-                                    break;
-                                case EAST:
-                                    sx += 1;
-                                    scx += 1;
-                                    break;
-                                case NORTH:
-                                    sz += 1;
-                                    scz += 1;
-                                    break;
-                                case SOUTH:
-                                    sz -= 1;
-                                    scz -= 1;
-                                    break;
-                            }
-                            if(sy < 0)
-                                continue;
-                            if(sy > WORLD_HEIGHT-1)
-                                continue;
-
-                            // Select the correct chunk
-                            if(scz < 0) {
-                                scz += CHUNK_SIZE;
-                                sChunk = getChunkAtPosition(sx, sz);
-                            } else if(scz > CHUNK_SIZE-1) {
-                                scz -= CHUNK_SIZE;
-                                sChunk = getChunkAtPosition(sx, sz);
-                            }
-                            if(scx < 0) {
-                                scx += CHUNK_SIZE;
-                                sChunk = getChunkAtPosition(sx, sz);
-                            } else if(scx > CHUNK_SIZE-1) {
-                                scx -= CHUNK_SIZE;
-                                sChunk = getChunkAtPosition(sx, sz);
-                            }
-
-                            if(sChunk == null)
-                                continue;
-
-                            // Spread lighting
-                            Block sBlock = sChunk.getBlock(scx, sy, scz);
-                            // When spreading down, lighting at max level does not decay
-                            if(s == Side.BOTTOM) {
-                                Block block = posChunk.getBlock(cx, y, cz); // Block being spread from
-                                if (ll == 16 && (block == null || block.decreasesLight()))
-                                    nextLL = 16;
-                            }
-                            if(sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
-                                if(sChunk.getSunlight(scx, sy, scz) < nextLL) {
-                                    sChunk.setSunlight(scx, sy, scz, nextLL);
-                                    addToSunlightQueue(sx, sy, sz);
-                                    changedChunks.add(sChunk);
-                                }
-                            }
-                        }
-                    }
-                    for(IChunk changedChunk : changedChunks) {
-                        changedChunk.finishChangingSunlight();
-                    }
-                    lightUpdaters--;
+        if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty()) {
+            for(IChunk c : chunkList) {
+                if(c.waitingOnLightFinish()) {
+                    c.finishChangingSunlight();
                 }
-            }.start();
+            }
+            return;
         }
+        processLightRemovalQueue();
     }
 
     private void processLightRemovalQueue() {
@@ -496,7 +393,7 @@ public class World implements IWorld {
                 int y = pos[1];
                 int z = pos[2];
                 int cz = z & (CHUNK_SIZE-1);
-                IChunk posChunk = getChunkAtPosition(x, z);
+                IChunk posChunk = getChunk(x, z);
                 if (posChunk == null) {
                     continue;
                 }
@@ -544,17 +441,17 @@ public class World implements IWorld {
                     // Select the correct chunk
                     if(scz < 0) {
                         scz += CHUNK_SIZE;
-                        sChunk = getChunkAtPosition(sx, sz);
+                        sChunk = getChunk(sx, sz);
                     } else if(scz > CHUNK_SIZE-1) {
                         scz -= CHUNK_SIZE;
-                        sChunk = getChunkAtPosition(sx, sz);
+                        sChunk = getChunk(sx, sz);
                     }
                     if(scx < 0) {
                         scx += CHUNK_SIZE;
-                        sChunk = getChunkAtPosition(sx, sz);
+                        sChunk = getChunk(sx, sz);
                     } else if(scx > CHUNK_SIZE-1) {
                         scx -= CHUNK_SIZE;
-                        sChunk = getChunkAtPosition(sx, sz);
+                        sChunk = getChunk(sx, sz);
                     }
 
                     if(sChunk == null)
@@ -583,7 +480,7 @@ public class World implements IWorld {
 
     @Override
     public float getLightLevel(Vec3i pos) {
-        IChunk chunk = getChunkAtPosition(pos);
+        IChunk chunk = getChunk(pos);
         if (chunk == null) {
             return 1;
         }
@@ -703,9 +600,12 @@ public class World implements IWorld {
                 if(c.getBlockId(x, y, z) > 0) {
                     break;
                 }
-                addToSunlightQueue(c.getStartPosition().x + x, y, c.getStartPosition().z + z);
+                sunlightQueue.add(new int[]{c.getStartPosition().x + x, y, c.getStartPosition().z + z});
                 c.setSunlight(x, y, z, 16);
             }
+        }
+        synchronized (sunlightQueue) {
+            sunlightQueue.notifyAll();
         }
     }
 

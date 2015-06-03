@@ -14,8 +14,8 @@ public interface IWorld {
 
     int getHeight();
 
-    IChunk getChunkAtPosition(Vec3i position);
-    IChunk getChunkAtPosition(int x, int z);
+    IChunk getChunk(Vec3i position);
+    IChunk getChunk(int x, int z);
 
     void render();
 

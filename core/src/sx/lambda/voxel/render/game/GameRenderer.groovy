@@ -180,7 +180,7 @@ class GameRenderer implements Renderer {
 
         int playerX = MathUtils.floor(game.player.position.x);
         int playerZ = MathUtils.floor(game.player.position.z);
-        IChunk playerChunk = game.world.getChunkAtPosition(playerX, playerZ)
+        IChunk playerChunk = game.world.getChunk(playerX, playerZ)
         if (playerChunk != null) {
             String llStr = String.format("Light Level @ Feet: "
                     + playerChunk.getSunlight(playerX & (game.world.chunkSize-1), MathUtils.floor(game.player.position.y), playerZ & (game.world.chunkSize-1)))

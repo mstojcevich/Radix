@@ -89,7 +89,7 @@ public class GreedyMesher implements Mesher {
                     if (curBlock == null) continue;
 
                     int westNeighborX = chunk.getStartPosition().x + x - 1;
-                    IChunk westNeighborChunk = chunk.getWorld().getChunkAtPosition(westNeighborX, chunk.getStartPosition().z + z);
+                    IChunk westNeighborChunk = chunk.getWorld().getChunk(westNeighborX, chunk.getStartPosition().z + z);
                     if (westNeighborChunk != null) {
                         Block westNeighborBlk = VoxelGameAPI.instance.getBlockByID(
                                 westNeighborChunk.getBlockId(westNeighborX & (voxels.length - 1), y, z));
@@ -104,7 +104,7 @@ public class GreedyMesher implements Mesher {
                     }
 
                     int eastNeighborX = chunk.getStartPosition().x + x + 1;
-                    IChunk eastNeighborChunk = chunk.getWorld().getChunkAtPosition(eastNeighborX, chunk.getStartPosition().z + z);
+                    IChunk eastNeighborChunk = chunk.getWorld().getChunk(eastNeighborX, chunk.getStartPosition().z + z);
                     if (eastNeighborChunk != null) {
                         Block eastNeighborBlk = VoxelGameAPI.instance.getBlockByID(
                                 eastNeighborChunk.getBlockId(eastNeighborX & (voxels.length - 1), y, z));
@@ -138,8 +138,8 @@ public class GreedyMesher implements Mesher {
                     if (curBlock == null) continue;
                     int northNeighborZ = chunk.getStartPosition().z + z + 1;
                     int southNeighborZ = chunk.getStartPosition().z + z - 1;
-                    IChunk northNeighborChunk = chunk.getWorld().getChunkAtPosition(chunk.getStartPosition().x + x, northNeighborZ);
-                    IChunk southNeighborChunk = chunk.getWorld().getChunkAtPosition(chunk.getStartPosition().x + x, southNeighborZ);
+                    IChunk northNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, northNeighborZ);
+                    IChunk southNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, southNeighborZ);
 
                     if (northNeighborChunk != null) {
                         Block northNeighborBlock = VoxelGameAPI.instance.getBlockByID(

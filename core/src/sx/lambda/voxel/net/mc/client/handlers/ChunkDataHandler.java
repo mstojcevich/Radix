@@ -5,7 +5,6 @@ import org.spacehq.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
-import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.biome.Biome;
 import sx.lambda.voxel.world.chunk.IChunk;
@@ -21,7 +20,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
     @Override
     public void handle(ServerChunkDataPacket scdp) {
         if(scdp.getChunks().length == 0) {
-            VoxelGameClient.getInstance().getWorld().rmChunk(VoxelGameClient.getInstance().getWorld().getChunkAtPosition(scdp.getX(), scdp.getZ()));
+            VoxelGameClient.getInstance().getWorld().rmChunk(VoxelGameClient.getInstance().getWorld().getChunk(scdp.getX(), scdp.getZ()));
         }
 
         int biomeID = 0;
@@ -36,7 +35,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
 
         int cx = scdp.getX()*16;
         int cz = scdp.getZ()*16;
-        IChunk ck = game.getWorld().getChunkAtPosition(cx, cz);
+        IChunk ck = game.getWorld().getChunk(cx, cz);
         if(ck != null) {
             game.getWorld().rmChunk(ck);
         }

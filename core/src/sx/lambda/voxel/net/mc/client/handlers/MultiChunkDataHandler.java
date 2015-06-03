@@ -5,7 +5,6 @@ import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiChunkDataPa
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
-import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.biome.Biome;
 import sx.lambda.voxel.world.chunk.IChunk;
@@ -32,7 +31,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                         biome = VoxelGameAPI.instance.getBiomeByID(biomeID-128);
                     if(biome == null)
                         biome = VoxelGameAPI.instance.getBiomeByID(0);
-                    IChunk ck = game.getWorld().getChunkAtPosition(cx, cz);
+                    IChunk ck = game.getWorld().getChunk(cx, cz);
                     if(ck != null) {
                         game.getWorld().rmChunk(ck);
                     }

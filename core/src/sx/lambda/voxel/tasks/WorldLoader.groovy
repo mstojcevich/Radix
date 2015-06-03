@@ -26,11 +26,11 @@ class WorldLoader implements RepeatedTask {
                     EntityPosition playerPos = game.getPlayer().getPosition()
                     if (currentChunk == null) {
                         game.getWorld().loadChunks(playerPos, viewDistance)
-                        currentChunk = game.getWorld().getChunkAtPosition(MathUtils.floor(playerPos.getX()), MathUtils.floor(playerPos.getZ()));
+                        currentChunk = game.getWorld().getChunk(MathUtils.floor(playerPos.getX()), MathUtils.floor(playerPos.getZ()));
                     } else {
                         if (Math.abs(currentChunk.getStartPosition().x - game.getPlayer().getPosition().getX()) > game.getWorld().getChunkSize()
                                 || Math.abs(currentChunk.getStartPosition().z - game.getPlayer().getPosition().getZ()) > game.getWorld().getChunkSize()) {
-                            currentChunk = game.getWorld().getChunkAtPosition(MathUtils.floor(playerPos.getX()), MathUtils.floor(playerPos.getZ()));
+                            currentChunk = game.getWorld().getChunk(MathUtils.floor(playerPos.getX()), MathUtils.floor(playerPos.getZ()));
                             game.getWorld().loadChunks(playerPos, viewDistance)
                         }
                     }

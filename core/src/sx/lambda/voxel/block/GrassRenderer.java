@@ -39,7 +39,7 @@ public class GrassRenderer extends NormalBlockRenderer {
 
     @Override
     public void renderTop(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, MeshBuilder builder) {
-        Biome biome = VoxelGameClient.getInstance().getWorld().getChunkAtPosition((int)x1, (int)z1).getBiome();
+        Biome biome = VoxelGameClient.getInstance().getWorld().getChunk((int) x1, (int) z1).getBiome();
         int[] color = biome.getGrassColor((int)y - 1);
         float r = color[0]/255f;
         float g = color[1]/255f;

@@ -143,6 +143,11 @@ public interface IChunk extends Serializable, Disposable {
 
     void setLighted(boolean b);
 
+    /**
+     * Returns true if the chunk is waiting for light to finish updating to rerender
+     */
+    boolean waitingOnLightFinish();
+
     interface EachBlockCallee {
         void call(Block block, int x, int y, int z);
     }

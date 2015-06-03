@@ -181,14 +181,14 @@ public class Chunk implements IChunk {
         assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
         if(x == size - 1) {
-            getWorld().rerenderChunk(getWorld().getChunkAtPosition(getStartPosition().x + size, getStartPosition().z));
+            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x + size, getStartPosition().z));
         } else if(x == 0) {
-            getWorld().rerenderChunk(getWorld().getChunkAtPosition(getStartPosition().x - size, getStartPosition().z));
+            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x - size, getStartPosition().z));
         }
         if(z == size - 1) {
-            getWorld().rerenderChunk(getWorld().getChunkAtPosition(getStartPosition().x, getStartPosition().z + size));
+            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x, getStartPosition().z + size));
         } else if(z == 0) {
-            getWorld().rerenderChunk(getWorld().getChunkAtPosition(getStartPosition().x, getStartPosition().z - size));
+            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x, getStartPosition().z - size));
         }
 
         blockList[x][y][z] = -1;
@@ -248,17 +248,17 @@ public class Chunk implements IChunk {
             // Select the correct chunk
             if(scz < 0) {
                 scz += size;
-                sChunk = parentWorld.getChunkAtPosition(sx, sz);
+                sChunk = parentWorld.getChunk(sx, sz);
             } else if(scz > size-1) {
                 scz -= size;
-                sChunk = parentWorld.getChunkAtPosition(sx, sz);
+                sChunk = parentWorld.getChunk(sx, sz);
             }
             if(scx < 0) {
                 scx += size;
-                sChunk = parentWorld.getChunkAtPosition(sx, sz);
+                sChunk = parentWorld.getChunk(sx, sz);
             } else if(scx > size-1) {
                 scx -= size;
-                sChunk = parentWorld.getChunkAtPosition(sx, sz);
+                sChunk = parentWorld.getChunk(sx, sz);
             }
 
             if(sChunk == null)
@@ -363,11 +363,6 @@ public class Chunk implements IChunk {
         assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
         return sunlightLevels[x][y][z];
-    }
-
-    @Override
-    public void finishChangingSunlight() {
-        sunlightChanging = false;
     }
 
     @Override
@@ -488,6 +483,17 @@ public class Chunk implements IChunk {
     @Override
     public void setLighted(boolean lighted) {
         this.lighted = lighted;
+    }
+
+
+    @Override
+    public void finishChangingSunlight() {
+        sunlightChanging = false;
+    }
+
+    @Override
+    public boolean waitingOnLightFinish() {
+        return sunlightChanging;
     }
 
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.IBlockRenderer;
+import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.block.Side;
 import sx.lambda.voxel.world.chunk.IChunk;
 
@@ -34,7 +35,7 @@ public class GreedyMesher implements Mesher {
         return meshFaces(faces, builder);
     }
 
-    public List<Face> getFaces(Block[][][] voxels, short[][][] metadata, float[][][] lightLevels, OccludeCondition ocCond) {
+    public List<Face> getFaces(Block[][][] voxels, short[][][] metadata, float[][][] lightLevels, OccludeCondition ocCond, MergeCondition shouldMerge) {
         List<Face> faces = new ArrayList<>();
 
         // Top, bottom
@@ -71,8 +72,8 @@ public class GreedyMesher implements Mesher {
                     }
                 }
             }
-            greedy(faces, Side.TOP, topBlocks, topMeta, topLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
-            greedy(faces, Side.BOTTOM, btmBlocks, btmMeta, btmLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
+            greedy(faces, Side.TOP, shouldMerge, topBlocks, topMeta, topLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
+            greedy(faces, Side.BOTTOM, shouldMerge, btmBlocks, btmMeta, btmLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
         }
 
         // East, west
@@ -120,8 +121,8 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.EAST, eastBlocks, eastMeta, eastLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
-            greedy(faces, Side.WEST, westBlocks, westMeta, westLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.EAST, shouldMerge, eastBlocks, eastMeta, eastLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.WEST, shouldMerge, westBlocks, westMeta, westLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
         }
 
         // North, south
@@ -169,8 +170,8 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.NORTH, northBlocks, northMeta, northLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
-            greedy(faces, Side.SOUTH, southBlocks, southMeta, southLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
+            greedy(faces, Side.NORTH, shouldMerge, northBlocks, northMeta, northLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
+            greedy(faces, Side.SOUTH, shouldMerge, southBlocks, southMeta, southLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
         }
 
         return faces;
@@ -178,12 +179,29 @@ public class GreedyMesher implements Mesher {
 
     public List<Face> getFaces(Block[][][] voxels, short[][][] metadata, float[][][] lightLevels) {
         return getFaces(voxels, metadata, lightLevels, new OccludeCondition() {
-            @Override
-            public boolean shouldOcclude(Block curBlock, Block blockToSide) {
-                return !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
-                    && (curBlock.occludeCovered() && blockToSide.occludeCovered());
-            }
-        });
+                    @Override
+                    public boolean shouldOcclude(Block curBlock, Block blockToSide) {
+                        return !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
+                                && (curBlock.occludeCovered() && blockToSide.occludeCovered());
+                    }
+                },
+                new MergeCondition() {
+                    @Override
+                    public boolean shouldMerge(int id1, int meta1, float light1, int id2, int meta2, float light2) {
+                        boolean sameBlock = id1 == id2 && meta1 == meta2;
+                        boolean sameLight = light1 == light2;
+                        boolean tooDarkToTell = light1 < 0.1f; // Too dark to tell they're not the same block
+                        if(sameLight && !sameBlock && tooDarkToTell) {
+                            Block block1 = VoxelGameAPI.instance.getBlockByID(id1);
+                            Block block2 = VoxelGameAPI.instance.getBlockByID(id2);
+                            // Other block renderers may alter shape in an unpredictable way
+                            if(block1.getRenderer().getClass() == NormalBlockRenderer.class
+                                    && block2.getRenderer().getClass() == NormalBlockRenderer.class)
+                                sameBlock = true; // Consider them the same block
+                        }
+                        return sameBlock && sameLight;
+                    }
+                });
     }
 
     /**
@@ -193,7 +211,7 @@ public class GreedyMesher implements Mesher {
      * @param lls        Light levels of the blocks
      * @param z          Depth on the plane
      */
-    private void greedy(List<Face> outputList, Side side, int[][] blks, short metadata[][], float lls[][], int z, int offsetX, int offsetY) {
+    private void greedy(List<Face> outputList, Side side, MergeCondition mergeCond, int[][] blks, short metadata[][], float lls[][], int z, int offsetX, int offsetY) {
         int width = blks.length;
         int height = blks[0].length;
         boolean[][] used = new boolean[blks.length][blks[0].length];
@@ -201,50 +219,57 @@ public class GreedyMesher implements Mesher {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int blk = blks[x][y];
-                if(blk == 0)
+                if(blk == 0 || used[x][y])
                     continue;
+                used[x][y] = true;
                 float ll = lls[x][y];
                 short meta = metadata[x][y];
-                if (!used[x][y] && blk > 0) {
-                    used[x][y] = true;
-                    int endX = x + 1;
-                    int endY = y + 1;
-                    while (true) {
-                        int newX = endX;
-                        if (newX == blks.length) {
-                            break;
-                        }
-                        int newBlk = blks[newX][y];
-                        float newll = lls[newX][y];
-                        short newMeta = metadata[newX][y];
-                        if (((newBlk == blk && newMeta == meta) || (newll == 0 && newBlk != 0)) && newll == ll && !used[newX][y]) {
-                            endX++;
-                            used[newX][y] = true;
-                        } else {
-                            while (true) {
-                                if (endY == height) break;
-                                boolean allPassed = true;
-                                for (int lx = x; lx < endX; lx++) {
-                                    int lblk = blks[lx][endY];
-                                    float llight = lls[lx][endY];
-                                    if (((lblk != blk || metadata[lx][endY] != meta) && (llight != 0 || lblk == 0)) || llight != ll || used[lx][endY]) {
-                                        allPassed = false;
-                                    }
-                                }
-                                if (allPassed) {
-                                    for (int lx = x; lx < endX; lx++) {
-                                        used[lx][endY] = true;
-                                    }
-                                } else {
+                int endX = x + 1;
+                int endY = y + 1;
+                while (true) {
+                    int newX = endX;
+                    if (newX == blks.length) {
+                        break;
+                    }
+                    int newBlk = blks[newX][y];
+                    float newll = lls[newX][y];
+                    short newMeta = metadata[newX][y];
+                    // expand right if the same block
+                    if (!used[newX][y] && newBlk != 0 && mergeCond.shouldMerge(blk, meta, ll, newBlk, newMeta, newll)) {
+                        endX++;
+                        used[newX][y] = true;
+                    } else { // done on initial pass right. Start passing up.
+                        while (true) {
+                            if (endY == height) break;
+                            boolean allPassed = true;
+                            // sweep right
+                            for (int lx = x; lx < endX; lx++) {
+                                int lblk = blks[lx][endY];
+                                if(lblk == 0) {
+                                    allPassed = false;
                                     break;
                                 }
-                                endY++;
+                                short lmeta = metadata[lx][endY];
+                                float llight = lls[lx][endY];
+
+                                if (used[lx][endY] || !mergeCond.shouldMerge(blk, meta, ll, lblk, lmeta, llight)) {
+                                    allPassed = false;
+                                    break;
+                                }
                             }
-                            break;
+                            if (allPassed) {
+                                for (int lx = x; lx < endX; lx++) {
+                                    used[lx][endY] = true;
+                                }
+                                endY++;
+                            } else {
+                                break;
+                            }
                         }
+                        break;
                     }
-                    outputList.add(new Face(side, blk, ll, x + offsetX, y + offsetY, endX + offsetX, endY + offsetY, z));
                 }
+                outputList.add(new Face(side, blk, ll, x + offsetX, y + offsetY, endX + offsetX, endY + offsetY, z));
             }
         }
     }
@@ -318,6 +343,10 @@ public class GreedyMesher implements Mesher {
          * @return True if the side of the curBlock should be occluded
          */
         boolean shouldOcclude(Block curBlock, Block blockToSide);
+    }
+
+    public interface MergeCondition {
+        boolean shouldMerge(int id1, int meta1, float light1, int id2, int meta2, float light2);
     }
 
 }

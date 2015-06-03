@@ -228,14 +228,15 @@ public class GreedyMesher implements Mesher {
                 int endY = y + 1;
                 while (true) {
                     int newX = endX;
-                    if (newX == blks.length) {
-                        break;
+                    boolean shouldPass = false;
+                    if (newX < width) {
+                        int newBlk = blks[newX][y];
+                        float newll = lls[newX][y];
+                        short newMeta = metadata[newX][y];
+                        shouldPass = !used[newX][y] && newBlk != 0 && mergeCond.shouldMerge(blk, meta, ll, newBlk, newMeta, newll);
                     }
-                    int newBlk = blks[newX][y];
-                    float newll = lls[newX][y];
-                    short newMeta = metadata[newX][y];
                     // expand right if the same block
-                    if (!used[newX][y] && newBlk != 0 && mergeCond.shouldMerge(blk, meta, ll, newBlk, newMeta, newll)) {
+                    if (shouldPass) {
                         endX++;
                         used[newX][y] = true;
                     } else { // done on initial pass right. Start passing up.

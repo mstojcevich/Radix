@@ -1,8 +1,10 @@
 package sx.lambda.voxel.block;
 
-public class Block {
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
+import sx.lambda.voxel.world.chunk.IChunk;
 
-    // AIR(0), DIRT(1), GRASS(2), STONE(3), WATER(4, new WaterRenderer(4), true, false), SAND(5);
+public class Block {
 
     private int id;
     private final transient IBlockRenderer renderer;
@@ -141,6 +143,20 @@ public class Block {
      */
     public void setOccludeCovered(boolean occludeCovered) {
         this.occludeCovered = occludeCovered;
+    }
+
+    /**
+     * Get the bounding box of an instance of the block at the specified coordinates
+     *
+     * @param c Chunk the block is in
+     * @param x Chunk-relative x position of the block. 0->(chunkWidth-1) inclusive.
+     * @param y Chunk-relative y position of the block. 0->(chunkHeight-1) inclusive.
+     * @param z Chunk-relative z position of the block. 0->(chunkWidth-1) inclusive.
+     */
+    public BoundingBox calculateBoundingBox(IChunk c, int x, int y, int z) {
+        Vector3 corner1 = new Vector3(c.getStartPosition().x+x, c.getStartPosition().y+y, c.getStartPosition().z+z);
+        Vector3 corner2 = corner1.cpy().add(1, 1, 1);
+        return new BoundingBox(corner1, corner2);
     }
 
 }

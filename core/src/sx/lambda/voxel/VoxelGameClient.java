@@ -665,22 +665,18 @@ public class VoxelGameClient extends ApplicationAdapter {
         if(!MathUtils.isZero(moveTouchpad.getKnobPercentX()) || !MathUtils.isZero(moveTouchpad.getKnobPercentY())) {
             float posMult = 4.5f * Gdx.graphics.getDeltaTime();
 
-            float newX = player.getPosition().getX();
-            float newZ = player.getPosition().getZ();
+            float deltaX = 0;
+            float deltaZ = 0;
             float yawSine = MathUtils.sinDeg(player.getRotation().getYaw());
             float yawCosine = MathUtils.cosDeg(player.getRotation().getYaw());
-            newX += yawSine * moveTouchpad.getKnobPercentY() * posMult;
-            newZ += -yawCosine * moveTouchpad.getKnobPercentY() * posMult;
-            newX += yawCosine * moveTouchpad.getKnobPercentX() * posMult;
-            newZ += yawSine * moveTouchpad.getKnobPercentX() * posMult;
+            deltaX += yawSine * moveTouchpad.getKnobPercentY() * posMult;
+            deltaZ += -yawCosine * moveTouchpad.getKnobPercentY() * posMult;
+            deltaX += yawCosine * moveTouchpad.getKnobPercentX() * posMult;
+            deltaZ += yawSine * moveTouchpad.getKnobPercentX() * posMult;
 
-            int blockX = MathUtils.floor(newX);
-            int blockZ = MathUtils.floor(newZ);
-            int blockFeetY = MathUtils.floor(player.getPosition().getY() - 0.1f);
-            int blockHeadY = MathUtils.floor(player.getPosition().getY() + player.getHeight() - 0.1f);
-            if(!movementHandler.checkCollision(blockX, blockFeetY, blockZ)
-                    && !movementHandler.checkCollision(blockX, blockHeadY, blockZ)) {
-                player.getPosition().set(newX, player.getPosition().getY(), newZ);
+            if(!movementHandler.checkDeltaCollision(player, deltaX, 0, deltaZ)
+                    && !movementHandler.checkDeltaCollision(player, deltaX, 0, deltaZ)) {
+                player.getPosition().offset(deltaX, 0, deltaZ);
                 gameRenderer.calculateFrustum();
             }
         }

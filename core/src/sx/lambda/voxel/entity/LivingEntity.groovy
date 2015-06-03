@@ -41,6 +41,10 @@ public abstract class LivingEntity extends Entity implements Serializable {
         if (!handler.checkDeltaCollision(this, 0, yVelocity, 0)) {
             this.getPosition().offset(0, this.yVelocity, 0)
         } else {
+            if(yVelocity < 0) { // falling down and failed because we hit the ground
+                // prevent overshoot causing the player to not reach the ground
+                getPosition().set(position.x, MathUtils.floor(position.y), position.z); // go directly to ground
+            }
             yVelocity = 0
         }
     }
@@ -74,8 +78,9 @@ public abstract class LivingEntity extends Entity implements Serializable {
         }
     }
 
-    public BoundingBox getBoundingBox() {
-        return boundingBox;
+    public BoundingBox calculateBoundingBox() {
+        float halfWidth = (float)width/2f;
+        return new BoundingBox(getPosition().cpy().add(-halfWidth, 0, -halfWidth), getPosition().cpy().add(halfWidth, height, halfWidth));
     }
 
 }

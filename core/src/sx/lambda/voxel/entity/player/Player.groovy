@@ -17,7 +17,7 @@ import sx.lambda.voxel.world.chunk.IChunk
 @CompileStatic
 class Player extends LivingEntity implements Serializable {
 
-    private static final float WIDTH = 1, HEIGHT = 1.8f
+    private static final float WIDTH = 0.6f, HEIGHT = 1.8f
     private static final float REACH = 4
 
     private transient boolean moved = false
@@ -37,7 +37,7 @@ class Player extends LivingEntity implements Serializable {
 
     public Player(EntityPosition pos, EntityRotation rot) {
         super(playerModel,
-                pos, rot, 1, HEIGHT)
+                pos, rot, WIDTH, HEIGHT)
     }
 
     public float getEyeHeight() {
@@ -56,7 +56,7 @@ class Player extends LivingEntity implements Serializable {
         if (moved) {
             if(VoxelGameClient.instance.minecraftConn != null) {
                 VoxelGameClient.instance.minecraftConn.client.session.send(new ClientPlayerPositionRotationPacket(
-                        this.onGround, this.position.x, this.position.y - 0.1, this.position.z, 180-this.rotation.yaw, 360-this.rotation.pitch))
+                        this.onGround, this.position.x, this.position.y, this.position.z, 180-this.rotation.yaw, 360-this.rotation.pitch))
             }
             moved = false
         }

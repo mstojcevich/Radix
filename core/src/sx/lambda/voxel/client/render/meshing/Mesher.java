@@ -18,14 +18,4 @@ public interface Mesher {
      */
     Mesh meshVoxels(MeshBuilder builder, Block[][][] voxels, short[][][] metadata, float[][][] lightLevels);
 
-    /**
-     * Enables the alpha channel for color
-     */
-    void enableAlpha();
-
-    /**
-     * Disables theslpha channel for color
-     */
-    void disableAlpha();
-
 }

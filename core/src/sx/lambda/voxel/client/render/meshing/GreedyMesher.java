@@ -19,7 +19,6 @@ import java.util.List;
 public class GreedyMesher implements Mesher {
 
     private final IChunk chunk;
-    private boolean useAlpha;
 
     /**
      * @param chunk Chunk to mesh
@@ -281,16 +280,6 @@ public class GreedyMesher implements Mesher {
             f.render(builder);
         }
         return builder.end();
-    }
-
-    @Override
-    public void enableAlpha() {
-        this.useAlpha = true;
-    }
-
-    @Override
-    public void disableAlpha() {
-        this.useAlpha = false;
     }
 
     public static class Face {

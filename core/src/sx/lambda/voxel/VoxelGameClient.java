@@ -338,6 +338,8 @@ public class VoxelGameClient extends ApplicationAdapter {
             Vec3i bp = new Vec3i(v.x, v.y, v.z);
             IChunk theChunk = world.getChunk(bp);
             if (theChunk != null) {
+                if(bp.y >= world.getHeight())
+                    continue;
                 Block b = theChunk.getBlock(bp.x & (world.getChunkSize() - 1), bp.y, bp.z & (world.getChunkSize() - 1));
                 if (b != null && b.isSelectable()) {
                     selectedBlock = bp;

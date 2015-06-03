@@ -183,7 +183,9 @@ class MovementHandler implements RepeatedTask {
         IChunk newChunk = game.getWorld().getChunk(x, z);
         if (newChunk == null) return true
 
-        Block block = newChunk.getBlock(x & (game.world.chunkSize-1), y, z & (game.world.chunkSize-1));
+        Block block = null;
+        if(y < VoxelGameClient.getInstance().getWorld().getHeight())
+            block = newChunk.getBlock(x & (game.world.chunkSize-1), y, z & (game.world.chunkSize-1));
 
         boolean passed = true
         if (block != null && block.isSolid()) {

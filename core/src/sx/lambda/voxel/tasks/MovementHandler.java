@@ -40,7 +40,7 @@ public class MovementHandler implements RepeatedTask {
                     Player player = game.getPlayer();
                     IWorld world = game.getWorld();
                     long moveDiffMS = lastMoveCheckMS - System.currentTimeMillis();
-                    float movementMultiplier = moveDiffMS * 0.0045f;
+                    float movementMultiplier = moveDiffMS * 0.0043f;
                     final boolean threeDMove = false;
                     EntityPosition lastPosition = player.getPosition().clone();
                     if (game.getCurrentScreen().equals(game.getHud())) {

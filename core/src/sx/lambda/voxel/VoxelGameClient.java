@@ -680,7 +680,7 @@ public class VoxelGameClient extends ApplicationAdapter {
             int blockHeadY = MathUtils.floor(player.getPosition().getY() + player.getHeight() - 0.1f);
             if(!movementHandler.checkCollision(blockX, blockFeetY, blockZ)
                     && !movementHandler.checkCollision(blockX, blockHeadY, blockZ)) {
-                player.getPosition().setPos(newX, player.getPosition().getY(), newZ);
+                player.getPosition().set(newX, player.getPosition().getY(), newZ);
                 gameRenderer.calculateFrustum();
             }
         }

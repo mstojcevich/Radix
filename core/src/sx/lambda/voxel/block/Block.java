@@ -12,9 +12,11 @@ public class Block {
     private final String humanName;
     private final String[] textureLocations;
     private int textureIndex;
+    private int lightValue;
 
     Block(int id, String humanName, IBlockRenderer renderer, String textureLocations[],
-          boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered, boolean decreaseLight) {
+          boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered, boolean decreaseLight,
+          int lightValue) {
         this.id = id;
         this.renderer = renderer;
         this.translucent = translucent;
@@ -25,6 +27,7 @@ public class Block {
         this.selectable = selectable;
         this.occludeCovered = occludeCovered;
         this.decreaseLight = decreaseLight;
+        this.lightValue = lightValue;
     }
 
     public IBlockRenderer getRenderer() {
@@ -101,6 +104,14 @@ public class Block {
      */
     public boolean decreasesLight() {
         return this.decreaseLight;
+    }
+
+    /**
+     * Get the light emission value of the block
+     * @return Integer between 0 and 15 representing the light emission value of the block
+     */
+    public int getLightValue() {
+        return this.lightValue;
     }
 
     /**

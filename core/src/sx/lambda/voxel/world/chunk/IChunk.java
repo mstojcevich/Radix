@@ -101,7 +101,7 @@ public interface IChunk extends Serializable, Disposable {
      * @param x X value, relative to the chunk. 0->(chunk size - 1)
      * @param y Y value, relative to the chunk. 0->(chunk height - 1)
      * @param z Z value, relative to the chunk. 0->(chunk size - 1)
-     * @return Sunlight value, between 0 and 16
+     * @return Sunlight value, between 0 and 15
      */
     int getSunlight(int x, int y, int z);
 
@@ -110,9 +110,27 @@ public interface IChunk extends Serializable, Disposable {
      * @param x X value, relative to the chunk. 0->(chunk size - 1)
      * @param y Y value, relative to the chunk. 0->(chunk height - 1)
      * @param z Z value, relative to the chunk. 0->(chunk size - 1)
-     * @param level Value between 0 and 16 for sunlight
+     * @param level Value between 0 and 15 for sunlight
      */
     void setSunlight(int x, int y, int z, int level);
+
+    /**
+     * Get the blocklight at the specified position
+     * @param x
+     * @param y
+     * @param z
+     * @return Blocklight value, between 0 and 15
+     */
+    int getBlocklight(int x, int y, int z);
+
+    /**
+     * Set the blocklight at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     * @param level Value between 0 and 15 for blocklight
+     */
+    void setBlocklight(int x, int y, int z, int level);
 
     void eachBlock(EachBlockCallee action);
 
@@ -145,6 +163,8 @@ public interface IChunk extends Serializable, Disposable {
      * Returns true if the chunk is waiting for a light update to finish before rerendering
      */
     boolean waitingOnLightFinish();
+
+    int getMaxLightLevel();
 
     interface EachBlockCallee {
         void call(Block block, int x, int y, int z);

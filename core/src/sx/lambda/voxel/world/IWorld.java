@@ -54,9 +54,16 @@ public interface IWorld {
     ChunkGenerator getChunkGen();
 
     /**
-     * Add a position to the sunlight queue
+     * Add a block to a list of blocks to process sunlight for
+     * The block at the position passed should be translucent or null and have a sunlight level greater than 0
      */
     void addToSunlightQueue(int x, int y, int z);
+
+    /**
+     * Add a block to the list of blocks to process block light for
+     * The block at the position should not be null and should have a blocklight level greater than 0.
+     */
+    void addToBlocklightQueue(int x, int y, int z);
 
     /**
      * Add a position to the sunlight removal queue

@@ -9,16 +9,24 @@ import java.util.Queue;
 /**
  * Worker that processes a light update queue
  */
-class LightQueueWorker extends Thread {
+abstract class LightQueueWorker extends Thread {
 
     private final Queue<int[]> lightUpdateQueue;
     private final IWorld world;
     private final Side[] sides;
+    private final boolean decayDown;
 
-    public LightQueueWorker(IWorld world, Queue<int[]> lightUpdateQueue) {
+    /**
+     * @param world World that light is updating in
+     * @param lightUpdateQueue Light queue to process
+     * @param decayDown Whether light should decay when heading down and at full brightness.
+     *                  This should be set to false for sunlight since sunlight doesn't decay when heading down at max brightness.
+     */
+    public LightQueueWorker(IWorld world, Queue<int[]> lightUpdateQueue, boolean decayDown) {
         this.world = world;
         this.lightUpdateQueue = lightUpdateQueue;
         this.sides = Side.values();
+        this.decayDown = decayDown;
     }
 
     @Override
@@ -41,7 +49,7 @@ class LightQueueWorker extends Thread {
                     if (posChunk == null) {
                         continue;
                     }
-                    int ll = posChunk.getSunlight(cx, y, cz);
+                    int ll = getLight(posChunk, cx, y, cz);
 
                     // Spread off to each side
                     for (Side s : sides) {
@@ -105,14 +113,14 @@ class LightQueueWorker extends Thread {
                         // Spread lighting
                         Block sBlock = sChunk.getBlock(scx, sy, scz);
                         // When spreading down, lighting at max level does not decay
-                        if (s == Side.BOTTOM) {
+                        if (!decayDown && s == Side.BOTTOM) {
                             Block block = posChunk.getBlock(cx, y, cz); // Block being spread from
-                            if (ll == 16 && (block == null || block.decreasesLight()))
-                                nextLL = 16;
+                            if (ll == posChunk.getMaxLightLevel() && (block == null || block.decreasesLight()))
+                                nextLL = posChunk.getMaxLightLevel();
                         }
                         if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
-                            if (sChunk.getSunlight(scx, sy, scz) < nextLL) {
-                                sChunk.setSunlight(scx, sy, scz, nextLL);
+                            if (getLight(sChunk, scx, sy, scz) < nextLL) {
+                                setLight(sChunk, scx, sy, scz, nextLL);
                                 lightUpdateQueue.add(new int[]{sx, sy, sz});
                                 updatedLight = true;
                             }
@@ -133,5 +141,9 @@ class LightQueueWorker extends Thread {
             }
         }
     }
+
+    protected abstract int getLight(IChunk c, int cx, int cy, int cz);
+
+    protected abstract void setLight(IChunk c, int cx, int cy, int cz, int newLight);
 
 }

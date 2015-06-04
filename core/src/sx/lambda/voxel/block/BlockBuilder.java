@@ -14,6 +14,7 @@ public class BlockBuilder {
     private boolean selectable = true;
     private boolean occludeCovered = true;
     private boolean decreaseLight = true;
+    private int lightValue = 0;
 
     /**
      * Set the display name for the block
@@ -120,6 +121,18 @@ public class BlockBuilder {
         return this;
     }
 
+    /**
+     * Set the light value of the block for emitting light
+     *
+     * Defaults to 0
+     *
+     * @param lightValue Integer between 0 and 15 representing the light emission value of the block
+     */
+    public BlockBuilder setLightValue(int lightValue) {
+        this.lightValue = lightValue;
+        return this;
+    }
+
     public BlockBuilder setBlockRenderer(IBlockRenderer renderer) {
         this.renderer = renderer;
         return this;
@@ -133,7 +146,7 @@ public class BlockBuilder {
             }
             renderer = defaultRenderer;
         }
-        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight);
+        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, lightValue);
     }
 
     public class MissingElementException extends Exception {

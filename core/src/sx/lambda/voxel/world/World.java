@@ -58,8 +58,10 @@ public class World implements IWorld {
 
     // Light-related stuff
     private final ExecutorService sunlightPoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
+    private final ExecutorService blocklightPoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
     private final Queue<int[]> sunlightQueue = new LinkedBlockingDeque<>();
     private final Queue<int[]> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<int[]> blocklightQueue = new LinkedBlockingDeque<>();
 
     // Skybox stuff
     private ModelBatch modelBatch;
@@ -80,7 +82,10 @@ public class World implements IWorld {
         }
 
         for(int i = 0; i < LIGHTING_WORKERS; i++) {
-            sunlightPoolExecutor.submit(new LightQueueWorker(this, sunlightQueue));
+            sunlightPoolExecutor.submit(new SunlightQueueWorker(this, sunlightQueue));
+        }
+        for(int i = 0; i < LIGHTING_WORKERS; i++) {
+            blocklightPoolExecutor.submit(new BlocklightQueueWorker(this, blocklightQueue));
         }
     }
 
@@ -324,15 +329,19 @@ public class World implements IWorld {
         return this.chunkGen;
     }
 
-    /**
-     * Add a block to a list of blocks to process sunlight for
-     * The block at the position passed should be translucent or null and have a sunlight level greater than 0
-     */
     @Override
     public void addToSunlightQueue(int x, int y, int z) {
         sunlightQueue.add(new int[]{x, y, z});
         synchronized(sunlightQueue) {
             sunlightQueue.notify();
+        }
+    }
+
+    @Override
+    public void addToBlocklightQueue(int x, int y, int z) {
+        blocklightQueue.add(new int[]{x, y, z});
+        synchronized(blocklightQueue) {
+            blocklightQueue.notify();
         }
     }
 
@@ -349,7 +358,7 @@ public class World implements IWorld {
                         c.getStartPosition().x, c.getStartPosition().z)
                         <= VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE)
                 .forEach(c -> {
-            setupSunlighting(c);
+            setupLighting(c);
             c.finishAddingSun();
         });
         if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty()) {
@@ -566,7 +575,7 @@ public class World implements IWorld {
         return new ModelInstance(skyboxModel = modelBuilder.end());
     }
 
-    private void setupSunlighting(IChunk c) {
+    private void setupLighting(IChunk c) {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
                 int y = WORLD_HEIGHT-1;
@@ -574,11 +583,25 @@ public class World implements IWorld {
                     break;
                 }
                 sunlightQueue.add(new int[]{c.getStartPosition().x + x, y, c.getStartPosition().z + z});
-                c.setSunlight(x, y, z, 16);
+                c.setSunlight(x, y, z, c.getMaxLightLevel());
+
+                for(int cy = 0; cy < getHeight(); cy++) {
+                    int id = c.getBlockId(x, cy, z);
+                    if(id > 0) {
+                        Block blk = VoxelGameAPI.instance.getBlockByID(id);
+                        if(blk.getLightValue() > 0) {
+                            c.setBlocklight(x, cy, z, blk.getLightValue());
+                            addToBlocklightQueue(c.getStartPosition().x + x, c.getStartPosition().y + cy, c.getStartPosition().z + z);
+                        }
+                    }
+                }
             }
         }
         synchronized (sunlightQueue) {
             sunlightQueue.notifyAll();
+        }
+        synchronized (blocklightQueue) {
+            blocklightQueue.notifyAll();
         }
     }
 

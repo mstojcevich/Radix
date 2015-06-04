@@ -2,6 +2,9 @@ package sx.lambda.voxel.net.mc.client.handlers;
 
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerBlockChangePacket;
 import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.api.BuiltInBlockIds;
+import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket> {
@@ -25,8 +28,15 @@ public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket
         IChunk chunk = game.getWorld().getChunk(x, z);
         if(chunk != null) {
             if (id > 0) {
-                chunk.setBlock(id, chunkRelativeX, y, chunkRelativeZ);
-                chunk.setMeta((short) meta, chunkRelativeX, y, chunkRelativeZ);
+                boolean blockExists = false;
+                for(Block b : VoxelGameAPI.instance.getBlocks()) {
+                    if(b.getID() == id) {
+                        blockExists = true;
+                        break;
+                    }
+                }
+                chunk.setBlock(blockExists? id : BuiltInBlockIds.UNKNOWN_ID, chunkRelativeX, y, chunkRelativeZ);
+                chunk.setMeta((short) (blockExists ? meta : 0), chunkRelativeX, y, chunkRelativeZ);
             } else {
                 chunk.removeBlock(chunkRelativeX, y, chunkRelativeZ);
                 chunk.setMeta((short) 0, chunkRelativeX, y, chunkRelativeZ);

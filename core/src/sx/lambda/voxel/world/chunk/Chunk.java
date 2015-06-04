@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.MathUtils;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.api.events.render.EventChunkRender;
@@ -25,13 +26,15 @@ import java.util.List;
 
 public class Chunk implements IChunk {
 
+    private static final int MAX_LIGHT_LEVEL = 15;
+
     private final transient GreedyMesher mesher;
     private final int size;
     private final int height;
     /**
-     * Map of light levels (ints 0-16) to brightness multipliers
+     * Map of light levels (ints 0-15) to brightness multipliers
      */
-    private final float[] lightLevelMap = new float[17];
+    private final float[] lightLevelMap = new float[MAX_LIGHT_LEVEL+1];
     private int[][][] blockList;
     private final short[][][] metadata;
     private final transient IWorld parentWorld;
@@ -42,8 +45,8 @@ public class Chunk implements IChunk {
     private transient ModelInstance opaqueModelInstance, translucentModelInstance;
     private final Vec3i startPosition;
     private int highestPoint;
-    private final transient float[][][] lightLevels;
     private transient int[][][] sunlightLevels;
+    private transient int[][][] blocklightLevels;
     private transient boolean sunlightChanging;
     private transient boolean sunlightChanged;
     private boolean setup;
@@ -62,12 +65,13 @@ public class Chunk implements IChunk {
         this.height = world.getHeight();
         this.metadata = meta;
 
-        for (int i = 0; i < 17; i++) {
-            int reduction = 16 - i;
+        for (int i = 0; i <= MAX_LIGHT_LEVEL; i++) {
+            int reduction = MAX_LIGHT_LEVEL - i;
             lightLevelMap[i] = (float) Math.pow(0.8, reduction);
         }
 
         sunlightLevels = new int[size][height][size];
+        blocklightLevels = new int[size][height][size];
 
         if (VoxelGameClient.getInstance() != null) {// We're a client
             mesher = new GreedyMesher(this);
@@ -77,8 +81,6 @@ public class Chunk implements IChunk {
 
 
         this.loadIdInts(ids);
-
-        lightLevels = new float[size][height][size];
     }
 
     public Chunk(IWorld world, Vec3i startPosition, Biome biome) {
@@ -89,8 +91,8 @@ public class Chunk implements IChunk {
         this.biome = biome;
         this.metadata = new short[size][height][size];
 
-        for (int i = 0; i < 17; i++) {
-            int reduction = 16 - i;
+        for (int i = 0; i <= MAX_LIGHT_LEVEL; i++) {
+            int reduction = MAX_LIGHT_LEVEL - i;
             lightLevelMap[i] = (float) Math.pow(0.8, reduction);
         }
 
@@ -105,8 +107,6 @@ public class Chunk implements IChunk {
 
         this.blockList = new int[size][height][size];
         highestPoint = world.getChunkGen().generate(startPosition, blockList);
-
-        lightLevels = new float[size][height][size];
     }
 
     @Override
@@ -171,7 +171,7 @@ public class Chunk implements IChunk {
         }
     }
 
-    private void addNeighborsToSunlightQueue(int x, int y, int z) {// X Y and Z are relative coords, not world coords
+    private void addNeighborsToLightQueues(int x, int y, int z) {// X Y and Z are relative coords, not world coords
         assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
         int cx = x;
@@ -238,10 +238,14 @@ public class Chunk implements IChunk {
                 continue;
 
             int sSunlight = sChunk.getSunlight(scx, sy, scz);
-            if (sSunlight > 1) {
+            int sBlocklight = sChunk.getBlocklight(scx, sy, scz);
+            if (sSunlight > 0 || sBlocklight > 0) {
                 Block sBlock = sChunk.getBlock(scx, sy, scz);
                 if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
-                    parentWorld.addToSunlightQueue(sx, sy, sz);
+                    if(sSunlight > 0)
+                        parentWorld.addToSunlightQueue(sx, sy, sz);
+                    if(sBlocklight > 0)
+                        parentWorld.addToBlocklightQueue(sx, sy, sz);
                 }
             }
         }
@@ -251,7 +255,9 @@ public class Chunk implements IChunk {
     public float getLightLevel(int x, int y, int z) {
         assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
-        return lightLevels[x][y][z];
+        int sunlight = sunlightLevels[x][y][z];
+        int blocklight = blocklightLevels[x][y][z];
+        return lightLevelMap[MathUtils.clamp(sunlight+blocklight, 0, MAX_LIGHT_LEVEL)];
     }
 
     @Override
@@ -271,10 +277,12 @@ public class Chunk implements IChunk {
         }
 
         blockList[x][y][z] = -1;
+        blocklightLevels[x][y][z] = 0;
+        // TODO XXX LIGHTING add to block light removal queue
 
         getWorld().rerenderChunk(this);
 
-        this.addNeighborsToSunlightQueue(x, y, z);
+        this.addNeighborsToLightQueues(x, y, z);
     }
 
     @Override
@@ -289,6 +297,26 @@ public class Chunk implements IChunk {
         if(block == 0) {
             removeBlock(x, y, z);
             return;
+        }
+
+        int oldBlock = blockList[x][y][z];
+        Block blk = VoxelGameAPI.instance.getBlockByID(block);
+        if(blk == null)
+            System.err.println(block + " was trying to be set, but was null. WTF?");
+        int newBlocklightVal = blk.getLightValue();
+        blocklightLevels[x][y][z] = newBlocklightVal;
+        if(oldBlock > 0) {
+            Block oldBlk = VoxelGameAPI.instance.getBlockByID(oldBlock);
+            int oldBlocklightVal = oldBlk.getLightValue();
+            if(newBlocklightVal > oldBlocklightVal) {
+                parentWorld.addToBlocklightQueue(startPosition.x + x, startPosition.y + y, startPosition.z + z);
+            } else if(oldBlocklightVal > newBlocklightVal) {
+                // TODO XXX LIGTHTING add to blocklight removal queue
+            }
+        } else {
+            if(newBlocklightVal > 0) {
+                parentWorld.addToBlocklightQueue(startPosition.x + x, startPosition.y + y, startPosition.z + z);
+            }
         }
 
         blockList[x][y][z] = block;
@@ -388,7 +416,9 @@ public class Chunk implements IChunk {
         parentWorld.incrChunksMeshing();
         final Block[][][] translucent = new Block[size][height][size];
         final Block[][][] opaque = new Block[size][height][size];
+        final float[][][] lightLevels = new float[size][height][size];
         eachBlock((block, x, y, z) -> {
+            lightLevels[x][y][z] = getLightLevel(x, y, z);
             if (block != null) {
                 if (block.isTranslucent())
                     translucent[x][y][z] = block;
@@ -416,10 +446,9 @@ public class Chunk implements IChunk {
     @Override
     public void setSunlight(int x, int y, int z, int level) {
         assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-        assert level >= 0 && level < 17;
+        assert level >= 0 && level <= MAX_LIGHT_LEVEL;
 
         sunlightLevels[x][y][z] = level;
-        lightLevels[x][y][z] = lightLevelMap[level];
 
         sunlightChanging = true;
         sunlightChanged = true;
@@ -430,6 +459,19 @@ public class Chunk implements IChunk {
         assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
 
         return sunlightLevels[x][y][z];
+    }
+
+    @Override
+    public void setBlocklight(int x, int y, int z, int level) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+        assert level >= 0 && level <= MAX_LIGHT_LEVEL;
+
+        blocklightLevels[x][y][z] = level;
+    }
+
+    @Override
+    public int getBlocklight(int x, int y, int z) {
+        return blocklightLevels[x][y][z];
     }
 
     @Override
@@ -474,6 +516,11 @@ public class Chunk implements IChunk {
     @Override
     public IWorld getWorld() {
         return this.parentWorld;
+    }
+
+    @Override
+    public int getMaxLightLevel() {
+        return MAX_LIGHT_LEVEL;
     }
 
     @Override

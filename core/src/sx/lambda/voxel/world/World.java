@@ -179,15 +179,15 @@ public class World implements IWorld {
             lastPlayerChunk = playerChunk;
         }
 
+        float playerX = VoxelGameClient.getInstance().getPlayer().getPosition().getX(),
+                playerY = VoxelGameClient.getInstance().getPlayer().getPosition().getY(),
+                playerZ = VoxelGameClient.getInstance().getPlayer().getPosition().getZ();
+        modelBatch.begin(VoxelGameClient.getInstance().getCamera());
+        skybox.transform.translate(playerX, playerY, playerZ);
+        modelBatch.render(skybox);
+        skybox.transform.translate(-playerX, -playerY, -playerZ);
         if(sortedChunkList != null) {
             long renderStartNS = System.nanoTime();
-            modelBatch.begin(VoxelGameClient.getInstance().getCamera());
-            float playerX = VoxelGameClient.getInstance().getPlayer().getPosition().getX(),
-                    playerY = VoxelGameClient.getInstance().getPlayer().getPosition().getY(),
-                    playerZ = VoxelGameClient.getInstance().getPlayer().getPosition().getZ();
-            skybox.transform.translate(playerX, playerY, playerZ);
-            modelBatch.render(skybox);
-            skybox.transform.translate(-playerX, -playerY, -playerZ);
             if(VoxelGameClient.getInstance().isWireframe())
                 Gdx.gl.glLineWidth(5);
             boolean[] chunkVisible = new boolean[sortedChunkList.size()];
@@ -213,7 +213,6 @@ public class World implements IWorld {
                 }
                 chunkNum++;
             }
-            modelBatch.end();
             if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
                 VoxelGameClient.getInstance().numChunkRenders = 0;
                 VoxelGameClient.getInstance().chunkRenderTimes = 0;
@@ -221,6 +220,7 @@ public class World implements IWorld {
             VoxelGameClient.getInstance().chunkRenderTimes += (int) (System.nanoTime() - renderStartNS);
             VoxelGameClient.getInstance().numChunkRenders++;
         }
+        modelBatch.end();
     }
 
     @Override

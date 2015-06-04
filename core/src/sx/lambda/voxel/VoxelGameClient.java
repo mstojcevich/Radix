@@ -66,11 +66,8 @@ import static com.badlogic.gdx.graphics.GL20.*;
 
 public class VoxelGameClient extends ApplicationAdapter {
 
-    public static final boolean DEBUG = false;
     public static final String GAME_TITLE = "VoxelTest";
     private static VoxelGameClient theGame;
-    public int chunkRenderTimes = 0;
-    public int numChunkRenders = 0;
     private SettingsManager settingsManager;
     private IWorld world;
     private Player player;

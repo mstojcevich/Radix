@@ -213,12 +213,6 @@ public class World implements IWorld {
                 }
                 chunkNum++;
             }
-            if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
-                VoxelGameClient.getInstance().numChunkRenders = 0;
-                VoxelGameClient.getInstance().chunkRenderTimes = 0;
-            }
-            VoxelGameClient.getInstance().chunkRenderTimes += (int) (System.nanoTime() - renderStartNS);
-            VoxelGameClient.getInstance().numChunkRenders++;
         }
         modelBatch.end();
     }

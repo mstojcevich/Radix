@@ -146,15 +146,6 @@ class GameRenderer implements Renderer {
         fpsRender.setPosition(Gdx.graphics.width - fpsGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()
 
-        int acrt = 0
-        if (game.numChunkRenders > 0) {
-            acrt = (int) (game.chunkRenderTimes / game.numChunkRenders)
-        }
-        String lcrtStr = "AWRT: $acrt ns"
-        GlyphLayout awrtGl = awrtRender.setText(lcrtStr, 0, 0)
-        awrtRender.setPosition(Gdx.graphics.width - awrtGl.width, (float) (Gdx.graphics.height - currentHeight))
-        currentHeight += debugTextRenderer.getLineHeight()
-
         DecimalFormat posFormat = new DecimalFormat("#.00");
         String coordsStr = String.format("(x,y,z): %s,%s,%s",
                 posFormat.format(game.player.position.x),

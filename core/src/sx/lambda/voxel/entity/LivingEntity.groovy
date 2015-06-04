@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.collision.BoundingBox
 import groovy.transform.CompileStatic
+import sx.lambda.voxel.VoxelGameClient
+import sx.lambda.voxel.block.Block
 import sx.lambda.voxel.tasks.MovementHandler
 import sx.lambda.voxel.world.IWorld
 import sx.lambda.voxel.world.chunk.IChunk
@@ -43,7 +45,22 @@ public abstract class LivingEntity extends Entity implements Serializable {
         } else {
             if(yVelocity < 0) { // falling down and failed because we hit the ground
                 // prevent overshoot causing the player to not reach the ground
-                getPosition().set(position.x, MathUtils.floor(position.y), position.z); // go directly to ground
+                int x = MathUtils.floor(position.x)
+                int y = MathUtils.floor(position.y)
+                int z = MathUtils.floor(position.z)
+                int cx = x & (VoxelGameClient.instance.world.chunkSize-1)
+                int cz = z & (VoxelGameClient.instance.world.chunkSize-1)
+
+                IChunk chunk = VoxelGameClient.instance.world.getChunk(x, z)
+                if (chunk != null) {
+                    // go directly to ground
+                    for(int downY = y; downY > y+yVelocity; downY--) {
+                        Block block = chunk.getBlock(cx, downY, cz);
+                        if(block != null) {
+                            getPosition().set(position.x, (float)block.calculateBoundingBox(chunk, cx, downY, cz).max.y + 0.015f, position.z)
+                        }
+                    }
+                }
             }
             yVelocity = 0
         }

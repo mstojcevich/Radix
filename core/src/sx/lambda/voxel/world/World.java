@@ -156,70 +156,72 @@ public class World implements IWorld {
         final IChunk playerChunk = getChunk(
                 MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getX()),
                 MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getZ()));
-        if(playerChunk != null && (playerChunk != lastPlayerChunk || (sortedChunkList != null && chunkList.size() != sortedChunkList.size()))) {
-            sortedChunkList = new ArrayList<>();
-            for(IChunk c : chunkList) {
-                if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                        VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
-                    sortedChunkList.add(c);
+        if(VoxelGameClient.getInstance().shouldRenderChunks()) {
+            if (playerChunk != null && (playerChunk != lastPlayerChunk || (sortedChunkList != null && chunkList.size() != sortedChunkList.size()))) {
+                sortedChunkList = new ArrayList<>();
+                for (IChunk c : chunkList) {
+                    if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                            VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
+                        sortedChunkList.add(c);
+                    }
                 }
+                Collections.sort(sortedChunkList, new Comparator<IChunk>() {
+                    @Override
+                    public int compare(IChunk c1, IChunk c2) {
+                        int xDiff1 = playerChunk.getStartPosition().x - c1.getStartPosition().x;
+                        int zDiff1 = playerChunk.getStartPosition().z - c1.getStartPosition().z;
+                        int xDiff2 = playerChunk.getStartPosition().x - c2.getStartPosition().x;
+                        int zDiff2 = playerChunk.getStartPosition().z - c2.getStartPosition().z;
+                        int sqDist2 = xDiff2 * xDiff2 + zDiff2 * zDiff2;
+                        int sqDist1 = xDiff1 * xDiff1 + zDiff1 * zDiff1;
+                        return sqDist2 - sqDist1;
+                    }
+                });
+                lastPlayerChunk = playerChunk;
             }
-            Collections.sort(sortedChunkList, new Comparator<IChunk>() {
-                @Override
-                public int compare(IChunk c1, IChunk c2) {
-                    int xDiff1 = playerChunk.getStartPosition().x - c1.getStartPosition().x;
-                    int zDiff1 = playerChunk.getStartPosition().z - c1.getStartPosition().z;
-                    int xDiff2 = playerChunk.getStartPosition().x - c2.getStartPosition().x;
-                    int zDiff2 = playerChunk.getStartPosition().z - c2.getStartPosition().z;
-                    int sqDist2 = xDiff2*xDiff2 + zDiff2*zDiff2;
-                    int sqDist1 = xDiff1*xDiff1 + zDiff1*zDiff1;
-                    return sqDist2 - sqDist1;
-                }
-            });
-            lastPlayerChunk = playerChunk;
-        }
 
-        if(sortedChunkList != null) {
-            long renderStartNS = System.nanoTime();
-            modelBatch.begin(VoxelGameClient.getInstance().getCamera());
-            float playerX = VoxelGameClient.getInstance().getPlayer().getPosition().getX(),
-                    playerY = VoxelGameClient.getInstance().getPlayer().getPosition().getY(),
-                    playerZ = VoxelGameClient.getInstance().getPlayer().getPosition().getZ();
-            skybox.transform.translate(playerX, playerY, playerZ);
-            modelBatch.render(skybox);
-            skybox.transform.translate(-playerX, -playerY, -playerZ);
-            if(VoxelGameClient.getInstance().isWireframe())
-                Gdx.gl.glLineWidth(5);
-            boolean[] chunkVisible = new boolean[sortedChunkList.size()];
-            int chunkNum = 0;
-            for (IChunk c : sortedChunkList) {
-                int x = c.getStartPosition().x;
-                int z = c.getStartPosition().z;
-                int halfWidth = getChunkSize()/2;
-                int midX = x + halfWidth;
-                int midZ = z + halfWidth;
-                int midY = c.getHighestPoint()/2;
-                boolean visible = VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
-                chunkVisible[chunkNum] = visible;
-                chunkNum++;
-                if(visible) {
-                    c.render(modelBatch);
+            if (sortedChunkList != null) {
+                long renderStartNS = System.nanoTime();
+                modelBatch.begin(VoxelGameClient.getInstance().getCamera());
+                float playerX = VoxelGameClient.getInstance().getPlayer().getPosition().getX(),
+                        playerY = VoxelGameClient.getInstance().getPlayer().getPosition().getY(),
+                        playerZ = VoxelGameClient.getInstance().getPlayer().getPosition().getZ();
+                skybox.transform.translate(playerX, playerY, playerZ);
+                modelBatch.render(skybox);
+                skybox.transform.translate(-playerX, -playerY, -playerZ);
+                if (VoxelGameClient.getInstance().isWireframe())
+                    Gdx.gl.glLineWidth(5);
+                boolean[] chunkVisible = new boolean[sortedChunkList.size()];
+                int chunkNum = 0;
+                for (IChunk c : sortedChunkList) {
+                    int x = c.getStartPosition().x;
+                    int z = c.getStartPosition().z;
+                    int halfWidth = getChunkSize() / 2;
+                    int midX = x + halfWidth;
+                    int midZ = z + halfWidth;
+                    int midY = c.getHighestPoint() / 2;
+                    boolean visible = VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
+                    chunkVisible[chunkNum] = visible;
+                    chunkNum++;
+                    if (visible) {
+                        c.render(modelBatch);
+                    }
                 }
-            }
-            chunkNum = 0;
-            for (IChunk c : sortedChunkList) {
-                if(chunkVisible[chunkNum]) {
-                    c.renderTranslucent(modelBatch);
+                chunkNum = 0;
+                for (IChunk c : sortedChunkList) {
+                    if (chunkVisible[chunkNum]) {
+                        c.renderTranslucent(modelBatch);
+                    }
+                    chunkNum++;
                 }
-                chunkNum++;
+                modelBatch.end();
+                if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
+                    VoxelGameClient.getInstance().numChunkRenders = 0;
+                    VoxelGameClient.getInstance().chunkRenderTimes = 0;
+                }
+                VoxelGameClient.getInstance().chunkRenderTimes += (int) (System.nanoTime() - renderStartNS);
+                VoxelGameClient.getInstance().numChunkRenders++;
             }
-            modelBatch.end();
-            if (VoxelGameClient.getInstance().numChunkRenders == 100) {  // Reset every 100 renders
-                VoxelGameClient.getInstance().numChunkRenders = 0;
-                VoxelGameClient.getInstance().chunkRenderTimes = 0;
-            }
-            VoxelGameClient.getInstance().chunkRenderTimes += (int) (System.nanoTime() - renderStartNS);
-            VoxelGameClient.getInstance().numChunkRenders++;
         }
     }
 

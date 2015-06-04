@@ -108,6 +108,9 @@ public class VoxelGameClient extends ApplicationAdapter {
     private ImageButton jumpButton, placeButton, breakButton;
 
     private boolean wireframe;
+    private boolean shouldRenderChunks;
+
+    private long lastDongMS;
 
     public static VoxelGameClient getInstance() {
         return theGame;
@@ -269,38 +272,40 @@ public class VoxelGameClient extends ApplicationAdapter {
                 renderer.render();
             }
 
-            guiBatch.begin();
-            if (renderer != null) {
-                renderer.draw2d(guiBatch);
-            }
+            if(world  == null || shouldRenderChunks()) {
+                guiBatch.begin();
+                if (renderer != null) {
+                    renderer.draw2d(guiBatch);
+                }
 
-            if (currentScreen != null) {
-                currentScreen.render(world != null, guiBatch);
-            }
+                if (currentScreen != null) {
+                    currentScreen.render(world != null, guiBatch);
+                }
 
-            if(transitionAnimation != null) {
-                transitionAnimation.render(guiBatch);
-                if(transitionAnimation.isFinished()) {
-                    transitionAnimation.finish();
-                    transitionAnimation = null;
+                if (transitionAnimation != null) {
+                    transitionAnimation.render(guiBatch);
+                    if (transitionAnimation.isFinished()) {
+                        transitionAnimation.finish();
+                        transitionAnimation = null;
+                    }
+                }
+
+                guiBatch.end();
+
+                if (world != null && android) {
+                    updatePositionRotationAndroid();
+                    androidStage.act();
+                    androidStage.draw();
                 }
             }
 
-            guiBatch.end();
-
-            if(world != null && android) {
-                updatePositionRotationAndroid();
-                androidStage.act();
-                androidStage.draw();
-            }
-
+            shouldRenderChunks = false;
         } catch (Exception e) {
             done = true;
             e.printStackTrace();
             Gdx.input.setCursorCatched(false);
             Gdx.app.exit();
         }
-
     }
 
     private void runQueuedOGL() {
@@ -315,7 +320,11 @@ public class VoxelGameClient extends ApplicationAdapter {
         int clear = GL_DEPTH_BUFFER_BIT;
         if(world == null || getCurrentScreen() != hud || (transitionAnimation != null && !transitionAnimation.isFinished()))
             clear |= GL_COLOR_BUFFER_BIT;
-        Gdx.gl.glClear(clear);
+        if(world == null || gameRenderer.shouldCalcFrustum() || System.currentTimeMillis() - lastDongMS > 30) {
+            lastDongMS = System.currentTimeMillis();
+            Gdx.gl.glClear(clear);
+            shouldRenderChunks = true;
+        }
     }
 
     public void updateSelectedBlock() {
@@ -690,4 +699,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         this.wireframe = wireframe;
     }
 
+    public boolean shouldRenderChunks() {
+        return shouldRenderChunks;
+    }
 }

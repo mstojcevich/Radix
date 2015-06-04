@@ -195,7 +195,8 @@ public class GreedyMesher implements Mesher {
                             Block block2 = VoxelGameAPI.instance.getBlockByID(id2);
                             // Other block renderers may alter shape in an unpredictable way
                             if(block1.getRenderer().getClass() == NormalBlockRenderer.class
-                                    && block2.getRenderer().getClass() == NormalBlockRenderer.class)
+                                    && block2.getRenderer().getClass() == NormalBlockRenderer.class
+                                    && !block1.isTranslucent() && !block2.isTranslucent())
                                 sameBlock = true; // Consider them the same block
                         }
                         return sameBlock && sameLight;

@@ -10,11 +10,6 @@ public class EntityPosition extends Vector3 implements Cloneable {
         super(x, y, z);
     }
 
-    @Override
-    public EntityPosition clone() {
-        return new EntityPosition(getX(), getY(), getZ());
-    }
-
     public float planeDistance(float xp, float zp) {
         return (float)Math.sqrt(Math.pow(xp - getX(), 2) + Math.pow(zp - getZ(), 2));
     }

@@ -50,10 +50,8 @@ import sx.lambda.voxel.render.Renderer;
 import sx.lambda.voxel.render.game.GameRenderer;
 import sx.lambda.voxel.settings.SettingsManager;
 import sx.lambda.voxel.tasks.*;
-import sx.lambda.voxel.texture.TextureManager;
 import sx.lambda.voxel.util.PlotCell3f;
 import sx.lambda.voxel.util.Vec3i;
-import sx.lambda.voxel.util.gl.ShaderManager;
 import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.World;
 import sx.lambda.voxel.world.chunk.IChunk;
@@ -68,32 +66,36 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     public static final String GAME_TITLE = "VoxelTest";
     private static VoxelGameClient theGame;
+
     private SettingsManager settingsManager;
+
+    private boolean done; // Whether the game has finished and should shut down
+
+    private boolean remote; // Whether the player is connected to a remote server
     private IWorld world;
     private Player player;
-    private boolean done;
-    private Vec3i selectedBlock;
-    private Vec3i selectedNextPlace;
-    private Queue<Runnable> glQueue = new ConcurrentLinkedDeque<>();
+    private Vec3i selectedBlock; // selected block to break next
+    private Vec3i selectedNextPlace; // selected block to place at next
+
+    private MinecraftClientConnection mcClientConn;
+
+    private final Queue<Runnable> glQueue = new ConcurrentLinkedDeque<>();
+
+    private GuiScreen currentScreen;
+    private TransitionAnimation transitionAnimation;
+    private Renderer renderer; // renders the game
+    private GameRenderer gameRenderer; // renderer for when in game
     private MainMenu mainMenu;
     private IngameHUD hud;
     private ChatGUI chatGUI;
-    private GuiScreen currentScreen;
-    private TextureManager textureManager = new TextureManager();
-    private ShaderManager shaderManager = new ShaderManager();
-    private Renderer renderer;
-    private TransitionAnimation transitionAnimation;
-    private boolean remote;
-    private GameRenderer gameRenderer;
+
     private Texture blockTextureAtlas;
     private PerspectiveCamera camera;
     private OrthographicCamera hudCamera;
     private SpriteBatch guiBatch;
 
-    private MinecraftClientConnection mcClientConn;
-
-    private MovementHandler movementHandler = new MovementHandler(this);
-    private RepeatedTask[] handlers = new RepeatedTask[]{new WorldLoader(this), movementHandler, new EntityUpdater(this), new LightUpdater(this)};
+    private final MovementHandler movementHandler = new MovementHandler(this);
+    private final RepeatedTask[] handlers = new RepeatedTask[]{new WorldLoader(this), movementHandler, new EntityUpdater(this), new LightUpdater(this)};
 
     // Android specific stuff
     private boolean android;
@@ -372,14 +374,6 @@ public class VoxelGameClient extends ApplicationAdapter {
         return player;
     }
 
-    public TextureManager getTextureManager() {
-        return textureManager;
-    }
-
-    public ShaderManager getShaderManager() {
-        return shaderManager;
-    }
-
     public boolean isDone() {
         return done;
     }
@@ -403,24 +397,16 @@ public class VoxelGameClient extends ApplicationAdapter {
     private void setRenderer(Renderer renderer) {
         if (renderer == null) {
             if (this.renderer != null) {
-                synchronized (this.renderer) {
-                    this.renderer.cleanup();
-                    this.renderer = null;
-                }
-
-            } else {
+                this.renderer.cleanup();
                 this.renderer = null;
             }
-
         } else if (this.renderer == null) {
             this.renderer = renderer;
             this.renderer.init();
-        } else if (!this.renderer.equals(renderer)) {
-            synchronized (this.renderer) {
-                this.renderer.cleanup();
-                this.renderer = renderer;
-                this.renderer.init();
-            }
+        } else {
+            this.renderer.cleanup();
+            this.renderer = renderer;
+            this.renderer.init();
         }
     }
 
@@ -450,12 +436,9 @@ public class VoxelGameClient extends ApplicationAdapter {
             currentScreen = screen;
             screen.init();
         } else if (!currentScreen.equals(screen)) {
-            synchronized (currentScreen) {
-                currentScreen.finish();
-                currentScreen = screen;
-                screen.init();
-            }
-
+            currentScreen.finish();
+            currentScreen = screen;
+            screen.init();
         }
 
         if (screen.equals(hud) && !android) {
@@ -463,19 +446,6 @@ public class VoxelGameClient extends ApplicationAdapter {
         } else {
             Gdx.input.setCursorCatched(false);
         }
-
-    }
-
-    public IngameHUD getHud() {
-        return this.hud;
-    }
-
-    public ChatGUI getChatGUI() {
-        return this.chatGUI;
-    }
-
-    public GameRenderer getGameRenderer() {
-        return this.gameRenderer;
     }
 
     public void enterRemoteWorld(final String hostname, final short port) {
@@ -500,21 +470,17 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     public void exitWorld() {
-        addToGLQueue(new Runnable() {
-            @Override
-            public void run() {
-                setCurrentScreen(mainMenu);
-                setRenderer(null);
-                getWorld().cleanup();
-                if (isRemote()) {
-                    mcClientConn.getClient().getSession().disconnect("Exiting world");
-                }
-
-                world = null;
-                remote = false;
-                player = null;
+        addToGLQueue(() -> {
+            setCurrentScreen(mainMenu);
+            setRenderer(null);
+            getWorld().cleanup();
+            if (isRemote()) {
+                mcClientConn.getClient().getSession().disconnect("Exiting world");
             }
 
+            world = null;
+            remote = false;
+            player = null;
         });
 
         if(android) {
@@ -559,29 +525,25 @@ public class VoxelGameClient extends ApplicationAdapter {
     @EventListener(Priority.LAST)
     public void onBlockRegister(EventEarlyInit event) {
         // Create a texture atlas for all of the blocks
-        addToGLQueue(new Runnable() {
-            @Override
-            public void run() {
-                Pixmap bi = new Pixmap(1024, 1024, Pixmap.Format.RGBA8888);
-                bi.setColor(1, 1, 1, 1);
-                final int BLOCK_TEX_SIZE = 32;
-                int textureIndex = 0;
-                for (Block b : VoxelGameAPI.instance.getBlocks()) {
-                    b.setTextureIndex(textureIndex);
-                    for (String texLoc : b.getTextureLocations()) {
-                        int x = textureIndex * BLOCK_TEX_SIZE % bi.getWidth();
-                        int y = BLOCK_TEX_SIZE * ((textureIndex * BLOCK_TEX_SIZE) / bi.getWidth());
-                        Pixmap tex = new Pixmap(Gdx.files.internal(texLoc));
-                        bi.drawPixmap(tex, x, y);
-                        tex.dispose();
-                        textureIndex++;
-                    }
+        addToGLQueue(() -> {
+            Pixmap bi = new Pixmap(1024, 1024, Pixmap.Format.RGBA8888);
+            bi.setColor(1, 1, 1, 1);
+            final int BLOCK_TEX_SIZE = 32;
+            int textureIndex = 0;
+            for (Block b : VoxelGameAPI.instance.getBlocks()) {
+                b.setTextureIndex(textureIndex);
+                for (String texLoc : b.getTextureLocations()) {
+                    int x = textureIndex * BLOCK_TEX_SIZE % bi.getWidth();
+                    int y = BLOCK_TEX_SIZE * ((textureIndex * BLOCK_TEX_SIZE) / bi.getWidth());
+                    Pixmap tex = new Pixmap(Gdx.files.internal(texLoc));
+                    bi.drawPixmap(tex, x, y);
+                    tex.dispose();
+                    textureIndex++;
                 }
-
-                blockTextureAtlas = new Texture(bi);
-                bi.dispose();
             }
 
+            blockTextureAtlas = new Texture(bi);
+            bi.dispose();
         });
     }
 
@@ -599,22 +561,6 @@ public class VoxelGameClient extends ApplicationAdapter {
 
         if(android)
             androidStage.getViewport().update(width, height, true);
-    }
-
-    public boolean onAndroid() {
-        return android;
-    }
-
-    public PerspectiveCamera getCamera() {
-        return camera;
-    }
-
-    public OrthographicCamera getHudCamera() {
-        return hudCamera;
-    }
-
-    public MovementHandler getMovementHandler() {
-        return movementHandler;
     }
 
     public void breakBlock() {
@@ -677,6 +623,34 @@ public class VoxelGameClient extends ApplicationAdapter {
                 gameRenderer.calculateFrustum();
             }
         }
+    }
+
+    public boolean onAndroid() {
+        return android;
+    }
+
+    public PerspectiveCamera getCamera() {
+        return camera;
+    }
+
+    public OrthographicCamera getHudCamera() {
+        return hudCamera;
+    }
+
+    public MovementHandler getMovementHandler() {
+        return movementHandler;
+    }
+
+    public IngameHUD getHud() {
+        return this.hud;
+    }
+
+    public ChatGUI getChatGUI() {
+        return this.chatGUI;
+    }
+
+    public GameRenderer getGameRenderer() {
+        return this.gameRenderer;
     }
 
     public boolean isWireframe() {

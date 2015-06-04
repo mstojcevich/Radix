@@ -42,7 +42,7 @@ public class MovementHandler implements RepeatedTask {
                     long moveDiffMS = lastMoveCheckMS - System.currentTimeMillis();
                     float movementMultiplier = moveDiffMS * 0.0043f;
                     final boolean threeDMove = false;
-                    EntityPosition lastPosition = player.getPosition().clone();
+                    Vector3 lastPosition = player.getPosition().cpy();
                     if (game.getCurrentScreen().equals(game.getHud())) {
                         float deltaX = 0;
                         float deltaY = 0;
@@ -77,15 +77,15 @@ public class MovementHandler implements RepeatedTask {
                         if (Gdx.input.isKeyPressed(Input.Keys.A)) {//Strafe left
                             float yaw = player.getRotation().getYaw();
 
-                            deltaX += -MathUtils.sinDeg((float) yaw - 90) * movementMultiplier;
-                            deltaZ += MathUtils.cosDeg((float) yaw - 90) * movementMultiplier;
+                            deltaX += -MathUtils.sinDeg(yaw - 90) * movementMultiplier;
+                            deltaZ += MathUtils.cosDeg(yaw - 90) * movementMultiplier;
                         }
 
                         if (Gdx.input.isKeyPressed(Input.Keys.D)) {//Strafe right
                             float yaw = player.getRotation().getYaw();
 
-                            deltaX += -MathUtils.sinDeg((float) yaw + 90) * movementMultiplier;
-                            deltaZ += MathUtils.cosDeg((float) yaw + 90) * movementMultiplier;
+                            deltaX += -MathUtils.sinDeg(yaw + 90) * movementMultiplier;
+                            deltaZ += MathUtils.cosDeg(yaw + 90) * movementMultiplier;
                         }
 
 
@@ -178,11 +178,7 @@ public class MovementHandler implements RepeatedTask {
         int cz = z & (game.getWorld().getChunkSize() - 1);
         Block block = chunk.getBlock(cx, y, cz);
 
-        if (block != null && block.isSolid()) {
-            return block.calculateBoundingBox(chunk, cx, y, cz).contains(pos);
-        } else {
-            return false;
-        }
+        return block != null && block.isSolid() && block.calculateBoundingBox(chunk, cx, y, cz).contains(pos);
     }
 
     public void jump() {

@@ -13,12 +13,12 @@ public class VoxelGameAPI {
 
     public static final VoxelGameAPI instance = new VoxelGameAPI();
     private final EventManager eventManager;
-    private List<Block> registeredBlocks = new ArrayList<>();
-    private Block[] registeredBlockArray = new Block[Short.MAX_VALUE];
-    private Biome[] registeredBiomeArray = new Biome[Short.MAX_VALUE];
+    private final List<Block> registeredBlocks = new ArrayList<>();
+    private final Block[] registeredBlockArray = new Block[Short.MAX_VALUE];
+    private final Biome[] registeredBiomeArray = new Biome[Short.MAX_VALUE];
     private int highestID = 0;
 
-    public VoxelGameAPI() {
+    private VoxelGameAPI() {
         this.eventManager = new IridiumEventManager();
     }
 

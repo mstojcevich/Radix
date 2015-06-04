@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ChatGUI implements GuiScreen, ChatHandler.ChatMessageListener {
 
-    private List<String> chatMessages = new ArrayList<>();
+    private final List<String> chatMessages = new ArrayList<>();
 
     private BitmapFont font;
     private BitmapFontCache fontCache;

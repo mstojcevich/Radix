@@ -9,7 +9,7 @@ import java.util.Queue;
 /**
  * Worker that processes a light update queue
  */
-public class LightQueueWorker extends Thread {
+class LightQueueWorker extends Thread {
 
     private final Queue<int[]> lightUpdateQueue;
     private final IWorld world;

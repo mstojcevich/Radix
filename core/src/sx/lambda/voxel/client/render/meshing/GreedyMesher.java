@@ -177,30 +177,24 @@ public class GreedyMesher implements Mesher {
     }
 
     public List<Face> getFaces(Block[][][] voxels, short[][][] metadata, float[][][] lightLevels) {
-        return getFaces(voxels, metadata, lightLevels, new OccludeCondition() {
-                    @Override
-                    public boolean shouldOcclude(Block curBlock, Block blockToSide) {
-                        return !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
-                                && (curBlock.occludeCovered() && blockToSide.occludeCovered());
+        return getFaces(voxels, metadata, lightLevels,
+                (curBlock, blockToSide) ->
+                        !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
+                                && (curBlock.occludeCovered() && blockToSide.occludeCovered()),
+                (id1, meta1, light1, id2, meta2, light2) -> {
+                    boolean sameBlock = id1 == id2 && meta1 == meta2;
+                    boolean sameLight = light1 == light2;
+                    boolean tooDarkToTell = light1 < 0.1f; // Too dark to tell they're not the same block
+                    if(sameLight && !sameBlock && tooDarkToTell) {
+                        Block block1 = VoxelGameAPI.instance.getBlockByID(id1);
+                        Block block2 = VoxelGameAPI.instance.getBlockByID(id2);
+                        // Other block renderers may alter shape in an unpredictable way
+                        if(block1.getRenderer().getClass() == NormalBlockRenderer.class
+                                && block2.getRenderer().getClass() == NormalBlockRenderer.class
+                                && !block1.isTranslucent() && !block2.isTranslucent())
+                            sameBlock = true; // Consider them the same block
                     }
-                },
-                new MergeCondition() {
-                    @Override
-                    public boolean shouldMerge(int id1, int meta1, float light1, int id2, int meta2, float light2) {
-                        boolean sameBlock = id1 == id2 && meta1 == meta2;
-                        boolean sameLight = light1 == light2;
-                        boolean tooDarkToTell = light1 < 0.1f; // Too dark to tell they're not the same block
-                        if(sameLight && !sameBlock && tooDarkToTell) {
-                            Block block1 = VoxelGameAPI.instance.getBlockByID(id1);
-                            Block block2 = VoxelGameAPI.instance.getBlockByID(id2);
-                            // Other block renderers may alter shape in an unpredictable way
-                            if(block1.getRenderer().getClass() == NormalBlockRenderer.class
-                                    && block2.getRenderer().getClass() == NormalBlockRenderer.class
-                                    && !block1.isTranslucent() && !block2.isTranslucent())
-                                sameBlock = true; // Consider them the same block
-                        }
-                        return sameBlock && sameLight;
-                    }
+                    return sameBlock && sameLight;
                 });
     }
 

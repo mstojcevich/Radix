@@ -160,11 +160,6 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void renderTranslucent(ModelBatch batch) {
-
-    }
-
-    @Override
     public void eachBlock(EachBlockCallee callee) {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < height; y++) {
@@ -174,28 +169,6 @@ public class Chunk implements IChunk {
                 }
             }
         }
-    }
-
-    @Override
-    public void removeBlock(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        if(x == size - 1) {
-            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x + size, getStartPosition().z));
-        } else if(x == 0) {
-            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x - size, getStartPosition().z));
-        }
-        if(z == size - 1) {
-            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x, getStartPosition().z + size));
-        } else if(z == 0) {
-            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x, getStartPosition().z - size));
-        }
-
-        blockList[x][y][z] = -1;
-
-        getWorld().rerenderChunk(this);
-
-        this.addNeighborsToSunlightQueue(x, y, z);
     }
 
     private void addNeighborsToSunlightQueue(int x, int y, int z) {// X Y and Z are relative coords, not world coords
@@ -275,6 +248,36 @@ public class Chunk implements IChunk {
     }
 
     @Override
+    public float getLightLevel(int x, int y, int z) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+
+        return lightLevels[x][y][z];
+    }
+
+    @Override
+    //TODO remove entirely in favor of setBlock(0 ?
+    public void removeBlock(int x, int y, int z) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+
+        if(x == size - 1) {
+            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x + size, getStartPosition().z));
+        } else if(x == 0) {
+            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x - size, getStartPosition().z));
+        }
+        if(z == size - 1) {
+            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x, getStartPosition().z + size));
+        } else if(z == 0) {
+            getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x, getStartPosition().z - size));
+        }
+
+        blockList[x][y][z] = -1;
+
+        getWorld().rerenderChunk(this);
+
+        this.addNeighborsToSunlightQueue(x, y, z);
+    }
+
+    @Override
     public void setBlock(int block, int x, int y, int z) {
         setBlock(block, x, y, z, true);
     }
@@ -321,18 +324,6 @@ public class Chunk implements IChunk {
         return highestPoint;
     }
 
-    @Override
-    public float getLightLevel(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        return lightLevels[x][y][z];
-    }
-
-    @Override
-    public int[][][] getBlockIds() {
-        return blockList;
-    }
-
     private void loadIdInts(int[][][] ints) {
         blockList = ints;
         highestPoint = 0;
@@ -344,52 +335,6 @@ public class Chunk implements IChunk {
                 }
             }
         }
-    }
-
-    @Override
-    public void setSunlight(int x, int y, int z, int level) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-        assert level >= 0 && level < 17;
-
-        sunlightLevels[x][y][z] = level;
-        lightLevels[x][y][z] = lightLevelMap[level];
-
-        sunlightChanging = true;
-        sunlightChanged = true;
-    }
-
-    @Override
-    public int getSunlight(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        return sunlightLevels[x][y][z];
-    }
-
-    @Override
-    public IWorld getWorld() {
-        return this.parentWorld;
-    }
-
-    @Override
-    public void dispose() {
-        if(opaqueModel != null)
-            opaqueModel.dispose();
-        if(translucentModel != null)
-            translucentModel.dispose();
-        cleanedUp = true;
-    }
-
-    public int getBlockId(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        return blockList[x][y][z];
-    }
-
-    @Override
-    public Block getBlock(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
     }
 
     private void updateModelInstances() {
@@ -443,15 +388,12 @@ public class Chunk implements IChunk {
         parentWorld.incrChunksMeshing();
         final Block[][][] translucent = new Block[size][height][size];
         final Block[][][] opaque = new Block[size][height][size];
-        eachBlock(new EachBlockCallee() {
-            @Override
-            public void call(Block block, int x, int y, int z) {
-                if (block != null) {
-                    if (block.isTranslucent())
-                        translucent[x][y][z] = block;
-                    else
-                        opaque[x][y][z] = block;
-                }
+        eachBlock((block, x, y, z) -> {
+            if (block != null) {
+                if (block.isTranslucent())
+                    translucent[x][y][z] = block;
+                else
+                    opaque[x][y][z] = block;
             }
         });
         opaqueFaces = mesher.getFaces(opaque, metadata, lightLevels);
@@ -463,28 +405,46 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public Biome getBiome() {
-        return this.biome;
+    public void dispose() {
+        if(opaqueModel != null)
+            opaqueModel.dispose();
+        if(translucentModel != null)
+            translucentModel.dispose();
+        cleanedUp = true;
     }
 
     @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + this.startPosition.x;
-        hash = 71 * hash + this.startPosition.z;
-        return hash;
+    public void setSunlight(int x, int y, int z, int level) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+        assert level >= 0 && level < 17;
+
+        sunlightLevels[x][y][z] = level;
+        lightLevels[x][y][z] = lightLevelMap[level];
+
+        sunlightChanging = true;
+        sunlightChanged = true;
     }
 
     @Override
-    public boolean isLighted() {
-        return lighted;
+    public int getSunlight(int x, int y, int z) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+
+        return sunlightLevels[x][y][z];
     }
 
     @Override
-    public void setLighted(boolean lighted) {
-        this.lighted = lighted;
+    public int getBlockId(int x, int y, int z) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+
+        return blockList[x][y][z];
     }
 
+    @Override
+    public Block getBlock(int x, int y, int z) {
+        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+
+        return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
+    }
 
     @Override
     public void finishChangingSunlight() {
@@ -494,6 +454,34 @@ public class Chunk implements IChunk {
     @Override
     public boolean waitingOnLightFinish() {
         return sunlightChanging;
+    }
+
+    @Override
+    public boolean hasInitialSun() {
+        return lighted;
+    }
+
+    @Override
+    public void finishAddingSun() {
+        this.lighted = true;
+    }
+
+    @Override
+    public Biome getBiome() {
+        return this.biome;
+    }
+
+    @Override
+    public IWorld getWorld() {
+        return this.parentWorld;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 71 * hash + this.startPosition.x;
+        hash = 71 * hash + this.startPosition.z;
+        return hash;
     }
 
 }

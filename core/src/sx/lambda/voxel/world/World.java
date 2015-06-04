@@ -35,40 +35,39 @@ import java.util.concurrent.*;
 public class World implements IWorld {
 
     private static final int CHUNK_SIZE = 16;
-
     private static final int WORLD_HEIGHT = 256;
-
     private static final int SEA_LEVEL = 64;
+    private static final float GRAVITY = 6f;
+    private static final float TERMINAL_VELOCITY = 56;
 
-    private static final int LIGHTING_WORKERS = 4;
+    /**
+     * The amount of lighting workers to have per light type (sunlight and blocklight)
+     */
+    private static final int LIGHTING_WORKERS = 2;
 
+    // Chunk storage TODO simplify
     private final IntMap<IntMap<IChunk>> chunkMapX = new IntMap<>();
     private final Set<IChunk> chunkList = new ConcurrentSet<>();
     private List<IChunk> sortedChunkList;
-
+    private final Set<IChunk> chunksToRerender = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private IChunk lastPlayerChunk;
 
-    private static final float GRAVITY = 6f;
-
-    private static final float TERMINAL_VELOCITY = 56;
-
-    private final ChunkGenerator chunkGen;
-
     private final boolean remote, server;
+    private final ChunkGenerator chunkGen;
+    private final List<Entity> loadedEntities = new CopyOnWriteArrayList<>();
 
-    private List<Entity> loadedEntities = new CopyOnWriteArrayList<>();
-
-    private Set<IChunk> chunksToRerender = Collections.newSetFromMap(new ConcurrentHashMap<IChunk, Boolean>());
-
-    private final ExecutorService lightUpdatePoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
+    // Light-related stuff
+    private final ExecutorService sunlightPoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
     private final Queue<int[]> sunlightQueue = new LinkedBlockingDeque<>();
     private final Queue<int[]> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
 
+    // Skybox stuff
     private ModelBatch modelBatch;
     private ModelInstance skybox;
     private Model skyboxModel;
     private Texture skyboxTexture;
 
+    // The amount of chunks currently meshing. TODO have a queue system with a limited queue
     private int chunksMeshing;
 
     public World(boolean remote, boolean server) {
@@ -81,7 +80,7 @@ public class World implements IWorld {
         }
 
         for(int i = 0; i < LIGHTING_WORKERS; i++) {
-            lightUpdatePoolExecutor.submit(new LightQueueWorker(this, sunlightQueue));
+            sunlightPoolExecutor.submit(new LightQueueWorker(this, sunlightQueue));
         }
     }
 
@@ -187,11 +186,8 @@ public class World implements IWorld {
         modelBatch.render(skybox);
         skybox.transform.translate(-playerX, -playerY, -playerZ);
         if(sortedChunkList != null) {
-            long renderStartNS = System.nanoTime();
             if(VoxelGameClient.getInstance().isWireframe())
                 Gdx.gl.glLineWidth(5);
-            boolean[] chunkVisible = new boolean[sortedChunkList.size()];
-            int chunkNum = 0;
             for (IChunk c : sortedChunkList) {
                 int x = c.getStartPosition().x;
                 int z = c.getStartPosition().z;
@@ -200,18 +196,9 @@ public class World implements IWorld {
                 int midZ = z + halfWidth;
                 int midY = c.getHighestPoint()/2;
                 boolean visible = VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
-                chunkVisible[chunkNum] = visible;
-                chunkNum++;
                 if(visible) {
                     c.render(modelBatch);
                 }
-            }
-            chunkNum = 0;
-            for (IChunk c : sortedChunkList) {
-                if(chunkVisible[chunkNum]) {
-                    c.renderTranslucent(modelBatch);
-                }
-                chunkNum++;
             }
         }
         modelBatch.end();
@@ -356,20 +343,17 @@ public class World implements IWorld {
 
     @Override
     public void processLightQueue() {
-        for(IChunk c : chunkList) {
-            if(!c.isLighted()) {
-                if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <= VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
-                    setupSunlighting(c);
-                    c.setLighted(true);
-                }
-            }
-        }
+        // If the chunk is not lighted and it is in range, setup lighting then set as lighted
+        chunkList.stream().filter(c -> !c.hasInitialSun())
+                .filter(c -> VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(
+                        c.getStartPosition().x, c.getStartPosition().z)
+                        <= VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE)
+                .forEach(c -> {
+            setupSunlighting(c);
+            c.finishAddingSun();
+        });
         if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty()) {
-            for(IChunk c : chunkList) {
-                if(c.waitingOnLightFinish()) {
-                    c.finishChangingSunlight();
-                }
-            }
+            chunkList.stream().filter(IChunk::waitingOnLightFinish).forEach(IChunk::finishChangingSunlight);
             return;
         }
         processLightRemovalQueue();
@@ -483,9 +467,7 @@ public class World implements IWorld {
 
     @Override
     public void cleanup() {
-        for (IChunk c : chunkList) {
-            c.dispose();
-        }
+        chunkList.forEach(IChunk::dispose);
         modelBatch.dispose();
         modelBatch = null;
         skyboxTexture.dispose();
@@ -496,12 +478,9 @@ public class World implements IWorld {
 
     @Override
     public void rerenderChunks() {
-        for(IChunk c : chunkList) {
-            if(VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                    VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
-                rerenderChunk(c);
-            }
-        }
+        // If the chunk is in range, rerender it
+        chunkList.stream().filter(c -> VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE).forEach(this::rerenderChunk);
     }
 
     public int getNumChunksMeshing() {

@@ -114,14 +114,6 @@ public interface IChunk extends Serializable, Disposable {
      */
     void setSunlight(int x, int y, int z, int level);
 
-    /**
-     * Render the translucent parts of the chunk
-     * @param batch Batch to render onto
-     */
-    void renderTranslucent(ModelBatch batch);
-
-    int[][][] getBlockIds();
-
     void eachBlock(EachBlockCallee action);
 
     /**
@@ -139,12 +131,18 @@ public interface IChunk extends Serializable, Disposable {
      */
     Biome getBiome();
 
-    boolean isLighted();
-
-    void setLighted(boolean b);
+    /**
+     * Whether the chunk as obtained its initial sunlight from World
+     */
+    boolean hasInitialSun();
 
     /**
-     * Returns true if the chunk is waiting for light to finish updating to rerender
+     * Called after the chunk as finished getting initial sunlight fromm world
+     */
+    void finishAddingSun();
+
+    /**
+     * Returns true if the chunk is waiting for a light update to finish before rerendering
      */
     boolean waitingOnLightFinish();
 

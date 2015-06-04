@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ChatHandler implements PacketHandler<ServerChatPacket> {
 
-    private List<ChatMessageListener> listeners = new ArrayList<>();
+    private final List<ChatMessageListener> listeners = new ArrayList<>();
 
     public ChatHandler(VoxelGameClient game) {}
 

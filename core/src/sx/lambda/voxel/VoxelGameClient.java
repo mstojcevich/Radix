@@ -221,13 +221,12 @@ public class VoxelGameClient extends ApplicationAdapter {
     private void setupOGL() {
         Gdx.gl.glEnable(GL_TEXTURE_2D);
         Gdx.gl.glEnable(GL_DEPTH_TEST);//Enable depth visibility check
-        Gdx.gl.glDepthFunc(GL_LEQUAL);//How to test depth (less than or equal)
 
         camera = new PerspectiveCamera(90, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(10f, 150f, 10f);
         camera.lookAt(0, 0, 0);
-        camera.near = 0.1f;
-        camera.far = 500f;
+        camera.near = 0.2f;
+        camera.far = 450f;
         camera.update();
         hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 

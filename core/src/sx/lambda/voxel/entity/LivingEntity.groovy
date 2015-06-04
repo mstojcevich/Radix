@@ -56,7 +56,7 @@ public abstract class LivingEntity extends Entity implements Serializable {
                     // go directly to ground
                     for(int downY = y; downY > y+yVelocity; downY--) {
                         Block block = chunk.getBlock(cx, downY, cz);
-                        if(block != null) {
+                        if(block != null && block.isSolid()) {
                             getPosition().set(position.x, (float)block.calculateBoundingBox(chunk, cx, downY, cz).max.y + 0.015f, position.z)
                         }
                     }

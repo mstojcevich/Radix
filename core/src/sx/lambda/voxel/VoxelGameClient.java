@@ -312,7 +312,10 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     private void prepareNewFrame() {
-        Gdx.gl.glClear(GL_DEPTH_BUFFER_BIT);
+        int clear = GL_DEPTH_BUFFER_BIT;
+        if(world == null || getCurrentScreen() != hud || (transitionAnimation != null && !transitionAnimation.isFinished()))
+            clear |= GL_COLOR_BUFFER_BIT;
+        Gdx.gl.glClear(clear);
     }
 
     public void updateSelectedBlock() {
@@ -421,9 +424,7 @@ public class VoxelGameClient extends ApplicationAdapter {
                 this.renderer = renderer;
                 this.renderer.init();
             }
-
         }
-
     }
 
     public boolean isRemote() {

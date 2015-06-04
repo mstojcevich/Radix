@@ -25,7 +25,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
 
     @Override
     public void renderNorth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
-        int zi = MathUtils.floor(z);
+        int zi = MathUtils.floor(z - 1);
         int xi = MathUtils.floor(x1);
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
@@ -59,7 +59,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
     @Override
     public void renderEast(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         int zi = MathUtils.floor(z1);
-        int xi = MathUtils.floor(x);
+        int xi = MathUtils.floor(x - 1);
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);

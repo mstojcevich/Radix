@@ -2,9 +2,11 @@ package sx.lambda.voxel.entity
 
 import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.math.collision.BoundingBox
 import groovy.transform.CompileStatic
 import sx.lambda.voxel.VoxelGameClient
+import sx.lambda.voxel.api.VoxelGameAPI
 import sx.lambda.voxel.block.Block
 import sx.lambda.voxel.tasks.MovementHandler
 import sx.lambda.voxel.world.IWorld
@@ -83,13 +85,31 @@ public abstract class LivingEntity extends Entity implements Serializable {
     }
 
     public int getBlockInFeet(IWorld world) {
-        IChunk chunk = world.getChunk(MathUtils.floor(position.x), MathUtils.floor(position.z))
-        int y = MathUtils.floor(position.y);
+        int x = MathUtils.floor(position.x)
+        int y = MathUtils.floor(position.y)
+        int z = MathUtils.floor(position.z)
+        IChunk chunk = world.getChunk(x, z)
         if (chunk != null && y < world.getHeight()) {
-            return chunk.getBlockId(
-                    MathUtils.floor(position.x) & (world.getChunkSize()-1),
+            int cx = x & (world.getChunkSize()-1)
+            int cz = z & (world.getChunkSize()-1)
+            int id = chunk.getBlockId(
+                    cx,
                     y,
-                    MathUtils.floor(position.z) & (world.getChunkSize()-1))
+                    cz)
+            Block block = VoxelGameAPI.instance.getBlockByID(id);
+            if(block == null)
+                return 0
+            BoundingBox blockBox = block.calculateBoundingBox(chunk, cx, y, cz)
+            float halfWidth = (float)width/2f
+            Vector3 bottomBackLeft = position.cpy().add(-halfWidth, 0, -halfWidth)
+            Vector3 bottomBackRight = bottomBackLeft.cpy().add(width, 0, 0)
+            Vector3 bottomFrontRight = bottomBackRight.cpy().add(0, 0, width)
+            Vector3 bottomFrontLeft = bottomBackLeft.cpy().add(width, 0, 0)
+
+            boolean inFeet = blockBox.contains(bottomBackLeft) || blockBox.contains(bottomBackRight) ||
+                    blockBox.contains(bottomFrontLeft) || blockBox.contains(bottomFrontRight)
+
+            return inFeet ? id : 0
         } else {
             return 0
         }

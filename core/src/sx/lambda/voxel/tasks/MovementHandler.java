@@ -11,7 +11,6 @@ import org.codehaus.groovy.runtime.DefaultGroovyStaticMethods;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.block.Block;
-import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.entity.LivingEntity;
 import sx.lambda.voxel.entity.player.Player;
 import sx.lambda.voxel.world.IWorld;
@@ -122,9 +121,13 @@ public class MovementHandler implements RepeatedTask {
                     }
 
                     int blockInFeet = player.getBlockInFeet(world);
-                    if (blockInFeet == BuiltInBlockIds.WATER_ID || blockInFeet == BuiltInBlockIds.WATER_FLOW_ID) {
+                    boolean inWater = blockInFeet == BuiltInBlockIds.WATER_ID || blockInFeet == BuiltInBlockIds.WATER_FLOW_ID
+                            || blockInFeet == BuiltInBlockIds.LAVA_STILL_ID || blockInFeet == BuiltInBlockIds.LAVA_FLOW_ID;
+                    if (inWater) {
                         if (!Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-                            player.setYVelocity(-0.05f);
+                            player.setYVelocity(-0.05f); // TODO use the same value as mc
+                        } else {
+                            player.setYVelocity(0.05f); // TODO use the same value as mc
                         }
                     } else {
                         player.setYVelocity(world.applyGravity(player.getYVelocity(), moveDiffMS));
@@ -182,8 +185,12 @@ public class MovementHandler implements RepeatedTask {
     }
 
     public void jump() {
+        int blockInFeet = game.getPlayer().getBlockInFeet(game.getWorld());
+        boolean inWater = blockInFeet == BuiltInBlockIds.WATER_ID || blockInFeet == BuiltInBlockIds.WATER_FLOW_ID
+                || blockInFeet == BuiltInBlockIds.LAVA_STILL_ID || blockInFeet == BuiltInBlockIds.LAVA_FLOW_ID;
         if (game.getPlayer().isOnGround()) {
-            game.getPlayer().setYVelocity(0.115f);
+            if(!inWater)
+                game.getPlayer().setYVelocity(0.115f);
             game.getPlayer().setOnGround(false);
         }
     }

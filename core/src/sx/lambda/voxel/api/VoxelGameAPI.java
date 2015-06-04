@@ -45,7 +45,6 @@ public class VoxelGameAPI {
         try {
             IBlockRenderer foliageRenderer = new FlatFoliageRenderer();
             IBlockRenderer coloredFoliageRenderer = new ColoredFoliageRenderer();
-            IBlockRenderer liquidHeightRenderer = new MetadataHeightRenderer(15, true);
             registerBlocks(
                     new BlockBuilder().setID(BuiltInBlockIds.DIRT_ID).setHumanName("Dirt").setTextureLocation("textures/block/dirt.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHumanName("Grass").setTextureLocations("textures/block/grass_top.png", "textures/block/grass_side.png", "textures/block/dirt.png").setBlockRenderer(new GrassRenderer()).build(),
@@ -54,10 +53,10 @@ public class VoxelGameAPI {
                     new BlockBuilder().setID(BuiltInBlockIds.MOSS_STONE_ID).setHumanName("Mossy Cobblestone").setTextureLocation("textures/block/moss_stone.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.SAND_ID).setHumanName("Sand").setTextureLocation("textures/block/sand.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.CLAY_ID).setHumanName("Clay").setTextureLocation("textures/block/clay.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.WATER_ID).setHumanName("Water (Still)").setBlockRenderer(liquidHeightRenderer).setSolid(false).setSelectable(false).setTranslucent(true).setLightPassthrough(true).setTextureLocation("textures/block/water.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.WATER_FLOW_ID).setHumanName("Water (Flowing)").setBlockRenderer(liquidHeightRenderer).setSolid(false).setSelectable(false).setTranslucent(true).setLightPassthrough(true).setTextureLocation("textures/block/water.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.LAVA_STILL_ID).setHumanName("Lava (Still)").setBlockRenderer(liquidHeightRenderer).setSolid(false).setSelectable(false).setTranslucent(true).setLightValue(15).setTextureLocation("textures/block/lava.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.LAVA_FLOW_ID).setHumanName("Lava (Flowing)").setBlockRenderer(liquidHeightRenderer).setSolid(false).setSelectable(false).setTranslucent(false).setLightValue(15).setTextureLocation("textures/block/lava.png").build(),
+                    new Liquid(BuiltInBlockIds.WATER_ID, "Water (Still)", "textures/block/water.png", 0),
+                    new Liquid(BuiltInBlockIds.WATER_FLOW_ID, "Water (Flowing)", "textures/block/water.png", 0),
+                    new Liquid(BuiltInBlockIds.LAVA_STILL_ID, "Lava (Still)", "textures/block/lava.png", 15),
+                    new Liquid(BuiltInBlockIds.LAVA_FLOW_ID, "Lava (Flowing)", "textures/block/lava.png", 15),
                     new BlockBuilder().setID(BuiltInBlockIds.PLANKS_ID).setHumanName("Planks").setTextureLocation("textures/block/planks.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.STONE_BRICK_ID).setHumanName("Stone Brick").setTextureLocation("textures/block/stonebrick.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.TALL_GRASS_ID).setHumanName("Tall Grass").setTextureLocation("textures/block/tallgrass.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(new TallGrassRenderer()).build(),

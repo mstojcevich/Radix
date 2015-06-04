@@ -84,6 +84,7 @@ public class VoxelGameAPI {
                     new BlockBuilder().setID(BuiltInBlockIds.BROWN_MUSHROOM_BLOCK_ID).setHumanName("Brown Mushroom Block").setTextureLocation("textures/block/mushroom_block_skin_brown.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.BROWN_MUSHROOM_ID).setHumanName("Brown Mushroom").setTextureLocation("textures/block/mushroom_brown.png").setTranslucent(true).setLightPassthrough(true).setSolid(false).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.RED_MUSHROOM_ID).setHumanName("Red Mushroom").setTextureLocation("textures/block/mushroom_red.png").setTranslucent(true).setLightPassthrough(true).setSolid(false).build(),
+                    new Fence(),
                     new BlockBuilder().setID(BuiltInBlockIds.UNKNOWN_ID).setHumanName("Unknown").setTextureLocation("textures/block/undefined.png").build()
             );
         } catch (BlockBuilder.MissingElementException ex) {

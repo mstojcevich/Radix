@@ -182,11 +182,13 @@ public class GreedyMesher implements Mesher {
                         !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
                                 && (curBlock.occludeCovered() && blockToSide.occludeCovered()),
                 (id1, meta1, light1, id2, meta2, light2) -> {
+                    Block block1 = VoxelGameAPI.instance.getBlockByID(id1);
+                    if(!block1.shouldGreedyMerge())
+                        return false;
                     boolean sameBlock = id1 == id2 && meta1 == meta2;
                     boolean sameLight = light1 == light2;
                     boolean tooDarkToTell = light1 < 0.1f; // Too dark to tell they're not the same block
                     if(sameLight && !sameBlock && tooDarkToTell) {
-                        Block block1 = VoxelGameAPI.instance.getBlockByID(id1);
                         Block block2 = VoxelGameAPI.instance.getBlockByID(id2);
                         // Other block renderers may alter shape in an unpredictable way
                         if(block1.getRenderer().getClass() == NormalBlockRenderer.class

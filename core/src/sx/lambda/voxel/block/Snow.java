@@ -11,7 +11,7 @@ public class Snow extends Block {
 
     public Snow() {
         super(BuiltInBlockIds.SNOW_ID, "Snow", new MetadataHeightRenderer(7), new String[]{"textures/block/snow.png"},
-                false, true, true, true, false, true, 0);
+                false, true, true, true, false, true, true, 0);
     }
 
     @Override

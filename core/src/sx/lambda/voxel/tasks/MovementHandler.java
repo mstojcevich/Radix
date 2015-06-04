@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import groovy.transform.CompileStatic;
-import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.DefaultGroovyStaticMethods;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
@@ -158,11 +157,25 @@ public class MovementHandler implements RepeatedTask {
 
         boolean collideSuccess = false;
 
+        int x = MathUtils.floor(e.getPosition().x);
+        int y = MathUtils.floor(e.getPosition().y);
+        int z = MathUtils.floor(e.getPosition().z);
+
+        IChunk chunk = game.getWorld().getChunk(x, z);
+        if (chunk == null)
+            return true;
+
+        int cx = x & (game.getWorld().getChunkSize() - 1);
+        int cz = z & (game.getWorld().getChunkSize() - 1);
+        Block block = chunk.getBlock(cx, y, cz);
+
         for (Vector3 corner : getCorners(newBB)) {
-            collideSuccess = DefaultGroovyMethods.or(collideSuccess, checkCollision(corner));
+            collideSuccess = collideSuccess || checkCollision(corner);
         }
 
-        return collideSuccess;
+        return collideSuccess ||
+                (block != null && block.isSolid()
+                        && block.calculateBoundingBox(chunk, cx, y, cz).intersects(newBB));
     }
 
     public boolean checkCollision(Vector3 pos) {

@@ -8,14 +8,15 @@ public class Block {
 
     private int id;
     private final transient IBlockRenderer renderer;
-    private boolean translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight;
+    private boolean translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge;
     private final String humanName;
     private final String[] textureLocations;
     private int textureIndex;
     private int lightValue;
 
     Block(int id, String humanName, IBlockRenderer renderer, String textureLocations[],
-          boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered, boolean decreaseLight,
+          boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered,
+          boolean decreaseLight, boolean greedyMerge,
           int lightValue) {
         this.id = id;
         this.renderer = renderer;
@@ -28,6 +29,7 @@ public class Block {
         this.occludeCovered = occludeCovered;
         this.decreaseLight = decreaseLight;
         this.lightValue = lightValue;
+        this.greedyMerge = greedyMerge;
     }
 
     public IBlockRenderer getRenderer() {
@@ -112,6 +114,10 @@ public class Block {
      */
     public int getLightValue() {
         return this.lightValue;
+    }
+
+    public boolean shouldGreedyMerge() {
+        return this.greedyMerge;
     }
 
     /**

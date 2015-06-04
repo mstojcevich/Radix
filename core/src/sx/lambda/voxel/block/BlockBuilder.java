@@ -14,6 +14,7 @@ public class BlockBuilder {
     private boolean selectable = true;
     private boolean occludeCovered = true;
     private boolean decreaseLight = true;
+    private boolean greedyMerge = true;
     private int lightValue = 0;
 
     /**
@@ -133,6 +134,11 @@ public class BlockBuilder {
         return this;
     }
 
+    public BlockBuilder dontMerge() {
+        this.greedyMerge = false;
+        return this;
+    }
+
     public BlockBuilder setBlockRenderer(IBlockRenderer renderer) {
         this.renderer = renderer;
         return this;
@@ -146,7 +152,7 @@ public class BlockBuilder {
             }
             renderer = defaultRenderer;
         }
-        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, lightValue);
+        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge, lightValue);
     }
 
     public class MissingElementException extends Exception {

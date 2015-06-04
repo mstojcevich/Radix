@@ -41,6 +41,7 @@ public final class BuiltInBlockIds {
                 MOSS_STONE_ID = 48,
                 BROWN_MUSHROOM_ID = 39,
                 RED_MUSHROOM_ID = 40,
+                FENCE_ID = 85,
                 UNKNOWN_ID = 1023;
 
 }

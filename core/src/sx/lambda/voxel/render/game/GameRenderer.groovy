@@ -56,8 +56,8 @@ class GameRenderer implements Renderer {
     void draw2d(SpriteBatch batch) {
         if (!initted) init()
 
-        if (System.currentTimeMillis() - lastDynamicTextRerenderMS >= 1000) { // Rerender the dynamic texts every second
-            createDynamicRenderers(batch)
+        if (System.currentTimeMillis() - lastDynamicTextRerenderMS >= 250) { // Rerender the dynamic texts every quarter second
+            createDynamicRenderers()
             lastDynamicTextRerenderMS = System.currentTimeMillis()
         }
 
@@ -130,7 +130,7 @@ class GameRenderer implements Renderer {
 
     public Frustum getFrustum() { frustum }
 
-    private void createDynamicRenderers(SpriteBatch batch) {
+    private void createDynamicRenderers() {
         float currentHeight = 2
 
         String glInfoStr = String.format("%s (%s) [%s]",

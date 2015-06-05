@@ -55,7 +55,8 @@ public class MovementHandler implements RepeatedTask {
                                 deltaX += MathUtils.sinDeg(yaw) * movementMultiplier;
                                 deltaZ += -MathUtils.cosDeg(yaw) * movementMultiplier;
                             }
-                        } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                        }
+                        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
                             float yaw = player.getRotation().getYaw();
                             float pitch = player.getRotation().getPitch();
                             if (threeDMove) {
@@ -67,26 +68,32 @@ public class MovementHandler implements RepeatedTask {
                                 deltaZ += MathUtils.cosDeg(yaw) * movementMultiplier;
                                 deltaY += 0;
                             }
-                        } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {//Strafe left
+                        }
+                        if (Gdx.input.isKeyPressed(Input.Keys.A)) {//Strafe left
                             float yaw = player.getRotation().getYaw();
 
                             deltaX += MathUtils.sinDeg(yaw - 90) * movementMultiplier;
                             deltaZ += -MathUtils.cosDeg(yaw - 90) * movementMultiplier;
-                        } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {//Strafe right
+                        }
+                        if (Gdx.input.isKeyPressed(Input.Keys.D)) {//Strafe right
                             float yaw = player.getRotation().getYaw();
 
                             deltaX += MathUtils.sinDeg(yaw + 90) * movementMultiplier;
                             deltaZ += -MathUtils.cosDeg(yaw + 90) * movementMultiplier;
                         }
 
-                        if (!checkDeltaCollision(player, 0, 0, deltaZ)) {
-                            player.getPosition().offset(0, 0, deltaZ);
+                        Vector3 deltaVec = new Vector3(deltaX, deltaY, deltaZ);
+                        deltaVec.nor();
+                        deltaVec.set(deltaVec.x*movementMultiplier, deltaVec.y*movementMultiplier, deltaVec.z*movementMultiplier);
+
+                        if (!checkDeltaCollision(player, 0, 0, deltaVec.z)) {
+                            player.getPosition().offset(0, 0, deltaVec.z);
                         }
-                        if (!checkDeltaCollision(player, deltaX, 0, 0)) {
-                            player.getPosition().offset(deltaX, 0, 0);
+                        if (!checkDeltaCollision(player, deltaVec.x, 0, 0)) {
+                            player.getPosition().offset(deltaVec.x, 0, 0);
                         }
-                        if (!checkDeltaCollision(player, 0, deltaY, 0)) {
-                            player.getPosition().offset(0, deltaY, 0);
+                        if (!checkDeltaCollision(player, 0, deltaVec.y, 0)) {
+                            player.getPosition().offset(0, deltaVec.y, 0);
                         }
                     }
 

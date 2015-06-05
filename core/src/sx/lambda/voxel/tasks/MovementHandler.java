@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import groovy.transform.CompileStatic;
-import org.codehaus.groovy.runtime.DefaultGroovyStaticMethods;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.block.Block;
@@ -32,12 +31,12 @@ public class MovementHandler implements RepeatedTask {
             long lastMoveCheckMS = System.currentTimeMillis();
             while (!game.isDone()) {
                 if (game.getWorld() == null || game.getPlayer() == null) {
-                    DefaultGroovyStaticMethods.sleep(null, 1000);
+                    Thread.sleep(1000);
                     lastMoveCheckMS = System.currentTimeMillis();
                 } else {
                     Player player = game.getPlayer();
                     IWorld world = game.getWorld();
-                    long moveDiffMS = lastMoveCheckMS - System.currentTimeMillis();
+                    long moveDiffMS = System.currentTimeMillis() - lastMoveCheckMS;
                     float movementMultiplier = moveDiffMS * 0.0043f;
                     final boolean threeDMove = false;
                     Vector3 lastPosition = player.getPosition().cpy();
@@ -49,52 +48,43 @@ public class MovementHandler implements RepeatedTask {
                             float yaw = player.getRotation().getYaw();
                             float pitch = player.getRotation().getPitch();
                             if (threeDMove) {
-                                deltaX += -MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier;
-                                deltaY += -MathUtils.sinDeg(pitch) * movementMultiplier;
-                                deltaZ += MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier;
-                            } else {
-                                deltaX += -MathUtils.sinDeg(yaw) * movementMultiplier;
-                                deltaZ += MathUtils.cosDeg(yaw) * movementMultiplier;
-                            }
-                        }
-
-                        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                            float yaw = player.getRotation().getYaw();
-                            float pitch = player.getRotation().getPitch();
-                            if (threeDMove) {
                                 deltaX += MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier;
                                 deltaY += MathUtils.sinDeg(pitch) * movementMultiplier;
                                 deltaZ += -MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier;
                             } else {
                                 deltaX += MathUtils.sinDeg(yaw) * movementMultiplier;
                                 deltaZ += -MathUtils.cosDeg(yaw) * movementMultiplier;
+                            }
+                        } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                            float yaw = player.getRotation().getYaw();
+                            float pitch = player.getRotation().getPitch();
+                            if (threeDMove) {
+                                deltaX += -MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier;
+                                deltaY += -MathUtils.sinDeg(pitch) * movementMultiplier;
+                                deltaZ += MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier;
+                            } else {
+                                deltaX += -MathUtils.sinDeg(yaw) * movementMultiplier;
+                                deltaZ += MathUtils.cosDeg(yaw) * movementMultiplier;
                                 deltaY += 0;
                             }
-                        }
-
-                        if (Gdx.input.isKeyPressed(Input.Keys.A)) {//Strafe left
+                        } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {//Strafe left
                             float yaw = player.getRotation().getYaw();
 
-                            deltaX += -MathUtils.sinDeg(yaw - 90) * movementMultiplier;
-                            deltaZ += MathUtils.cosDeg(yaw - 90) * movementMultiplier;
-                        }
-
-                        if (Gdx.input.isKeyPressed(Input.Keys.D)) {//Strafe right
+                            deltaX += MathUtils.sinDeg(yaw - 90) * movementMultiplier;
+                            deltaZ += -MathUtils.cosDeg(yaw - 90) * movementMultiplier;
+                        } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {//Strafe right
                             float yaw = player.getRotation().getYaw();
 
-                            deltaX += -MathUtils.sinDeg(yaw + 90) * movementMultiplier;
-                            deltaZ += MathUtils.cosDeg(yaw + 90) * movementMultiplier;
+                            deltaX += MathUtils.sinDeg(yaw + 90) * movementMultiplier;
+                            deltaZ += -MathUtils.cosDeg(yaw + 90) * movementMultiplier;
                         }
-
 
                         if (!checkDeltaCollision(player, 0, 0, deltaZ)) {
                             player.getPosition().offset(0, 0, deltaZ);
                         }
-
                         if (!checkDeltaCollision(player, deltaX, 0, 0)) {
                             player.getPosition().offset(deltaX, 0, 0);
                         }
-
                         if (!checkDeltaCollision(player, 0, deltaY, 0)) {
                             player.getPosition().offset(0, deltaY, 0);
                         }
@@ -124,15 +114,15 @@ public class MovementHandler implements RepeatedTask {
                             || blockInFeet == BuiltInBlockIds.LAVA_STILL_ID || blockInFeet == BuiltInBlockIds.LAVA_FLOW_ID;
                     if (inWater) {
                         if (!Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-                            player.setYVelocity(-0.05f); // TODO use the same value as mc
+                            player.setYVelocity(-3f); // TODO use the same value as mc
                         } else {
-                            player.setYVelocity(0.05f); // TODO use the same value as mc
+                            player.setYVelocity(3f); // TODO use the same value as mc
                         }
                     } else {
                         player.setYVelocity(world.applyGravity(player.getYVelocity(), moveDiffMS));
                     }
 
-                    player.updateMovement(this);
+                    player.updateMovement(this, moveDiffMS/1000f);
 
                     if (!(player.getPosition().equals(lastPosition))) {
                         player.setMoved(true);
@@ -143,7 +133,7 @@ public class MovementHandler implements RepeatedTask {
                     }
 
                     lastMoveCheckMS = System.currentTimeMillis();
-                    DefaultGroovyStaticMethods.sleep(null, 10);
+                    Thread.sleep(10l);
                 }
             }
         } catch (Exception e) {
@@ -203,7 +193,7 @@ public class MovementHandler implements RepeatedTask {
                 || blockInFeet == BuiltInBlockIds.LAVA_STILL_ID || blockInFeet == BuiltInBlockIds.LAVA_FLOW_ID;
         if (game.getPlayer().isOnGround()) {
             if(!inWater)
-                game.getPlayer().setYVelocity(0.115f);
+                game.getPlayer().setYVelocity(8.5f);
             game.getPlayer().setOnGround(false);
         }
     }

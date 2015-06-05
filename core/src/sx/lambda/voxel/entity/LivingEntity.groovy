@@ -38,12 +38,13 @@ public abstract class LivingEntity extends Entity implements Serializable {
 
     public boolean isOnGround() { this.onGround }
 
-    public void updateMovement(MovementHandler handler) {
+    public void updateMovement(MovementHandler handler, float seconds) {
         if (this.onGround) {
             this.yVelocity = Math.max(this.yVelocity, 0)
         }
-        if (!handler.checkDeltaCollision(this, 0, yVelocity, 0)) {
-            this.getPosition().offset(0, this.yVelocity, 0)
+        float deltaY = yVelocity*seconds;
+        if (!handler.checkDeltaCollision(this, 0, deltaY, 0)) {
+            this.getPosition().offset(0, deltaY, 0)
         } else {
             if(yVelocity < 0) { // falling down and failed because we hit the ground
                 // prevent overshoot causing the player to not reach the ground
@@ -56,7 +57,7 @@ public abstract class LivingEntity extends Entity implements Serializable {
                 IChunk chunk = VoxelGameClient.instance.world.getChunk(x, z)
                 if (chunk != null) {
                     // go directly to ground
-                    for(int downY = y; downY > y+yVelocity; downY--) {
+                    for(int downY = y; downY > y+deltaY; downY--) {
                         Block block = chunk.getBlock(cx, downY, cz);
                         if(block != null && block.isSolid()) {
                             getPosition().set(position.x, (float)block.calculateBoundingBox(chunk, cx, downY, cz).max.y + 0.015f, position.z)

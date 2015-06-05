@@ -19,6 +19,6 @@ class OtherPlayer extends Player {
     void onUpdate() {}
 
     @Override
-    void updateMovement(MovementHandler handler) {}
+    void updateMovement(MovementHandler handler, float seconds) {}
 
 }

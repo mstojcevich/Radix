@@ -37,8 +37,8 @@ public class World implements IWorld {
     private static final int CHUNK_SIZE = 16;
     private static final int WORLD_HEIGHT = 256;
     private static final int SEA_LEVEL = 64;
-    private static final float GRAVITY = 6f;
-    private static final float TERMINAL_VELOCITY = 56;
+    private static final float GRAVITY = 32f;
+    private static final float TERMINAL_VELOCITY = 78.4f;
 
     /**
      * The amount of lighting workers to have per light type (sunlight and blocklight)
@@ -235,8 +235,7 @@ public class World implements IWorld {
 
     @Override
     public float applyGravity(float velocity, long ms) {
-        if (ms < 0) ms = 0 - ms;
-        return Math.max(-TERMINAL_VELOCITY, velocity - (getGravity() / 1000) * (ms / 10f));
+        return Math.max(-TERMINAL_VELOCITY, velocity - getGravity() * (ms / 1000f));
     }
 
     @Override

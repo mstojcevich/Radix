@@ -74,7 +74,7 @@ public class Chunk implements IChunk {
         blocklightLevels = new int[size][height][size];
 
         if (VoxelGameClient.getInstance() != null) {// We're a client
-            mesher = new GreedyMesher(this);
+            mesher = new GreedyMesher(this, VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().perCornerLightEnabled());
         } else {
             mesher = null;
         }
@@ -99,7 +99,7 @@ public class Chunk implements IChunk {
         sunlightLevels = new int[size][height][size];
 
         if (VoxelGameClient.getInstance() != null) {// We're a client
-            mesher = new GreedyMesher(this);
+            mesher = new GreedyMesher(this, VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().perCornerLightEnabled());
         } else {
             mesher = null;
         }

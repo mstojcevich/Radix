@@ -19,12 +19,15 @@ import java.util.List;
 public class GreedyMesher implements Mesher {
 
     private final IChunk chunk;
+    private final boolean perCornerLight;
 
     /**
      * @param chunk Chunk to mesh
+     * @param perCornerLight Whether to average light on a per-corner basis
      */
-    public GreedyMesher(IChunk chunk) {
+    public GreedyMesher(IChunk chunk, boolean perCornerLight) {
         this.chunk = chunk;
+        this.perCornerLight = perCornerLight;
     }
 
     @Override
@@ -37,14 +40,33 @@ public class GreedyMesher implements Mesher {
     public List<Face> getFaces(Block[][][] voxels, short[][][] metadata, float[][][] lightLevels, OccludeCondition ocCond, MergeCondition shouldMerge) {
         List<Face> faces = new ArrayList<>();
 
+        // TODO don't allocate arrays for lightData if pcld is enabled
+
+        PerCornerLightData bright = null;
+        if(perCornerLight) {
+            bright = new PerCornerLightData();
+            bright.l00 = 1;
+            bright.l01 = 1;
+            bright.l10 = 1;
+            bright.l11 = 1;
+        }
+
         // Top, bottom
         for (int y = 0; y < voxels[0].length; y++) {
             int[][] topBlocks = new int[voxels.length][voxels[0][0].length];
             short[][] topMeta = new short[voxels.length][voxels[0][0].length];
             float[][] topLightLevels = new float[voxels.length][voxels[0][0].length];
+            PerCornerLightData[][] topPcld = null;
+            if(perCornerLight) {
+                topPcld = new PerCornerLightData[voxels.length][voxels[0][0].length];
+            }
             int[][] btmBlocks = new int[voxels.length][voxels[0][0].length];
             short[][] btmMeta = new short[voxels.length][voxels[0][0].length];
             float[][] btmLightLevels = new float[voxels.length][voxels[0][0].length];
+            PerCornerLightData[][] btmPcld = null;
+            if(perCornerLight) {
+                btmPcld = new PerCornerLightData[voxels.length][voxels[0][0].length];
+            }
             for (int x = 0; x < voxels.length; x++) {
                 for (int z = 0; z < voxels[0][0].length; z++) {
                     Block curBlock = voxels[x][y][z];
@@ -54,9 +76,21 @@ public class GreedyMesher implements Mesher {
                             topBlocks[x][z] = curBlock.getID();
                             topMeta[x][z] = metadata[x][y][z];
                             topLightLevels[x][z] = lightLevels[x][y + 1][z];
+
+                            if(perCornerLight) {
+                                PerCornerLightData pcld = new PerCornerLightData();
+                                pcld.l00 = calcPerCornerLight(Side.TOP, x, y, z);
+                                pcld.l01 = calcPerCornerLight(Side.TOP, x, y, z + 1);
+                                pcld.l10 = calcPerCornerLight(Side.TOP, x + 1, y, z);
+                                pcld.l11 = calcPerCornerLight(Side.TOP, x + 1, y, z + 1);
+                                topPcld[x][z] = pcld;
+                            }
                         }
                     } else {
                         topBlocks[x][z] = curBlock.getID();
+                        if(perCornerLight) {
+                            topPcld[x][z] = bright;
+                        }
                         topLightLevels[x][z] = 1;
                     }
                     if (y > 0) {
@@ -64,6 +98,15 @@ public class GreedyMesher implements Mesher {
                             btmBlocks[x][z] = curBlock.getID();
                             btmMeta[x][z] = metadata[x][y][z];
                             btmLightLevels[x][z] = lightLevels[x][y - 1][z];
+
+                            if(perCornerLight) {
+                                PerCornerLightData pcld = new PerCornerLightData();
+                                pcld.l00 = calcPerCornerLight(Side.BOTTOM, x, y, z);
+                                pcld.l01 = calcPerCornerLight(Side.BOTTOM, x, y, z + 1);
+                                pcld.l10 = calcPerCornerLight(Side.BOTTOM, x + 1, y, z);
+                                pcld.l11 = calcPerCornerLight(Side.BOTTOM, x + 1, y, z + 1);
+                                btmPcld[x][z] = pcld;
+                            }
                         }
                     } else {
                         btmLightLevels[x][z] = 1;
@@ -71,8 +114,8 @@ public class GreedyMesher implements Mesher {
                     }
                 }
             }
-            greedy(faces, Side.TOP, shouldMerge, topBlocks, topMeta, topLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
-            greedy(faces, Side.BOTTOM, shouldMerge, btmBlocks, btmMeta, btmLightLevels, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
+            greedy(faces, Side.TOP, shouldMerge, topBlocks, topMeta, topLightLevels, topPcld, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
+            greedy(faces, Side.BOTTOM, shouldMerge, btmBlocks, btmMeta, btmLightLevels, btmPcld, y + chunk.getStartPosition().y, chunk.getStartPosition().x, chunk.getStartPosition().z);
         }
 
         // East, west
@@ -80,9 +123,17 @@ public class GreedyMesher implements Mesher {
             int[][] westBlocks = new int[voxels[0][0].length][voxels[0].length];
             short[][] westMeta = new short[voxels[0][0].length][voxels[0].length];
             float[][] westLightLevels = new float[voxels[0][0].length][voxels[0].length];
+            PerCornerLightData[][] westPcld = null;
+            if(perCornerLight) {
+                westPcld = new PerCornerLightData[voxels[0][0].length][voxels[0].length];
+            }
             int[][] eastBlocks = new int[voxels[0][0].length][voxels[0].length];
             short[][] eastMeta = new short[voxels[0][0].length][voxels[0].length];
             float[][] eastLightLevels = new float[voxels[0][0].length][voxels[0].length];
+            PerCornerLightData[][] eastPcld = null;
+            if(perCornerLight) {
+                eastPcld = new PerCornerLightData[voxels[0][0].length][voxels[0].length];
+            }
             for (int z = 0; z < voxels[0][0].length; z++) {
                 for (int y = 0; y < voxels[0].length; y++) {
                     Block curBlock = voxels[x][y][z];
@@ -97,6 +148,15 @@ public class GreedyMesher implements Mesher {
                             westBlocks[z][y] = curBlock.getID();
                             westMeta[z][y] = metadata[x][y][z];
                             westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX & (voxels.length-1), y, z);
+
+                            if(perCornerLight) {
+                                PerCornerLightData pcld = new PerCornerLightData();
+                                pcld.l00 = calcPerCornerLight(Side.WEST, x, y, z);
+                                pcld.l01 = calcPerCornerLight(Side.WEST, x, y, z + 1);
+                                pcld.l10 = calcPerCornerLight(Side.WEST, x, y + 1, z);
+                                pcld.l11 = calcPerCornerLight(Side.WEST, x, y + 1, z + 1);
+                                westPcld[z][y] = pcld;
+                            }
                         }
                     } else {
                         westLightLevels[z][y] = 1;
@@ -112,6 +172,15 @@ public class GreedyMesher implements Mesher {
                             eastBlocks[z][y] = curBlock.getID();
                             eastMeta[z][y] = metadata[x][y][z];
                             eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX & (voxels.length-1), y, z);
+
+                            if(perCornerLight) {
+                                PerCornerLightData pcld = new PerCornerLightData();
+                                pcld.l00 = calcPerCornerLight(Side.EAST, x, y, z);
+                                pcld.l01 = calcPerCornerLight(Side.EAST, x, y, z + 1);
+                                pcld.l10 = calcPerCornerLight(Side.EAST, x, y + 1, z);
+                                pcld.l11 = calcPerCornerLight(Side.EAST, x, y + 1, z + 1);
+                                eastPcld[z][y] = pcld;
+                            }
                         }
                     } else {
                         eastLightLevels[z][y] = 1;
@@ -120,8 +189,8 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.EAST, shouldMerge, eastBlocks, eastMeta, eastLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
-            greedy(faces, Side.WEST, shouldMerge, westBlocks, westMeta, westLightLevels, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.EAST, shouldMerge, eastBlocks, eastMeta, eastLightLevels, eastPcld, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.WEST, shouldMerge, westBlocks, westMeta, westLightLevels, westPcld, x + chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
         }
 
         // North, south
@@ -129,9 +198,17 @@ public class GreedyMesher implements Mesher {
             int[][] northBlocks = new int[voxels.length][voxels[0].length];
             short[][] northMeta = new short[voxels.length][voxels[0].length];
             float[][] northLightLevels = new float[voxels.length][voxels[0].length];
+            PerCornerLightData[][] northPcld = null;
+            if(perCornerLight) {
+                northPcld = new PerCornerLightData[voxels.length][voxels[0].length];
+            }
             int[][] southBlocks = new int[voxels.length][voxels[0].length];
             short[][] southMeta = new short[voxels.length][voxels[0].length];
             float[][] southLightLevels = new float[voxels.length][voxels[0].length];
+            PerCornerLightData[][] southPcld = null;
+            if(perCornerLight) {
+                southPcld = new PerCornerLightData[voxels.length][voxels[0].length];
+            }
             for (int x = 0; x < voxels.length; x++) {
                 for (int y = 0; y < voxels[0].length; y++) {
                     Block curBlock = voxels[x][y][z];
@@ -148,6 +225,15 @@ public class GreedyMesher implements Mesher {
                             northBlocks[x][y] = curBlock.getID();
                             northMeta[x][y] = metadata[x][y][z];
                             northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ & (voxels[0][0].length-1));
+
+                            if(perCornerLight) {
+                                PerCornerLightData pcld = new PerCornerLightData();
+                                pcld.l00 = calcPerCornerLight(Side.NORTH, x, y, z);
+                                pcld.l01 = calcPerCornerLight(Side.NORTH, x, y + 1, z);
+                                pcld.l10 = calcPerCornerLight(Side.NORTH, x + 1, y, z);
+                                pcld.l11 = calcPerCornerLight(Side.NORTH, x + 1, y + 1, z);
+                                northPcld[x][y] = pcld;
+                            }
                         }
                     } else {
                         northLightLevels[x][y] = 1;
@@ -161,6 +247,15 @@ public class GreedyMesher implements Mesher {
                             southBlocks[x][y] = curBlock.getID();
                             southMeta[x][y] = metadata[x][y][z];
                             southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ & (voxels[0][0].length-1));
+
+                            if(perCornerLight) {
+                                PerCornerLightData pcld = new PerCornerLightData();
+                                pcld.l00 = calcPerCornerLight(Side.SOUTH, x, y, z);
+                                pcld.l01 = calcPerCornerLight(Side.SOUTH, x, y + 1, z);
+                                pcld.l10 = calcPerCornerLight(Side.SOUTH, x + 1, y, z);
+                                pcld.l11 = calcPerCornerLight(Side.SOUTH, x + 1, y + 1, z);
+                                southPcld[x][y] = pcld;
+                            }
                         }
                     } else {
                         southLightLevels[x][y] = 1;
@@ -169,8 +264,8 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.NORTH, shouldMerge, northBlocks, northMeta, northLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
-            greedy(faces, Side.SOUTH, shouldMerge, southBlocks, southMeta, southLightLevels, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
+            greedy(faces, Side.NORTH, shouldMerge, northBlocks, northMeta, northLightLevels, northPcld, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
+            greedy(faces, Side.SOUTH, shouldMerge, southBlocks, southMeta, southLightLevels, southPcld, z + chunk.getStartPosition().z, chunk.getStartPosition().x, chunk.getStartPosition().y);
         }
 
         return faces;
@@ -181,17 +276,20 @@ public class GreedyMesher implements Mesher {
                 (curBlock, blockToSide) ->
                         !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
                                 && (curBlock.occludeCovered() && blockToSide.occludeCovered()),
-                (id1, meta1, light1, id2, meta2, light2) -> {
+                (id1, meta1, light1, pcld1, id2, meta2, light2, pcld2) -> {
                     Block block1 = VoxelGameAPI.instance.getBlockByID(id1);
-                    if(!block1.shouldGreedyMerge())
+                    if (!block1.shouldGreedyMerge())
                         return false;
                     boolean sameBlock = id1 == id2 && meta1 == meta2;
                     boolean sameLight = light1 == light2;
                     boolean tooDarkToTell = light1 < 0.1f; // Too dark to tell they're not the same block
-                    if(sameLight && !sameBlock && tooDarkToTell) {
+                    if(perCornerLight) {
+                        sameLight = pcld1.equals(pcld2);
+                    }
+                    if (sameLight && !sameBlock && tooDarkToTell) {
                         Block block2 = VoxelGameAPI.instance.getBlockByID(id2);
                         // Other block renderers may alter shape in an unpredictable way
-                        if(block1.getRenderer().getClass() == NormalBlockRenderer.class
+                        if (block1.getRenderer().getClass() == NormalBlockRenderer.class
                                 && block2.getRenderer().getClass() == NormalBlockRenderer.class
                                 && !block1.isTranslucent() && !block2.isTranslucent())
                             sameBlock = true; // Consider them the same block
@@ -207,7 +305,7 @@ public class GreedyMesher implements Mesher {
      * @param lls        Light levels of the blocks
      * @param z          Depth on the plane
      */
-    private void greedy(List<Face> outputList, Side side, MergeCondition mergeCond, int[][] blks, short metadata[][], float lls[][], int z, int offsetX, int offsetY) {
+    private void greedy(List<Face> outputList, Side side, MergeCondition mergeCond, int[][] blks, short metadata[][], float lls[][], PerCornerLightData[][] pclds, int z, int offsetX, int offsetY) {
         int width = blks.length;
         int height = blks[0].length;
         boolean[][] used = new boolean[blks.length][blks[0].length];
@@ -220,6 +318,9 @@ public class GreedyMesher implements Mesher {
                 used[x][y] = true;
                 float ll = lls[x][y];
                 short meta = metadata[x][y];
+                PerCornerLightData pcld = null;
+                if(perCornerLight)
+                    pcld = pclds[x][y];
                 int endX = x + 1;
                 int endY = y + 1;
                 while (true) {
@@ -229,7 +330,10 @@ public class GreedyMesher implements Mesher {
                         int newBlk = blks[newX][y];
                         float newll = lls[newX][y];
                         short newMeta = metadata[newX][y];
-                        shouldPass = !used[newX][y] && newBlk != 0 && mergeCond.shouldMerge(blk, meta, ll, newBlk, newMeta, newll);
+                        PerCornerLightData newPcld = null;
+                        if(perCornerLight)
+                            newPcld = pclds[newX][y];
+                        shouldPass = !used[newX][y] && newBlk != 0 && mergeCond.shouldMerge(blk, meta, ll, pcld, newBlk, newMeta, newll, newPcld);
                     }
                     // expand right if the same block
                     if (shouldPass) {
@@ -248,8 +352,11 @@ public class GreedyMesher implements Mesher {
                                 }
                                 short lmeta = metadata[lx][endY];
                                 float llight = lls[lx][endY];
+                                PerCornerLightData lPcld = null;
+                                if(perCornerLight)
+                                    lPcld = pclds[lx][endY];
 
-                                if (used[lx][endY] || !mergeCond.shouldMerge(blk, meta, ll, lblk, lmeta, llight)) {
+                                if (used[lx][endY] || !mergeCond.shouldMerge(blk, meta, ll, pcld, lblk, lmeta, llight, lPcld)) {
                                     allPassed = false;
                                     break;
                                 }
@@ -266,17 +373,99 @@ public class GreedyMesher implements Mesher {
                         break;
                     }
                 }
-                outputList.add(new Face(side, blk, ll, x + offsetX, y + offsetY, endX + offsetX, endY + offsetY, z));
+                outputList.add(new Face(side, blk, ll, pcld, x + offsetX, y + offsetY, endX + offsetX, endY + offsetY, z));
             }
         }
     }
 
     public Mesh meshFaces(List<Face> faces, MeshBuilder builder) {
-        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        if(perCornerLight) {
+            builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorUnpacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        } else {
+            builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+        }
         for (Face f : faces) {
             f.render(builder);
         }
         return builder.end();
+    }
+
+    /**
+     * Averages light values at a corner.
+     *
+     * @param side Side of the face being calculated
+     * @param cx Chunk-relative X coordinate for the corner. NOT PRE-OFFSET FOR THE FACE!
+     * @param y Chunk-relative Y coordinate for the corner. NOT PRE-OFFSET FOR THE FACE!
+     * @param cz Chunk-relative Z coordinate for the corner. NOT PRE-OFFSET FOR THE FACE!
+     */
+    private float calcPerCornerLight(Side side, int cx, int y, int cz) {
+        // World coordinates for the positions
+        int wx = chunk.getStartPosition().x + cx;
+        int wz = chunk.getStartPosition().z + cz;
+
+        // coordinate offsets for getting the blocks to average
+        int posX = 0, negX = 0,
+                posY = 0, negY = 0,
+                posZ = 0, negZ = 0;
+        switch(side) {
+            case TOP:
+                // Use the light values from the blocks above the face
+                negY = posY = 1;
+                // Get blocks around the point
+                negZ = negX = -1;
+                break;
+            case BOTTOM:
+                // Use the light values from the blocks below the face
+                negY = posY = -1;
+                // Get blocks around the point
+                negZ = negX = -1;
+                break;
+            case WEST:
+                // Use the light values from the blocks to the west of the face
+                negX = posX = -1;
+                // Get blocks around the point
+                negY = negZ = -1;
+                break;
+            case EAST:
+                // Use the light values from the blocks to the east of the face
+                negX = posX = 1;
+                // Get blocks around the point
+                negY = negZ = -1;
+                break;
+            case NORTH:
+                // Use the light values from the blocks to the north of the face
+                negZ = posZ = 1;
+                // Get blocks around the point
+                negY = negX = -1;
+                break;
+            case SOUTH:
+                // Use the light values from the blocks to the south of the face
+                negZ = posZ = -1;
+                // Get blocks around the point
+                negY = negX = -1;
+                break;
+        }
+        // sx,sy,sz are the x, y, and z positions of the side block
+        int count = 0;
+        float lightSum = 0;
+        for(int sx = wx + negX; sx <= wx + posX; sx++) {
+            for(int sy = y + negY; sy <= y + posY; sy++) {
+                for(int sz = wz + negZ; sz <= wz + posZ; sz++) {
+                    if(sy < 0 || sy >= chunk.getWorld().getHeight())
+                        continue;
+
+                    IChunk sChunk = chunk.getWorld().getChunk(sx, sz);
+                    if(sChunk == null)
+                        continue;
+                    // Convert to chunk-relative coords
+                    int scx = sx & (chunk.getWorld().getChunkSize() - 1);
+                    int scz = sz & (chunk.getWorld().getChunkSize() - 1);
+                    lightSum += sChunk.getLightLevel(scx, sy, scz);
+                    count++;
+                }
+            }
+        }
+        return lightSum / count;
     }
 
     public static class Face {
@@ -284,8 +473,12 @@ public class GreedyMesher implements Mesher {
         private final int x1, y1, x2, y2, z;
         private final Block block;
         private final float lightLevel;
+        private final PerCornerLightData pcld;
 
-        public Face(Side side, int block, float lightLevel, int startX, int startY, int endX, int endY, int z) {
+        /**
+         * @param pcld Per corner light data. Pass null if per corner lighting is disabled.
+         */
+        public Face(Side side, int block, float lightLevel, PerCornerLightData pcld, int startX, int startY, int endX, int endY, int z) {
             this.block = VoxelGameAPI.instance.getBlockByID(block);
             this.lightLevel = lightLevel;
             this.x1 = startX;
@@ -294,6 +487,7 @@ public class GreedyMesher implements Mesher {
             this.y2 = endY;
             this.z = z;
             this.side = side;
+            this.pcld = pcld;
         }
 
         public void render(MeshBuilder builder) {
@@ -301,22 +495,22 @@ public class GreedyMesher implements Mesher {
 
             switch (side) {
                 case TOP:
-                    renderer.renderTop(block.getTextureIndex(), x1, y1, x2, y2, z + 1, lightLevel, null, builder);
+                    renderer.renderTop(block.getTextureIndex(), x1, y1, x2, y2, z + 1, lightLevel, pcld, builder);
                     break;
                 case BOTTOM:
-                    renderer.renderBottom(block.getTextureIndex(), x1, y1, x2, y2, z, lightLevel, null, builder);
+                    renderer.renderBottom(block.getTextureIndex(), x1, y1, x2, y2, z, lightLevel, pcld, builder);
                     break;
                 case NORTH:
-                    renderer.renderNorth(block.getTextureIndex(), x1, y1, x2, y2, z + 1, lightLevel, null, builder);
+                    renderer.renderNorth(block.getTextureIndex(), x1, y1, x2, y2, z + 1, lightLevel, pcld, builder);
                     break;
                 case SOUTH:
-                    renderer.renderSouth(block.getTextureIndex(), x1, y1, x2, y2, z, lightLevel, null, builder);
+                    renderer.renderSouth(block.getTextureIndex(), x1, y1, x2, y2, z, lightLevel, pcld, builder);
                     break;
                 case EAST:
-                    renderer.renderEast(block.getTextureIndex(), x1, y1, x2, y2, z + 1, lightLevel, null, builder);
+                    renderer.renderEast(block.getTextureIndex(), x1, y1, x2, y2, z + 1, lightLevel, pcld, builder);
                     break;
                 case WEST:
-                    renderer.renderWest(block.getTextureIndex(), x1, y1, x2, y2, z, lightLevel, null, builder);
+                    renderer.renderWest(block.getTextureIndex(), x1, y1, x2, y2, z, lightLevel, pcld, builder);
                     break;
 
             }
@@ -333,7 +527,7 @@ public class GreedyMesher implements Mesher {
     }
 
     public interface MergeCondition {
-        boolean shouldMerge(int id1, int meta1, float light1, int id2, int meta2, float light2);
+        boolean shouldMerge(int id1, int meta1, float light1, PerCornerLightData pcld1, int id2, int meta2, float light2, PerCornerLightData pcld2);
     }
 
 }

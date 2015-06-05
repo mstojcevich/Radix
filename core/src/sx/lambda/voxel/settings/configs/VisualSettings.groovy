@@ -15,9 +15,15 @@ class VisualSettings implements Serializable {
      * Whether to draw internal leaves of trees
      */
     private boolean fancyTrees = true
+    /**
+     * Whether to average light values on a per-corner basis
+     */
+    private boolean perCornerLight = true;
 
     public int getViewDistance() { viewDistance }
 
     public boolean isFancyTreesEnabled() { fancyTrees }
+
+    public boolean perCornerLightEnabled() { perCornerLight }
 
 }

@@ -114,7 +114,16 @@ public class Chunk implements IChunk {
         if (cleanedUp)
             return;
 
-        if(sunlightChanging)
+        boolean neighborSunlightChanging = false;
+        for(int x = startPosition.x - 16; x <= startPosition.x + 16; x += 16) {
+            for(int z = startPosition.z - 16; z <= startPosition.z + 16; z += 16) {
+                IChunk c = getWorld().getChunk(x, z);
+                if(c != null && c.waitingOnLightFinish()) {
+                    neighborSunlightChanging = true;
+                }
+            }
+        }
+        if(neighborSunlightChanging)
             return;
 
         if (!setup) {

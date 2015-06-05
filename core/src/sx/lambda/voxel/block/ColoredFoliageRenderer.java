@@ -11,13 +11,13 @@ import sx.lambda.voxel.world.biome.Biome;
 public class ColoredFoliageRenderer extends NormalBlockRenderer {
 
     @Override
-    protected Color getColor(int x, int y, int z, float lightLevel) {
+    protected Color getColor(int x, int y, int z) {
         Biome biome = VoxelGameClient.getInstance().getWorld().getChunk(x, z).getBiome();
         int[] color = biome.getFoliageColor(y);
         float r = color[0]/255f;
         float g = color[1]/255f;
         float b = color[2]/255f;
-        return new Color(r*lightLevel, g*lightLevel, b*lightLevel, 1);
+        return new Color(r, g, b, 1);
     }
 
 }

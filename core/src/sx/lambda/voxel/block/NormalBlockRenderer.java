@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
 import groovy.transform.CompileStatic;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.render.NotInitializedException;
@@ -35,73 +36,91 @@ public class NormalBlockRenderer implements IBlockRenderer {
     @Override
     public void renderNorth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         // POSITIVE Z
-        builder.setColor(getColor((int)x1, (int)y1, (int)z, lightLevel));
-        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
-        builder.rect(x1, y1, z,
-                x2, y1, z,
-                x2, y2, z,
-                x1, y2, z,
-                0, 0, 1);
+        float uv = atlasIndex / 100.0f;
+        builder.setColor(getColor((int) x1, (int) y1, (int) z - 1, lightLevel));
+        builder.setUVRange(uv, uv, uv, uv);
+
+        VertexInfo c00 = new VertexInfo().setPos(x1, y1, z).setNor(0, 0, 1);
+        VertexInfo c01 = new VertexInfo().setPos(x1, y2, z).setNor(0, 0, 1);
+        VertexInfo c10 = new VertexInfo().setPos(x2, y1, z).setNor(0, 0, 1);
+        VertexInfo c11 = new VertexInfo().setPos(x2, y2, z).setNor(0, 0, 1);
+
+        builder.rect(c00, c10, c11, c01);
     }
 
     @Override
     public void renderSouth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Z
-        builder.setColor(getColor((int)x1, (int)y1, (int)z, lightLevel));
-        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
-        builder.rect(x1, y2, z,
-                x2, y2, z,
-                x2, y1, z,
-                x1, y1, z,
-                0, 0, -1);
+        float uv = atlasIndex / 100.0f;
+        builder.setColor(getColor((int) x1, (int) y1, (int) z, lightLevel));
+        builder.setUVRange(uv, uv, uv, uv);
+
+        VertexInfo c00 = new VertexInfo().setPos(x1, y1, z).setNor(0, 0, -1);
+        VertexInfo c01 = new VertexInfo().setPos(x1, y2, z).setNor(0, 0, -1);
+        VertexInfo c10 = new VertexInfo().setPos(x2, y1, z).setNor(0, 0, -1);
+        VertexInfo c11 = new VertexInfo().setPos(x2, y2, z).setNor(0, 0, -1);
+
+        builder.rect(c01, c11, c10, c00);
     }
 
     @Override
     public void renderWest(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         // NEGATIVE X
-        builder.setColor(getColor((int)x, (int)y1, (int)z1, lightLevel));
-        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
-        builder.rect(x, y1, z2,
-                x, y2, z2,
-                x, y2, z1,
-                x, y1, z1,
-                -1, 0, 0);
+        float uv = atlasIndex / 100.0f;
+        builder.setColor(getColor((int) x, (int) y1, (int) z1, lightLevel));
+        builder.setUVRange(uv, uv, uv, uv);
+
+        VertexInfo c00 = new VertexInfo().setPos(x, y1, z1).setNor(-1, 0, 0);
+        VertexInfo c01 = new VertexInfo().setPos(x, y1, z2).setNor(-1, 0, 0);
+        VertexInfo c10 = new VertexInfo().setPos(x, y2, z1).setNor(-1, 0, 0);
+        VertexInfo c11 = new VertexInfo().setPos(x, y2, z2).setNor(-1, 0, 0);
+
+        builder.rect(c01, c11, c10, c00);
     }
 
     @Override
     public void renderEast(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, MeshBuilder builder) {
         // POSITIVE X
-        builder.setColor(getColor((int)x, (int)y1, (int)z1, lightLevel));
-        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
-        builder.rect(x, y1, z1,
-                x, y2, z1,
-                x, y2, z2,
-                x, y1, z2,
-                1, 0, 0);
+        float uv = atlasIndex / 100.0f;
+        builder.setColor(getColor((int) x - 1, (int) y1, (int) z1, lightLevel));
+        builder.setUVRange(uv, uv, uv, uv);
+
+        VertexInfo c00 = new VertexInfo().setPos(x, y1, z1).setNor(1, 0, 0);
+        VertexInfo c01 = new VertexInfo().setPos(x, y1, z2).setNor(1, 0, 0);
+        VertexInfo c10 = new VertexInfo().setPos(x, y2, z1).setNor(1, 0, 0);
+        VertexInfo c11 = new VertexInfo().setPos(x, y2, z2).setNor(1, 0, 0);
+
+        builder.rect(c00, c10, c11, c01);
     }
 
     @Override
     public void renderTop(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, MeshBuilder builder) {
         // POSITIVE Y
-        builder.setColor(getColor((int)x1, (int)y-1, (int)z1, lightLevel));
-        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
-        builder.rect(x1, y, z2,
-                x2, y, z2,
-                x2, y, z1,
-                x1, y, z1,
-                0, 1, 0);
+        float uv = atlasIndex / 100.0f;
+        builder.setColor(getColor((int) x1, (int) y - 1, (int) z1, lightLevel));
+        builder.setUVRange(uv, uv, uv, uv);
+
+        VertexInfo c00 = new VertexInfo().setPos(x1, y, z1).setNor(0, 1, 0);
+        VertexInfo c01 = new VertexInfo().setPos(x1, y, z2).setNor(0, 1, 0);
+        VertexInfo c10 = new VertexInfo().setPos(x2, y, z1).setNor(0, 1, 0);
+        VertexInfo c11 = new VertexInfo().setPos(x2, y, z2).setNor(0, 1, 0);
+
+        builder.rect(c01, c11, c10, c00);
     }
 
     @Override
     public void renderBottom(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, MeshBuilder builder) {
         // NEGATIVE Y
-        builder.setColor(getColor((int)x1, (int)y, (int)z1, lightLevel));
-        builder.setUVRange(atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f, atlasIndex / 100.0f);
-        builder.rect(x1, y, z1,
-                x2, y, z1,
-                x2, y, z2,
-                x1, y, z2,
-                0, -1, 0);
+        float uv = atlasIndex / 100.0f;
+        builder.setColor(getColor((int) x1, (int) y, (int) z1, lightLevel));
+        builder.setUVRange(uv, uv, uv, uv);
+
+        VertexInfo c00 = new VertexInfo().setPos(x1, y, z1).setNor(0, -1, 0);
+        VertexInfo c01 = new VertexInfo().setPos(x1, y, z2).setNor(0, -1, 0);
+        VertexInfo c10 = new VertexInfo().setPos(x2, y, z1).setNor(0, -1, 0);
+        VertexInfo c11 = new VertexInfo().setPos(x2, y, z2).setNor(0, -1, 0);
+
+        builder.rect(c00, c10, c11, c01);
     }
 
     protected Color getColor(int x, int y, int z, float lightLevel) {

@@ -64,6 +64,7 @@ public class World implements IWorld {
 
     // Skybox stuff
     private ModelBatch modelBatch;
+    private ModelBatch wiremeshBatch;
     private ModelInstance skybox;
     private Model skyboxModel;
     private Texture skyboxTexture;
@@ -130,6 +131,7 @@ public class World implements IWorld {
 
         if (modelBatch == null) {
             modelBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
+            wiremeshBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/wiremesh.frag.glsl"));
         }
         if(skybox == null) {
             skybox = createSkybox();
@@ -173,13 +175,15 @@ public class World implements IWorld {
         float playerX = VoxelGameClient.getInstance().getPlayer().getPosition().getX(),
                 playerY = VoxelGameClient.getInstance().getPlayer().getPosition().getY(),
                 playerZ = VoxelGameClient.getInstance().getPlayer().getPosition().getZ();
+        boolean wireframe = VoxelGameClient.getInstance().isWireframe();
+        if(wireframe) {
+            VoxelGameClient.getInstance().setWireframe(false);
+        }
         modelBatch.begin(VoxelGameClient.getInstance().getCamera());
         skybox.transform.translate(playerX, playerY, playerZ);
         modelBatch.render(skybox);
         skybox.transform.translate(-playerX, -playerY, -playerZ);
         if(sortedChunkList != null) {
-            if(VoxelGameClient.getInstance().isWireframe())
-                Gdx.gl.glLineWidth(5);
             for (IChunk c : sortedChunkList) {
                 int x = c.getStartPosition().x;
                 int z = c.getStartPosition().z;
@@ -194,6 +198,24 @@ public class World implements IWorld {
             }
         }
         modelBatch.end();
+        if(wireframe && sortedChunkList != null) {
+            VoxelGameClient.getInstance().setWireframe(true);
+            Gdx.gl.glLineWidth(2);
+            wiremeshBatch.begin(VoxelGameClient.getInstance().getCamera());
+            for (IChunk c : sortedChunkList) {
+                int x = c.getStartPosition().x;
+                int z = c.getStartPosition().z;
+                int halfWidth = getChunkSize()/2;
+                int midX = x + halfWidth;
+                int midZ = z + halfWidth;
+                int midY = c.getHighestPoint()/2;
+                boolean visible = VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
+                if(visible) {
+                    c.render(wiremeshBatch);
+                }
+            }
+            wiremeshBatch.end();
+        }
     }
 
     @Override

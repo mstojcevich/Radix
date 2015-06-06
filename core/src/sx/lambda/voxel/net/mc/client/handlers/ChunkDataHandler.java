@@ -52,6 +52,8 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                     for (int y = 0; y < 16; y++) {
                         int id = c.getBlocks().getBlock(x, y, z);
                         short meta = (short)c.getBlocks().getData(x, y, z);
+                        byte blocklight = (byte) c.getBlockLight().get(x, y, z);
+                        byte skylight = (byte) c.getSkyLight().get(x, y, z);
                         boolean blockExists = false;
                         if(id <= 0 || VoxelGameAPI.instance.getBlockByID(id) != null) {
                             blockExists = true;
@@ -62,6 +64,9 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                                 ck.setBlock(id, x, cy + y, z, false);
                             if (meta > 0)
                                 ck.setMeta(meta, x, cy + y, z);
+                            ck.setBlocklight(x, cy+y, z, blocklight);
+                            ck.setSunlight(x, cy+y, z, skylight);
+                            ck.finishAddingSun();
                         } catch (CoordinatesOutOfBoundsException ex) {
                             ex.printStackTrace();
                         }

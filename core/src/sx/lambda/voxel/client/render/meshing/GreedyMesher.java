@@ -418,10 +418,6 @@ public class GreedyMesher implements Mesher {
      * @param cz Chunk-relative Z coordinate for the corner. NOT PRE-OFFSET FOR THE FACE!
      */
     private float calcPerCornerLight(Side side, int cx, int y, int cz) {
-        // World coordinates for the positions
-        int wx = chunk.getStartPosition().x + cx;
-        int wz = chunk.getStartPosition().z + cz;
-
         // coordinate offsets for getting the blocks to average
         int posX = 0, negX = 0,
                 posY = 0, negY = 0,
@@ -467,20 +463,40 @@ public class GreedyMesher implements Mesher {
         // sx,sy,sz are the x, y, and z positions of the side block
         int count = 0;
         float lightSum = 0;
-        for(int sx = wx + negX; sx <= wx + posX; sx++) {
+        for(int sx = cx + negX; sx <= cx + posX; sx++) {
             for(int sy = y + negY; sy <= y + posY; sy++) {
-                for(int sz = wz + negZ; sz <= wz + posZ; sz++) {
-                    if(sy < 0 || sy >= chunk.getWorld().getHeight())
+                if(sy < 0 || sy >= chunk.getWorld().getHeight())
+                    continue;
+                for(int sz = cz + negZ; sz <= cz + posZ; sz++) {
+                    IChunk sChunk = chunk;
+                    boolean getChunk = false; // whether the block is not in the current chunk and a new chunk should be found
+                    int getChunkX = chunk.getStartPosition().x + sx;
+                    int getChunkZ = chunk.getStartPosition().z + sz;
+                    int fixedSz = sz;
+                    int fixedSx = sx;
+                    if(sz < 0) {
+                        fixedSz = chunk.getWorld().getChunkSize() + sz;
+                        getChunk = true;
+                    } else if(sz >= chunk.getWorld().getChunkSize()) {
+                        fixedSz = sz - chunk.getWorld().getChunkSize();
+                        getChunk = true;
+                    }
+                    if(sx < 0) {
+                        fixedSx = chunk.getWorld().getChunkSize() + sx;
+                        getChunk = true;
+                    } else if(sx >= chunk.getWorld().getChunkSize()) {
+                        fixedSx = sx - chunk.getWorld().getChunkSize();
+                        getChunk = true;
+                    }
+                    if(getChunk) {
+                        sChunk = chunk.getWorld().getChunk(getChunkX, getChunkZ);
+                    }
+                    if (sChunk == null)
                         continue;
 
                     try {
-                        IChunk sChunk = chunk.getWorld().getChunk(sx, sz);
-                        if (sChunk == null)
-                            continue;
                         // Convert to chunk-relative coords
-                        int scx = sx & (chunk.getWorld().getChunkSize() - 1);
-                        int scz = sz & (chunk.getWorld().getChunkSize() - 1);
-                        lightSum += sChunk.getLightLevel(scx, sy, scz);
+                        lightSum += sChunk.getLightLevel(fixedSx, sy, fixedSz);
                         count++;
                     } catch (CoordinatesOutOfBoundsException ex) {
                         ex.printStackTrace();

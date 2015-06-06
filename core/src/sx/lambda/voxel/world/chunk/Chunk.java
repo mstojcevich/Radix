@@ -55,7 +55,7 @@ public class Chunk implements IChunk {
     private List<GreedyMesher.Face> opaqueFaces;
     private boolean meshing, meshed, meshWhenDone;
 
-    public Chunk(IWorld world, Vec3i startPosition, int[][][] ids, short[][][] meta, Biome biome) {
+    public Chunk(IWorld world, Vec3i startPosition, Biome biome, boolean local) {
         this.parentWorld = world;
         this.startPosition = startPosition;
         this.biome = biome;
@@ -75,31 +75,8 @@ public class Chunk implements IChunk {
             mesher = null;
         }
 
-
-        this.loadIdInts(ids);
-    }
-
-    public Chunk(IWorld world, Vec3i startPosition, Biome biome) {
-        this.parentWorld = world;
-        this.startPosition = startPosition;
-        this.size = world.getChunkSize();
-        this.height = world.getHeight();
-        this.biome = biome;
-
-        this.blockStorage = new FlatBlockStorage(size, height, size);
-
-        for (int i = 0; i <= MAX_LIGHT_LEVEL; i++) {
-            int reduction = MAX_LIGHT_LEVEL - i;
-            lightLevelMap[i] = (float) Math.pow(0.8, reduction);
-        }
-
-        if (VoxelGameClient.getInstance() != null) { // We're a client
-            mesher = new GreedyMesher(this, VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().perCornerLightEnabled());
-        } else {
-            mesher = null;
-        }
-
-        highestPoint = world.getChunkGen().generate(startPosition, blockStorage);
+        if(local)
+            highestPoint = world.getChunkGen().generate(startPosition, blockStorage);
     }
 
     @Override
@@ -356,24 +333,6 @@ public class Chunk implements IChunk {
     @Override
     public int getHighestPoint() {
         return highestPoint;
-    }
-
-    private void loadIdInts(int[][][] ints) {
-        highestPoint = 0;
-        for (int x = 0; x < ints.length; x++) {
-            for (int z = 0; z < ints[0][0].length; z++) {
-                for (int y = 0; y < ints[0].length; y++) {
-                    if (ints[x][y][z] > 0) {
-                        try {
-                            blockStorage.setId(x, y, z, ints[x][y][z]);
-                            highestPoint = Math.max(y, highestPoint);
-                        } catch (CoordinatesOutOfBoundsException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private void updateModelInstances() {

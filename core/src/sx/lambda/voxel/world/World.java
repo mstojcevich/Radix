@@ -312,7 +312,7 @@ public class World implements IWorld {
     private IChunk loadChunk(int startX, int startZ) {
         IChunk foundChunk = getChunk(startX, startZ);
         if (foundChunk == null && !remote) {
-            final IChunk c = new Chunk(this, new Vec3i(startX, 0, startZ), VoxelGameAPI.instance.getBiomeByID(0));
+            final IChunk c = new Chunk(this, new Vec3i(startX, 0, startZ), VoxelGameAPI.instance.getBiomeByID(0), true);
             VoxelGameAPI.instance.getEventManager().push(new EventFinishChunkGen(c));
             addChunk(c, startX, startZ);
             return c;

@@ -46,7 +46,7 @@ public class World implements IWorld {
     private static final int LIGHTING_WORKERS = 2;
 
     // Chunk storage TODO simplify
-    private final IntMap<IChunk> chunkMap = new IntMap<>();
+    private final IntMap<IntMap<IChunk>> chunkMapX = new IntMap<>();
     private final Set<IChunk> chunkList = new ConcurrentSet<>();
     private List<IChunk> sortedChunkList;
     private final Set<IChunk> chunksToRerender = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -101,19 +101,28 @@ public class World implements IWorld {
         return getChunk(position.x, position.z);
     }
 
-    private int getChunkHash(int x, int z) {
-        int hash = 7;
-        hash = 71 * hash + x;
-        hash = 71 * hash + z;
-        return hash;
-    }
-
     @Override
     public IChunk getChunk(int x, int z) {
         x = getChunkPosition(x);
         z = getChunkPosition(z);
 
-        return chunkMap.get(getChunkHash(x, z));
+        IntMap<IChunk> zMap = null;
+        try {
+            zMap = this.chunkMapX.get(x);
+        } catch(ArrayIndexOutOfBoundsException ex) { // Sometimes the libgdx intmap will give aioob. Not sure why.
+            ex.printStackTrace();
+        }
+        if(zMap == null)
+            return null;
+
+        IChunk chunk = null;
+        try {
+            chunk = zMap.get(z);
+        } catch(ArrayIndexOutOfBoundsException ex) { // Sometimes the libgdx intmap will give aioob. Not sure why.
+            ex.printStackTrace();
+        }
+
+        return chunk;
     }
 
     private void removeChunkFromMap(Vec3i pos) {
@@ -121,7 +130,11 @@ public class World implements IWorld {
     }
 
     private void removeChunkFromMap(int x, int z) {
-        this.chunkMap.remove(getChunkHash(x, z));
+        IntMap<IChunk> zMap = this.chunkMapX.get(x);
+        if(zMap == null)
+            return;
+
+        zMap.remove(z);
     }
 
     @Override
@@ -155,14 +168,17 @@ public class World implements IWorld {
                     sortedChunkList.add(c);
                 }
             }
-            Collections.sort(sortedChunkList, (c1, c2) -> {
-                int xDiff1 = playerChunk.getStartPosition().x - c1.getStartPosition().x;
-                int zDiff1 = playerChunk.getStartPosition().z - c1.getStartPosition().z;
-                int xDiff2 = playerChunk.getStartPosition().x - c2.getStartPosition().x;
-                int zDiff2 = playerChunk.getStartPosition().z - c2.getStartPosition().z;
-                int sqDist2 = xDiff2*xDiff2 + zDiff2*zDiff2;
-                int sqDist1 = xDiff1*xDiff1 + zDiff1*zDiff1;
-                return sqDist2 - sqDist1;
+            Collections.sort(sortedChunkList, new Comparator<IChunk>() {
+                @Override
+                public int compare(IChunk c1, IChunk c2) {
+                    int xDiff1 = playerChunk.getStartPosition().x - c1.getStartPosition().x;
+                    int zDiff1 = playerChunk.getStartPosition().z - c1.getStartPosition().z;
+                    int xDiff2 = playerChunk.getStartPosition().x - c2.getStartPosition().x;
+                    int zDiff2 = playerChunk.getStartPosition().z - c2.getStartPosition().z;
+                    int sqDist2 = xDiff2*xDiff2 + zDiff2*zDiff2;
+                    int sqDist1 = xDiff1*xDiff1 + zDiff1*zDiff1;
+                    return sqDist2 - sqDist1;
+                }
             });
             lastPlayerChunk = playerChunk;
         }
@@ -274,7 +290,12 @@ public class World implements IWorld {
     }
 
     private void addChunk(IChunk chunk, int x, int z) {
-        this.chunkMap.put(getChunkHash(x, z), chunk);
+        IntMap<IChunk> foundChunkMapZ = this.chunkMapX.get(x);
+        if(foundChunkMapZ == null) {
+            foundChunkMapZ = new IntMap<>();
+            this.chunkMapX.put(x, foundChunkMapZ);
+        }
+        foundChunkMapZ.put(z, chunk);
         this.chunkList.add(chunk);
     }
 

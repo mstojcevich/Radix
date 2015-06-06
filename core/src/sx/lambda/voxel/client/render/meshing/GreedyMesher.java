@@ -54,7 +54,7 @@ public class GreedyMesher implements Mesher {
         }
 
         // Top, bottom
-        for (int y = 0; y < storage.getHeight(); y++) {
+        for (int y = 0; y <= chunk.getHighestPoint(); y++) {
             short[][] topBlocks = new short[storage.getWidth()][storage.getDepth()];
             short[][] topMeta = new short[storage.getWidth()][storage.getDepth()];
             float[][] topLightLevels = new float[storage.getWidth()][storage.getDepth()];
@@ -128,22 +128,22 @@ public class GreedyMesher implements Mesher {
 
         // East, west
         for (int x = 0; x < storage.getWidth(); x++) {
-            short[][] westBlocks = new short[storage.getDepth()][storage.getHeight()];
-            short[][] westMeta = new short[storage.getDepth()][storage.getHeight()];
-            float[][] westLightLevels = new float[storage.getDepth()][storage.getHeight()];
+            short[][] westBlocks = new short[storage.getDepth()][chunk.getHighestPoint()+1];
+            short[][] westMeta = new short[storage.getDepth()][chunk.getHighestPoint()+1];
+            float[][] westLightLevels = new float[storage.getDepth()][chunk.getHighestPoint()+1];
             PerCornerLightData[][] westPcld = null;
             if(perCornerLight) {
-                westPcld = new PerCornerLightData[storage.getDepth()][storage.getHeight()];
+                westPcld = new PerCornerLightData[storage.getDepth()][chunk.getHighestPoint()+1];
             }
-            short[][] eastBlocks = new short[storage.getDepth()][storage.getHeight()];
-            short[][] eastMeta = new short[storage.getDepth()][storage.getHeight()];
-            float[][] eastLightLevels = new float[storage.getDepth()][storage.getHeight()];
+            short[][] eastBlocks = new short[storage.getDepth()][chunk.getHighestPoint()+1];
+            short[][] eastMeta = new short[storage.getDepth()][chunk.getHighestPoint()+1];
+            float[][] eastLightLevels = new float[storage.getDepth()][chunk.getHighestPoint()+1];
             PerCornerLightData[][] eastPcld = null;
             if(perCornerLight) {
-                eastPcld = new PerCornerLightData[storage.getDepth()][storage.getHeight()];
+                eastPcld = new PerCornerLightData[storage.getDepth()][chunk.getHighestPoint()+1];
             }
             for (int z = 0; z < storage.getDepth(); z++) {
-                for (int y = 0; y < storage.getHeight(); y++) {
+                for (int y = 0; y <= chunk.getHighestPoint(); y++) {
                     try {
                         Block curBlock = storage.getBlock(x, y, z);
                         if (curBlock == null || !condition.shouldUse(curBlock))
@@ -208,22 +208,22 @@ public class GreedyMesher implements Mesher {
 
         // North, south
         for (int z = 0; z < storage.getDepth(); z++) {
-            short[][] northBlocks = new short[storage.getWidth()][storage.getHeight()];
-            short[][] northMeta = new short[storage.getWidth()][storage.getHeight()];
-            float[][] northLightLevels = new float[storage.getWidth()][storage.getHeight()];
+            short[][] northBlocks = new short[storage.getWidth()][chunk.getHighestPoint()+1];
+            short[][] northMeta = new short[storage.getWidth()][chunk.getHighestPoint()+1];
+            float[][] northLightLevels = new float[storage.getWidth()][chunk.getHighestPoint()+1];
             PerCornerLightData[][] northPcld = null;
             if(perCornerLight) {
-                northPcld = new PerCornerLightData[storage.getWidth()][storage.getHeight()];
+                northPcld = new PerCornerLightData[storage.getWidth()][chunk.getHighestPoint()+1];
             }
-            short[][] southBlocks = new short[storage.getWidth()][storage.getHeight()];
-            short[][] southMeta = new short[storage.getWidth()][storage.getHeight()];
-            float[][] southLightLevels = new float[storage.getWidth()][storage.getHeight()];
+            short[][] southBlocks = new short[storage.getWidth()][chunk.getHighestPoint()+1];
+            short[][] southMeta = new short[storage.getWidth()][chunk.getHighestPoint()+1];
+            float[][] southLightLevels = new float[storage.getWidth()][chunk.getHighestPoint()+1];
             PerCornerLightData[][] southPcld = null;
             if(perCornerLight) {
-                southPcld = new PerCornerLightData[storage.getWidth()][storage.getHeight()];
+                southPcld = new PerCornerLightData[storage.getWidth()][chunk.getHighestPoint()+1];
             }
             for (int x = 0; x < storage.getWidth(); x++) {
-                for (int y = 0; y < storage.getHeight(); y++) {
+                for (int y = 0; y <= chunk.getHighestPoint(); y++) {
                     try {
                         Block curBlock = storage.getBlock(x, y, z);
                         if (curBlock == null || !condition.shouldUse(curBlock))

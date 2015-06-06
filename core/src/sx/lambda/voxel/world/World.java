@@ -45,8 +45,7 @@ public class World implements IWorld {
      */
     private static final int LIGHTING_WORKERS = 2;
 
-    // Chunk storage TODO simplify
-    private final IntMap<IntMap<IChunk>> chunkMapX = new IntMap<>();
+    private final IntMap<IChunk> chunkMap = new IntMap<>();
     private final Set<IChunk> chunkList = new ConcurrentSet<>();
     private List<IChunk> sortedChunkList;
     private final Set<IChunk> chunksToRerender = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -101,28 +100,20 @@ public class World implements IWorld {
         return getChunk(position.x, position.z);
     }
 
+    private int getChunkKey(int x, int z) {
+        short nx = (short)((x - (x & (getChunkSize()-1))) / getChunkSize());
+        short nz = (short)((z - (z & (getChunkSize()-1))) / getChunkSize());
+
+        return (nx << 16) | (nz & 0xFFFF);
+    }
+
     @Override
     public IChunk getChunk(int x, int z) {
-        x = getChunkPosition(x);
-        z = getChunkPosition(z);
-
-        IntMap<IChunk> zMap = null;
         try {
-            zMap = this.chunkMapX.get(x);
-        } catch(ArrayIndexOutOfBoundsException ex) { // Sometimes the libgdx intmap will give aioob. Not sure why.
-            ex.printStackTrace();
-        }
-        if(zMap == null)
+            return chunkMap.get(getChunkKey(x, z));
+        } catch(ArrayIndexOutOfBoundsException ex) {
             return null;
-
-        IChunk chunk = null;
-        try {
-            chunk = zMap.get(z);
-        } catch(ArrayIndexOutOfBoundsException ex) { // Sometimes the libgdx intmap will give aioob. Not sure why.
-            ex.printStackTrace();
         }
-
-        return chunk;
     }
 
     private void removeChunkFromMap(Vec3i pos) {
@@ -130,11 +121,7 @@ public class World implements IWorld {
     }
 
     private void removeChunkFromMap(int x, int z) {
-        IntMap<IChunk> zMap = this.chunkMapX.get(x);
-        if(zMap == null)
-            return;
-
-        zMap.remove(z);
+        chunkMap.remove(getChunkKey(x, z));
     }
 
     @Override
@@ -290,12 +277,7 @@ public class World implements IWorld {
     }
 
     private void addChunk(IChunk chunk, int x, int z) {
-        IntMap<IChunk> foundChunkMapZ = this.chunkMapX.get(x);
-        if(foundChunkMapZ == null) {
-            foundChunkMapZ = new IntMap<>();
-            this.chunkMapX.put(x, foundChunkMapZ);
-        }
-        foundChunkMapZ.put(z, chunk);
+        this.chunkMap.put(getChunkKey(x, z), chunk);
         this.chunkList.add(chunk);
     }
 

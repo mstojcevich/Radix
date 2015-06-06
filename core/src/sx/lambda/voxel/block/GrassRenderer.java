@@ -3,8 +3,10 @@ package sx.lambda.voxel.block;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.client.render.meshing.PerCornerLightData;
 import sx.lambda.voxel.world.biome.Biome;
+import sx.lambda.voxel.world.chunk.IChunk;
 
 /**
  * Renderer for blocks like grass with different top, sides, and bottom textures.
@@ -49,7 +51,13 @@ public class GrassRenderer extends NormalBlockRenderer {
         MeshPartBuilder.VertexInfo c10 = new MeshPartBuilder.VertexInfo().setPos(x2, y, z1).setNor(0, 1, 0);
         MeshPartBuilder.VertexInfo c11 = new MeshPartBuilder.VertexInfo().setPos(x2, y, z2).setNor(0, 1, 0);
 
-        Biome biome = VoxelGameClient.getInstance().getWorld().getChunk((int) x1, (int) z1).getBiome();
+        IChunk chunk = VoxelGameClient.getInstance().getWorld().getChunk((int) x1, (int) z1);
+        Biome biome;
+        if(chunk != null) {
+            biome = chunk.getBiome();
+        } else {
+            biome = VoxelGameAPI.instance.getBiomeByID(0);
+        }
         int[] color = biome.getGrassColor((int) y - 1);
         float r = color[0]/255f;
         float g = color[1]/255f;

@@ -6,6 +6,7 @@ import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.biome.Biome;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 
 import java.io.Serializable;
 
@@ -24,59 +25,6 @@ public interface IChunk extends Serializable, Disposable {
      */
     void render(ModelBatch batch);
 
-    int getBlockId(int x, int y, int z);
-
-    /**
-     * Get the block at the specified position
-     * @param x X value, relative to the chunk. 0->(chunk size - 1)
-     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
-     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
-     */
-    Block getBlock(int x, int y, int z);
-
-    /**
-     * Remove the block at the specified position
-     * @param x X value, relative to the chunk. 0->(chunk size - 1)
-     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
-     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
-     */
-    void removeBlock(int x, int y, int z);
-
-    /**
-     * Set the block at the specified position
-     * @param block New block to set to
-     * @param x X value, relative to the chunk. 0->(chunk size - 1)
-     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
-     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
-     */
-    void setBlock(int block, int x, int y, int z);
-
-    /**
-     * Set the block at the specified position
-     * @param block New block to set to
-     * @param x X value, relative to the chunk. 0->(chunk size - 1)
-     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
-     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
-     * @param updateSunlight Whether to update sunlight values for the new block
-     */
-    void setBlock(int block, int x, int y, int z, boolean updateSunlight);
-
-    /**
-     * Set the metadata for the block at the specified position
-     * @param meta Metadata value to set to
-     * @param x X value, relative to the chunk. 0->(chunk size - 1)
-     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
-     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
-     */
-    void setMeta(short meta, int x, int y, int z);
-
-    /**
-     * Get the metadata value at the specified position
-     * @param x X value, relative to the chunk. 0->(chunk size - 1)
-     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
-     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
-     */
-    short getMeta(int x, int y, int z);
 
     /**
      * Gets the starting position of the chunk
@@ -88,13 +36,67 @@ public interface IChunk extends Serializable, Disposable {
      */
     int getHighestPoint();
 
+    int getBlockId(int x, int y, int z) throws CoordinatesOutOfBoundsException;
+
+    /**
+     * Get the block at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
+    Block getBlock(int x, int y, int z) throws CoordinatesOutOfBoundsException;
+
+    /**
+     * Remove the block at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
+    void removeBlock(int x, int y, int z) throws CoordinatesOutOfBoundsException;
+
+    /**
+     * Set the block at the specified position
+     * @param block New block to set to
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
+    void setBlock(int block, int x, int y, int z) throws CoordinatesOutOfBoundsException;
+
+    /**
+     * Set the block at the specified position
+     * @param block New block to set to
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     * @param updateSunlight Whether to update sunlight values for the new block
+     */
+    void setBlock(int block, int x, int y, int z, boolean updateSunlight) throws CoordinatesOutOfBoundsException;
+
+    /**
+     * Set the metadata for the block at the specified position
+     * @param meta Metadata value to set to
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
+    void setMeta(short meta, int x, int y, int z) throws CoordinatesOutOfBoundsException;
+
+    /**
+     * Get the metadata value at the specified position
+     * @param x X value, relative to the chunk. 0->(chunk size - 1)
+     * @param y Y value, relative to the chunk. 0->(chunk height - 1)
+     * @param z Z value, relative to the chunk. 0->(chunk size - 1)
+     */
+    short getMeta(int x, int y, int z) throws CoordinatesOutOfBoundsException;
+
     /**
      * Gets the light value at the specified location
      * @param x X value, relative to the chunk. 0->(chunk size - 1)
      * @param y Y value, relative to the chunk. 0->(chunk height - 1)
      * @param z Z value, relative to the chunk. 0->(chunk size - 1)
      */
-    float getLightLevel(int x, int y, int z);
+    float getLightLevel(int x, int y, int z) throws CoordinatesOutOfBoundsException;
 
     /**
      * Get sunlight at the specified position
@@ -103,7 +105,7 @@ public interface IChunk extends Serializable, Disposable {
      * @param z Z value, relative to the chunk. 0->(chunk size - 1)
      * @return Sunlight value, between 0 and 15
      */
-    int getSunlight(int x, int y, int z);
+    int getSunlight(int x, int y, int z) throws CoordinatesOutOfBoundsException;
 
     /**
      * Set the sunlight at the specified position
@@ -112,7 +114,7 @@ public interface IChunk extends Serializable, Disposable {
      * @param z Z value, relative to the chunk. 0->(chunk size - 1)
      * @param level Value between 0 and 15 for sunlight
      */
-    void setSunlight(int x, int y, int z, int level);
+    void setSunlight(int x, int y, int z, int level) throws CoordinatesOutOfBoundsException;
 
     /**
      * Get the blocklight at the specified position
@@ -121,7 +123,7 @@ public interface IChunk extends Serializable, Disposable {
      * @param z
      * @return Blocklight value, between 0 and 15
      */
-    int getBlocklight(int x, int y, int z);
+    int getBlocklight(int x, int y, int z) throws CoordinatesOutOfBoundsException;
 
     /**
      * Set the blocklight at the specified position
@@ -130,7 +132,7 @@ public interface IChunk extends Serializable, Disposable {
      * @param z Z value, relative to the chunk. 0->(chunk size - 1)
      * @param level Value between 0 and 15 for blocklight
      */
-    void setBlocklight(int x, int y, int z, int level);
+    void setBlocklight(int x, int y, int z, int level) throws CoordinatesOutOfBoundsException;
 
     void eachBlock(EachBlockCallee action);
 

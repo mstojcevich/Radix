@@ -7,6 +7,7 @@ import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.biome.Biome;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
@@ -56,10 +57,14 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                             blockExists = true;
                         }
                         if(!blockExists)id = BuiltInBlockIds.UNKNOWN_ID;
-                        if(id > 0)
-                            ck.setBlock(id, x, cy + y, z, false);
-                        if(meta > 0)
-                            ck.setMeta(meta, x, cy+y, z);
+                        try {
+                            if (id > 0)
+                                ck.setBlock(id, x, cy + y, z, false);
+                            if (meta > 0)
+                                ck.setMeta(meta, x, cy + y, z);
+                        } catch (CoordinatesOutOfBoundsException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
             }

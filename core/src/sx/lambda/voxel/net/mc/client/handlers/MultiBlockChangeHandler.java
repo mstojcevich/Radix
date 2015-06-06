@@ -6,6 +6,7 @@ import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.block.Block;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockChangePacket> {
@@ -37,11 +38,19 @@ public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockCh
                             break;
                         }
                     }
-                    chunk.setBlock(blockExists? id : BuiltInBlockIds.UNKNOWN_ID, chunkRelativeX, y, chunkRelativeZ);
-                    chunk.setMeta((short) (blockExists ? meta : 0), chunkRelativeX, y, chunkRelativeZ);
+                    try {
+                        chunk.setBlock(blockExists? id : BuiltInBlockIds.UNKNOWN_ID, chunkRelativeX, y, chunkRelativeZ);
+                        chunk.setMeta((short) (blockExists ? meta : 0), chunkRelativeX, y, chunkRelativeZ);
+                    } catch (CoordinatesOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
                 } else {
-                    chunk.removeBlock(chunkRelativeX, y, chunkRelativeZ);
-                    chunk.setMeta((short) 0, chunkRelativeX, y, chunkRelativeZ);
+                    try {
+                        chunk.removeBlock(chunkRelativeX, y, chunkRelativeZ);
+                        chunk.setMeta((short) 0, chunkRelativeX, y, chunkRelativeZ);
+                    } catch (CoordinatesOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

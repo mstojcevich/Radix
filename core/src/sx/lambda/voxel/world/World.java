@@ -24,6 +24,7 @@ import sx.lambda.voxel.block.Side;
 import sx.lambda.voxel.entity.Entity;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.util.Vec3i;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.Chunk;
 import sx.lambda.voxel.world.chunk.IChunk;
 import sx.lambda.voxel.world.generation.ChunkGenerator;
@@ -227,23 +228,28 @@ public class World implements IWorld {
 
     @Override
     public void removeBlock(int x, int y, int z) {
-        synchronized (this) {
-            final IChunk c = this.getChunk(x, z);
-            if (c != null) {
-                x &= getChunkSize()-1;
-                y &= getChunkSize()-1;
+        final IChunk c = this.getChunk(x, z);
+        if (c != null) {
+            x &= getChunkSize()-1;
+            y &= getChunkSize()-1;
+            try {
                 c.removeBlock(x, y, z);
                 c.setMeta((short) 0, x, y, z);
+            } catch (CoordinatesOutOfBoundsException ex) {
+                ex.printStackTrace();
             }
         }
     }
 
     @Override
     public void addBlock(int block, int x, int y, int z) {
-        synchronized (this) {
-            final IChunk c = this.getChunk(x, z);
-            if(c != null)
+        final IChunk c = this.getChunk(x, z);
+        if(c != null) {
+            try {
                 c.setBlock(block, x & (getChunkSize() - 1), y, z * (getChunkSize() - 1));
+            } catch (CoordinatesOutOfBoundsException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -365,80 +371,85 @@ public class World implements IWorld {
                 if (posChunk == null) {
                     continue;
                 }
-                int ll = posChunk.getSunlight(x & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
+                int ll = 0;
+                try {
+                    ll = posChunk.getSunlight(x & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
 
-                // Spread off to each side
-                for(Side s : sides) {
-                    int sx = x; // Side x coord
-                    int sy = y; // Side y coord
-                    int sz = z; // Side z coord
-                    int scx = cx; // Chunk-relative side x coord
-                    int scz = cz; // Chunk-relative side z coord
-                    IChunk sChunk = posChunk;
+                    // Spread off to each side
+                    for(Side s : sides) {
+                        int sx = x; // Side x coord
+                        int sy = y; // Side y coord
+                        int sz = z; // Side z coord
+                        int scx = cx; // Chunk-relative side x coord
+                        int scz = cz; // Chunk-relative side z coord
+                        IChunk sChunk = posChunk;
 
-                    // Offset values based on side
-                    switch (s) {
-                        case TOP:
-                            sy += 1;
-                            break;
-                        case BOTTOM:
-                            sy -= 1;
-                            break;
-                        case WEST:
-                            sx -= 1;
-                            scx -= 1;
-                            break;
-                        case EAST:
-                            sx += 1;
-                            scx += 1;
-                            break;
-                        case NORTH:
-                            sz += 1;
-                            scz += 1;
-                            break;
-                        case SOUTH:
-                            sz -= 1;
-                            scz -= 1;
-                            break;
-                    }
-                    if (sy < 0)
-                        continue;
-                    if (sy > WORLD_HEIGHT - 1)
-                        continue;
+                        // Offset values based on side
+                        switch (s) {
+                            case TOP:
+                                sy += 1;
+                                break;
+                            case BOTTOM:
+                                sy -= 1;
+                                break;
+                            case WEST:
+                                sx -= 1;
+                                scx -= 1;
+                                break;
+                            case EAST:
+                                sx += 1;
+                                scx += 1;
+                                break;
+                            case NORTH:
+                                sz += 1;
+                                scz += 1;
+                                break;
+                            case SOUTH:
+                                sz -= 1;
+                                scz -= 1;
+                                break;
+                        }
+                        if (sy < 0)
+                            continue;
+                        if (sy > WORLD_HEIGHT - 1)
+                            continue;
 
-                    // Select the correct chunk
-                    if(scz < 0) {
-                        scz += CHUNK_SIZE;
-                        sChunk = getChunk(sx, sz);
-                    } else if(scz > CHUNK_SIZE-1) {
-                        scz -= CHUNK_SIZE;
-                        sChunk = getChunk(sx, sz);
-                    }
-                    if(scx < 0) {
-                        scx += CHUNK_SIZE;
-                        sChunk = getChunk(sx, sz);
-                    } else if(scx > CHUNK_SIZE-1) {
-                        scx -= CHUNK_SIZE;
-                        sChunk = getChunk(sx, sz);
-                    }
+                        // Select the correct chunk
+                        if(scz < 0) {
+                            scz += CHUNK_SIZE;
+                            sChunk = getChunk(sx, sz);
+                        } else if(scz > CHUNK_SIZE-1) {
+                            scz -= CHUNK_SIZE;
+                            sChunk = getChunk(sx, sz);
+                        }
+                        if(scx < 0) {
+                            scx += CHUNK_SIZE;
+                            sChunk = getChunk(sx, sz);
+                        } else if(scx > CHUNK_SIZE-1) {
+                            scx -= CHUNK_SIZE;
+                            sChunk = getChunk(sx, sz);
+                        }
 
-                    if(sChunk == null)
-                        continue;
+                        if(sChunk == null)
+                            continue;
 
-                    Block sBlock = sChunk.getBlock(scx, sy, scz);
-                    int sSunlight = sChunk.getSunlight(scx, sy, scz);
-                    if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
-                        if ((sSunlight < ll || s == Side.BOTTOM) && sSunlight != 0) { // Reset lighting for blocks affected by this block
-                            addToSunlightRemovalQueue(sx, sy, sz);
-                        } else if (sSunlight >= ll && s != Side.BOTTOM) { // Add surrounding blocks to queue to restore lighting of the reset blocks
-                            addToSunlightQueue(sx, sy, sz);
+                        Block sBlock = sChunk.getBlock(scx, sy, scz);
+                        int sSunlight = sChunk.getSunlight(scx, sy, scz);
+                        if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
+                            if ((sSunlight < ll || s == Side.BOTTOM) && sSunlight != 0) { // Reset lighting for blocks affected by this block
+                                addToSunlightRemovalQueue(sx, sy, sz);
+                            } else if (sSunlight >= ll && s != Side.BOTTOM) { // Add surrounding blocks to queue to restore lighting of the reset blocks
+                                addToSunlightQueue(sx, sy, sz);
+                            }
                         }
                     }
-                }
 
-                // Reset lighting for the block
-                posChunk.setSunlight(cx, y, cz, 0);
-                changedChunks.add(posChunk);
+                    // Reset lighting for the block
+                    posChunk.setSunlight(cx, y, cz, 0);
+                    changedChunks.add(posChunk);
+                } catch (CoordinatesOutOfBoundsException e) {
+                    e.printStackTrace();
+                }
             }
             for(IChunk changedChunk : changedChunks) {
                 changedChunk.finishChangingSunlight();
@@ -452,7 +463,12 @@ public class World implements IWorld {
         if (chunk == null) {
             return 1;
         }
-        return chunk.getLightLevel(pos.x & (CHUNK_SIZE-1), pos.y, pos.z & (CHUNK_SIZE-1));
+        try {
+            return chunk.getLightLevel(pos.x & (CHUNK_SIZE-1), pos.y, pos.z & (CHUNK_SIZE-1));
+        } catch (CoordinatesOutOfBoundsException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     @Override
@@ -557,32 +573,36 @@ public class World implements IWorld {
     }
 
     private void setupLighting(IChunk c) {
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int z = 0; z < CHUNK_SIZE; z++) {
-                int y = WORLD_HEIGHT-1;
-                if(c.getBlockId(x, y, z) > 0) {
-                    break;
-                }
-                sunlightQueue.add(new int[]{c.getStartPosition().x + x, y, c.getStartPosition().z + z});
-                c.setSunlight(x, y, z, c.getMaxLightLevel());
+        try {
+            for (int x = 0; x < CHUNK_SIZE; x++) {
+                for (int z = 0; z < CHUNK_SIZE; z++) {
+                    int y = WORLD_HEIGHT - 1;
+                    if (c.getBlockId(x, y, z) > 0) {
+                        break;
+                    }
+                    sunlightQueue.add(new int[]{c.getStartPosition().x + x, y, c.getStartPosition().z + z});
+                    c.setSunlight(x, y, z, c.getMaxLightLevel());
 
-                for(int cy = 0; cy < getHeight(); cy++) {
-                    int id = c.getBlockId(x, cy, z);
-                    if(id > 0) {
-                        Block blk = VoxelGameAPI.instance.getBlockByID(id);
-                        if(blk.getLightValue() > 0) {
-                            c.setBlocklight(x, cy, z, blk.getLightValue());
-                            addToBlocklightQueue(c.getStartPosition().x + x, c.getStartPosition().y + cy, c.getStartPosition().z + z);
+                    for (int cy = 0; cy < getHeight(); cy++) {
+                        int id = c.getBlockId(x, cy, z);
+                        if (id > 0) {
+                            Block blk = VoxelGameAPI.instance.getBlockByID(id);
+                            if (blk.getLightValue() > 0) {
+                                c.setBlocklight(x, cy, z, blk.getLightValue());
+                                addToBlocklightQueue(c.getStartPosition().x + x, c.getStartPosition().y + cy, c.getStartPosition().z + z);
+                            }
                         }
                     }
                 }
             }
-        }
-        synchronized (sunlightQueue) {
-            sunlightQueue.notifyAll();
-        }
-        synchronized (blocklightQueue) {
-            blocklightQueue.notifyAll();
+            synchronized (sunlightQueue) {
+                sunlightQueue.notifyAll();
+            }
+            synchronized (blocklightQueue) {
+                blocklightQueue.notifyAll();
+            }
+        } catch (CoordinatesOutOfBoundsException ex) {
+            ex.printStackTrace();
         }
     }
 

@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.client.render.meshing.PerCornerLightData;
 import sx.lambda.voxel.world.IWorld;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 /**
@@ -31,7 +32,12 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
-        short meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
+        short meta = 0;
+        try {
+            meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
+        } catch (CoordinatesOutOfBoundsException e) {
+            e.printStackTrace();
+        }
         super.renderNorth(atlasIndex, x1, y1, x2, y1 + getHeight(meta), z, lightLevel, pcld, builder);
     }
 
@@ -42,7 +48,12 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
-        short meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
+        short meta = 0;
+        try {
+            meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
+        } catch (CoordinatesOutOfBoundsException e) {
+            e.printStackTrace();
+        }
         super.renderSouth(atlasIndex, x1, y1, x2, y1 + getHeight(meta), z, lightLevel, pcld, builder);
     }
 
@@ -53,7 +64,12 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
-        short meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
+        short meta = 0;
+        try {
+            meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
+        } catch (CoordinatesOutOfBoundsException e) {
+            e.printStackTrace();
+        }
         super.renderWest(atlasIndex, z1, y1, z2, y1 + getHeight(meta), x, lightLevel, pcld, builder);
     }
 
@@ -64,7 +80,12 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int yi = MathUtils.floor(y1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
-        short meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
+        short meta = 0;
+        try {
+            meta = chunk.getMeta(xi & (world.getChunkSize() - 1), yi, zi & (world.getChunkSize() - 1));
+        } catch (CoordinatesOutOfBoundsException e) {
+            e.printStackTrace();
+        }
         super.renderEast(atlasIndex, z1, y1, z2, y1 + getHeight(meta), x, lightLevel, pcld, builder);
     }
 
@@ -75,7 +96,12 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int yi = MathUtils.floor(y - 1);
         IWorld world = VoxelGameClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
-        short meta = chunk.getMeta(xi & (world.getChunkSize()-1), yi, zi & (world.getChunkSize()-1));
+        short meta = 0;
+        try {
+            meta = chunk.getMeta(xi & (world.getChunkSize()-1), yi, zi & (world.getChunkSize()-1));
+        } catch (CoordinatesOutOfBoundsException e) {
+            e.printStackTrace();
+        }
         super.renderTop(atlasIndex, x1, z1, x2, z2, y - (1 - getHeight(meta)), lightLevel, pcld, builder);
     }
 

@@ -3,6 +3,7 @@ package sx.lambda.voxel.block;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import sx.lambda.voxel.api.BuiltInBlockIds;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class Snow extends Block {
@@ -16,7 +17,12 @@ public class Snow extends Block {
 
     @Override
     public BoundingBox calculateBoundingBox(IChunk c, int x, int y, int z) {
-        short metadata = c.getMeta(x, y, z);
+        short metadata = 0;
+        try {
+            metadata = c.getMeta(x, y, z);
+        } catch (CoordinatesOutOfBoundsException e) {
+            e.printStackTrace();
+        }
 
         return new BoundingBox(new Vector3(c.getStartPosition().x+x, y, c.getStartPosition().z+z),
                 new Vector3(c.getStartPosition().x+x+1, y+getHeight(metadata), c.getStartPosition().z+z+1));

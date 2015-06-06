@@ -7,6 +7,7 @@ import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.biome.Biome;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkDataPacket> {
@@ -45,19 +46,23 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                         for(int x = 0; x < 16; x++) {
                             for(int z = 0; z < 16; z++) {
                                 for(int y = 0; y < 16; y++) {
-                                    int id = c.getBlocks().getBlock(x, y, z);
-                                    short meta = (short)c.getBlocks().getData(x, y, z);
-                                    boolean blockExists = false;
-                                    if(id <= 0 || VoxelGameAPI.instance.getBlockByID(id) != null) {
-                                        blockExists = true;
+                                    try {
+                                        int id = c.getBlocks().getBlock(x, y, z);
+                                        short meta = (short) c.getBlocks().getData(x, y, z);
+                                        boolean blockExists = false;
+                                        if (id <= 0 || VoxelGameAPI.instance.getBlockByID(id) != null) {
+                                            blockExists = true;
+                                        }
+                                        if (!blockExists) {
+                                            id = BuiltInBlockIds.UNKNOWN_ID;
+                                        }
+                                        if (id > 0)
+                                            ck.setBlock(id, x, cy + y, z, false);
+                                        if (meta > 0)
+                                            ck.setMeta(meta, x, cy + y, z);
+                                    } catch (CoordinatesOutOfBoundsException ex) {
+                                        ex.printStackTrace();
                                     }
-                                    if(!blockExists) {
-                                        id = BuiltInBlockIds.UNKNOWN_ID;
-                                    }
-                                    if(id > 0)
-                                        ck.setBlock(id, x, cy + y, z, false);
-                                    if(meta > 0)
-                                        ck.setMeta(meta, x, cy+y, z);
                                 }
                             }
                         }

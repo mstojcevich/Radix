@@ -9,6 +9,8 @@ import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.IBlockRenderer;
 import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.block.Side;
+import sx.lambda.voxel.world.chunk.BlockStorage;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 import java.util.ArrayList;
@@ -31,13 +33,13 @@ public class GreedyMesher implements Mesher {
     }
 
     @Override
-    public Mesh meshVoxels(MeshBuilder builder, Block[][][] voxels, short[][][] metadata, float[][][] lightLevels) {
-        List<Face> faces = getFaces(voxels, metadata, lightLevels);
+    public Mesh meshVoxels(MeshBuilder builder, BlockStorage storage, UseCondition condition) {
+        List<Face> faces = getFaces(storage, condition);
 
         return meshFaces(faces, builder);
     }
 
-    public List<Face> getFaces(Block[][][] voxels, short[][][] metadata, float[][][] lightLevels, OccludeCondition ocCond, MergeCondition shouldMerge) {
+    public List<Face> getFaces(BlockStorage storage, UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
         List<Face> faces = new ArrayList<>();
 
         // TODO don't allocate arrays for lightData if pcld is enabled
@@ -52,65 +54,71 @@ public class GreedyMesher implements Mesher {
         }
 
         // Top, bottom
-        for (int y = 0; y < voxels[0].length; y++) {
-            int[][] topBlocks = new int[voxels.length][voxels[0][0].length];
-            short[][] topMeta = new short[voxels.length][voxels[0][0].length];
-            float[][] topLightLevels = new float[voxels.length][voxels[0][0].length];
+        for (int y = 0; y < storage.getHeight(); y++) {
+            short[][] topBlocks = new short[storage.getWidth()][storage.getDepth()];
+            short[][] topMeta = new short[storage.getWidth()][storage.getDepth()];
+            float[][] topLightLevels = new float[storage.getWidth()][storage.getDepth()];
             PerCornerLightData[][] topPcld = null;
             if(perCornerLight) {
-                topPcld = new PerCornerLightData[voxels.length][voxels[0][0].length];
+                topPcld = new PerCornerLightData[storage.getWidth()][storage.getDepth()];
             }
-            int[][] btmBlocks = new int[voxels.length][voxels[0][0].length];
-            short[][] btmMeta = new short[voxels.length][voxels[0][0].length];
-            float[][] btmLightLevels = new float[voxels.length][voxels[0][0].length];
+            short[][] btmBlocks = new short[storage.getWidth()][storage.getDepth()];
+            short[][] btmMeta = new short[storage.getWidth()][storage.getDepth()];
+            float[][] btmLightLevels = new float[storage.getWidth()][storage.getDepth()];
             PerCornerLightData[][] btmPcld = null;
             if(perCornerLight) {
-                btmPcld = new PerCornerLightData[voxels.length][voxels[0][0].length];
+                btmPcld = new PerCornerLightData[storage.getWidth()][storage.getDepth()];
             }
-            for (int x = 0; x < voxels.length; x++) {
-                for (int z = 0; z < voxels[0][0].length; z++) {
-                    Block curBlock = voxels[x][y][z];
-                    if (curBlock == null) continue;
-                    if (y < voxels[0].length - 1) {
-                        if (!ocCond.shouldOcclude(curBlock, voxels[x][y + 1][z])) {
-                            topBlocks[x][z] = curBlock.getID();
-                            topMeta[x][z] = metadata[x][y][z];
-                            topLightLevels[x][z] = lightLevels[x][y + 1][z];
+            for (int x = 0; x < storage.getWidth(); x++) {
+                for (int z = 0; z < storage.getDepth(); z++) {
+                    try {
+                        Block curBlock = storage.getBlock(x, y, z);
+                        if (curBlock == null || !condition.shouldUse(curBlock))
+                            continue;
 
-                            if(perCornerLight) {
-                                PerCornerLightData pcld = new PerCornerLightData();
-                                pcld.l00 = calcPerCornerLight(Side.TOP, x, y, z);
-                                pcld.l01 = calcPerCornerLight(Side.TOP, x, y, z + 1);
-                                pcld.l10 = calcPerCornerLight(Side.TOP, x + 1, y, z);
-                                pcld.l11 = calcPerCornerLight(Side.TOP, x + 1, y, z + 1);
-                                topPcld[x][z] = pcld;
-                            }
-                        }
-                    } else {
-                        topBlocks[x][z] = curBlock.getID();
-                        if(perCornerLight) {
-                            topPcld[x][z] = bright;
-                        }
-                        topLightLevels[x][z] = 1;
-                    }
-                    if (y > 0) {
-                        if(!ocCond.shouldOcclude(curBlock, voxels[x][y - 1][z])) {
-                            btmBlocks[x][z] = curBlock.getID();
-                            btmMeta[x][z] = metadata[x][y][z];
-                            btmLightLevels[x][z] = lightLevels[x][y - 1][z];
+                        if (y < storage.getHeight() - 1) {
+                            if (!ocCond.shouldOcclude(curBlock, storage.getBlock(x, y + 1, z))) {
+                                topBlocks[x][z] = (short)curBlock.getID();
+                                topMeta[x][z] = storage.getMeta(x, y, z);
+                                topLightLevels[x][z] = chunk.getLightLevel(x, y + 1, z);
 
-                            if(perCornerLight) {
-                                PerCornerLightData pcld = new PerCornerLightData();
-                                pcld.l00 = calcPerCornerLight(Side.BOTTOM, x, y, z);
-                                pcld.l01 = calcPerCornerLight(Side.BOTTOM, x, y, z + 1);
-                                pcld.l10 = calcPerCornerLight(Side.BOTTOM, x + 1, y, z);
-                                pcld.l11 = calcPerCornerLight(Side.BOTTOM, x + 1, y, z + 1);
-                                btmPcld[x][z] = pcld;
+                                if (perCornerLight) {
+                                    PerCornerLightData pcld = new PerCornerLightData();
+                                    pcld.l00 = calcPerCornerLight(Side.TOP, x, y, z);
+                                    pcld.l01 = calcPerCornerLight(Side.TOP, x, y, z + 1);
+                                    pcld.l10 = calcPerCornerLight(Side.TOP, x + 1, y, z);
+                                    pcld.l11 = calcPerCornerLight(Side.TOP, x + 1, y, z + 1);
+                                    topPcld[x][z] = pcld;
+                                }
                             }
+                        } else {
+                            topBlocks[x][z] = (short) curBlock.getID();
+                            if (perCornerLight) {
+                                topPcld[x][z] = bright;
+                            }
+                            topLightLevels[x][z] = 1;
                         }
-                    } else {
-                        btmLightLevels[x][z] = 1;
-                        continue;
+                        if (y > 0) {
+                            if (!ocCond.shouldOcclude(curBlock, storage.getBlock(x, y - 1, z))) {
+                                btmBlocks[x][z] = (short) curBlock.getID();
+                                btmMeta[x][z] = storage.getMeta(x, y, z);
+                                btmLightLevels[x][z] = chunk.getLightLevel(x, y - 1, z);
+
+                                if (perCornerLight) {
+                                    PerCornerLightData pcld = new PerCornerLightData();
+                                    pcld.l00 = calcPerCornerLight(Side.BOTTOM, x, y, z);
+                                    pcld.l01 = calcPerCornerLight(Side.BOTTOM, x, y, z + 1);
+                                    pcld.l10 = calcPerCornerLight(Side.BOTTOM, x + 1, y, z);
+                                    pcld.l11 = calcPerCornerLight(Side.BOTTOM, x + 1, y, z + 1);
+                                    btmPcld[x][z] = pcld;
+                                }
+                            }
+                        } else {
+                            btmLightLevels[x][z] = 1;
+                            continue;
+                        }
+                    } catch (CoordinatesOutOfBoundsException ex) {
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -119,72 +127,77 @@ public class GreedyMesher implements Mesher {
         }
 
         // East, west
-        for (int x = 0; x < voxels.length; x++) {
-            int[][] westBlocks = new int[voxels[0][0].length][voxels[0].length];
-            short[][] westMeta = new short[voxels[0][0].length][voxels[0].length];
-            float[][] westLightLevels = new float[voxels[0][0].length][voxels[0].length];
+        for (int x = 0; x < storage.getWidth(); x++) {
+            short[][] westBlocks = new short[storage.getDepth()][storage.getHeight()];
+            short[][] westMeta = new short[storage.getDepth()][storage.getHeight()];
+            float[][] westLightLevels = new float[storage.getDepth()][storage.getHeight()];
             PerCornerLightData[][] westPcld = null;
             if(perCornerLight) {
-                westPcld = new PerCornerLightData[voxels[0][0].length][voxels[0].length];
+                westPcld = new PerCornerLightData[storage.getDepth()][storage.getHeight()];
             }
-            int[][] eastBlocks = new int[voxels[0][0].length][voxels[0].length];
-            short[][] eastMeta = new short[voxels[0][0].length][voxels[0].length];
-            float[][] eastLightLevels = new float[voxels[0][0].length][voxels[0].length];
+            short[][] eastBlocks = new short[storage.getDepth()][storage.getHeight()];
+            short[][] eastMeta = new short[storage.getDepth()][storage.getHeight()];
+            float[][] eastLightLevels = new float[storage.getDepth()][storage.getHeight()];
             PerCornerLightData[][] eastPcld = null;
             if(perCornerLight) {
-                eastPcld = new PerCornerLightData[voxels[0][0].length][voxels[0].length];
+                eastPcld = new PerCornerLightData[storage.getDepth()][storage.getHeight()];
             }
-            for (int z = 0; z < voxels[0][0].length; z++) {
-                for (int y = 0; y < voxels[0].length; y++) {
-                    Block curBlock = voxels[x][y][z];
-                    if (curBlock == null) continue;
+            for (int z = 0; z < storage.getDepth(); z++) {
+                for (int y = 0; y < storage.getHeight(); y++) {
+                    try {
+                        Block curBlock = storage.getBlock(x, y, z);
+                        if (curBlock == null || !condition.shouldUse(curBlock))
+                            continue;
 
-                    int westNeighborX = chunk.getStartPosition().x + x - 1;
-                    IChunk westNeighborChunk = chunk.getWorld().getChunk(westNeighborX, chunk.getStartPosition().z + z);
-                    if (westNeighborChunk != null) {
-                        Block westNeighborBlk = VoxelGameAPI.instance.getBlockByID(
-                                westNeighborChunk.getBlockId(westNeighborX & (voxels.length - 1), y, z));
-                        if (!ocCond.shouldOcclude(curBlock, westNeighborBlk)) {
-                            westBlocks[z][y] = curBlock.getID();
-                            westMeta[z][y] = metadata[x][y][z];
-                            westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX & (voxels.length-1), y, z);
+                        int westNeighborX = chunk.getStartPosition().x + x - 1;
+                        IChunk westNeighborChunk = chunk.getWorld().getChunk(westNeighborX, chunk.getStartPosition().z + z);
+                        if (westNeighborChunk != null) {
+                            Block westNeighborBlk = VoxelGameAPI.instance.getBlockByID(
+                                    westNeighborChunk.getBlockId(westNeighborX & (storage.getWidth() - 1), y, z));
+                            if (!ocCond.shouldOcclude(curBlock, westNeighborBlk)) {
+                                westBlocks[z][y] = (short)curBlock.getID();
+                                westMeta[z][y] = storage.getMeta(x, y, z);
+                                westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX & (storage.getWidth() - 1), y, z);
 
-                            if(perCornerLight) {
-                                PerCornerLightData pcld = new PerCornerLightData();
-                                pcld.l00 = calcPerCornerLight(Side.WEST, x, y, z);
-                                pcld.l01 = calcPerCornerLight(Side.WEST, x, y, z + 1);
-                                pcld.l10 = calcPerCornerLight(Side.WEST, x, y + 1, z);
-                                pcld.l11 = calcPerCornerLight(Side.WEST, x, y + 1, z + 1);
-                                westPcld[z][y] = pcld;
+                                if (perCornerLight) {
+                                    PerCornerLightData pcld = new PerCornerLightData();
+                                    pcld.l00 = calcPerCornerLight(Side.WEST, x, y, z);
+                                    pcld.l01 = calcPerCornerLight(Side.WEST, x, y, z + 1);
+                                    pcld.l10 = calcPerCornerLight(Side.WEST, x, y + 1, z);
+                                    pcld.l11 = calcPerCornerLight(Side.WEST, x, y + 1, z + 1);
+                                    westPcld[z][y] = pcld;
+                                }
                             }
+                        } else {
+                            westLightLevels[z][y] = 1;
+                            continue;
                         }
-                    } else {
-                        westLightLevels[z][y] = 1;
-                        continue;
-                    }
 
-                    int eastNeighborX = chunk.getStartPosition().x + x + 1;
-                    IChunk eastNeighborChunk = chunk.getWorld().getChunk(eastNeighborX, chunk.getStartPosition().z + z);
-                    if (eastNeighborChunk != null) {
-                        Block eastNeighborBlk = VoxelGameAPI.instance.getBlockByID(
-                                eastNeighborChunk.getBlockId(eastNeighborX & (voxels.length - 1), y, z));
-                        if (!ocCond.shouldOcclude(curBlock, eastNeighborBlk)) {
-                            eastBlocks[z][y] = curBlock.getID();
-                            eastMeta[z][y] = metadata[x][y][z];
-                            eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX & (voxels.length-1), y, z);
+                        int eastNeighborX = chunk.getStartPosition().x + x + 1;
+                        IChunk eastNeighborChunk = chunk.getWorld().getChunk(eastNeighborX, chunk.getStartPosition().z + z);
+                        if (eastNeighborChunk != null) {
+                            Block eastNeighborBlk = VoxelGameAPI.instance.getBlockByID(
+                                    eastNeighborChunk.getBlockId(eastNeighborX & (storage.getWidth() - 1), y, z));
+                            if (!ocCond.shouldOcclude(curBlock, eastNeighborBlk)) {
+                                eastBlocks[z][y] = (short)curBlock.getID();
+                                eastMeta[z][y] = storage.getMeta(x, y, z);
+                                eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX & (storage.getWidth() - 1), y, z);
 
-                            if(perCornerLight) {
-                                PerCornerLightData pcld = new PerCornerLightData();
-                                pcld.l00 = calcPerCornerLight(Side.EAST, x, y, z);
-                                pcld.l01 = calcPerCornerLight(Side.EAST, x, y, z + 1);
-                                pcld.l10 = calcPerCornerLight(Side.EAST, x, y + 1, z);
-                                pcld.l11 = calcPerCornerLight(Side.EAST, x, y + 1, z + 1);
-                                eastPcld[z][y] = pcld;
+                                if (perCornerLight) {
+                                    PerCornerLightData pcld = new PerCornerLightData();
+                                    pcld.l00 = calcPerCornerLight(Side.EAST, x, y, z);
+                                    pcld.l01 = calcPerCornerLight(Side.EAST, x, y, z + 1);
+                                    pcld.l10 = calcPerCornerLight(Side.EAST, x, y + 1, z);
+                                    pcld.l11 = calcPerCornerLight(Side.EAST, x, y + 1, z + 1);
+                                    eastPcld[z][y] = pcld;
+                                }
                             }
+                        } else {
+                            eastLightLevels[z][y] = 1;
+                            continue;
                         }
-                    } else {
-                        eastLightLevels[z][y] = 1;
-                        continue;
+                    } catch (CoordinatesOutOfBoundsException ex) {
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -194,72 +207,78 @@ public class GreedyMesher implements Mesher {
         }
 
         // North, south
-        for (int z = 0; z < voxels[0][0].length; z++) {
-            int[][] northBlocks = new int[voxels.length][voxels[0].length];
-            short[][] northMeta = new short[voxels.length][voxels[0].length];
-            float[][] northLightLevels = new float[voxels.length][voxels[0].length];
+        for (int z = 0; z < storage.getDepth(); z++) {
+            short[][] northBlocks = new short[storage.getWidth()][storage.getHeight()];
+            short[][] northMeta = new short[storage.getWidth()][storage.getHeight()];
+            float[][] northLightLevels = new float[storage.getWidth()][storage.getHeight()];
             PerCornerLightData[][] northPcld = null;
             if(perCornerLight) {
-                northPcld = new PerCornerLightData[voxels.length][voxels[0].length];
+                northPcld = new PerCornerLightData[storage.getWidth()][storage.getHeight()];
             }
-            int[][] southBlocks = new int[voxels.length][voxels[0].length];
-            short[][] southMeta = new short[voxels.length][voxels[0].length];
-            float[][] southLightLevels = new float[voxels.length][voxels[0].length];
+            short[][] southBlocks = new short[storage.getWidth()][storage.getHeight()];
+            short[][] southMeta = new short[storage.getWidth()][storage.getHeight()];
+            float[][] southLightLevels = new float[storage.getWidth()][storage.getHeight()];
             PerCornerLightData[][] southPcld = null;
             if(perCornerLight) {
-                southPcld = new PerCornerLightData[voxels.length][voxels[0].length];
+                southPcld = new PerCornerLightData[storage.getWidth()][storage.getHeight()];
             }
-            for (int x = 0; x < voxels.length; x++) {
-                for (int y = 0; y < voxels[0].length; y++) {
-                    Block curBlock = voxels[x][y][z];
-                    if (curBlock == null) continue;
-                    int northNeighborZ = chunk.getStartPosition().z + z + 1;
-                    int southNeighborZ = chunk.getStartPosition().z + z - 1;
-                    IChunk northNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, northNeighborZ);
-                    IChunk southNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, southNeighborZ);
+            for (int x = 0; x < storage.getWidth(); x++) {
+                for (int y = 0; y < storage.getHeight(); y++) {
+                    try {
+                        Block curBlock = storage.getBlock(x, y, z);
+                        if (curBlock == null || !condition.shouldUse(curBlock))
+                            continue;
 
-                    if (northNeighborChunk != null) {
-                        Block northNeighborBlock = VoxelGameAPI.instance.getBlockByID(
-                                northNeighborChunk.getBlockId(x, y, northNeighborZ & (voxels[0][0].length-1)));
-                        if (!ocCond.shouldOcclude(curBlock, northNeighborBlock)) {
-                            northBlocks[x][y] = curBlock.getID();
-                            northMeta[x][y] = metadata[x][y][z];
-                            northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ & (voxels[0][0].length-1));
+                        int northNeighborZ = chunk.getStartPosition().z + z + 1;
+                        int southNeighborZ = chunk.getStartPosition().z + z - 1;
+                        IChunk northNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, northNeighborZ);
+                        IChunk southNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, southNeighborZ);
 
-                            if(perCornerLight) {
-                                PerCornerLightData pcld = new PerCornerLightData();
-                                pcld.l00 = calcPerCornerLight(Side.NORTH, x, y, z);
-                                pcld.l01 = calcPerCornerLight(Side.NORTH, x, y + 1, z);
-                                pcld.l10 = calcPerCornerLight(Side.NORTH, x + 1, y, z);
-                                pcld.l11 = calcPerCornerLight(Side.NORTH, x + 1, y + 1, z);
-                                northPcld[x][y] = pcld;
+                        if (northNeighborChunk != null) {
+                            Block northNeighborBlock = VoxelGameAPI.instance.getBlockByID(
+                                    northNeighborChunk.getBlockId(x, y, northNeighborZ & (storage.getDepth() - 1)));
+                            if (!ocCond.shouldOcclude(curBlock, northNeighborBlock)) {
+                                northBlocks[x][y] = (short)curBlock.getID();
+                                northMeta[x][y] = storage.getMeta(x, y, z);
+                                northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ & (storage.getDepth() - 1));
+
+                                if (perCornerLight) {
+                                    PerCornerLightData pcld = new PerCornerLightData();
+                                    pcld.l00 = calcPerCornerLight(Side.NORTH, x, y, z);
+                                    pcld.l01 = calcPerCornerLight(Side.NORTH, x, y + 1, z);
+                                    pcld.l10 = calcPerCornerLight(Side.NORTH, x + 1, y, z);
+                                    pcld.l11 = calcPerCornerLight(Side.NORTH, x + 1, y + 1, z);
+                                    northPcld[x][y] = pcld;
+                                }
                             }
+                        } else {
+                            northLightLevels[x][y] = 1;
+                            continue;
                         }
-                    } else {
-                        northLightLevels[x][y] = 1;
-                        continue;
-                    }
 
-                    if (southNeighborChunk != null) {
-                        Block southNeighborBlock = VoxelGameAPI.instance.getBlockByID(
-                                southNeighborChunk.getBlockId(x, y, southNeighborZ & (voxels[0][0].length-1)));
-                        if (!ocCond.shouldOcclude(curBlock, southNeighborBlock)) {
-                            southBlocks[x][y] = curBlock.getID();
-                            southMeta[x][y] = metadata[x][y][z];
-                            southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ & (voxels[0][0].length-1));
+                        if (southNeighborChunk != null) {
+                            Block southNeighborBlock = VoxelGameAPI.instance.getBlockByID(
+                                    southNeighborChunk.getBlockId(x, y, southNeighborZ & (storage.getDepth() - 1)));
+                            if (!ocCond.shouldOcclude(curBlock, southNeighborBlock)) {
+                                southBlocks[x][y] = (short)curBlock.getID();
+                                southMeta[x][y] = storage.getMeta(x, y, z);
+                                southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ & (storage.getDepth() - 1));
 
-                            if(perCornerLight) {
-                                PerCornerLightData pcld = new PerCornerLightData();
-                                pcld.l00 = calcPerCornerLight(Side.SOUTH, x, y, z);
-                                pcld.l01 = calcPerCornerLight(Side.SOUTH, x, y + 1, z);
-                                pcld.l10 = calcPerCornerLight(Side.SOUTH, x + 1, y, z);
-                                pcld.l11 = calcPerCornerLight(Side.SOUTH, x + 1, y + 1, z);
-                                southPcld[x][y] = pcld;
+                                if (perCornerLight) {
+                                    PerCornerLightData pcld = new PerCornerLightData();
+                                    pcld.l00 = calcPerCornerLight(Side.SOUTH, x, y, z);
+                                    pcld.l01 = calcPerCornerLight(Side.SOUTH, x, y + 1, z);
+                                    pcld.l10 = calcPerCornerLight(Side.SOUTH, x + 1, y, z);
+                                    pcld.l11 = calcPerCornerLight(Side.SOUTH, x + 1, y + 1, z);
+                                    southPcld[x][y] = pcld;
+                                }
                             }
+                        } else {
+                            southLightLevels[x][y] = 1;
+                            continue;
                         }
-                    } else {
-                        southLightLevels[x][y] = 1;
-                        continue;
+                    } catch (CoordinatesOutOfBoundsException ex) {
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -271,8 +290,8 @@ public class GreedyMesher implements Mesher {
         return faces;
     }
 
-    public List<Face> getFaces(Block[][][] voxels, short[][][] metadata, float[][][] lightLevels) {
-        return getFaces(voxels, metadata, lightLevels,
+    public List<Face> getFaces(BlockStorage storage, UseCondition condition) {
+        return getFaces(storage, condition,
                 (curBlock, blockToSide) ->
                         !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
                                 && (curBlock.occludeCovered() && blockToSide.occludeCovered()),
@@ -305,7 +324,7 @@ public class GreedyMesher implements Mesher {
      * @param lls        Light levels of the blocks
      * @param z          Depth on the plane
      */
-    private void greedy(List<Face> outputList, Side side, MergeCondition mergeCond, int[][] blks, short metadata[][], float lls[][], PerCornerLightData[][] pclds, int z, int offsetX, int offsetY) {
+    private void greedy(List<Face> outputList, Side side, MergeCondition mergeCond, short[][] blks, short metadata[][], float lls[][], PerCornerLightData[][] pclds, int z, int offsetX, int offsetY) {
         int width = blks.length;
         int height = blks[0].length;
         boolean[][] used = new boolean[blks.length][blks[0].length];
@@ -454,14 +473,18 @@ public class GreedyMesher implements Mesher {
                     if(sy < 0 || sy >= chunk.getWorld().getHeight())
                         continue;
 
-                    IChunk sChunk = chunk.getWorld().getChunk(sx, sz);
-                    if(sChunk == null)
-                        continue;
-                    // Convert to chunk-relative coords
-                    int scx = sx & (chunk.getWorld().getChunkSize() - 1);
-                    int scz = sz & (chunk.getWorld().getChunkSize() - 1);
-                    lightSum += sChunk.getLightLevel(scx, sy, scz);
-                    count++;
+                    try {
+                        IChunk sChunk = chunk.getWorld().getChunk(sx, sz);
+                        if (sChunk == null)
+                            continue;
+                        // Convert to chunk-relative coords
+                        int scx = sx & (chunk.getWorld().getChunkSize() - 1);
+                        int scz = sz & (chunk.getWorld().getChunkSize() - 1);
+                        lightSum += sChunk.getLightLevel(scx, sy, scz);
+                        count++;
+                    } catch (CoordinatesOutOfBoundsException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         }

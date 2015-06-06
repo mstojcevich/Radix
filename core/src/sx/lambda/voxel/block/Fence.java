@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class Fence extends Block {
@@ -60,25 +61,28 @@ public class Fence extends Block {
             if (sChunk == null)
                 continue;
 
-            int sBlk = sChunk.getBlockId(sx, y, sz);
-            if(sBlk > 0) {
-                Block sBlock = VoxelGameAPI.instance.getBlockByID(sBlk);
-                if(sBlock.isSolid()) {
-                    switch(side) {
-                        case EAST:
-                            x2 = c.getStartPosition().x + x + 1;
-                            break;
-                        case WEST:
-                            x1 = c.getStartPosition().x + x;
-                            break;
-                        case NORTH:
-                            z2 = c.getStartPosition().z + z + 1;
-                            break;
-                        case SOUTH:
-                            z1 = c.getStartPosition().z + z;
-                            break;
+            try {
+                Block sBlock = sChunk.getBlock(sx, y, sz);
+                if (sBlock != null) {
+                    if (sBlock.isSolid()) {
+                        switch (side) {
+                            case EAST:
+                                x2 = c.getStartPosition().x + x + 1;
+                                break;
+                            case WEST:
+                                x1 = c.getStartPosition().x + x;
+                                break;
+                            case NORTH:
+                                z2 = c.getStartPosition().z + z + 1;
+                                break;
+                            case SOUTH:
+                                z1 = c.getStartPosition().z + z;
+                                break;
+                        }
                     }
                 }
+            } catch (CoordinatesOutOfBoundsException ex) {
+                ex.printStackTrace();
             }
         }
         Vector3 corner1 = new Vector3(x1, c.getStartPosition().y+y, z1);

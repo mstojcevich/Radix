@@ -12,6 +12,7 @@ import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.entity.LivingEntity;
 import sx.lambda.voxel.entity.player.Player;
 import sx.lambda.voxel.world.IWorld;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 @CompileStatic
@@ -164,15 +165,20 @@ public class MovementHandler implements RepeatedTask {
 
         int cx = x & (game.getWorld().getChunkSize() - 1);
         int cz = z & (game.getWorld().getChunkSize() - 1);
-        Block block = chunk.getBlock(cx, y, cz);
+        try {
+            Block block = chunk.getBlock(cx, y, cz);
 
-        for (Vector3 corner : getCorners(newBB)) {
-            collideSuccess = collideSuccess || checkCollision(corner);
+            for (Vector3 corner : getCorners(newBB)) {
+                collideSuccess = collideSuccess || checkCollision(corner);
+            }
+
+            return collideSuccess ||
+                    (block != null && block.isSolid()
+                            && block.calculateBoundingBox(chunk, cx, y, cz).intersects(newBB));
+        } catch(CoordinatesOutOfBoundsException ex) {
+            ex.printStackTrace();
+            return true;
         }
-
-        return collideSuccess ||
-                (block != null && block.isSolid()
-                        && block.calculateBoundingBox(chunk, cx, y, cz).intersects(newBB));
     }
 
     public boolean checkCollision(Vector3 pos) {
@@ -189,9 +195,14 @@ public class MovementHandler implements RepeatedTask {
 
         int cx = x & (game.getWorld().getChunkSize() - 1);
         int cz = z & (game.getWorld().getChunkSize() - 1);
-        Block block = chunk.getBlock(cx, y, cz);
+        try {
+            Block block = chunk.getBlock(cx, y, cz);
 
-        return block != null && block.isSolid() && block.calculateBoundingBox(chunk, cx, y, cz).contains(pos);
+            return block != null && block.isSolid() && block.calculateBoundingBox(chunk, cx, y, cz).contains(pos);
+        } catch (CoordinatesOutOfBoundsException ex) {
+            ex.printStackTrace();
+            return true;
+        }
     }
 
     public void jump() {

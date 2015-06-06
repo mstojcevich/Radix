@@ -2,6 +2,7 @@ package sx.lambda.voxel.world;
 
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.Side;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 import java.util.Queue;
@@ -110,20 +111,24 @@ abstract class LightQueueWorker extends Thread {
                         if (sChunk == null)
                             continue;
 
-                        // Spread lighting
-                        Block sBlock = sChunk.getBlock(scx, sy, scz);
-                        // When spreading down, lighting at max level does not decay
-                        if (!decayDown && s == Side.BOTTOM) {
-                            Block block = posChunk.getBlock(cx, y, cz); // Block being spread from
-                            if (ll == posChunk.getMaxLightLevel() && (block == null || block.decreasesLight()))
-                                nextLL = posChunk.getMaxLightLevel();
-                        }
-                        if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
-                            if (getLight(sChunk, scx, sy, scz) < nextLL) {
-                                setLight(sChunk, scx, sy, scz, nextLL);
-                                lightUpdateQueue.add(new int[]{sx, sy, sz});
-                                updatedLight = true;
+                        try {
+                            // Spread lighting
+                            Block sBlock = sChunk.getBlock(scx, sy, scz);
+                            // When spreading down, lighting at max level does not decay
+                            if (!decayDown && s == Side.BOTTOM) {
+                                Block block = posChunk.getBlock(cx, y, cz); // Block being spread from
+                                if (ll == posChunk.getMaxLightLevel() && (block == null || block.decreasesLight()))
+                                    nextLL = posChunk.getMaxLightLevel();
                             }
+                            if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
+                                if (getLight(sChunk, scx, sy, scz) < nextLL) {
+                                    setLight(sChunk, scx, sy, scz, nextLL);
+                                    lightUpdateQueue.add(new int[]{sx, sy, sz});
+                                    updatedLight = true;
+                                }
+                            }
+                        } catch (CoordinatesOutOfBoundsException ex) {
+                            ex.printStackTrace();
                         }
                     }
                 }

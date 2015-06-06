@@ -21,6 +21,7 @@ import sx.lambda.voxel.client.render.meshing.GreedyMesher;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.biome.Biome;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 
 import java.util.List;
 
@@ -31,12 +32,11 @@ public class Chunk implements IChunk {
     private final transient GreedyMesher mesher;
     private final int size;
     private final int height;
+    private final BlockStorage blockStorage;
     /**
      * Map of light levels (ints 0-15) to brightness multipliers
      */
     private final float[] lightLevelMap = new float[MAX_LIGHT_LEVEL+1];
-    private int[][][] blockList;
-    private final short[][][] metadata;
     private final transient IWorld parentWorld;
     private final Biome biome;
     private transient MeshBuilder meshBuilder;
@@ -45,8 +45,6 @@ public class Chunk implements IChunk {
     private transient ModelInstance opaqueModelInstance, translucentModelInstance;
     private final Vec3i startPosition;
     private int highestPoint;
-    private transient int[][][] sunlightLevels;
-    private transient int[][][] blocklightLevels;
     private transient boolean sunlightChanging;
     private transient boolean sunlightChanged;
     private boolean setup;
@@ -63,15 +61,13 @@ public class Chunk implements IChunk {
         this.biome = biome;
         this.size = world.getChunkSize();
         this.height = world.getHeight();
-        this.metadata = meta;
+
+        this.blockStorage = new FlatBlockStorage(size, height, size);
 
         for (int i = 0; i <= MAX_LIGHT_LEVEL; i++) {
             int reduction = MAX_LIGHT_LEVEL - i;
             lightLevelMap[i] = (float) Math.pow(0.8, reduction);
         }
-
-        sunlightLevels = new int[size][height][size];
-        blocklightLevels = new int[size][height][size];
 
         if (VoxelGameClient.getInstance() != null) {// We're a client
             mesher = new GreedyMesher(this, VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().perCornerLightEnabled());
@@ -89,24 +85,21 @@ public class Chunk implements IChunk {
         this.size = world.getChunkSize();
         this.height = world.getHeight();
         this.biome = biome;
-        this.metadata = new short[size][height][size];
+
+        this.blockStorage = new FlatBlockStorage(size, height, size);
 
         for (int i = 0; i <= MAX_LIGHT_LEVEL; i++) {
             int reduction = MAX_LIGHT_LEVEL - i;
             lightLevelMap[i] = (float) Math.pow(0.8, reduction);
         }
 
-        sunlightLevels = new int[size][height][size];
-
-        if (VoxelGameClient.getInstance() != null) {// We're a client
+        if (VoxelGameClient.getInstance() != null) { // We're a client
             mesher = new GreedyMesher(this, VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().perCornerLightEnabled());
         } else {
             mesher = null;
         }
 
-
-        this.blockList = new int[size][height][size];
-        highestPoint = world.getChunkGen().generate(startPosition, blockList);
+        highestPoint = world.getChunkGen().generate(startPosition, blockStorage);
     }
 
     @Override
@@ -173,8 +166,12 @@ public class Chunk implements IChunk {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < height; y++) {
                 for (int z = 0; z < size; z++) {
-                    Block blk = VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
-                    callee.call(blk, x, y, z);
+                    try {
+                        Block blk = blockStorage.getBlock(x, y, z);
+                        callee.call(blk, x, y, z);
+                    } catch (CoordinatesOutOfBoundsException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         }
@@ -246,33 +243,29 @@ public class Chunk implements IChunk {
             if(sChunk == null)
                 continue;
 
-            int sSunlight = sChunk.getSunlight(scx, sy, scz);
-            int sBlocklight = sChunk.getBlocklight(scx, sy, scz);
-            if (sSunlight > 0 || sBlocklight > 0) {
-                Block sBlock = sChunk.getBlock(scx, sy, scz);
-                if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
-                    if(sSunlight > 0)
-                        parentWorld.addToSunlightQueue(sx, sy, sz);
-                    if(sBlocklight > 0)
-                        parentWorld.addToBlocklightQueue(sx, sy, sz);
+            try {
+                int sSunlight = sChunk.getSunlight(scx, sy, scz);
+                int sBlocklight = sChunk.getBlocklight(scx, sy, scz);
+                if (sSunlight > 0 || sBlocklight > 0) {
+                    Block sBlock = sChunk.getBlock(scx, sy, scz);
+                    if (sBlock == null || sBlock.doesLightPassThrough() || !sBlock.decreasesLight()) {
+                        if (sSunlight > 0)
+                            parentWorld.addToSunlightQueue(sx, sy, sz);
+                        if (sBlocklight > 0)
+                            parentWorld.addToBlocklightQueue(sx, sy, sz);
+                    }
                 }
+            } catch (CoordinatesOutOfBoundsException ex) {
+                ex.printStackTrace();
             }
         }
     }
 
     @Override
-    public float getLightLevel(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        int sunlight = sunlightLevels[x][y][z];
-        int blocklight = blocklightLevels[x][y][z];
-        return lightLevelMap[MathUtils.clamp(sunlight+blocklight, 0, MAX_LIGHT_LEVEL)];
-    }
-
-    @Override
     //TODO remove entirely in favor of setBlock(0 ?
-    public void removeBlock(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+    public void removeBlock(int x, int y, int z) throws CoordinatesOutOfBoundsException {
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
 
         if(x == size - 1) {
             getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x + size, getStartPosition().z));
@@ -285,8 +278,11 @@ public class Chunk implements IChunk {
             getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x, getStartPosition().z - size));
         }
 
-        blockList[x][y][z] = -1;
-        blocklightLevels[x][y][z] = 0;
+        blockStorage.setBlock(x, y, z, null);
+        blockStorage.setId(x, y, z, 0);
+        blockStorage.setMeta(x, y, z, 0);
+        blockStorage.setSunlight(x, y, z, 0);
+        blockStorage.setBlocklight(x, y, z, 0);
         // TODO XXX LIGHTING add to block light removal queue
 
         getWorld().rerenderChunk(this);
@@ -295,25 +291,24 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void setBlock(int block, int x, int y, int z) {
+    public void setBlock(int block, int x, int y, int z) throws CoordinatesOutOfBoundsException {
         setBlock(block, x, y, z, true);
     }
 
     @Override
-    public void setBlock(int block, int x, int y, int z, boolean updateSunlight) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+    public void setBlock(int block, int x, int y, int z, boolean updateSunlight) throws CoordinatesOutOfBoundsException {
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
 
         if(block == 0) {
             removeBlock(x, y, z);
             return;
         }
 
-        int oldBlock = blockList[x][y][z];
+        int oldBlock = blockStorage.getId(x, y, z);
         Block blk = VoxelGameAPI.instance.getBlockByID(block);
-        if(blk == null)
-            System.err.println(block + " was trying to be set, but was null. WTF?");
         int newBlocklightVal = blk.getLightValue();
-        blocklightLevels[x][y][z] = newBlocklightVal;
+        blockStorage.setBlocklight(x, y, z, newBlocklightVal);
         if(oldBlock > 0) {
             Block oldBlk = VoxelGameAPI.instance.getBlockByID(oldBlock);
             int oldBlocklightVal = oldBlk.getLightValue();
@@ -328,27 +323,29 @@ public class Chunk implements IChunk {
             }
         }
 
-        blockList[x][y][z] = block;
-        if (block > 0) {
-            highestPoint = Math.max(highestPoint, y);
-        }
+        blockStorage.setId(x, y, z, block);
+        blockStorage.setBlock(x, y, z, blk);
+        highestPoint = Math.max(highestPoint, y);
 
         if(updateSunlight)
             getWorld().addToSunlightRemovalQueue(x + startPosition.x, y + startPosition.y, z + startPosition.z);
     }
 
     @Override
-    public void setMeta(short meta, int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        metadata[x][y][z] = meta;
+    public void setMeta(short meta, int x, int y, int z) throws CoordinatesOutOfBoundsException {
+        blockStorage.setMeta(x, y, z, meta);
     }
 
     @Override
-    public short getMeta(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+    public short getMeta(int x, int y, int z) throws CoordinatesOutOfBoundsException {
+        return blockStorage.getMeta(x, y, z);
+    }
 
-        return metadata[x][y][z];
+    @Override
+    public float getLightLevel(int x, int y, int z) throws CoordinatesOutOfBoundsException {
+        int sunlight = blockStorage.getSunlight(x, y, z);
+        int blocklight = blockStorage.getBlocklight(x, y, z);
+        return lightLevelMap[MathUtils.clamp(sunlight+blocklight, 0, MAX_LIGHT_LEVEL)];
     }
 
     @Override
@@ -362,13 +359,18 @@ public class Chunk implements IChunk {
     }
 
     private void loadIdInts(int[][][] ints) {
-        blockList = ints;
         highestPoint = 0;
         for (int x = 0; x < ints.length; x++) {
             for (int z = 0; z < ints[0][0].length; z++) {
                 for (int y = 0; y < ints[0].length; y++) {
-                    if (ints[x][y][z] > 0)
-                        highestPoint = Math.max(y, highestPoint);
+                    if (ints[x][y][z] > 0) {
+                        try {
+                            blockStorage.setId(x, y, z, ints[x][y][z]);
+                            highestPoint = Math.max(y, highestPoint);
+                        } catch (CoordinatesOutOfBoundsException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
         }
@@ -427,7 +429,11 @@ public class Chunk implements IChunk {
         final Block[][][] opaque = new Block[size][height][size];
         final float[][][] lightLevels = new float[size][height][size];
         eachBlock((block, x, y, z) -> {
-            lightLevels[x][y][z] = getLightLevel(x, y, z);
+            try {
+                lightLevels[x][y][z] = getLightLevel(x, y, z);
+            } catch (CoordinatesOutOfBoundsException ex) {
+                ex.printStackTrace();
+            }
             if (block != null) {
                 if (block.isTranslucent())
                     translucent[x][y][z] = block;
@@ -435,8 +441,8 @@ public class Chunk implements IChunk {
                     opaque[x][y][z] = block;
             }
         });
-        opaqueFaces = mesher.getFaces(opaque, metadata, lightLevels);
-        translucentFaces = mesher.getFaces(translucent, metadata, lightLevels);
+        opaqueFaces = mesher.getFaces(blockStorage, block -> !block.isTranslucent());
+        translucentFaces = mesher.getFaces(blockStorage, Block::isTranslucent);
         meshing = false;
         meshed = true;
         parentWorld.decrChunksMeshing();
@@ -453,48 +459,40 @@ public class Chunk implements IChunk {
     }
 
     @Override
-    public void setSunlight(int x, int y, int z, int level) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+    public void setSunlight(int x, int y, int z, int level) throws CoordinatesOutOfBoundsException {
         assert level >= 0 && level <= MAX_LIGHT_LEVEL;
 
-        sunlightLevels[x][y][z] = level;
+        blockStorage.setSunlight(x, y, z, level);
 
         sunlightChanging = true;
         sunlightChanged = true;
     }
 
     @Override
-    public int getSunlight(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        return sunlightLevels[x][y][z];
+    public int getSunlight(int x, int y, int z) throws CoordinatesOutOfBoundsException {
+        return blockStorage.getSunlight(x, y, z);
     }
 
     @Override
-    public void setBlocklight(int x, int y, int z, int level) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
+    public void setBlocklight(int x, int y, int z, int level) throws CoordinatesOutOfBoundsException {
         assert level >= 0 && level <= MAX_LIGHT_LEVEL;
 
-        blocklightLevels[x][y][z] = level;
+        blockStorage.setBlocklight(x, y, z, level);
     }
 
     @Override
-    public int getBlocklight(int x, int y, int z) {
-        return blocklightLevels[x][y][z];
+    public int getBlocklight(int x, int y, int z) throws CoordinatesOutOfBoundsException {
+        return blockStorage.getBlocklight(x, y, z);
     }
 
     @Override
-    public int getBlockId(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        return blockList[x][y][z];
+    public int getBlockId(int x, int y, int z) throws CoordinatesOutOfBoundsException {
+        return blockStorage.getId(x, y, z);
     }
 
     @Override
-    public Block getBlock(int x, int y, int z) {
-        assert x >= 0 && x < size && z >= 0 && z < size && y >= 0 && y < height;
-
-        return VoxelGameAPI.instance.getBlockByID(blockList[x][y][z]);
+    public Block getBlock(int x, int y, int z) throws CoordinatesOutOfBoundsException {
+        return blockStorage.getBlock(x, y, z);
     }
 
     @Override

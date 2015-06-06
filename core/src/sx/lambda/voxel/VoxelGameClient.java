@@ -54,6 +54,7 @@ import sx.lambda.voxel.util.PlotCell3f;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.World;
+import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 import javax.swing.*;
@@ -339,16 +340,22 @@ public class VoxelGameClient extends ApplicationAdapter {
             if (theChunk != null) {
                 if(bp.y >= world.getHeight())
                     continue;
-                Block b = theChunk.getBlock(bp.x & (world.getChunkSize() - 1), bp.y, bp.z & (world.getChunkSize() - 1));
-                if (b != null && b.isSelectable()) {
-                    selectedBlock = bp;
-                    if (last != null) {
-                        Block lastBlock = theChunk.getBlock(last.x & (world.getChunkSize()-1), last.y, last.z & (world.getChunkSize()-1));
-                        if (lastBlock == null || !lastBlock.isSelectable()) {
-                            selectedNextPlace = last;
+                try {
+                    Block b = theChunk.getBlock(bp.x & (world.getChunkSize() - 1), bp.y, bp.z & (world.getChunkSize() - 1));
+                    if (b != null && b.isSelectable()) {
+                        selectedBlock = bp;
+                        if (last != null) {
+                            Block lastBlock = theChunk.getBlock(last.x & (world.getChunkSize() - 1), last.y, last.z & (world.getChunkSize() - 1));
+                            if (lastBlock == null || !lastBlock.isSelectable()) {
+                                selectedNextPlace = last;
+                            }
                         }
-                    }
 
+                        plotter.end();
+                        return;
+                    }
+                } catch(CoordinatesOutOfBoundsException ex) {
+                    ex.printStackTrace();
                     plotter.end();
                     return;
                 }
@@ -568,16 +575,20 @@ public class VoxelGameClient extends ApplicationAdapter {
                 && this.currentScreen == this.hud) {
             IChunk chunk = world.getChunk(selectedBlock);
             if(chunk != null) {
-                Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y, selectedBlock.z & (world.getChunkSize() - 1));
-                if(block != null && block.isSelectable()) {
-                    if (this.isRemote()) {
-                        mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
-                        mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.START_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
-                        mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.FINISH_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
-                    } else {
-                        this.getWorld().removeBlock(this.getSelectedBlock().x, this.getSelectedBlock().y, this.getSelectedBlock().z);
+                try {
+                    Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y, selectedBlock.z & (world.getChunkSize() - 1));
+                    if (block != null && block.isSelectable()) {
+                        if (this.isRemote()) {
+                            mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
+                            mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.START_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                            mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.FINISH_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                        } else {
+                            this.getWorld().removeBlock(this.getSelectedBlock().x, this.getSelectedBlock().y, this.getSelectedBlock().z);
+                        }
+                        updateSelectedBlock();
                     }
-                    updateSelectedBlock();
+                } catch (CoordinatesOutOfBoundsException ex) {
+                    ex.printStackTrace();
                 }
             }
         }

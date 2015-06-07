@@ -301,6 +301,8 @@ public class World implements IWorld {
         // Rerender neighbors
         for(int x = chunk.getStartPosition().x - getChunkSize(); x <= chunk.getStartPosition().x + getChunkSize(); x += getChunkSize()) {
             for (int z = chunk.getStartPosition().z - getChunkSize(); z <= chunk.getStartPosition().z + getChunkSize(); z += getChunkSize()) {
+                if(x == chunk.getStartPosition().x && z == chunk.getStartPosition().z)
+                    continue;
                 IChunk neighbor = getChunk(x, z);
                 if(neighbor != null) {
                     rerenderChunk(neighbor);

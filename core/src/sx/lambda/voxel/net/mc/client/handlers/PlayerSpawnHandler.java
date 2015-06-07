@@ -13,6 +13,10 @@ public class PlayerSpawnHandler implements PacketHandler<ServerSpawnPlayerPacket
 
     @Override
     public void handle(ServerSpawnPlayerPacket packet) {
+        // TODO if it's not for us, set position of the entity it is for
+        if(packet.getEntityId() != VoxelGameClient.getInstance().getPlayer().getID())
+            return;
+
         game.getPlayer().getPosition().set((float)packet.getX(), (float)packet.getY(), (float)packet.getZ());
         game.getPlayer().getRotation().setRot(-packet.getPitch(), 180-packet.getYaw());
 

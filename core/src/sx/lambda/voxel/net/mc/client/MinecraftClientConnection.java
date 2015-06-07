@@ -48,6 +48,7 @@ public class MinecraftClientConnection {
         handlerMap.put(ServerSpawnPlayerPacket.class, new PlayerSpawnHandler(game));
         handlerMap.put(ServerBlockChangePacket.class, new BlockChangeHandler(game));
         handlerMap.put(ServerMultiBlockChangePacket.class, new MultiBlockChangeHandler(game));
+        handlerMap.put(ServerJoinGamePacket.class, new JoinGameHandler());
         handlerMap.put(ServerChatPacket.class, chatHandler);
 
         client.getSession().addListener(new SessionAdapter() {
@@ -58,10 +59,7 @@ public class MinecraftClientConnection {
                 if (handler != null) {
                     handler.handle(event.getPacket());
                 }
-                if (event.getPacket() instanceof ServerJoinGamePacket) {
-                    event.getSession().send(new ClientChatPacket("Hello, this is a test of VoxelTest."));
-                    event.getSession().send(new ClientSettingsPacket("en_US", 1, ChatVisibility.FULL, false, SkinPart.HAT));
-                } else if (event.getPacket() instanceof ServerChatPacket) {
+                if (event.getPacket() instanceof ServerChatPacket) {
                     Message message = event.<ServerChatPacket>getPacket().getMessage();
                     System.out.println("Received Message: " + message.getFullText());
                     if (message instanceof TranslationMessage) {

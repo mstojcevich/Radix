@@ -14,7 +14,7 @@ public class PlayerSpawnHandler implements PacketHandler<ServerSpawnPlayerPacket
     @Override
     public void handle(ServerSpawnPlayerPacket packet) {
         game.getPlayer().getPosition().set((float)packet.getX(), (float)packet.getY(), (float)packet.getZ());
-        game.getPlayer().getRotation().setRot(packet.getPitch(), packet.getYaw());
+        game.getPlayer().getRotation().setRot(-packet.getPitch(), 180-packet.getYaw());
 
         // TODO set current item & entity ID
     }

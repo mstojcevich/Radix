@@ -494,21 +494,7 @@ public class World implements IWorld {
             }
         }
     }
-
-    @Override
-    public float getLightLevel(Vec3i pos) {
-        IChunk chunk = getChunk(pos);
-        if (chunk == null) {
-            return 1;
-        }
-        try {
-            return chunk.getLightLevel(pos.x & (CHUNK_SIZE-1), pos.y, pos.z & (CHUNK_SIZE-1));
-        } catch (CoordinatesOutOfBoundsException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
+    
     @Override
     public void cleanup() {
         chunkList.forEach(IChunk::dispose);

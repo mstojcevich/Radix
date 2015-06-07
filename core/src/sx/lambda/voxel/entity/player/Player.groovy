@@ -56,7 +56,7 @@ class Player extends LivingEntity implements Serializable {
         if (moved) {
             if(VoxelGameClient.instance.minecraftConn != null) {
                 VoxelGameClient.instance.minecraftConn.client.session.send(new ClientPlayerPositionRotationPacket(
-                        this.onGround, this.position.x, this.position.y, this.position.z, 180-this.rotation.yaw, 360-this.rotation.pitch))
+                        this.onGround, this.position.x, this.position.y, this.position.z, 180-this.rotation.yaw, -this.rotation.pitch))
             }
             moved = false
         }

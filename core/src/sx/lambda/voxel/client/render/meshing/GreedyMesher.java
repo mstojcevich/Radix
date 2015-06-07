@@ -149,15 +149,18 @@ public class GreedyMesher implements Mesher {
                         if (curBlock == null || !condition.shouldUse(curBlock))
                             continue;
 
-                        int westNeighborX = chunk.getStartPosition().x + x - 1;
-                        IChunk westNeighborChunk = chunk.getWorld().getChunk(westNeighborX, chunk.getStartPosition().z + z);
+                        int westNeighborX = x - 1;
+                        IChunk westNeighborChunk = chunk;
+                        if(westNeighborX < 0) {
+                            westNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + westNeighborX, chunk.getStartPosition().z + z);
+                            westNeighborX += chunk.getWorld().getChunkSize();
+                        }
                         if (westNeighborChunk != null) {
-                            Block westNeighborBlk = VoxelGameAPI.instance.getBlockByID(
-                                    westNeighborChunk.getBlockId(westNeighborX & (storage.getWidth() - 1), y, z));
+                            Block westNeighborBlk = westNeighborChunk.getBlock(westNeighborX, y, z);
                             if (!ocCond.shouldOcclude(curBlock, westNeighborBlk)) {
                                 westBlocks[z][y] = (short)curBlock.getID();
                                 westMeta[z][y] = storage.getMeta(x, y, z);
-                                westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX & (storage.getWidth() - 1), y, z);
+                                westLightLevels[z][y] = westNeighborChunk.getLightLevel(westNeighborX, y, z);
 
                                 if (perCornerLight) {
                                     PerCornerLightData pcld = new PerCornerLightData();
@@ -173,15 +176,18 @@ public class GreedyMesher implements Mesher {
                             continue;
                         }
 
-                        int eastNeighborX = chunk.getStartPosition().x + x + 1;
-                        IChunk eastNeighborChunk = chunk.getWorld().getChunk(eastNeighborX, chunk.getStartPosition().z + z);
+                        int eastNeighborX = x + 1;
+                        IChunk eastNeighborChunk = chunk;
+                        if(eastNeighborX >= chunk.getWorld().getChunkSize()) {
+                            eastNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + eastNeighborX, chunk.getStartPosition().z + z);
+                            eastNeighborX -= chunk.getWorld().getChunkSize();
+                        }
                         if (eastNeighborChunk != null) {
-                            Block eastNeighborBlk = VoxelGameAPI.instance.getBlockByID(
-                                    eastNeighborChunk.getBlockId(eastNeighborX & (storage.getWidth() - 1), y, z));
+                            Block eastNeighborBlk = eastNeighborChunk.getBlock(eastNeighborX, y, z);
                             if (!ocCond.shouldOcclude(curBlock, eastNeighborBlk)) {
                                 eastBlocks[z][y] = (short)curBlock.getID();
                                 eastMeta[z][y] = storage.getMeta(x, y, z);
-                                eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX & (storage.getWidth() - 1), y, z);
+                                eastLightLevels[z][y] = eastNeighborChunk.getLightLevel(eastNeighborX, y, z);
 
                                 if (perCornerLight) {
                                     PerCornerLightData pcld = new PerCornerLightData();
@@ -229,18 +235,24 @@ public class GreedyMesher implements Mesher {
                         if (curBlock == null || !condition.shouldUse(curBlock))
                             continue;
 
-                        int northNeighborZ = chunk.getStartPosition().z + z + 1;
-                        int southNeighborZ = chunk.getStartPosition().z + z - 1;
-                        IChunk northNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, northNeighborZ);
-                        IChunk southNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, southNeighborZ);
+                        int northNeighborZ = z + 1;
+                        int southNeighborZ = z - 1;
+                        IChunk northNeighborChunk = chunk;
+                        IChunk southNeighborChunk = chunk;
+                        if(northNeighborZ >= chunk.getWorld().getChunkSize()) {
+                            northNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, chunk.getStartPosition().z + northNeighborZ);
+                            northNeighborZ -= chunk.getWorld().getChunkSize();
+                        } else if(southNeighborZ < 0) {
+                            southNeighborChunk = chunk.getWorld().getChunk(chunk.getStartPosition().x + x, chunk.getStartPosition().z + southNeighborZ);
+                            southNeighborZ += chunk.getWorld().getChunkSize();
+                        }
 
                         if (northNeighborChunk != null) {
-                            Block northNeighborBlock = VoxelGameAPI.instance.getBlockByID(
-                                    northNeighborChunk.getBlockId(x, y, northNeighborZ & (storage.getDepth() - 1)));
+                            Block northNeighborBlock = northNeighborChunk.getBlock(x, y, northNeighborZ);
                             if (!ocCond.shouldOcclude(curBlock, northNeighborBlock)) {
                                 northBlocks[x][y] = (short)curBlock.getID();
                                 northMeta[x][y] = storage.getMeta(x, y, z);
-                                northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ & (storage.getDepth() - 1));
+                                northLightLevels[x][y] = northNeighborChunk.getLightLevel(x, y, northNeighborZ);
 
                                 if (perCornerLight) {
                                     PerCornerLightData pcld = new PerCornerLightData();
@@ -257,12 +269,11 @@ public class GreedyMesher implements Mesher {
                         }
 
                         if (southNeighborChunk != null) {
-                            Block southNeighborBlock = VoxelGameAPI.instance.getBlockByID(
-                                    southNeighborChunk.getBlockId(x, y, southNeighborZ & (storage.getDepth() - 1)));
+                            Block southNeighborBlock = southNeighborChunk.getBlock(x, y, southNeighborZ);
                             if (!ocCond.shouldOcclude(curBlock, southNeighborBlock)) {
                                 southBlocks[x][y] = (short)curBlock.getID();
                                 southMeta[x][y] = storage.getMeta(x, y, z);
-                                southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ & (storage.getDepth() - 1));
+                                southLightLevels[x][y] = southNeighborChunk.getLightLevel(x, y, southNeighborZ);
 
                                 if (perCornerLight) {
                                     PerCornerLightData pcld = new PerCornerLightData();

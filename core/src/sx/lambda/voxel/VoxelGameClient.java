@@ -219,8 +219,7 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     private void setupOGL() {
-        Gdx.gl.glEnable(GL_TEXTURE_2D);
-        Gdx.gl.glEnable(GL_DEPTH_TEST);//Enable depth visibility check
+        Gdx.gl.glClearColor(0.7f, 0.8f, 1f, 1f);
 
         camera = new PerspectiveCamera(90, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(10f, 150f, 10f);

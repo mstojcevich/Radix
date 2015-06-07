@@ -31,18 +31,18 @@ public class GreedyMesher implements Mesher {
     }
 
     @Override
-    public Mesh meshVoxels(MeshBuilder builder, BlockStorage storage, UseCondition condition) {
-        List<Face> faces = getFaces(storage, condition);
+    public Mesh meshVoxels(MeshBuilder builder, UseCondition condition) {
+        List<Face> faces = getFaces(condition);
 
         return meshFaces(faces, builder);
     }
 
-    public List<Face> getFaces(BlockStorage storage, UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
+    public List<Face> getFaces(UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
         List<Face> faces = new ArrayList<>();
 
-        float[][][] lightLevels = calcLightLevels(storage);
+        float[][][] lightLevels = calcLightLevels();
 
-        PerCornerLightData bright = null;
+        PerCornerLightData bright;
         if(perCornerLight) {
             bright = new PerCornerLightData();
             bright.l00 = 1;
@@ -51,27 +51,30 @@ public class GreedyMesher implements Mesher {
             bright.l11 = 1;
         }
 
+        int width = chunk.getWorld().getChunkSize();
+        int depth = width;
+        int height = chunk.getHighestPoint()+1;
         // Top, bottom
         for (int y = 0; y <= chunk.getHighestPoint(); y++) {
-            boolean[][] topMask = new boolean[storage.getWidth()][storage.getDepth()];
+            boolean[][] topMask = new boolean[width][depth];
             PerCornerLightData[][] topPcld = null;
             if(perCornerLight) {
-                topPcld = new PerCornerLightData[storage.getWidth()][storage.getDepth()];
+                topPcld = new PerCornerLightData[width][depth];
             }
-            boolean[][] btmMask = new boolean[storage.getWidth()][storage.getDepth()];
+            boolean[][] btmMask = new boolean[width][depth];
             PerCornerLightData[][] btmPcld = null;
             if(perCornerLight) {
-                btmPcld = new PerCornerLightData[storage.getWidth()][storage.getDepth()];
+                btmPcld = new PerCornerLightData[width][depth];
             }
-            for (int x = 0; x < storage.getWidth(); x++) {
-                for (int z = 0; z < storage.getDepth(); z++) {
+            for (int x = 0; x < width; x++) {
+                for (int z = 0; z < depth; z++) {
                     try {
-                        Block curBlock = storage.getBlock(x, y, z);
+                        Block curBlock = chunk.getBlock(x, y, z);
                         if (curBlock == null || !condition.shouldUse(curBlock))
                             continue;
 
-                        if (y < storage.getHeight() - 1) {
-                            if (!ocCond.shouldOcclude(curBlock, storage.getBlock(x, y + 1, z))) {
+                        if (y < height - 1) {
+                            if (!ocCond.shouldOcclude(curBlock, chunk.getBlock(x, y + 1, z))) {
                                 topMask[x][z] = true;
 
                                 if (perCornerLight) {
@@ -85,7 +88,7 @@ public class GreedyMesher implements Mesher {
                             }
                         }
                         if (y > 0) {
-                            if (!ocCond.shouldOcclude(curBlock, storage.getBlock(x, y - 1, z))) {
+                            if (!ocCond.shouldOcclude(curBlock, chunk.getBlock(x, y - 1, z))) {
                                 btmMask[x][z] = true;
 
                                 if (perCornerLight) {
@@ -103,26 +106,26 @@ public class GreedyMesher implements Mesher {
                     }
                 }
             }
-            greedy(faces, Side.TOP, shouldMerge, storage, topMask, lightLevels, topPcld, y, chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
-            greedy(faces, Side.BOTTOM, shouldMerge, storage, btmMask, lightLevels, btmPcld, y, chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.TOP, shouldMerge, topMask, lightLevels, topPcld, y, chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.BOTTOM, shouldMerge, btmMask, lightLevels, btmPcld, y, chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
         }
 
         // East, west
-        for (int x = 0; x < storage.getWidth(); x++) {
-            boolean[][] westMask = new boolean[storage.getDepth()][chunk.getHighestPoint()+1];
+        for (int x = 0; x < width; x++) {
+            boolean[][] westMask = new boolean[depth][chunk.getHighestPoint()+1];
             PerCornerLightData[][] westPcld = null;
             if(perCornerLight) {
-                westPcld = new PerCornerLightData[storage.getDepth()][chunk.getHighestPoint()+1];
+                westPcld = new PerCornerLightData[depth][chunk.getHighestPoint()+1];
             }
-            boolean[][] eastMask = new boolean[storage.getDepth()][chunk.getHighestPoint()+1];
+            boolean[][] eastMask = new boolean[depth][chunk.getHighestPoint()+1];
             PerCornerLightData[][] eastPcld = null;
             if(perCornerLight) {
-                eastPcld = new PerCornerLightData[storage.getDepth()][chunk.getHighestPoint()+1];
+                eastPcld = new PerCornerLightData[depth][chunk.getHighestPoint()+1];
             }
-            for (int z = 0; z < storage.getDepth(); z++) {
+            for (int z = 0; z < depth; z++) {
                 for (int y = 0; y <= chunk.getHighestPoint(); y++) {
                     try {
-                        Block curBlock = storage.getBlock(x, y, z);
+                        Block curBlock = chunk.getBlock(x, y, z);
                         if (curBlock == null || !condition.shouldUse(curBlock))
                             continue;
 
@@ -175,26 +178,26 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.EAST, shouldMerge, storage, eastMask, lightLevels, eastPcld, x, chunk.getStartPosition().z, chunk.getStartPosition().y, chunk.getStartPosition().x);
-            greedy(faces, Side.WEST, shouldMerge, storage, westMask, lightLevels, westPcld, x, chunk.getStartPosition().z, chunk.getStartPosition().y, chunk.getStartPosition().x);
+            greedy(faces, Side.EAST, shouldMerge, eastMask, lightLevels, eastPcld, x, chunk.getStartPosition().z, chunk.getStartPosition().y, chunk.getStartPosition().x);
+            greedy(faces, Side.WEST, shouldMerge, westMask, lightLevels, westPcld, x, chunk.getStartPosition().z, chunk.getStartPosition().y, chunk.getStartPosition().x);
         }
 
         // North, south
-        for (int z = 0; z < storage.getDepth(); z++) {
-            boolean[][] northMask = new boolean[storage.getWidth()][chunk.getHighestPoint()+1];
+        for (int z = 0; z < depth; z++) {
+            boolean[][] northMask = new boolean[width][chunk.getHighestPoint()+1];
             PerCornerLightData[][] northPcld = null;
             if(perCornerLight) {
-                northPcld = new PerCornerLightData[storage.getWidth()][chunk.getHighestPoint()+1];
+                northPcld = new PerCornerLightData[width][chunk.getHighestPoint()+1];
             }
-            boolean[][] southMask = new boolean[storage.getWidth()][chunk.getHighestPoint()+1];
+            boolean[][] southMask = new boolean[width][chunk.getHighestPoint()+1];
             PerCornerLightData[][] southPcld = null;
             if(perCornerLight) {
-                southPcld = new PerCornerLightData[storage.getWidth()][chunk.getHighestPoint()+1];
+                southPcld = new PerCornerLightData[width][chunk.getHighestPoint()+1];
             }
-            for (int x = 0; x < storage.getWidth(); x++) {
+            for (int x = 0; x < width; x++) {
                 for (int y = 0; y <= chunk.getHighestPoint(); y++) {
                     try {
-                        Block curBlock = storage.getBlock(x, y, z);
+                        Block curBlock = chunk.getBlock(x, y, z);
                         if (curBlock == null || !condition.shouldUse(curBlock))
                             continue;
 
@@ -247,24 +250,24 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.NORTH, shouldMerge, storage, northMask, lightLevels, northPcld, z, chunk.getStartPosition().x, chunk.getStartPosition().y, chunk.getStartPosition().z);
-            greedy(faces, Side.SOUTH, shouldMerge, storage, southMask, lightLevels, southPcld, z, chunk.getStartPosition().x, chunk.getStartPosition().y, chunk.getStartPosition().z);
+            greedy(faces, Side.NORTH, shouldMerge, northMask, lightLevels, northPcld, z, chunk.getStartPosition().x, chunk.getStartPosition().y, chunk.getStartPosition().z);
+            greedy(faces, Side.SOUTH, shouldMerge, southMask, lightLevels, southPcld, z, chunk.getStartPosition().x, chunk.getStartPosition().y, chunk.getStartPosition().z);
         }
 
         return faces;
     }
 
-    private float[][][] calcLightLevels(BlockStorage storage) {
-        int width = storage.getWidth();
-        int height = storage.getHeight();
-        int depth = storage.getDepth();
+    private float[][][] calcLightLevels() {
+        int width = chunk.getWorld().getChunkSize();
+        int height = chunk.getWorld().getHeight();
+        int depth = chunk.getWorld().getChunkSize();
         float[][][] lightLevels = new float[width][height][depth];
         try {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     for (int z = 0; z < depth; z++) {
-                        lightLevels[x][y][z] = Math.max(1, chunk.getBrightness(storage.getSunlight(x, y, z))
-                                + chunk.getBrightness(storage.getBlocklight(x, y, z)));
+                        lightLevels[x][y][z] = Math.max(1, chunk.getBrightness(chunk.getSunlight(x, y, z))
+                                + chunk.getBrightness(chunk.getBlocklight(x, y, z)));
                     }
                 }
             }
@@ -275,8 +278,8 @@ public class GreedyMesher implements Mesher {
         return lightLevels;
     }
 
-    public List<Face> getFaces(BlockStorage storage, UseCondition condition) {
-        return getFaces(storage, condition,
+    public List<Face> getFaces(UseCondition condition) {
+        return getFaces(condition,
                 (curBlock, blockToSide) ->
                         !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
                                 && (curBlock.occludeCovered() && blockToSide.occludeCovered()),
@@ -308,7 +311,7 @@ public class GreedyMesher implements Mesher {
      * @param lls        Light levels of the blocks
      * @param z          Depth on the plane
      */
-    private void greedy(List<Face> outputList, Side side, MergeCondition mergeCond, BlockStorage storage, boolean[][] mask, float[][][] lls, PerCornerLightData[][] pclds, int z, int offsetX, int offsetY, int offsetZ) {
+    private void greedy(List<Face> outputList, Side side, MergeCondition mergeCond, boolean[][] mask, float[][][] lls, PerCornerLightData[][] pclds, int z, int offsetX, int offsetY, int offsetZ) {
         int width = mask.length;
         int height = mask[0].length;
         boolean[][] used = new boolean[mask.length][mask[0].length];
@@ -324,8 +327,8 @@ public class GreedyMesher implements Mesher {
                     int ry = realY(side, x, y, z);
                     int rz = realZ(side, x, y, z);
 
-                    int blk = storage.getId(rx, ry, rz);
-                    short meta = storage.getMeta(rx, ry, rz);
+                    int blk = chunk.getBlockId(rx, ry, rz);
+                    short meta = chunk.getMeta(rx, ry, rz);
                     if (blk == 0 || used[x][y])
                         continue;
                     used[x][y] = true;
@@ -342,8 +345,8 @@ public class GreedyMesher implements Mesher {
                             int newRX = realX(side, newX, y, z);
                             int newRY = realY(side, newX, y, z);
                             int newRZ = realZ(side, newX, y, z);
-                            int newBlk = storage.getId(newRX, newRY, newRZ);
-                            int newMeta = storage.getMeta(newRX, newRY, newRZ);
+                            int newBlk = chunk.getBlockId(newRX, newRY, newRZ);
+                            int newMeta = chunk.getMeta(newRX, newRY, newRZ);
                             float newll = lls[newRX][newRY][newRZ];
                             PerCornerLightData newPcld = null;
                             if (perCornerLight)
@@ -365,12 +368,12 @@ public class GreedyMesher implements Mesher {
                                     int lRY = realY(side, lx, endY, z);
                                     int lRZ = realZ(side, lx, endY, z);
 
-                                    int lblk = storage.getId(lRX, lRY, lRZ);
+                                    int lblk = chunk.getBlockId(lRX, lRY, lRZ);
                                     if (lblk == 0) {
                                         allPassed = false;
                                         break;
                                     }
-                                    int lmeta = storage.getMeta(lRX, lRY, lRZ);
+                                    int lmeta = chunk.getMeta(lRX, lRY, lRZ);
                                     float llight = lls[lRX][lRY][lRZ];
                                     PerCornerLightData lPcld = null;
                                     if (perCornerLight)

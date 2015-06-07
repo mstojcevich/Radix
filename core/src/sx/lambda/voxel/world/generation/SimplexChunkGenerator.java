@@ -6,6 +6,7 @@ import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.chunk.BlockStorage;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
+import sx.lambda.voxel.world.chunk.IChunk;
 
 /**
  * Generates chunks using simplex noise
@@ -24,10 +25,10 @@ public class SimplexChunkGenerator implements ChunkGenerator {
     }
 
     @Override
-    public int generate(Vec3i startPosition, BlockStorage storage) {
+    public int generate(Vec3i startPosition, IChunk storage) {
         int highestPoint = world.getSeaLevel();
-        for (int x = 0; x < storage.getWidth(); x++) {
-            for (int z = 0; z < storage.getDepth(); z++) {
+        for (int x = 0; x < world.getChunkSize(); x++) {
+            for (int z = 0; z < world.getChunkSize(); z++) {
                 int distFromSeaLevel = getHeightAboveSeaLevel(startPosition.x + x, startPosition.z + z);
                 int yMax = world.getSeaLevel() + distFromSeaLevel;
                 if (yMax < world.getSeaLevel()) {
@@ -37,8 +38,7 @@ public class SimplexChunkGenerator implements ChunkGenerator {
                             blockType = BuiltInBlockIds.SAND_ID;
                         }
                         try {
-                            storage.setId(x, y, z, blockType);
-                            storage.setBlock(x, y, z, VoxelGameAPI.instance.getBlockByID(blockType));
+                            storage.setBlock(blockType, x, y, z);
                         } catch(CoordinatesOutOfBoundsException ex) {
                             ex.printStackTrace();
                         }
@@ -49,8 +49,7 @@ public class SimplexChunkGenerator implements ChunkGenerator {
 
                     if (y == world.getSeaLevel() - 1 && y == yMax - 1) {
                         try {
-                            storage.setId(x, y + 1, z, BuiltInBlockIds.SAND_ID);
-                            storage.setBlock(x, y + 1, z, VoxelGameAPI.instance.getBlockByID(BuiltInBlockIds.SAND_ID));
+                            storage.setBlock(BuiltInBlockIds.SAND_ID, x, y + 1, z);
                             highestPoint = Math.max(highestPoint, y + 1);
                         } catch(CoordinatesOutOfBoundsException ex) {
                             ex.printStackTrace();
@@ -63,8 +62,7 @@ public class SimplexChunkGenerator implements ChunkGenerator {
                         blockType = BuiltInBlockIds.DIRT_ID;
                     }
                     try {
-                        storage.setId(x, y, z, blockType);
-                        storage.setBlock(x, y, z, VoxelGameAPI.instance.getBlockByID(blockType));
+                        storage.setBlock(blockType, x, y, z);
                     } catch (CoordinatesOutOfBoundsException ex) {
                         ex.printStackTrace();
                     }

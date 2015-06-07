@@ -16,7 +16,7 @@ public interface Mesher {
      * @param builder     MeshBuilder to build the mesh onto
      * @param storage     Blocks to mesh
      */
-    Mesh meshVoxels(MeshBuilder builder, BlockStorage storage, UseCondition condition);
+    Mesh meshVoxels(MeshBuilder builder, UseCondition condition);
 
     interface UseCondition {
         /**

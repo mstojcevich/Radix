@@ -32,7 +32,12 @@ public class Chunk implements IChunk {
     private final transient GreedyMesher mesher;
     private final int size;
     private final int height;
-    private final BlockStorage blockStorage;
+    /**
+     * Block storage, in pieces 16 high
+     *
+     * Done this way so that piece full of air don't take up more memory than they have to
+     */
+    private final BlockStorage[] blockStorage;
     /**
      * Map of light levels (ints 0-15) to brightness multipliers
      */
@@ -62,7 +67,7 @@ public class Chunk implements IChunk {
         this.size = world.getChunkSize();
         this.height = world.getHeight();
 
-        this.blockStorage = new FlatBlockStorage(size, height, size);
+        this.blockStorage = new BlockStorage[MathUtils.ceilPositive((float)this.height/16)];
 
         for (int i = 0; i <= MAX_LIGHT_LEVEL; i++) {
             int reduction = MAX_LIGHT_LEVEL - i;
@@ -76,7 +81,7 @@ public class Chunk implements IChunk {
         }
 
         if(local)
-            highestPoint = world.getChunkGen().generate(startPosition, blockStorage);
+            highestPoint = world.getChunkGen().generate(startPosition, this);
     }
 
     @Override
@@ -143,9 +148,10 @@ public class Chunk implements IChunk {
     public void eachBlock(EachBlockCallee callee) {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < height; y++) {
+                BlockStorage storage = blockStorage[y / 16];
                 for (int z = 0; z < size; z++) {
                     try {
-                        Block blk = blockStorage.getBlock(x, y, z);
+                        Block blk = storage.getBlock(x, y & 0xF, z);
                         callee.call(blk, x, y, z);
                     } catch (CoordinatesOutOfBoundsException ex) {
                         ex.printStackTrace();
@@ -245,6 +251,18 @@ public class Chunk implements IChunk {
         if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
             throw new CoordinatesOutOfBoundsException();
 
+        int storageIndex = y / 16;
+        int sy = y & 0xF; // storage relative y
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null)
+            return;
+        storage.setBlock(x, sy, z, null);
+        storage.setId(x, sy, z, 0);
+        storage.setMeta(x, sy, z, 0);
+        storage.setSunlight(x, sy, z, 0);
+        storage.setBlocklight(x, sy, z, 0);
+        // TODO XXX LIGHTING add to block light removal queue
+
         if(x == size - 1) {
             getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x + size, getStartPosition().z));
         } else if(x == 0) {
@@ -255,13 +273,6 @@ public class Chunk implements IChunk {
         } else if(z == 0) {
             getWorld().rerenderChunk(getWorld().getChunk(getStartPosition().x, getStartPosition().z - size));
         }
-
-        blockStorage.setBlock(x, y, z, null);
-        blockStorage.setId(x, y, z, 0);
-        blockStorage.setMeta(x, y, z, 0);
-        blockStorage.setSunlight(x, y, z, 0);
-        blockStorage.setBlocklight(x, y, z, 0);
-        // TODO XXX LIGHTING add to block light removal queue
 
         getWorld().rerenderChunk(this);
 
@@ -283,10 +294,16 @@ public class Chunk implements IChunk {
             return;
         }
 
-        int oldBlock = blockStorage.getId(x, y, z);
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null)
+            storage = blockStorage[storageIndex] = new FlatBlockStorage(size, 16, size);
+
+        int oldBlock = storage.getId(x, sy, z);
         Block blk = VoxelGameAPI.instance.getBlockByID(block);
         int newBlocklightVal = blk.getLightValue();
-        blockStorage.setBlocklight(x, y, z, newBlocklightVal);
+        storage.setBlocklight(x, sy, z, newBlocklightVal);
         if(oldBlock > 0) {
             Block oldBlk = VoxelGameAPI.instance.getBlockByID(oldBlock);
             int oldBlocklightVal = oldBlk.getLightValue();
@@ -301,8 +318,8 @@ public class Chunk implements IChunk {
             }
         }
 
-        blockStorage.setId(x, y, z, block);
-        blockStorage.setBlock(x, y, z, blk);
+        storage.setId(x, sy, z, block);
+        storage.setBlock(x, sy, z, blk);
         highestPoint = Math.max(highestPoint, y);
 
         if(updateSunlight)
@@ -311,18 +328,45 @@ public class Chunk implements IChunk {
 
     @Override
     public void setMeta(short meta, int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        blockStorage.setMeta(x, y, z, meta);
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null)
+            storage = blockStorage[storageIndex] = new FlatBlockStorage(size, 16, size);
+
+        storage.setMeta(x, sy, z, meta);
     }
 
     @Override
     public short getMeta(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return blockStorage.getMeta(x, y, z);
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null)
+            return 0;
+
+        return storage.getMeta(x, sy, z);
     }
 
     @Override
     public float getLightLevel(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        int sunlight = blockStorage.getSunlight(x, y, z);
-        int blocklight = blockStorage.getBlocklight(x, y, z);
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null)
+            return 0;
+
+        int sunlight = storage.getSunlight(x, sy, z);
+        int blocklight = storage.getBlocklight(x, sy, z);
         return lightLevelMap[MathUtils.clamp(sunlight+blocklight, 0, MAX_LIGHT_LEVEL)];
     }
 
@@ -384,8 +428,8 @@ public class Chunk implements IChunk {
     }
 
     private void updateFaces() {
-        opaqueFaces = mesher.getFaces(blockStorage, block -> !block.isTranslucent());
-        translucentFaces = mesher.getFaces(blockStorage, Block::isTranslucent);
+        opaqueFaces = mesher.getFaces(block -> !block.isTranslucent());
+        translucentFaces = mesher.getFaces(Block::isTranslucent);
         meshing = false;
         meshed = true;
         VoxelGameAPI.instance.getEventManager().push(new EventChunkRender(Chunk.this));
@@ -403,8 +447,24 @@ public class Chunk implements IChunk {
     @Override
     public void setSunlight(int x, int y, int z, int level) throws CoordinatesOutOfBoundsException {
         assert level >= 0 && level <= MAX_LIGHT_LEVEL;
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
 
-        blockStorage.setSunlight(x, y, z, level);
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null) {
+            if(level < MAX_LIGHT_LEVEL) {
+                storage = blockStorage[storageIndex] = new FlatBlockStorage(size, 16, size);
+            } else {
+                return;
+            }
+        }
+
+        storage.setSunlight(x, sy, z, level);
 
         sunlightChanging = true;
         sunlightChanged = true;
@@ -412,29 +472,78 @@ public class Chunk implements IChunk {
 
     @Override
     public int getSunlight(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return blockStorage.getSunlight(x, y, z);
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null)
+            return MAX_LIGHT_LEVEL;
+
+        return storage.getSunlight(x, sy, z);
     }
 
     @Override
     public void setBlocklight(int x, int y, int z, int level) throws CoordinatesOutOfBoundsException {
         assert level >= 0 && level <= MAX_LIGHT_LEVEL;
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
 
-        blockStorage.setBlocklight(x, y, z, level);
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null) {
+            if(level < MAX_LIGHT_LEVEL) {
+                storage = blockStorage[storageIndex] = new FlatBlockStorage(size, 16, size);
+            } else {
+                return;
+            }
+        }
+
+        storage.setBlocklight(x, sy, z, level);
     }
 
     @Override
     public int getBlocklight(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return blockStorage.getBlocklight(x, y, z);
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null)
+            return MAX_LIGHT_LEVEL;
+
+        return storage.getBlocklight(x, sy, z);
     }
 
     @Override
     public int getBlockId(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return blockStorage.getId(x, y, z);
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null)
+            return 0;
+
+        return storage.getId(x, sy, z);
     }
 
     @Override
     public Block getBlock(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return blockStorage.getBlock(x, y, z);
+        if(x < 0 || x >= size || z < 0 || z >= size || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int storageIndex = y / 16;
+        int sy = y & 0xF;
+        BlockStorage storage = blockStorage[storageIndex];
+        if(storage == null)
+            return null;
+
+        return storage.getBlock(x, sy, z);
     }
 
     @Override

@@ -32,21 +32,23 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                 biome = VoxelGameAPI.instance.getBiomeByID(0);
 
             IChunk ck = game.getWorld().getChunk(cx, cz);
-            if(ck != null) {
-                game.getWorld().rmChunk(ck);
+            boolean hadChunk = ck != null;
+            if(!hadChunk) {
+                ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), biome, false);
             }
 
-            ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), biome, false);
             int cy = 0;
             for(Chunk c : packet.getChunks(column)) {
                 if(c == null) {
-                    for (int x = 0; x < 16; x++) {
-                        for (int z = 0; z < 16; z++) {
-                            for (int y = 0; y < 16; y++) {
-                                try {
-                                    ck.setSunlight(x, cy+y, z, 15);
-                                } catch (CoordinatesOutOfBoundsException e) {
-                                    e.printStackTrace();
+                    if(!hadChunk) {
+                        for (int x = 0; x < 16; x++) {
+                            for (int z = 0; z < 16; z++) {
+                                for (int y = 0; y < 16; y++) {
+                                    try {
+                                        ck.setSunlight(x, cy + y, z, 15);
+                                    } catch (CoordinatesOutOfBoundsException e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         }
@@ -85,7 +87,9 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                 cy += 16;
             }
 
-            game.getWorld().addChunk(ck);
+            if(!hadChunk) {
+                game.getWorld().addChunk(ck);
+            }
         }
     }
 }

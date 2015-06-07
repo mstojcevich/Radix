@@ -414,6 +414,7 @@ public class GreedyMesher implements Mesher {
         } else {
             builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
         }
+        builder.ensureVertices(faces.size()*4);
         for (Face f : faces) {
             f.render(builder);
         }

@@ -78,10 +78,6 @@ public interface IWorld {
 
     void rerenderChunks();
 
-    int getNumChunksMeshing();
-    void incrChunksMeshing();
-    void decrChunksMeshing();
-
     void rmChunk(IChunk chunk);
 
     void addToMeshQueue(Runnable updateFaces);

@@ -530,18 +530,6 @@ public class World implements IWorld {
                 VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE).forEach(this::rerenderChunk);
     }
 
-    public int getNumChunksMeshing() {
-        return chunksMeshing;
-    }
-
-    public void incrChunksMeshing() {
-        chunksMeshing++;
-    }
-
-    public void decrChunksMeshing() {
-        chunksMeshing--;
-    }
-
     @Override
     public void rmChunk(IChunk chunk) {
         if(chunk == null)return;

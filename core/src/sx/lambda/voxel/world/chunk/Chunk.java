@@ -378,7 +378,6 @@ public class Chunk implements IChunk {
     }
 
     private void updateFaces() {
-        parentWorld.incrChunksMeshing();
         final Block[][][] translucent = new Block[size][height][size];
         final Block[][][] opaque = new Block[size][height][size];
         final float[][][] lightLevels = new float[size][height][size];
@@ -399,7 +398,6 @@ public class Chunk implements IChunk {
         translucentFaces = mesher.getFaces(blockStorage, Block::isTranslucent);
         meshing = false;
         meshed = true;
-        parentWorld.decrChunksMeshing();
         VoxelGameAPI.instance.getEventManager().push(new EventChunkRender(Chunk.this));
     }
 

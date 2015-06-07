@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector2;
 import groovy.transform.CompileStatic;
+import org.spacehq.mc.protocol.data.game.ItemStack;
+import org.spacehq.mc.protocol.packet.ingame.client.player.ClientChangeHeldItemPacket;
+import org.spacehq.mc.protocol.packet.ingame.client.window.ClientCreativeInventoryActionPacket;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.block.Block;
@@ -119,8 +122,16 @@ public class BlockSelectGUI implements GuiScreen {
         Integer id = getBlockID(mouseX, mouseY);
         if (id != null) {
             VoxelGameClient.getInstance().getPlayer().setItemInHand(id);
-        }
 
+            if(VoxelGameClient.getInstance().getMinecraftConn() != null) {
+                VoxelGameClient.getInstance().getMinecraftConn().getClient().getSession().send(
+                        new ClientCreativeInventoryActionPacket(36 /* Bottom left of hot bar */, new ItemStack(id, 1))
+                );
+                VoxelGameClient.getInstance().getMinecraftConn().getClient().getSession().send(
+                        new ClientChangeHeldItemPacket(0)
+                );
+            }
+        }
     }
 
     @Override

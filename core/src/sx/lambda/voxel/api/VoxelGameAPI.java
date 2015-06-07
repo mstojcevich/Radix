@@ -14,8 +14,8 @@ public class VoxelGameAPI {
     public static final VoxelGameAPI instance = new VoxelGameAPI();
     private final EventManager eventManager;
     private final List<Block> registeredBlocks = new ArrayList<>();
-    private final Block[] registeredBlockArray = new Block[Short.MAX_VALUE];
-    private final Biome[] registeredBiomeArray = new Biome[Short.MAX_VALUE];
+    private final Block[] registeredBlockArray = new Block[1024];
+    private final Biome[] registeredBiomeArray = new Biome[256];
     private int highestID = 0;
 
     private VoxelGameAPI() {

@@ -297,6 +297,16 @@ public class World implements IWorld {
             this.chunkList.remove(c);
         }
         addChunk(chunk, chunk.getStartPosition().x, chunk.getStartPosition().z);
+
+        // Rerender neighbors
+        for(int x = chunk.getStartPosition().x - getChunkSize(); x <= chunk.getStartPosition().x + getChunkSize(); x += getChunkSize()) {
+            for (int z = chunk.getStartPosition().z - getChunkSize(); z <= chunk.getStartPosition().z + getChunkSize(); z += getChunkSize()) {
+                IChunk neighbor = getChunk(x, z);
+                if(neighbor != null) {
+                    rerenderChunk(neighbor);
+                }
+            }
+        }
     }
 
     @Override

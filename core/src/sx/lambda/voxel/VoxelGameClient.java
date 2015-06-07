@@ -295,6 +295,8 @@ public class VoxelGameClient extends ApplicationAdapter {
                 androidStage.draw();
             }
 
+            if(settingsManager.getVisualSettings().finishEachFrame())
+                Gdx.gl.glFinish();
         } catch (Exception e) {
             done = true;
             e.printStackTrace();

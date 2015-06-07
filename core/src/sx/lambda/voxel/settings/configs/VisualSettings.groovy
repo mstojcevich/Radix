@@ -33,6 +33,16 @@ class VisualSettings implements Serializable {
      *      since it will make chunks take longer to load in at lower fps.
      */
     private boolean smoothChunkLoad = false;
+    /**
+     * Whether to call glFinish() at the end of each frame
+     *
+     * Some GPUs will wait up to 3 frames before actually rendering. The delay allows the CPU to get ahead while reducing gpu overhead.
+     * By finishing each frame, this caching mechanism is avoided. This will take load off of the cpu while putting more on the GPU.
+     * Because this game is not GPU intensive to begin with, this may improve performance or smooth out fps.
+     *
+     * TL;DR this makes sure everything is actually drawn before going to the next frame
+     */
+    private boolean finishEachFrame = true;
 
     public int getViewDistance() { viewDistance }
 
@@ -43,5 +53,7 @@ class VisualSettings implements Serializable {
     public boolean nonContinuous() { nonContinuous }
 
     public boolean smoothChunkload() { smoothChunkLoad }
+
+    public boolean finishEachFrame() { finishEachFrame }
 
 }

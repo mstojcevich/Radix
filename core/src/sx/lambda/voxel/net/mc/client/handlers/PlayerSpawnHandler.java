@@ -18,11 +18,12 @@ public class PlayerSpawnHandler implements PacketHandler<ServerSpawnPlayerPacket
         if(packet.getEntityId() != VoxelGameClient.getInstance().getPlayer().getID())
             return;
 
-        game.getPlayer().getPosition().set((float)packet.getX(), (float)packet.getY(), (float)packet.getZ());
-        game.getPlayer().getRotation().setRot(-packet.getPitch(), 180-packet.getYaw());
+        game.getPlayer().getPosition().set((float) packet.getX(), (float) packet.getY(), (float) packet.getZ());
+        game.getPlayer().getRotation().setRot(-packet.getPitch(), 180 - packet.getYaw());
 
         // TODO set current item
 
+        game.getGameRenderer().calculateFrustum();
         Gdx.graphics.requestRendering();
     }
 

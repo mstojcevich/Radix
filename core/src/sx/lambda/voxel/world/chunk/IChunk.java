@@ -168,6 +168,8 @@ public interface IChunk extends Serializable, Disposable {
 
     int getMaxLightLevel();
 
+    float getBrightness(int lightLevel);
+
     interface EachBlockCallee {
         void call(Block block, int x, int y, int z);
     }

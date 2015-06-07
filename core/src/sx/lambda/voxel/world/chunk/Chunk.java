@@ -378,22 +378,6 @@ public class Chunk implements IChunk {
     }
 
     private void updateFaces() {
-        final Block[][][] translucent = new Block[size][height][size];
-        final Block[][][] opaque = new Block[size][height][size];
-        final float[][][] lightLevels = new float[size][height][size];
-        eachBlock((block, x, y, z) -> {
-            try {
-                lightLevels[x][y][z] = getLightLevel(x, y, z);
-            } catch (CoordinatesOutOfBoundsException ex) {
-                ex.printStackTrace();
-            }
-            if (block != null) {
-                if (block.isTranslucent())
-                    translucent[x][y][z] = block;
-                else
-                    opaque[x][y][z] = block;
-            }
-        });
         opaqueFaces = mesher.getFaces(blockStorage, block -> !block.isTranslucent());
         translucentFaces = mesher.getFaces(blockStorage, Block::isTranslucent);
         meshing = false;
@@ -480,6 +464,15 @@ public class Chunk implements IChunk {
     @Override
     public int getMaxLightLevel() {
         return MAX_LIGHT_LEVEL;
+    }
+
+    @Override
+    public float getBrightness(int lightLevel) {
+        if(lightLevel > getMaxLightLevel())
+            return 1;
+        if(lightLevel < 0)
+            return 0;
+        return lightLevelMap[lightLevel];
     }
 
     @Override

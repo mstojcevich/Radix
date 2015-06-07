@@ -23,7 +23,9 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
         new Thread() {
             @Override
             public void run() {
-                for(int column = 0; column < packet.getColumns(); column++) {
+                int numChunks = packet.getColumns();
+                VoxelGameClient.getInstance().getWorld().ensureCapacity(numChunks);
+                for(int column = 0; column < numChunks; column++) {
                     int cx = packet.getX(column)*16;
                     int cz = packet.getZ(column)*16;
                     int biomeID = packet.getBiomeData(column)[0];

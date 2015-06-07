@@ -78,5 +78,25 @@ public interface IWorld {
 
     void rmChunk(IChunk chunk);
 
+    /**
+     * Add to the queue of chunk meshing.
+     * This queue may be processed on another thread, so shouldn't do any GL stuff.
+     *
+     * This method is for internal use by chunks!
+     *
+     * @param updateFaces Method that generates the mesh
+     */
     void addToMeshQueue(Runnable updateFaces);
+
+    /**
+     * Add to the queue of chunks to upload.
+     * This queue is used to distribute chunk uploading across frames if the option is enabled.
+     * This queue is processed on the main thread, so gl can be used (and the mesh queue should be used for non-gl).
+     *
+     * This method is for internal use by chunks!
+     *
+     * @param upload Method that uploads the chunk
+     */
+    void addToChunkUploadQueue(Runnable upload);
+
 }

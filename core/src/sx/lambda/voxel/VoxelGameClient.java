@@ -460,19 +460,8 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     public void enterRemoteWorld(final String hostname, final short port) {
         enterWorld(new World(true, false), true);
-
-        new Thread("Client Connection") {
-            @Override
-            public void run() {
-                try {
-                    (mcClientConn = new MinecraftClientConnection(VoxelGameClient.this, hostname, port)).start();
-                    chatGUI.setup(mcClientConn);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }.start();
+        (mcClientConn = new MinecraftClientConnection(VoxelGameClient.this, hostname, port)).start();
+        chatGUI.setup(mcClientConn);
     }
 
     public void enterLocalWorld(IWorld world) {

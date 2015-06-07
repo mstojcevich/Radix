@@ -118,7 +118,7 @@ public class Chunk implements IChunk {
         if (cleanedUp) return;
 
         if(!meshing && meshed) {
-            updateModelInstances();
+            getWorld().addToChunkUploadQueue(this::updateModelInstances);
             meshed = false;
         }
 

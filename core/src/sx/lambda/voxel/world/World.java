@@ -67,6 +67,8 @@ public class World implements IWorld {
     // Mesh related stuff
     // Manages meshing chunks off of the main thread
     private final Queue<Runnable> chunkMeshQueue = new LinkedBlockingQueue<>();
+    // Manages uploading chunks on the gl thread
+    private final Queue<Runnable> chunkUploadQueue = new LinkedList<>();
 
     // Skybox stuff
     private ModelBatch modelBatch;
@@ -141,6 +143,8 @@ public class World implements IWorld {
         if(skybox == null) {
             skybox = createSkybox();
         }
+
+        processChunkUploadQueue();
 
         processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
         for (IChunk c : chunksToRerender) {
@@ -494,7 +498,7 @@ public class World implements IWorld {
             }
         }
     }
-    
+
     @Override
     public void cleanup() {
         chunkList.forEach(IChunk::dispose);
@@ -526,6 +530,11 @@ public class World implements IWorld {
         synchronized (chunkMeshQueue) {
             chunkMeshQueue.notify();
         }
+    }
+
+    @Override
+    public void addToChunkUploadQueue(Runnable upload) {
+        chunkUploadQueue.add(upload);
     }
 
     private ModelInstance createSkybox() {
@@ -623,6 +632,14 @@ public class World implements IWorld {
             }
         } catch (CoordinatesOutOfBoundsException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void processChunkUploadQueue() {
+        while(!chunkUploadQueue.isEmpty()) {
+            chunkUploadQueue.poll().run();
+            if(VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().smoothChunkload())
+                break; // distribute chunk uploads across frames (one chunkload per frame)
         }
     }
 

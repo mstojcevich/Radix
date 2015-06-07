@@ -25,6 +25,14 @@ class VisualSettings implements Serializable {
      * Saves battery on laptops and mobile phones
      */
     private boolean nonContinuous = false;
+    /**
+     * Whether to distribute chunk rerenders by only uploading one to the gpu per frame.
+     * This is for the GL stuff, since the non-gl stuff can be and is done on another thread.
+     *
+     * This should not be enabled on machines that don't see lag spikes when loading chunks,
+     *      since it will make chunks take longer to load in at lower fps.
+     */
+    private boolean smoothChunkLoad = false;
 
     public int getViewDistance() { viewDistance }
 
@@ -33,5 +41,7 @@ class VisualSettings implements Serializable {
     public boolean perCornerLightEnabled() { perCornerLight }
 
     public boolean nonContinuous() { nonContinuous }
+
+    public boolean smoothChunkload() { smoothChunkLoad }
 
 }

@@ -37,7 +37,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
                     game.addToGLQueue(new Runnable() {
                         @Override
                         void run() {
-                            game.setCurrentScreen(new BlockSelectGUI(VoxelGameAPI.instance.getBlocksSorted(), game.hud.icons))
+                            game.setCurrentScreen(new BlockSelectGUI(game.hud.icons))
                         }
                     })
                 }

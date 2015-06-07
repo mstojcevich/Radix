@@ -219,8 +219,6 @@ public class VoxelGameClient extends ApplicationAdapter {
     }
 
     private void setupOGL() {
-        Gdx.gl.glClearColor(0.7f, 0.8f, 1f, 1f);
-
         camera = new PerspectiveCamera(90, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(10f, 150f, 10f);
         camera.lookAt(0, 0, 0);
@@ -312,8 +310,10 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     private void prepareNewFrame() {
         int clear = GL_DEPTH_BUFFER_BIT;
-        if(world == null || getCurrentScreen() != hud || (transitionAnimation != null && !transitionAnimation.isFinished()))
+        if(world == null || getCurrentScreen() != hud || (transitionAnimation != null && !transitionAnimation.isFinished())) {
             clear |= GL_COLOR_BUFFER_BIT;
+            Gdx.gl.glClearColor(0.7f, 0.8f, 1f, 1f);
+        }
         Gdx.gl.glClear(clear);
     }
 

@@ -17,6 +17,10 @@ import sx.lambda.voxel.world.chunk.IChunk;
 
 @CompileStatic
 public class MovementHandler implements RepeatedTask {
+
+    // In meters per milliseconds
+    private static final float WALK_SPEED = 0.0043f;
+
     public MovementHandler(VoxelGameClient game) {
         this.game = game;
     }
@@ -38,7 +42,6 @@ public class MovementHandler implements RepeatedTask {
                     Player player = game.getPlayer();
                     IWorld world = game.getWorld();
                     long moveDiffMS = System.currentTimeMillis() - lastMoveCheckMS;
-                    float movementMultiplier = moveDiffMS * 0.0043f;
                     final boolean threeDMove = false;
                     Vector3 lastPosition = player.getPosition().cpy();
                     if (game.getCurrentScreen().equals(game.getHud())) {
@@ -49,40 +52,41 @@ public class MovementHandler implements RepeatedTask {
                             float yaw = player.getRotation().getYaw();
                             float pitch = player.getRotation().getPitch();
                             if (threeDMove) {
-                                deltaX += MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier;
-                                deltaY += MathUtils.sinDeg(pitch) * movementMultiplier;
-                                deltaZ += -MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier;
+                                deltaX += MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw);
+                                deltaY += MathUtils.sinDeg(pitch);
+                                deltaZ += -MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw);
                             } else {
-                                deltaX += MathUtils.sinDeg(yaw) * movementMultiplier;
-                                deltaZ += -MathUtils.cosDeg(yaw) * movementMultiplier;
+                                deltaX += MathUtils.sinDeg(yaw);
+                                deltaZ += -MathUtils.cosDeg(yaw);
                             }
                         }
                         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
                             float yaw = player.getRotation().getYaw();
                             float pitch = player.getRotation().getPitch();
                             if (threeDMove) {
-                                deltaX += -MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw) * movementMultiplier;
-                                deltaY += -MathUtils.sinDeg(pitch) * movementMultiplier;
-                                deltaZ += MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw) * movementMultiplier;
+                                deltaX += -MathUtils.cosDeg(pitch) * MathUtils.sinDeg(yaw);
+                                deltaY += -MathUtils.sinDeg(pitch);
+                                deltaZ += MathUtils.cosDeg(pitch) * MathUtils.cosDeg(yaw);
                             } else {
-                                deltaX += -MathUtils.sinDeg(yaw) * movementMultiplier;
-                                deltaZ += MathUtils.cosDeg(yaw) * movementMultiplier;
+                                deltaX += -MathUtils.sinDeg(yaw);
+                                deltaZ += MathUtils.cosDeg(yaw);
                                 deltaY += 0;
                             }
                         }
                         if (Gdx.input.isKeyPressed(Input.Keys.A)) {//Strafe left
                             float yaw = player.getRotation().getYaw();
 
-                            deltaX += MathUtils.sinDeg(yaw - 90) * movementMultiplier;
-                            deltaZ += -MathUtils.cosDeg(yaw - 90) * movementMultiplier;
+                            deltaX += MathUtils.sinDeg(yaw - 90);
+                            deltaZ += -MathUtils.cosDeg(yaw - 90);
                         }
                         if (Gdx.input.isKeyPressed(Input.Keys.D)) {//Strafe right
                             float yaw = player.getRotation().getYaw();
 
-                            deltaX += MathUtils.sinDeg(yaw + 90) * movementMultiplier;
-                            deltaZ += -MathUtils.cosDeg(yaw + 90) * movementMultiplier;
+                            deltaX += MathUtils.sinDeg(yaw + 90);
+                            deltaZ += -MathUtils.cosDeg(yaw + 90);
                         }
 
+                        float movementMultiplier = moveDiffMS*WALK_SPEED;
                         Vector3 deltaVec = new Vector3(deltaX, deltaY, deltaZ);
                         deltaVec.nor();
                         deltaVec.set(deltaVec.x*movementMultiplier, deltaVec.y*movementMultiplier, deltaVec.z*movementMultiplier);

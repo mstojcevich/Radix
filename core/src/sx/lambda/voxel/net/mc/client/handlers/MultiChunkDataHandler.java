@@ -40,6 +40,17 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                     int cy = 0;
                     for(Chunk c : packet.getChunks(column)) {
                         if(c == null) {
+                            for (int x = 0; x < 16; x++) {
+                                for (int z = 0; z < 16; z++) {
+                                    for (int y = 0; y < 16; y++) {
+                                        try {
+                                            ck.setSunlight(x, cy+y, z, 15);
+                                        } catch (CoordinatesOutOfBoundsException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }
                             cy += 16;
                             continue;
                         }

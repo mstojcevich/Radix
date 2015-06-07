@@ -23,8 +23,6 @@ import static com.badlogic.gdx.graphics.GL20.*
 @CompileStatic
 class GameRenderer implements Renderer {
 
-    private static final float mouseSensitivity = 0.03f //TODO Config - allow changeable mouse sensitivity
-
     private final VoxelGameClient game
     private BitmapFont debugTextRenderer
 

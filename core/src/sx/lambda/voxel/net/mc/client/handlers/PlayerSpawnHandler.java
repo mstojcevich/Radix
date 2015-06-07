@@ -20,7 +20,7 @@ public class PlayerSpawnHandler implements PacketHandler<ServerSpawnPlayerPacket
         game.getPlayer().getPosition().set((float)packet.getX(), (float)packet.getY(), (float)packet.getZ());
         game.getPlayer().getRotation().setRot(-packet.getPitch(), 180-packet.getYaw());
 
-        // TODO set current item & entity ID
+        // TODO set current item
     }
 
 }

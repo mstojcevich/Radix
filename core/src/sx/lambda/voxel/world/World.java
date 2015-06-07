@@ -75,9 +75,6 @@ public class World implements IWorld {
     private Model skyboxModel;
     private Texture skyboxTexture;
 
-    // The amount of chunks currently meshing. TODO have a queue system with a limited queue
-    private int chunksMeshing;
-
     public World(boolean remote, boolean server) {
         this.remote = remote;
         this.server = server;

@@ -1,5 +1,7 @@
 package sx.lambda.voxel.world.chunk;
 
+import com.badlogic.gdx.Gdx;
+
 import java.util.Queue;
 
 /**
@@ -21,6 +23,8 @@ public class MeshQueueWorker extends Thread {
                 while (!meshQueue.isEmpty()) {
                     meshQueue.poll().run();
                 }
+
+                Gdx.graphics.requestRendering();
 
                 synchronized (meshQueue) {
                     meshQueue.wait();

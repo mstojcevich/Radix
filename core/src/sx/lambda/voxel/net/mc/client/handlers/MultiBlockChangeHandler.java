@@ -1,5 +1,6 @@
 package sx.lambda.voxel.net.mc.client.handlers;
 
+import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.data.game.values.world.block.BlockChangeRecord;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiBlockChangePacket;
 import sx.lambda.voxel.VoxelGameClient;
@@ -54,6 +55,8 @@ public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockCh
                 }
             }
         }
+
+        Gdx.graphics.requestRendering();
     }
 
 }

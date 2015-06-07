@@ -235,6 +235,10 @@ public class VoxelGameClient extends ApplicationAdapter {
         }
 
         Gdx.input.setInputProcessor(new VoxelGameGdxInputHandler(this));
+
+        if(settingsManager.getVisualSettings().nonContinuous()) {
+            Gdx.graphics.setContinuousRendering(false);
+        }
     }
 
     @Override
@@ -498,24 +502,20 @@ public class VoxelGameClient extends ApplicationAdapter {
         this.world = world;
         this.remote = remote;
         player = new Player(new EntityPosition(0, 256, 0), new EntityRotation(0, 0));
-        glQueue.add(new Runnable() {
-            @Override
-            public void run() {
-                setRenderer(getGameRenderer());
-                getPlayer().init();
-                world.addEntity(getPlayer());
-                transitionAnimation = new SlideUpAnimation(getCurrentScreen(), 1000);
-                transitionAnimation.init();
-                setCurrentScreen(getHud());
+        addToGLQueue(() -> {
+            setRenderer(getGameRenderer());
+            getPlayer().init();
+            world.addEntity(getPlayer());
+            transitionAnimation = new SlideUpAnimation(getCurrentScreen(), 1000);
+            transitionAnimation.init();
+            setCurrentScreen(getHud());
 
-                if (!remote) {
-                    world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance());
-                }
-
-                VoxelGameAPI.instance.getEventManager().push(new EventWorldStart());
-                // Delays are somewhere in this function. Above here.
+            if (!remote) {
+                world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance());
             }
 
+            VoxelGameAPI.instance.getEventManager().push(new EventWorldStart());
+            // Delays are somewhere in this function. Above here.
         });
 
         if(android) {

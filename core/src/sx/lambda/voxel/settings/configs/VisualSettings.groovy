@@ -19,11 +19,19 @@ class VisualSettings implements Serializable {
      * Whether to average light values on a per-corner basis
      */
     private boolean perCornerLight = true;
+    /**
+     * Whether to only update the screen when something has changed
+     *
+     * Saves battery on laptops and mobile phones
+     */
+    private boolean nonContinuous = false;
 
     public int getViewDistance() { viewDistance }
 
     public boolean isFancyTreesEnabled() { fancyTrees }
 
     public boolean perCornerLightEnabled() { perCornerLight }
+
+    public boolean nonContinuous() { nonContinuous }
 
 }

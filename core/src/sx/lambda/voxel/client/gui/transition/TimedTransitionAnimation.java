@@ -1,5 +1,7 @@
 package sx.lambda.voxel.client.gui.transition;
 
+import com.badlogic.gdx.Gdx;
+
 public abstract class TimedTransitionAnimation implements TransitionAnimation {
 
     private final int length;
@@ -20,7 +22,11 @@ public abstract class TimedTransitionAnimation implements TransitionAnimation {
 
     @Override
     public boolean isFinished() {
-        return getTimeSinceStart() >= length;
+        boolean finished = getTimeSinceStart() >= length;
+        if(!finished) {
+            Gdx.graphics.requestRendering();
+        }
+        return finished;
     }
 
     public long getTimeSinceStart() {

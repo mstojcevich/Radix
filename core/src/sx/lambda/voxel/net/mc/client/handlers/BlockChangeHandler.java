@@ -1,5 +1,6 @@
 package sx.lambda.voxel.net.mc.client.handlers;
 
+import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerBlockChangePacket;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
@@ -51,5 +52,7 @@ public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket
                 }
             }
         }
+
+        Gdx.graphics.requestRendering();
     }
 }

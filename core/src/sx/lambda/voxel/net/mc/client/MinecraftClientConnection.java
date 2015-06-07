@@ -9,6 +9,7 @@ import org.spacehq.mc.protocol.packet.ingame.client.ClientChatPacket;
 import org.spacehq.mc.protocol.packet.ingame.client.ClientSettingsPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.ServerChatPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import org.spacehq.mc.protocol.packet.ingame.server.entity.ServerEntityMovementPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerBlockChangePacket;
@@ -49,6 +50,7 @@ public class MinecraftClientConnection {
         handlerMap.put(ServerBlockChangePacket.class, new BlockChangeHandler(game));
         handlerMap.put(ServerMultiBlockChangePacket.class, new MultiBlockChangeHandler(game));
         handlerMap.put(ServerJoinGamePacket.class, new JoinGameHandler());
+        handlerMap.put(ServerEntityMovementPacket.class, new EntityPositionHandler());
         handlerMap.put(ServerChatPacket.class, chatHandler);
 
         client.getSession().addListener(new SessionAdapter() {

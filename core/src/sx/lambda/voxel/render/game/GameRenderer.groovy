@@ -1,6 +1,7 @@
 package sx.lambda.voxel.render.game
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.BitmapFontCache
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -140,6 +141,10 @@ class GameRenderer implements Renderer {
         currentHeight += debugTextRenderer.getLineHeight()
 
         String fpsStr = "FPS: $Gdx.graphics.framesPerSecond"
+        if(VoxelGameClient.instance.settingsManager.visualSettings.nonContinuous()) {
+            fpsStr = fpsStr.concat(" (NON-CONTINUOUS! INACCURATE!)")
+            fpsRender.setColor(Color.RED)
+        }
         GlyphLayout fpsGl = fpsRender.setText(fpsStr, 0, 0)
         fpsRender.setPosition(Gdx.graphics.width - fpsGl.width, (float) (Gdx.graphics.height - currentHeight))
         currentHeight += debugTextRenderer.getLineHeight()

@@ -1,5 +1,6 @@
 package sx.lambda.voxel.net.mc.client.handlers;
 
+import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.data.game.Chunk;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiChunkDataPacket;
 import sx.lambda.voxel.VoxelGameClient;
@@ -91,5 +92,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                 game.getWorld().addChunk(ck);
             }
         }
+
+        Gdx.graphics.requestRendering();
     }
 }

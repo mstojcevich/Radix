@@ -136,12 +136,11 @@ public class MovementHandler implements RepeatedTask {
 
                     player.updateMovement(this, moveDiffMS/1000f);
 
-                    if (!(player.getPosition().equals(lastPosition))) {
-                        player.setMoved(true);
-                    }
+                    player.setMoved(player.getPosition().x != lastPosition.x || player.getPosition().y != lastPosition.y || player.getPosition().z != lastPosition.z);
 
                     if (player.hasMoved()) {
                         game.getGameRenderer().calculateFrustum();
+                        Gdx.graphics.requestRendering();
                     }
 
                     lastMoveCheckMS = System.currentTimeMillis();

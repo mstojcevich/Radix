@@ -1,5 +1,6 @@
 package sx.lambda.voxel.net.mc.client.handlers;
 
+import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
 import sx.lambda.voxel.VoxelGameClient;
 
@@ -21,6 +22,8 @@ public class PlayerSpawnHandler implements PacketHandler<ServerSpawnPlayerPacket
         game.getPlayer().getRotation().setRot(-packet.getPitch(), 180-packet.getYaw());
 
         // TODO set current item
+
+        Gdx.graphics.requestRendering();
     }
 
 }

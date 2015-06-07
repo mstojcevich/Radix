@@ -78,12 +78,6 @@ public interface IWorld {
 
     void rerenderChunks();
 
-    /**
-     * Pre-allocate room for more chunks
-     * @param chunks How many chunks to make room for
-     */
-    void ensureCapacity(int chunks);
-
     int getNumChunksMeshing();
     void incrChunksMeshing();
     void decrChunksMeshing();

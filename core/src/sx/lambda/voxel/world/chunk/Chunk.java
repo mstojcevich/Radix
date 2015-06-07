@@ -105,16 +105,11 @@ public class Chunk implements IChunk {
 
         sunlightChanged = false;
 
-        if(meshing || parentWorld.getNumChunksMeshing() >= 2) {
+        if(meshing) {
             meshWhenDone = true;
         } else {
             meshing = true;
-            new Thread("Chunk Meshing") {
-                @Override
-                public void run() {
-                    updateFaces();
-                }
-            }.start();
+            parentWorld.addToMeshQueue(this::updateFaces);
         }
     }
 

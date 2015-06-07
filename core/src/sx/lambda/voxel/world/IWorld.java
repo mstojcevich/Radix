@@ -84,4 +84,5 @@ public interface IWorld {
 
     void rmChunk(IChunk chunk);
 
+    void addToMeshQueue(Runnable updateFaces);
 }

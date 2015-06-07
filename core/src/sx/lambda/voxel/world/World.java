@@ -27,6 +27,7 @@ import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.Chunk;
 import sx.lambda.voxel.world.chunk.IChunk;
+import sx.lambda.voxel.world.chunk.MeshQueueWorker;
 import sx.lambda.voxel.world.generation.ChunkGenerator;
 import sx.lambda.voxel.world.generation.SimplexChunkGenerator;
 
@@ -59,9 +60,13 @@ public class World implements IWorld {
     // Light-related stuff
     private final ExecutorService sunlightPoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
     private final ExecutorService blocklightPoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
-    private final Queue<int[]> sunlightQueue = new LinkedBlockingDeque<>();
+    private final Queue<int[]> sunlightQueue = new LinkedBlockingQueue<>();
     private final Queue<int[]> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
-    private final Queue<int[]> blocklightQueue = new LinkedBlockingDeque<>();
+    private final Queue<int[]> blocklightQueue = new LinkedBlockingQueue<>();
+
+    // Mesh related stuff
+    // Manages meshing chunks off of the main thread
+    private final Queue<Runnable> chunkMeshQueue = new LinkedBlockingQueue<>();
 
     // Skybox stuff
     private ModelBatch modelBatch;
@@ -88,6 +93,8 @@ public class World implements IWorld {
         for(int i = 0; i < LIGHTING_WORKERS; i++) {
             blocklightPoolExecutor.submit(new BlocklightQueueWorker(this, blocklightQueue));
         }
+
+        new MeshQueueWorker(chunkMeshQueue).start();
     }
 
     public int getChunkSize() {
@@ -540,6 +547,14 @@ public class World implements IWorld {
         if(chunk == null)return;
         removeChunkFromMap(chunk.getStartPosition());
         this.chunkList.remove(chunk);
+    }
+
+    @Override
+    public void addToMeshQueue(Runnable updateFaces) {
+        chunkMeshQueue.add(updateFaces);
+        synchronized (chunkMeshQueue) {
+            chunkMeshQueue.notify();
+        }
     }
 
     private ModelInstance createSkybox() {

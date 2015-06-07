@@ -129,6 +129,12 @@ public class Chunk implements IChunk {
 
         if(opaqueModelInstance != null) {
             batch.render(opaqueModelInstance);
+        }
+    }
+
+    @Override
+    public void renderTranslucent(ModelBatch batch) {
+        if(translucentModelInstance != null) {
             batch.render(translucentModelInstance);
         }
     }

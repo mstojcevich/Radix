@@ -25,6 +25,7 @@ public interface IChunk extends Serializable, Disposable {
      */
     void render(ModelBatch batch);
 
+    void renderTranslucent(ModelBatch modelBatch);
 
     /**
      * Gets the starting position of the chunk

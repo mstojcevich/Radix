@@ -193,6 +193,8 @@ public class World implements IWorld {
         modelBatch.render(skybox);
         skybox.transform.translate(-playerX, -playerY, -playerZ);
         if(sortedChunkList != null) {
+            boolean[] visibleChunks = new boolean[sortedChunkList.size()];
+            int chunkNum = 0;
             for (IChunk c : sortedChunkList) {
                 int x = c.getStartPosition().x;
                 int z = c.getStartPosition().z;
@@ -202,8 +204,19 @@ public class World implements IWorld {
                 int midY = c.getHighestPoint()/2;
                 boolean visible = VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
                 if(visible) {
+                    visibleChunks[chunkNum] = true;
                     c.render(modelBatch);
                 }
+                chunkNum++;
+            }
+
+            chunkNum = 0;
+            for (IChunk c : sortedChunkList) {
+                boolean visible = visibleChunks[chunkNum];
+                if(visible) {
+                    c.renderTranslucent(modelBatch);
+                }
+                chunkNum++;
             }
         }
         modelBatch.end();

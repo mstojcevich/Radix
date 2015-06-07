@@ -20,6 +20,11 @@ public class NormalBlockRenderer implements IBlockRenderer {
 
     private static boolean initialized;
 
+    private VertexInfo c00 = new VertexInfo();
+    private VertexInfo c01 = new VertexInfo();
+    private VertexInfo c10 = new VertexInfo();
+    private VertexInfo c11 = new VertexInfo();
+
     public NormalBlockRenderer() {}
 
     @Override
@@ -40,10 +45,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
         float uv = atlasIndex / 100.0f;
         builder.setUVRange(uv, uv, uv, uv);
 
-        VertexInfo c00 = new VertexInfo().setPos(x1, y1, z).setNor(0, 0, 1);
-        VertexInfo c01 = new VertexInfo().setPos(x1, y2, z).setNor(0, 0, 1);
-        VertexInfo c10 = new VertexInfo().setPos(x2, y1, z).setNor(0, 0, 1);
-        VertexInfo c11 = new VertexInfo().setPos(x2, y2, z).setNor(0, 0, 1);
+        c00.setPos(x1, y1, z).setNor(0, 0, 1);
+        c01.setPos(x1, y2, z).setNor(0, 0, 1);
+        c10.setPos(x2, y1, z).setNor(0, 0, 1);
+        c11.setPos(x2, y2, z).setNor(0, 0, 1);
 
         Color c = getColor((int) x1, (int) y1, (int) z - 1);
         if(pcld == null) {
@@ -64,10 +69,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
         float uv = atlasIndex / 100.0f;
         builder.setUVRange(uv, uv, uv, uv);
 
-        VertexInfo c00 = new VertexInfo().setPos(x1, y1, z).setNor(0, 0, -1);
-        VertexInfo c01 = new VertexInfo().setPos(x1, y2, z).setNor(0, 0, -1);
-        VertexInfo c10 = new VertexInfo().setPos(x2, y1, z).setNor(0, 0, -1);
-        VertexInfo c11 = new VertexInfo().setPos(x2, y2, z).setNor(0, 0, -1);
+        c00.setPos(x1, y1, z).setNor(0, 0, -1);
+        c01.setPos(x1, y2, z).setNor(0, 0, -1);
+        c10.setPos(x2, y1, z).setNor(0, 0, -1);
+        c11.setPos(x2, y2, z).setNor(0, 0, -1);
 
         Color c = getColor((int) x1, (int) y1, (int) z);
         if(pcld == null) {
@@ -88,10 +93,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
         float uv = atlasIndex / 100.0f;
         builder.setUVRange(uv, uv, uv, uv);
 
-        VertexInfo c00 = new VertexInfo().setPos(x, y1, z1).setNor(-1, 0, 0);
-        VertexInfo c01 = new VertexInfo().setPos(x, y1, z2).setNor(-1, 0, 0);
-        VertexInfo c10 = new VertexInfo().setPos(x, y2, z1).setNor(-1, 0, 0);
-        VertexInfo c11 = new VertexInfo().setPos(x, y2, z2).setNor(-1, 0, 0);
+        c00.setPos(x, y1, z1).setNor(-1, 0, 0);
+        c01.setPos(x, y1, z2).setNor(-1, 0, 0);
+        c10.setPos(x, y2, z1).setNor(-1, 0, 0);
+        c11.setPos(x, y2, z2).setNor(-1, 0, 0);
 
         Color c = getColor((int) x, (int) y1, (int) z1);
         if(pcld == null) {
@@ -112,10 +117,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
         float uv = atlasIndex / 100.0f;
         builder.setUVRange(uv, uv, uv, uv);
 
-        VertexInfo c00 = new VertexInfo().setPos(x, y1, z1).setNor(1, 0, 0);
-        VertexInfo c01 = new VertexInfo().setPos(x, y1, z2).setNor(1, 0, 0);
-        VertexInfo c10 = new VertexInfo().setPos(x, y2, z1).setNor(1, 0, 0);
-        VertexInfo c11 = new VertexInfo().setPos(x, y2, z2).setNor(1, 0, 0);
+        c00.setPos(x, y1, z1).setNor(1, 0, 0);
+        c01.setPos(x, y1, z2).setNor(1, 0, 0);
+        c10.setPos(x, y2, z1).setNor(1, 0, 0);
+        c11.setPos(x, y2, z2).setNor(1, 0, 0);
 
         Color c = getColor((int) x - 1, (int) y1, (int) z1);
         if(pcld == null) {
@@ -136,10 +141,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
         float uv = atlasIndex / 100.0f;
         builder.setUVRange(uv, uv, uv, uv);
 
-        VertexInfo c00 = new VertexInfo().setPos(x1, y, z1).setNor(0, 1, 0);
-        VertexInfo c01 = new VertexInfo().setPos(x1, y, z2).setNor(0, 1, 0);
-        VertexInfo c10 = new VertexInfo().setPos(x2, y, z1).setNor(0, 1, 0);
-        VertexInfo c11 = new VertexInfo().setPos(x2, y, z2).setNor(0, 1, 0);
+        c00.setPos(x1, y, z1).setNor(0, 1, 0);
+        c01.setPos(x1, y, z2).setNor(0, 1, 0);
+        c10.setPos(x2, y, z1).setNor(0, 1, 0);
+        c11.setPos(x2, y, z2).setNor(0, 1, 0);
 
         Color c = getColor((int) x1, (int) y - 1, (int) z1);
         if(pcld == null) {
@@ -160,10 +165,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
         float uv = atlasIndex / 100.0f;
         builder.setUVRange(uv, uv, uv, uv);
 
-        VertexInfo c00 = new VertexInfo().setPos(x1, y, z1).setNor(0, -1, 0);
-        VertexInfo c01 = new VertexInfo().setPos(x1, y, z2).setNor(0, -1, 0);
-        VertexInfo c10 = new VertexInfo().setPos(x2, y, z1).setNor(0, -1, 0);
-        VertexInfo c11 = new VertexInfo().setPos(x2, y, z2).setNor(0, -1, 0);
+        c00.setPos(x1, y, z1).setNor(0, -1, 0);
+        c01.setPos(x1, y, z2).setNor(0, -1, 0);
+        c10.setPos(x2, y, z1).setNor(0, -1, 0);
+        c11.setPos(x2, y, z2).setNor(0, -1, 0);
 
         Color c = getColor((int) x1, (int) y, (int) z1);
         if(pcld == null) {

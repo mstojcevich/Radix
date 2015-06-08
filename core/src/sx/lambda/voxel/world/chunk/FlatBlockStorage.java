@@ -1,5 +1,7 @@
 package sx.lambda.voxel.world.chunk;
 
+import org.spacehq.mc.protocol.data.game.NibbleArray3d;
+import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.block.Block;
 
 /**
@@ -8,11 +10,9 @@ import sx.lambda.voxel.block.Block;
 public class FlatBlockStorage implements BlockStorage {
 
     private final int width, depth, height, size;
-    private final Block[] types;
-    private final short[] ids;
-    private final short[] metadata;
-    private final byte[] sunlight;
-    private final byte[] blocklight;
+    private short[] blocks; // last nibble is metadata, everything up to that is block id
+    private NibbleArray3d sunlight;
+    private NibbleArray3d blocklight;
 
     public FlatBlockStorage(int width, int height, int depth) {
         this.width = width;
@@ -20,61 +20,84 @@ public class FlatBlockStorage implements BlockStorage {
         this.depth = depth;
         this.size = width*height*depth;
 
-        types = new Block[size];
-        ids = new short[size];
-        metadata = new short[size];
-        sunlight = new byte[size];
-        blocklight = new byte[size];
+        blocks = new short[size];
+        sunlight = new NibbleArray3d(size);
+        blocklight = new NibbleArray3d(size);
     }
 
     @Override
     public void setId(int x, int y, int z, int id) throws CoordinatesOutOfBoundsException {
-        ids[getIndex(x, y, z)] = (short)id;
+        if(x < 0 || x >= width || z <  0 || z >= depth || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int index = getIndex(x, y, z);
+        blocks[index] = (short)(id << 4 | (blocks[index] & 0xF));
     }
 
     @Override
     public short getId(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return ids[getIndex(x, y, z)];
+        if(x < 0 || x >= width || z <  0 || z >= depth || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        return (short)(blocks[getIndex(x, y, z)] >> 4);
     }
 
     @Override
     public void setMeta(int x, int y, int z, int meta) throws CoordinatesOutOfBoundsException {
-        metadata[getIndex(x, y, z)] = (short)meta;
+        if(x < 0 || x >= width || z <  0 || z >= depth || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        int index = getIndex(x, y, z);
+        blocks[index] = (short)((blocks[index] >> 4 << 4) | meta);
     }
 
     @Override
     public short getMeta(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return metadata[getIndex(x, y, z)];
+        if(x < 0 || x >= width || z <  0 || z >= depth || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        return (short)(blocks[getIndex(x, y, z)] & 0xF);
     }
 
     @Override
     public void setBlock(int x, int y, int z, Block block) throws CoordinatesOutOfBoundsException {
-        types[getIndex(x, y, z)] = block;
     }
 
     @Override
     public Block getBlock(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return types[getIndex(x, y, z)];
+        return VoxelGameAPI.instance.getBlockByID(getId(x, y, z));
     }
 
     @Override
     public void setSunlight(int x, int y, int z, int sunlight) throws CoordinatesOutOfBoundsException {
-        this.sunlight[getIndex(x, y, z)] = (byte)sunlight;
+        if(x < 0 || x >= width || z <  0 || z >= depth || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        this.sunlight.set(x, y, z, sunlight);
     }
 
     @Override
     public byte getSunlight(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return sunlight[getIndex(x, y, z)];
+        if(x < 0 || x >= width || z <  0 || z >= depth || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        return (byte)this.sunlight.get(x, y, z);
     }
 
     @Override
     public void setBlocklight(int x, int y, int z, int blocklight) throws CoordinatesOutOfBoundsException {
-        this.blocklight[getIndex(x, y, z)] = (byte)blocklight;
+        if(x < 0 || x >= width || z <  0 || z >= depth || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        this.blocklight.set(x, y, z, blocklight);
     }
 
     @Override
     public byte getBlocklight(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return blocklight[getIndex(x, y, z)];
+        if(x < 0 || x >= width || z <  0 || z >= depth || y < 0 || y >= height)
+            throw new CoordinatesOutOfBoundsException();
+
+        return (byte)this.blocklight.get(x, y, z);
     }
 
     @Override
@@ -92,10 +115,34 @@ public class FlatBlockStorage implements BlockStorage {
         return depth;
     }
 
+    /**
+     * Set underlying sunlight array
+     */
+    public void setSunlight(NibbleArray3d nibbleArray) {
+        this.sunlight = nibbleArray;
+    }
+
+    /**
+     * Set underlying blocklight array
+     */
+    public void setBlocklight(NibbleArray3d nibbleArray) {
+        this.blocklight = nibbleArray;
+    }
+
+    /**
+     * Set underlying block array.
+     * Should probably only call this if you know what you're doing.
+     * @param blocks Array of shorts with the last nibble as the metadata and everything before it as tbe block id
+     */
+    public void setBlocks(short[] blocks) {
+        this.blocks = blocks;
+    }
+
     private int getIndex(int x, int y, int z) throws CoordinatesOutOfBoundsException {
         if(x < 0 || x > width || y < 0 || y > height || z < 0 || z > depth)
             throw new CoordinatesOutOfBoundsException();
-        return x + y*width + z*width*height;
+
+        return y << 8 | z << 4 | x;
     }
 
 }

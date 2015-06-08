@@ -94,10 +94,5 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
         }
 
         Gdx.graphics.requestRendering();
-
-        /*
-        mcprotocollib has its own version of Chunk and allocates memory for that
-        TODO modify mcprotocollib to use our chunks
-         */
     }
 }

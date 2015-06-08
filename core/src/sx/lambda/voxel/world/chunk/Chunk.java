@@ -37,7 +37,7 @@ public class Chunk implements IChunk {
      *
      * Done this way so that piece full of air don't take up more memory than they have to
      */
-    private final BlockStorage[] blockStorage;
+    private final FlatBlockStorage[] blockStorage;
     /**
      * Map of light levels (ints 0-15) to brightness multipliers
      */
@@ -67,7 +67,7 @@ public class Chunk implements IChunk {
         this.size = world.getChunkSize();
         this.height = world.getHeight();
 
-        this.blockStorage = new BlockStorage[MathUtils.ceilPositive((float)this.height/16)];
+        this.blockStorage = new FlatBlockStorage[MathUtils.ceilPositive((float)this.height/16)];
 
         for (int i = 0; i <= MAX_LIGHT_LEVEL; i++) {
             int reduction = MAX_LIGHT_LEVEL - i;
@@ -596,6 +596,15 @@ public class Chunk implements IChunk {
         hash = 71 * hash + this.startPosition.x;
         hash = 71 * hash + this.startPosition.z;
         return hash;
+    }
+
+    /**
+     * Get the underlying block storage.
+     *
+     * Don't use this to set data unless you know what you're doing (ex. loading a chunk initially)
+     */
+    public FlatBlockStorage[] getBlockStorage() {
+        return blockStorage;
     }
 
 }

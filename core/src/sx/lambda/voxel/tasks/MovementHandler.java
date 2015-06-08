@@ -17,7 +17,7 @@ import sx.lambda.voxel.world.chunk.IChunk;
 public class MovementHandler implements RepeatedTask {
 
     // In meters per milliseconds
-    private static final float WALK_SPEED = 0.0043f;
+    private static final float WALK_SPEED = 0.0032f;
 
     public MovementHandler(VoxelGameClient game) {
         this.game = game;

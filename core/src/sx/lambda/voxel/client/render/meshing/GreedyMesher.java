@@ -9,7 +9,6 @@ import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.IBlockRenderer;
 import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.block.Side;
-import sx.lambda.voxel.world.chunk.BlockStorage;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
@@ -266,7 +265,7 @@ public class GreedyMesher implements Mesher {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     for (int z = 0; z < depth; z++) {
-                        lightLevels[x][y][z] = Math.max(1, chunk.getBrightness(chunk.getSunlight(x, y, z))
+                        lightLevels[x][y][z] = Math.min(1, chunk.getBrightness(chunk.getSunlight(x, y, z))
                                 + chunk.getBrightness(chunk.getBlocklight(x, y, z)));
                     }
                 }

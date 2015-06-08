@@ -1,36 +1,37 @@
-package sx.lambda.voxel.entity
+package sx.lambda.voxel.entity;
 
-import com.badlogic.gdx.graphics.g3d.Model
-import groovy.transform.CompileStatic
+import com.badlogic.gdx.graphics.g3d.Model;
 
-@CompileStatic
-abstract class Entity implements Serializable {
+import java.io.Serializable;
 
+public abstract class Entity implements Serializable {
     private final EntityPosition position;
     private final EntityRotation rotation;
     private transient Model model;
-    private int id = -1
+    private int id = -1;
 
     public Entity(Model model, EntityPosition position, EntityRotation rotation) {
-        this.model = model
-        this.position = position
-        this.rotation = rotation
+        this.model = model;
+        this.position = position;
+        this.rotation = rotation;
     }
 
     public Entity(Model model) {
-        this(model, new EntityPosition(0, 0, 0), new EntityRotation(0, 0))
+        this(model, new EntityPosition(0, 0, 0), new EntityRotation(0, 0));
     }
 
     public Entity() {
-        this(getDefaultModel())
+        this.model = getDefaultModel();
+        this.position = new EntityPosition(0, 0, 0);
+        this.rotation = new EntityRotation(0, 0);
     }
 
     public EntityPosition getPosition() {
-        position
+        return position;
     }
 
     public EntityRotation getRotation() {
-        rotation
+        return rotation;
     }
 
     public void render() {
@@ -52,24 +53,24 @@ abstract class Entity implements Serializable {
     }
 
     public void setModel(Model model) {
-        this.model = model
+        this.model = model;
     }
 
     public Model getDefaultModel() {
-        return null
-    }
-
-    public void setID(int id) {
-        this.id = id
+        return null;
     }
 
     public int getID() {
-        id
+        return id;
+    }
+
+    public void setID(int id) {
+        this.id = id;
     }
 
     /**
      * Called 20 times a second
      */
-    public void onUpdate() {}
-
+    public void onUpdate() {
+    }
 }

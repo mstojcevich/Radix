@@ -1,11 +1,9 @@
 package sx.lambda.voxel.tasks;
 
-import groovy.transform.CompileStatic;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.api.events.EventGameTick;
 
-@CompileStatic
 public class EntityUpdater implements RepeatedTask {
 
     private VoxelGameClient game;

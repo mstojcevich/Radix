@@ -51,7 +51,6 @@ project(":core") {
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile group: 'org.codehaus.groovy', name: 'groovy', version:'2.4.3'
         compile group: "org.spacehq", name: 'mcprotocollib', version:'1.8-SNAPSHOT'
         compile name: 'iridiumeventbus-v0'
     }

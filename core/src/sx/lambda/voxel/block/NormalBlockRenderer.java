@@ -5,12 +5,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
-import groovy.transform.CompileStatic;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.client.render.meshing.PerCornerLightData;
 import sx.lambda.voxel.render.NotInitializedException;
 
-@CompileStatic
 public class NormalBlockRenderer implements IBlockRenderer {
 
     private static final float TEXTURE_PERCENTAGE = 0.03125f;

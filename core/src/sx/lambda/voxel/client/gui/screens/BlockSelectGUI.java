@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector2;
-import groovy.transform.CompileStatic;
 import org.spacehq.mc.protocol.data.game.ItemStack;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientChangeHeldItemPacket;
 import org.spacehq.mc.protocol.packet.ingame.client.window.ClientCreativeInventoryActionPacket;
@@ -19,7 +18,6 @@ import sx.lambda.voxel.client.gui.GuiScreen;
 import java.util.HashMap;
 import java.util.Map;
 
-@CompileStatic
 public class BlockSelectGUI implements GuiScreen {
 
     private static final int PADDING = 4;

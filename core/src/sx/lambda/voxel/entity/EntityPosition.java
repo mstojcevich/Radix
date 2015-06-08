@@ -1,9 +1,7 @@
 package sx.lambda.voxel.entity;
 
 import com.badlogic.gdx.math.Vector3;
-import groovy.transform.CompileStatic;
 
-@CompileStatic
 public class EntityPosition extends Vector3 implements Cloneable {
 
     public EntityPosition(float x, float y, float z) {

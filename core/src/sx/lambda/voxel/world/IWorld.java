@@ -10,6 +10,13 @@ import java.util.List;
 
 public interface IWorld {
 
+    /**
+     * Gets the chunk size used in the world.
+     *
+     * The number returned should be a 2^x number.
+     *
+     * @return 2^x number representing chunk size
+     */
     int getChunkSize();
 
     int getHeight();

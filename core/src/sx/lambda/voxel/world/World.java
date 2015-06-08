@@ -36,7 +36,7 @@ import java.util.concurrent.*;
 
 public class World implements IWorld {
 
-    private static final int CHUNK_SIZE = 16;
+    private static final int CHUNK_SIZE = 16; // SHOULD ALWAYS BE 2^x
     private static final int WORLD_HEIGHT = 256;
     private static final int SEA_LEVEL = 64;
     private static final float GRAVITY = 32f;

@@ -109,8 +109,8 @@ public class World implements IWorld {
     }
 
     private int getChunkKey(int x, int z) {
-        short nx = (short)((x - (x & (getChunkSize()-1))) / getChunkSize());
-        short nz = (short)((z - (z & (getChunkSize()-1))) / getChunkSize());
+        short nx = (short)Math.floorDiv(x, getChunkSize());
+        short nz = (short)Math.floorDiv(z, getChunkSize());
 
         return (nx << 16) | (nz & 0xFFFF);
     }

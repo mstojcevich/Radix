@@ -9,6 +9,7 @@ import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.IBlockRenderer;
 import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.block.Side;
+import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
@@ -38,8 +39,6 @@ public class GreedyMesher implements Mesher {
 
     public List<Face> getFaces(UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
         List<Face> faces = new ArrayList<>();
-
-        float[][][] lightLevels = perCornerLight ? null : calcLightLevels();
 
         PerCornerLightData bright;
         if(perCornerLight) {
@@ -105,8 +104,8 @@ public class GreedyMesher implements Mesher {
                     }
                 }
             }
-            greedy(faces, Side.TOP, shouldMerge, topMask, lightLevels, topPcld, y, chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
-            greedy(faces, Side.BOTTOM, shouldMerge, btmMask, lightLevels, btmPcld, y, chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.TOP, shouldMerge, topMask, topPcld, y, chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
+            greedy(faces, Side.BOTTOM, shouldMerge, btmMask, btmPcld, y, chunk.getStartPosition().x, chunk.getStartPosition().z, chunk.getStartPosition().y);
         }
 
         // East, west
@@ -177,8 +176,8 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.EAST, shouldMerge, eastMask, lightLevels, eastPcld, x, chunk.getStartPosition().z, chunk.getStartPosition().y, chunk.getStartPosition().x);
-            greedy(faces, Side.WEST, shouldMerge, westMask, lightLevels, westPcld, x, chunk.getStartPosition().z, chunk.getStartPosition().y, chunk.getStartPosition().x);
+            greedy(faces, Side.EAST, shouldMerge, eastMask, eastPcld, x, chunk.getStartPosition().z, chunk.getStartPosition().y, chunk.getStartPosition().x);
+            greedy(faces, Side.WEST, shouldMerge, westMask, westPcld, x, chunk.getStartPosition().z, chunk.getStartPosition().y, chunk.getStartPosition().x);
         }
 
         // North, south
@@ -249,32 +248,57 @@ public class GreedyMesher implements Mesher {
                 }
             }
 
-            greedy(faces, Side.NORTH, shouldMerge, northMask, lightLevels, northPcld, z, chunk.getStartPosition().x, chunk.getStartPosition().y, chunk.getStartPosition().z);
-            greedy(faces, Side.SOUTH, shouldMerge, southMask, lightLevels, southPcld, z, chunk.getStartPosition().x, chunk.getStartPosition().y, chunk.getStartPosition().z);
+            greedy(faces, Side.NORTH, shouldMerge, northMask, northPcld, z, chunk.getStartPosition().x, chunk.getStartPosition().y, chunk.getStartPosition().z);
+            greedy(faces, Side.SOUTH, shouldMerge, southMask, southPcld, z, chunk.getStartPosition().x, chunk.getStartPosition().y, chunk.getStartPosition().z);
         }
 
         return faces;
     }
 
-    private float[][][] calcLightLevels() {
-        int width = chunk.getWorld().getChunkSize();
-        int height = chunk.getHighestPoint()+1;
-        int depth = chunk.getWorld().getChunkSize();
-        float[][][] lightLevels = new float[width][height][depth];
-        try {
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    for (int z = 0; z < depth; z++) {
-                        lightLevels[x][y][z] = Math.min(1, chunk.getBrightness(chunk.getSunlight(x, y, z))
-                                + chunk.getBrightness(chunk.getBlocklight(x, y, z)));
-                    }
-                }
-            }
-        } catch (CoordinatesOutOfBoundsException ex) {
-            throw new RuntimeException(ex);
+    private float calcLightLevel(Side side, int x, int y, int z) throws CoordinatesOutOfBoundsException {
+        switch(side) {
+            case TOP:
+                y += 1;
+                break;
+            case BOTTOM:
+                y -= 1;
+                break;
+            case WEST:
+                x -= 1;
+                break;
+            case EAST:
+                x += 1;
+                break;
+            case NORTH:
+                z += 1;
+                break;
+            case SOUTH:
+                z -= 1;
+                break;
         }
 
-        return lightLevels;
+        IWorld world = chunk.getWorld();
+        int chunkSize = world.getChunkSize();
+        IChunk sChunk = chunk;
+        if (z < 0) {
+            sChunk = world.getChunk(chunk.getStartPosition().x + x, chunk.getStartPosition().z + z);
+            z += chunkSize;
+        } else if (z > chunkSize - 1) {
+            sChunk = world.getChunk(chunk.getStartPosition().x + x, chunk.getStartPosition().z + z);
+            z -= chunkSize;
+        } else if (x < 0) {
+            sChunk = world.getChunk(chunk.getStartPosition().x + x, chunk.getStartPosition().z + z);
+            x += chunkSize;
+        } else if (x > chunkSize - 1) {
+            sChunk = world.getChunk(chunk.getStartPosition().x + x, chunk.getStartPosition().z + z);
+            x -= chunkSize;
+        }
+
+        if(sChunk == null)
+            return 1;
+
+        return Math.min(1, sChunk.getBrightness(sChunk.getSunlight(x, y, z))
+                + sChunk.getBrightness(sChunk.getBlocklight(x, y, z)));
     }
 
     public List<Face> getFaces(UseCondition condition) {
@@ -307,10 +331,9 @@ public class GreedyMesher implements Mesher {
     /**
      * @param outputList List to put faces in
      * @param side       Side being meshed
-     * @param lls        Light levels of the blocks
      * @param z          Depth on the plane
      */
-    private void greedy(List<Face> outputList, Side side, MergeCondition mergeCond, boolean[][] mask, float[][][] lls, PerCornerLightData[][] pclds, int z, int offsetX, int offsetY, int offsetZ) {
+    private void greedy(List<Face> outputList, Side side, MergeCondition mergeCond, boolean[][] mask, PerCornerLightData[][] pclds, int z, int offsetX, int offsetY, int offsetZ) {
         int width = mask.length;
         int height = mask[0].length;
         boolean[][] used = new boolean[mask.length][mask[0].length];
@@ -336,7 +359,7 @@ public class GreedyMesher implements Mesher {
                     if (perCornerLight) {
                         pcld = pclds[x][y];
                     } else {
-                        ll = lls[rx][ry][rz];
+                        ll = calcLightLevel(side, rx, ry, rz);
                     }
                     int endX = x + 1;
                     int endY = y + 1;
@@ -354,7 +377,7 @@ public class GreedyMesher implements Mesher {
                             if (perCornerLight) {
                                 newPcld = pclds[newX][y];
                             } else {
-                                newll = lls[newRX][newRY][newRZ];
+                                newll = calcLightLevel(side, newRX, newRY, newRZ);
                             }
                             shouldPass = !used[newX][y] && newBlk != 0 && mergeCond.shouldMerge(blk, meta, ll, pcld, newBlk, newMeta, newll, newPcld);
                         }
@@ -384,7 +407,7 @@ public class GreedyMesher implements Mesher {
                                     if (perCornerLight) {
                                         lPcld = pclds[lx][endY];
                                     } else {
-                                        llight = lls[lRX][lRY][lRZ];
+                                        llight = calcLightLevel(side, lRX, lRY, lRZ);
                                     }
 
                                     if (used[lx][endY] || !mergeCond.shouldMerge(blk, meta, ll, pcld, lblk, lmeta, llight, lPcld)) {

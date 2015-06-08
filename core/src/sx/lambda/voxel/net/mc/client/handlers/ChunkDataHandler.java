@@ -56,7 +56,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
 
             FlatBlockStorage storage = blockStorages[yIndex];
             if(storage == null) {
-                storage = blockStorages[yIndex] = new FlatBlockStorage(16, 16, 16);
+                storage = blockStorages[yIndex] = new FlatBlockStorage(16, 16, 16, false);
             }
 
             short[] blockData = c.getBlocks().getData();

@@ -25,6 +25,23 @@ public class FlatBlockStorage implements BlockStorage {
         blocklight = new NibbleArray3d(size);
     }
 
+    /**
+     * ONLY USE THIS CONSTRUCTOR WITH ALLOCATE SET TO FALSE IF YOU'RE GOING TO IMMEDIATELY FILL IN BLOCKS, SUNLIGHT, AND BLOCKLIGHT
+     * @param allocate Whether to default the arrays. Set to false if you're going to manually set them immediately after construction.
+     */
+    public FlatBlockStorage(int width, int height, int depth, boolean allocate) {
+        this.width = width;
+        this.height = height;
+        this.depth = depth;
+        this.size = width*height*depth;
+
+        if(allocate) {
+            blocks = new short[size];
+            sunlight = new NibbleArray3d(size);
+            blocklight = new NibbleArray3d(size);
+        }
+    }
+
     @Override
     public void setId(int x, int y, int z, int id) throws CoordinatesOutOfBoundsException {
         if(x < 0 || x >= width || z <  0 || z >= depth || y < 0 || y >= height)

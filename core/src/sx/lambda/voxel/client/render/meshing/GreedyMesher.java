@@ -40,7 +40,7 @@ public class GreedyMesher implements Mesher {
     public List<Face> getFaces(UseCondition condition, OccludeCondition ocCond, MergeCondition shouldMerge) {
         List<Face> faces = new ArrayList<>();
 
-        float[][][] lightLevels = calcLightLevels();
+        float[][][] lightLevels = perCornerLight ? null : calcLightLevels();
 
         PerCornerLightData bright;
         if(perCornerLight) {
@@ -259,7 +259,7 @@ public class GreedyMesher implements Mesher {
 
     private float[][][] calcLightLevels() {
         int width = chunk.getWorld().getChunkSize();
-        int height = chunk.getWorld().getHeight();
+        int height = chunk.getHighestPoint()+1;
         int depth = chunk.getWorld().getChunkSize();
         float[][][] lightLevels = new float[width][height][depth];
         try {
@@ -332,10 +332,13 @@ public class GreedyMesher implements Mesher {
                     if (blk == 0 || used[x][y])
                         continue;
                     used[x][y] = true;
-                    float ll = lls[rx][ry][rz];
+                    float ll = 15;
                     PerCornerLightData pcld = null;
-                    if (perCornerLight)
+                    if (perCornerLight) {
                         pcld = pclds[x][y];
+                    } else {
+                        ll = lls[rx][ry][rz];
+                    }
                     int endX = x + 1;
                     int endY = y + 1;
                     while (true) {
@@ -347,10 +350,13 @@ public class GreedyMesher implements Mesher {
                             int newRZ = realZ(side, newX, y, z);
                             int newBlk = chunk.getBlockId(newRX, newRY, newRZ);
                             int newMeta = chunk.getMeta(newRX, newRY, newRZ);
-                            float newll = lls[newRX][newRY][newRZ];
+                            float newll = 15;
                             PerCornerLightData newPcld = null;
-                            if (perCornerLight)
+                            if (perCornerLight) {
                                 newPcld = pclds[newX][y];
+                            } else {
+                                newll = lls[newRX][newRY][newRZ];
+                            }
                             shouldPass = !used[newX][y] && newBlk != 0 && mergeCond.shouldMerge(blk, meta, ll, pcld, newBlk, newMeta, newll, newPcld);
                         }
                         // expand right if the same block
@@ -374,10 +380,13 @@ public class GreedyMesher implements Mesher {
                                         break;
                                     }
                                     int lmeta = chunk.getMeta(lRX, lRY, lRZ);
-                                    float llight = lls[lRX][lRY][lRZ];
+                                    float llight = 15;
                                     PerCornerLightData lPcld = null;
-                                    if (perCornerLight)
+                                    if (perCornerLight) {
                                         lPcld = pclds[lx][endY];
+                                    } else {
+                                        llight = lls[lRX][lRY][lRZ];
+                                    }
 
                                     if (used[lx][endY] || !mergeCond.shouldMerge(blk, meta, ll, pcld, lblk, lmeta, llight, lPcld)) {
                                         allPassed = false;

@@ -49,7 +49,10 @@ import sx.lambda.voxel.render.NotInitializedException;
 import sx.lambda.voxel.render.Renderer;
 import sx.lambda.voxel.render.game.GameRenderer;
 import sx.lambda.voxel.settings.SettingsManager;
-import sx.lambda.voxel.tasks.*;
+import sx.lambda.voxel.tasks.EntityUpdater;
+import sx.lambda.voxel.tasks.MovementHandler;
+import sx.lambda.voxel.tasks.RepeatedTask;
+import sx.lambda.voxel.tasks.WorldLoader;
 import sx.lambda.voxel.util.PlotCell3f;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
@@ -61,7 +64,8 @@ import javax.swing.*;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import static com.badlogic.gdx.graphics.GL20.*;
+import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
+import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_BUFFER_BIT;
 
 public class VoxelGameClient extends ApplicationAdapter {
 
@@ -96,7 +100,7 @@ public class VoxelGameClient extends ApplicationAdapter {
     private SpriteBatch guiBatch;
 
     private final MovementHandler movementHandler = new MovementHandler(this);
-    private final RepeatedTask[] handlers = new RepeatedTask[]{new WorldLoader(this), movementHandler, new EntityUpdater(this), new LightUpdater(this)};
+    private final RepeatedTask[] handlers = new RepeatedTask[]{new WorldLoader(this), movementHandler, new EntityUpdater(this)};
 
     // Android specific stuff
     private boolean android;

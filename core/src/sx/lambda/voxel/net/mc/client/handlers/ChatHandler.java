@@ -2,7 +2,7 @@ package sx.lambda.voxel.net.mc.client.handlers;
 
 import org.spacehq.mc.protocol.data.message.Message;
 import org.spacehq.mc.protocol.packet.ingame.server.ServerChatPacket;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ public class ChatHandler implements PacketHandler<ServerChatPacket> {
 
     private final List<ChatMessageListener> listeners = new ArrayList<>();
 
-    public ChatHandler(VoxelGameClient game) {}
+    public ChatHandler(RadixClient game) {}
 
     @Override
     public void handle(ServerChatPacket packet) {

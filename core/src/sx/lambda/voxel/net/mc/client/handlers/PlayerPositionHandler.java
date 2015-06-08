@@ -2,13 +2,13 @@ package sx.lambda.voxel.net.mc.client.handlers;
 
 import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 
 public class PlayerPositionHandler implements PacketHandler<ServerPlayerPositionRotationPacket> {
 
-    private final VoxelGameClient game;
+    private final RadixClient game;
 
-    public PlayerPositionHandler(VoxelGameClient game) {
+    public PlayerPositionHandler(RadixClient game) {
         this.game = game;
     }
 

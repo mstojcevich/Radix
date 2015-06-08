@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.Align;
 import org.spacehq.mc.protocol.data.message.Message;
 import org.spacehq.mc.protocol.data.message.TranslationMessage;
 import org.spacehq.mc.protocol.packet.ingame.client.ClientChatPacket;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.client.gui.GuiScreen;
 import sx.lambda.voxel.net.mc.client.MinecraftClientConnection;
 import sx.lambda.voxel.net.mc.client.handlers.ChatHandler;
@@ -67,9 +67,9 @@ public class ChatGUI implements GuiScreen, ChatHandler.ChatMessageListener {
             return;
         }
         if(c == 13 && currentMessage.length() > 0) { // enter
-            VoxelGameClient.getInstance().getMinecraftConn().getClient().getSession().send(new ClientChatPacket(currentMessage));
+            RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(new ClientChatPacket(currentMessage));
             currentMessage = "";
-            VoxelGameClient.getInstance().setCurrentScreen(VoxelGameClient.getInstance().getHud());
+            RadixClient.getInstance().setCurrentScreen(RadixClient.getInstance().getHud());
             return;
         }
         if(currentMessage.length() < 100 && c >= 32 && c <= 126) { // Ascii printable range

@@ -1,14 +1,14 @@
 package sx.lambda.voxel.tasks;
 
-import sx.lambda.voxel.VoxelGameClient;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.RadixClient;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.api.events.EventGameTick;
 
 public class EntityUpdater implements RepeatedTask {
 
-    private VoxelGameClient game;
+    private RadixClient game;
 
-    public EntityUpdater(VoxelGameClient game) {
+    public EntityUpdater(RadixClient game) {
         this.game = game;
     }
 
@@ -25,7 +25,7 @@ public class EntityUpdater implements RepeatedTask {
                     game.getWorld().getLoadedEntities().forEach(
                             sx.lambda.voxel.entity.Entity::onUpdate);
 
-                    VoxelGameAPI.instance.getEventManager().push(new EventGameTick(game.getWorld()));
+                    RadixAPI.instance.getEventManager().push(new EventGameTick(game.getWorld()));
                     Thread.sleep(50);
                 } else {
                     Thread.sleep(1000);

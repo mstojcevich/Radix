@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.IBlockRenderer;
 import sx.lambda.voxel.block.NormalBlockRenderer;
@@ -307,7 +307,7 @@ public class GreedyMesher implements Mesher {
                         !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
                                 && (curBlock.occludeCovered() && blockToSide.occludeCovered()),
                 (id1, meta1, light1, pcld1, id2, meta2, light2, pcld2) -> {
-                    Block block1 = VoxelGameAPI.instance.getBlockByID(id1);
+                    Block block1 = RadixAPI.instance.getBlockByID(id1);
                     if (!block1.shouldGreedyMerge())
                         return false;
                     boolean sameBlock = id1 == id2 && meta1 == meta2;
@@ -317,7 +317,7 @@ public class GreedyMesher implements Mesher {
                         sameLight = pcld1.equals(pcld2);
                     }
                     if (sameLight && !sameBlock && tooDarkToTell) {
-                        Block block2 = VoxelGameAPI.instance.getBlockByID(id2);
+                        Block block2 = RadixAPI.instance.getBlockByID(id2);
                         // Other block renderers may alter shape in an unpredictable way
                         if (block1.getRenderer().getClass() == NormalBlockRenderer.class
                                 && block2.getRenderer().getClass() == NormalBlockRenderer.class
@@ -557,7 +557,7 @@ public class GreedyMesher implements Mesher {
          * @param pcld Per corner light data. Pass null if per corner lighting is disabled.
          */
         public Face(Side side, int block, float lightLevel, PerCornerLightData pcld, int startX, int startY, int endX, int endY, int z) {
-            this.block = VoxelGameAPI.instance.getBlockByID(block);
+            this.block = RadixAPI.instance.getBlockByID(block);
             this.lightLevel = lightLevel;
             this.x1 = startX;
             this.y1 = startY;

@@ -31,7 +31,7 @@ import pw.oxcafebabe.marcusant.eventbus.EventListener;
 import pw.oxcafebabe.marcusant.eventbus.Priority;
 import pw.oxcafebabe.marcusant.eventbus.exceptions.InvalidListenerException;
 import sx.lambda.voxel.api.BuiltInBlockIds;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.api.events.EventEarlyInit;
 import sx.lambda.voxel.api.events.EventWorldStart;
 import sx.lambda.voxel.block.Block;
@@ -67,10 +67,10 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
 import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_BUFFER_BIT;
 
-public class VoxelGameClient extends ApplicationAdapter {
+public class RadixClient extends ApplicationAdapter {
 
     public static final String GAME_TITLE = "VoxelTest";
-    private static VoxelGameClient theGame;
+    private static RadixClient theGame;
 
     private SettingsManager settingsManager;
 
@@ -113,7 +113,7 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     private boolean wireframe;
 
-    public static VoxelGameClient getInstance() {
+    public static RadixClient getInstance() {
         return theGame;
     }
 
@@ -125,21 +125,21 @@ public class VoxelGameClient extends ApplicationAdapter {
         this.android = Gdx.app.getType().equals(Application.ApplicationType.Android);
 
         try {
-            VoxelGameAPI.instance.registerBuiltinBlocks();
+            RadixAPI.instance.registerBuiltinBlocks();
             if(!settingsManager.getVisualSettings().isFancyTreesEnabled()) {
-                VoxelGameAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_ID).setOccludeCovered(true);
-                VoxelGameAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_TWO_ID).setOccludeCovered(true);
+                RadixAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_ID).setOccludeCovered(true);
+                RadixAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_TWO_ID).setOccludeCovered(true);
             }
-        } catch (VoxelGameAPI.BlockRegistrationException e) {
+        } catch (RadixAPI.BlockRegistrationException e) {
             e.printStackTrace();
         }
-        VoxelGameAPI.instance.registerMinecraftBiomes();
+        RadixAPI.instance.registerMinecraftBiomes();
         try {
-            VoxelGameAPI.instance.getEventManager().register(this);
+            RadixAPI.instance.getEventManager().register(this);
         } catch (InvalidListenerException e) {
             e.printStackTrace();
         }
-        VoxelGameAPI.instance.getEventManager().push(new EventEarlyInit());
+        RadixAPI.instance.getEventManager().push(new EventEarlyInit());
 
         this.setupOGL();
 
@@ -238,7 +238,7 @@ public class VoxelGameClient extends ApplicationAdapter {
             setupTouchControls();
         }
 
-        Gdx.input.setInputProcessor(new VoxelGameGdxInputHandler(this));
+        Gdx.input.setInputProcessor(new RadixInputHandler(this));
 
         if(settingsManager.getVisualSettings().nonContinuous()) {
             Gdx.graphics.setContinuousRendering(false);
@@ -466,7 +466,7 @@ public class VoxelGameClient extends ApplicationAdapter {
 
     public void enterRemoteWorld(final String hostname, final short port) {
         enterWorld(new World(true, false), true);
-        (mcClientConn = new MinecraftClientConnection(VoxelGameClient.this, hostname, port)).start();
+        (mcClientConn = new MinecraftClientConnection(RadixClient.this, hostname, port)).start();
         chatGUI.setup(mcClientConn);
     }
 
@@ -489,7 +489,7 @@ public class VoxelGameClient extends ApplicationAdapter {
         });
 
         if(android) {
-            Gdx.input.setInputProcessor(new VoxelGameGdxInputHandler(this));
+            Gdx.input.setInputProcessor(new RadixInputHandler(this));
         }
     }
 
@@ -509,7 +509,7 @@ public class VoxelGameClient extends ApplicationAdapter {
                 world.loadChunks(new EntityPosition(0, 0, 0), getSettingsManager().getVisualSettings().getViewDistance());
             }
 
-            VoxelGameAPI.instance.getEventManager().push(new EventWorldStart());
+            RadixAPI.instance.getEventManager().push(new EventWorldStart());
             // Delays are somewhere in this function. Above here.
         });
 
@@ -531,7 +531,7 @@ public class VoxelGameClient extends ApplicationAdapter {
             bi.setColor(1, 1, 1, 1);
             final int BLOCK_TEX_SIZE = 32;
             int textureIndex = 0;
-            for (Block b : VoxelGameAPI.instance.getBlocks()) {
+            for (Block b : RadixAPI.instance.getBlocks()) {
                 b.setTextureIndex(textureIndex);
                 for (String texLoc : b.getTextureLocations()) {
                     int x = textureIndex * BLOCK_TEX_SIZE % bi.getWidth();

@@ -2,7 +2,7 @@ package sx.lambda.voxel.block;
 
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.math.MathUtils;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.client.render.meshing.PerCornerLightData;
 import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
@@ -30,7 +30,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int zi = MathUtils.floor(z - 1);
         int xi = MathUtils.floor(x1);
         int yi = MathUtils.floor(y1);
-        IWorld world = VoxelGameClient.getInstance().getWorld();
+        IWorld world = RadixClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
         short meta = 0;
         try {
@@ -46,7 +46,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int zi = MathUtils.floor(z);
         int xi = MathUtils.floor(x1);
         int yi = MathUtils.floor(y1);
-        IWorld world = VoxelGameClient.getInstance().getWorld();
+        IWorld world = RadixClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
         short meta = 0;
         try {
@@ -62,7 +62,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int zi = MathUtils.floor(z1);
         int xi = MathUtils.floor(x);
         int yi = MathUtils.floor(y1);
-        IWorld world = VoxelGameClient.getInstance().getWorld();
+        IWorld world = RadixClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
         short meta = 0;
         try {
@@ -78,7 +78,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int zi = MathUtils.floor(z1);
         int xi = MathUtils.floor(x - 1);
         int yi = MathUtils.floor(y1);
-        IWorld world = VoxelGameClient.getInstance().getWorld();
+        IWorld world = RadixClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
         short meta = 0;
         try {
@@ -94,7 +94,7 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         int zi = MathUtils.floor(z1);
         int xi = MathUtils.floor(x1);
         int yi = MathUtils.floor(y - 1);
-        IWorld world = VoxelGameClient.getInstance().getWorld();
+        IWorld world = RadixClient.getInstance().getWorld();
         IChunk chunk = world.getChunk(xi, zi);
         short meta = 0;
         try {

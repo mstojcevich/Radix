@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.client.gui.GuiScreen;
 
@@ -21,18 +21,18 @@ public class IngameHUD implements GuiScreen {
 
     @Override
     public void render(boolean inGame, SpriteBatch guiBatch) {
-        int blockInHead = VoxelGameClient.getInstance().getPlayer().getBlockInHead(VoxelGameClient.getInstance().getWorld());
+        int blockInHead = RadixClient.getInstance().getPlayer().getBlockInHead(RadixClient.getInstance().getWorld());
         switch (blockInHead) {
             case BuiltInBlockIds.WATER_FLOW_ID:
             case BuiltInBlockIds.WATER_ID:
                 guiBatch.setColor(1, 1, 1, 0.6f);
-                Block bl = VoxelGameAPI.instance.getBlockByID(blockInHead);
+                Block bl = RadixAPI.instance.getBlockByID(blockInHead);
                 bl.getRenderer().render2d(guiBatch, bl.getTextureIndex(), 0, 0, Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
                 guiBatch.setColor(1, 1, 1, 1);
                 break;
         }
 
-        Block handBlock = VoxelGameAPI.instance.getBlockByID(VoxelGameClient.getInstance().getPlayer().getItemInHand());
+        Block handBlock = RadixAPI.instance.getBlockByID(RadixClient.getInstance().getPlayer().getItemInHand());
         handBlock.getRenderer().render2d(guiBatch, handBlock.getTextureIndex(), 0, 0, 50);
 
         // Draw crosshair (after guiBatcher render because it needs to render with its own blending mode
@@ -42,7 +42,7 @@ public class IngameHUD implements GuiScreen {
         float halfCrosshairSize = crosshairSize / 2f;
         this.drawTexture(guiBatch, 0, MathUtils.round(centerX - halfCrosshairSize), MathUtils.round(centerY + halfCrosshairSize), crosshairSize, crosshairSize);
 
-        VoxelGameClient.getInstance().getChatGUI().renderHud(guiBatch);
+        RadixClient.getInstance().getChatGUI().renderHud(guiBatch);
     }
 
     @Override

@@ -3,21 +3,19 @@ package sx.lambda.voxel.net.mc.client.handlers;
 import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.data.game.Chunk;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiChunkDataPacket;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.biome.Biome;
-import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.FlatBlockStorage;
-import sx.lambda.voxel.world.chunk.IChunk;
 
 public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkDataPacket> {
 
-    private final VoxelGameClient game;
+    private final RadixClient game;
 
-    public MultiChunkDataHandler(VoxelGameClient game) {
+    public MultiChunkDataHandler(RadixClient game) {
         this.game = game;
     }
 
@@ -28,11 +26,11 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
             int cz = packet.getZ(column)*16;
             int biomeID = packet.getBiomeData(column)[0];
 
-            Biome biome = VoxelGameAPI.instance.getBiomeByID(biomeID);
+            Biome biome = RadixAPI.instance.getBiomeByID(biomeID);
             if(biome == null)
-                biome = VoxelGameAPI.instance.getBiomeByID(biomeID-128);
+                biome = RadixAPI.instance.getBiomeByID(biomeID-128);
             if(biome == null)
-                biome = VoxelGameAPI.instance.getBiomeByID(0);
+                biome = RadixAPI.instance.getBiomeByID(0);
 
             sx.lambda.voxel.world.chunk.Chunk ck = (sx.lambda.voxel.world.chunk.Chunk)game.getWorld().getChunk(cx, cz);
             boolean hadChunk = ck != null;
@@ -61,7 +59,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
                         continue;
                     int id = data >> 4;
                     boolean exists = false;
-                    for(Block blk : VoxelGameAPI.instance.getBlocksSorted()) {
+                    for(Block blk : RadixAPI.instance.getBlocksSorted()) {
                         if(blk == null)
                             continue;
                         if(blk.getID() == id)

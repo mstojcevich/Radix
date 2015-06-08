@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import sx.lambda.voxel.VoxelGameClient;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.RadixClient;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.tasks.MovementHandler;
 import sx.lambda.voxel.world.IWorld;
@@ -67,10 +67,10 @@ public abstract class LivingEntity extends Entity implements Serializable {
                 int x = MathUtils.floor(getPosition().getX());
                 int y = MathUtils.floor(getPosition().getY());
                 int z = MathUtils.floor(getPosition().getZ());
-                int cx = x & (VoxelGameClient.getInstance().getWorld().getChunkSize() - 1);
-                int cz = z & (VoxelGameClient.getInstance().getWorld().getChunkSize() - 1);
+                int cx = x & (RadixClient.getInstance().getWorld().getChunkSize() - 1);
+                int cz = z & (RadixClient.getInstance().getWorld().getChunkSize() - 1);
 
-                IChunk chunk = VoxelGameClient.getInstance().getWorld().getChunk(x, z);
+                IChunk chunk = RadixClient.getInstance().getWorld().getChunk(x, z);
                 if (chunk != null) {
                     // go directly to ground
                     for (int downY = y; downY > y + deltaY; downY--) {
@@ -111,7 +111,7 @@ public abstract class LivingEntity extends Entity implements Serializable {
             int cz = z & (world.getChunkSize() - 1);
             try {
                 int id = chunk.getBlockId(cx, y, cz);
-                Block block = VoxelGameAPI.instance.getBlockByID(id);
+                Block block = RadixAPI.instance.getBlockByID(id);
                 if (block == null) return 0;
                 BoundingBox blockBox = block.calculateBoundingBox(chunk, cx, y, cz);
                 float halfWidth = width / 2f;

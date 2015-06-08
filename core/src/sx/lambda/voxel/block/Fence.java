@@ -3,7 +3,6 @@ package sx.lambda.voxel.block;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import sx.lambda.voxel.api.BuiltInBlockIds;
-import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 

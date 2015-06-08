@@ -9,15 +9,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class VoxelGameGdxInputHandler implements InputProcessor {
+public class RadixInputHandler implements InputProcessor {
 
     private static final float mouseSensitivity = 0.03f;
-    private final VoxelGameClient game;
+    private final RadixClient game;
     private final List<Keybind> keybindList = Collections.synchronizedList(new ArrayList<Keybind>());
     private int lastMouseX = -Integer.MAX_VALUE;
     private int lastMouseY = -Integer.MAX_VALUE;
 
-    public VoxelGameGdxInputHandler(final VoxelGameClient game) {
+    public RadixInputHandler(final RadixClient game) {
         this.game = game;
 
         // Register the default keybinds
@@ -85,7 +85,7 @@ public class VoxelGameGdxInputHandler implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
-        VoxelGameClient.getInstance().getCurrentScreen().keyTyped(character);
+        RadixClient.getInstance().getCurrentScreen().keyTyped(character);
         return false;
     }
 

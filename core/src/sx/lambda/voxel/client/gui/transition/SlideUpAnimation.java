@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.client.gui.GuiScreen;
 
 import static com.badlogic.gdx.graphics.GL20.*;
@@ -40,7 +40,7 @@ public class SlideUpAnimation extends TimedTransitionAnimation {
         Gdx.gl.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Gdx.gl.glEnable(GL_BLEND);
         SpriteBatch batch = new SpriteBatch();
-        batch.setProjectionMatrix(VoxelGameClient.getInstance().getHudCamera().combined);
+        batch.setProjectionMatrix(RadixClient.getInstance().getHudCamera().combined);
         fbo.bind();
         batch.begin();
         currentScreen.render(false, batch);

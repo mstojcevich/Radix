@@ -2,23 +2,23 @@ package sx.lambda.voxel.api;
 
 import pw.oxcafebabe.marcusant.eventbus.EventManager;
 import pw.oxcafebabe.marcusant.eventbus.managers.iridium.IridiumEventManager;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.block.*;
 import sx.lambda.voxel.world.biome.Biome;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VoxelGameAPI {
+public class RadixAPI {
 
-    public static final VoxelGameAPI instance = new VoxelGameAPI();
+    public static final RadixAPI instance = new RadixAPI();
     private final EventManager eventManager;
     private final List<Block> registeredBlocks = new ArrayList<>();
     private final Block[] registeredBlockArray = new Block[1024];
     private final Biome[] registeredBiomeArray = new Biome[256];
     private int highestID = 0;
 
-    private VoxelGameAPI() {
+    private RadixAPI() {
         this.eventManager = new IridiumEventManager();
     }
 
@@ -33,7 +33,7 @@ public class VoxelGameAPI {
      * @return Whether the current game is a client
      */
     public boolean isClient() {
-        return VoxelGameClient.getInstance() != null;
+        return RadixClient.getInstance() != null;
     }
 
     /**

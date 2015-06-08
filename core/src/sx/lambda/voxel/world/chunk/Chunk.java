@@ -11,8 +11,8 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
-import sx.lambda.voxel.VoxelGameClient;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.RadixClient;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.api.events.render.EventChunkRender;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.NormalBlockRenderer;
@@ -74,8 +74,8 @@ public class Chunk implements IChunk {
             lightLevelMap[i] = (float) Math.pow(0.8, reduction);
         }
 
-        if (VoxelGameClient.getInstance() != null) {// We're a client
-            mesher = new GreedyMesher(this, VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().perCornerLightEnabled());
+        if (RadixClient.getInstance() != null) {// We're a client
+            mesher = new GreedyMesher(this, RadixClient.getInstance().getSettingsManager().getVisualSettings().perCornerLightEnabled());
         } else {
             mesher = null;
         }
@@ -301,11 +301,11 @@ public class Chunk implements IChunk {
             storage = blockStorage[storageIndex] = new FlatBlockStorage(size, 16, size);
 
         int oldBlock = storage.getId(x, sy, z);
-        Block blk = VoxelGameAPI.instance.getBlockByID(block);
+        Block blk = RadixAPI.instance.getBlockByID(block);
         int newBlocklightVal = blk.getLightValue();
         storage.setBlocklight(x, sy, z, newBlocklightVal);
         if(oldBlock > 0) {
-            Block oldBlk = VoxelGameAPI.instance.getBlockByID(oldBlock);
+            Block oldBlk = RadixAPI.instance.getBlockByID(oldBlock);
             int oldBlocklightVal = oldBlk.getLightValue();
             if(newBlocklightVal > oldBlocklightVal) {
                 parentWorld.addToBlocklightQueue(startPosition.x + x, startPosition.y + y, startPosition.z + z);
@@ -396,7 +396,7 @@ public class Chunk implements IChunk {
                 public Renderable getRenderable(final Renderable out, final Node node,
                                                 final NodePart nodePart) {
                     super.getRenderable(out, node, nodePart);
-                    if(VoxelGameClient.getInstance().isWireframe()) {
+                    if(RadixClient.getInstance().isWireframe()) {
                         out.primitiveType = GL20.GL_LINES;
                     } else {
                         out.primitiveType = GL20.GL_TRIANGLES;
@@ -425,7 +425,7 @@ public class Chunk implements IChunk {
                 public Renderable getRenderable(final Renderable out, final Node node,
                                                 final NodePart nodePart) {
                     super.getRenderable(out, node, nodePart);
-                    if(VoxelGameClient.getInstance().isWireframe()) {
+                    if(RadixClient.getInstance().isWireframe()) {
                         out.primitiveType = GL20.GL_LINES;
                     } else {
                         out.primitiveType = GL20.GL_TRIANGLES;
@@ -443,7 +443,7 @@ public class Chunk implements IChunk {
         translucentFaces = mesher.getFaces(Block::isTranslucent);
         meshing = false;
         meshed = true;
-        VoxelGameAPI.instance.getEventManager().push(new EventChunkRender(Chunk.this));
+        RadixAPI.instance.getEventManager().push(new EventChunkRender(Chunk.this));
     }
 
     @Override

@@ -8,8 +8,8 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
-import sx.lambda.voxel.VoxelGameClient;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.RadixClient;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.api.events.render.EventEntityRender;
 import sx.lambda.voxel.api.events.render.EventPostWorldRender;
 import sx.lambda.voxel.entity.Entity;
@@ -23,7 +23,7 @@ import static com.badlogic.gdx.graphics.GL20.*;
 
 public class GameRenderer implements Renderer {
 
-    private final VoxelGameClient game;
+    private final RadixClient game;
     private BitmapFont debugTextRenderer;
     private boolean initted = false;
     private boolean calcFrustum;
@@ -37,7 +37,7 @@ public class GameRenderer implements Renderer {
     private BitmapFontCache awrtRender;
     private BitmapFontCache lightlevelRender;
     private BitmapFontCache activeThreadsRender;
-    public GameRenderer(VoxelGameClient game) {
+    public GameRenderer(RadixClient game) {
         this.game = game;
     }
 
@@ -48,7 +48,7 @@ public class GameRenderer implements Renderer {
 
         prepareWorldRender();
         game.getWorld().render();
-        VoxelGameAPI.instance.getEventManager().push(new EventPostWorldRender());
+        RadixAPI.instance.getEventManager().push(new EventPostWorldRender());
         drawBlockSelection();
         renderEntities();
     }
@@ -118,7 +118,7 @@ public class GameRenderer implements Renderer {
         for (Entity e : game.getWorld().getLoadedEntities()) {
             if (e != null && !e.equals(game.getPlayer())) {
                 e.render();
-                VoxelGameAPI.instance.getEventManager().push(new EventEntityRender(e));
+                RadixAPI.instance.getEventManager().push(new EventEntityRender(e));
             }
         }
     }
@@ -144,7 +144,7 @@ public class GameRenderer implements Renderer {
         currentHeight += debugTextRenderer.getLineHeight();
 
         String fpsStr = "FPS: " + String.valueOf(Gdx.graphics.getFramesPerSecond());
-        if (VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().nonContinuous()) {
+        if (RadixClient.getInstance().getSettingsManager().getVisualSettings().nonContinuous()) {
             fpsStr = fpsStr.concat(" (NON-CONTINUOUS! INACCURATE!)");
             fpsRender.setColor(Color.RED);
         }

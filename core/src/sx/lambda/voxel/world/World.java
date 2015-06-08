@@ -16,8 +16,8 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.IntMap;
 import io.netty.util.internal.ConcurrentSet;
-import sx.lambda.voxel.VoxelGameClient;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.RadixClient;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.api.events.worldgen.EventFinishChunkGen;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.block.Side;
@@ -148,21 +148,21 @@ public class World implements IWorld {
 
         processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
         for (IChunk c : chunksToRerender) {
-            if(VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                    VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
+            if(RadixClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                    RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
                 c.rerender();
                 chunksToRerender.remove(c);
             }
         }
 
         final IChunk playerChunk = getChunk(
-                MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getX()),
-                MathUtils.floor(VoxelGameClient.getInstance().getPlayer().getPosition().getZ()));
+                MathUtils.floor(RadixClient.getInstance().getPlayer().getPosition().getX()),
+                MathUtils.floor(RadixClient.getInstance().getPlayer().getPosition().getZ()));
         if(playerChunk != null && (playerChunk != lastPlayerChunk || (sortedChunkList != null && chunkList.size() != sortedChunkList.size()))) {
             sortedChunkList = new ArrayList<>();
             for(IChunk c : chunkList) {
-                if (VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                        VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
+                if (RadixClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                        RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
                     sortedChunkList.add(c);
                 }
             }
@@ -181,14 +181,14 @@ public class World implements IWorld {
             lastPlayerChunk = playerChunk;
         }
 
-        float playerX = VoxelGameClient.getInstance().getPlayer().getPosition().getX(),
-                playerY = VoxelGameClient.getInstance().getPlayer().getPosition().getY(),
-                playerZ = VoxelGameClient.getInstance().getPlayer().getPosition().getZ();
-        boolean wireframe = VoxelGameClient.getInstance().isWireframe();
+        float playerX = RadixClient.getInstance().getPlayer().getPosition().getX(),
+                playerY = RadixClient.getInstance().getPlayer().getPosition().getY(),
+                playerZ = RadixClient.getInstance().getPlayer().getPosition().getZ();
+        boolean wireframe = RadixClient.getInstance().isWireframe();
         if(wireframe) {
-            VoxelGameClient.getInstance().setWireframe(false);
+            RadixClient.getInstance().setWireframe(false);
         }
-        modelBatch.begin(VoxelGameClient.getInstance().getCamera());
+        modelBatch.begin(RadixClient.getInstance().getCamera());
         skybox.transform.translate(playerX, playerY, playerZ);
         modelBatch.render(skybox);
         skybox.transform.translate(-playerX, -playerY, -playerZ);
@@ -202,7 +202,7 @@ public class World implements IWorld {
                 int midX = x + halfWidth;
                 int midZ = z + halfWidth;
                 int midY = c.getHighestPoint()/2;
-                boolean visible = VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
+                boolean visible = RadixClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
                 if(visible) {
                     visibleChunks[chunkNum] = true;
                     c.render(modelBatch);
@@ -221,9 +221,9 @@ public class World implements IWorld {
         }
         modelBatch.end();
         if(wireframe && sortedChunkList != null) {
-            VoxelGameClient.getInstance().setWireframe(true);
+            RadixClient.getInstance().setWireframe(true);
             Gdx.gl.glLineWidth(2);
-            wiremeshBatch.begin(VoxelGameClient.getInstance().getCamera());
+            wiremeshBatch.begin(RadixClient.getInstance().getCamera());
             for (IChunk c : sortedChunkList) {
                 int x = c.getStartPosition().x;
                 int z = c.getStartPosition().z;
@@ -231,7 +231,7 @@ public class World implements IWorld {
                 int midX = x + halfWidth;
                 int midZ = z + halfWidth;
                 int midY = c.getHighestPoint()/2;
-                boolean visible = VoxelGameClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
+                boolean visible = RadixClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
                 if(visible) {
                     c.render(wiremeshBatch);
                 }
@@ -345,8 +345,8 @@ public class World implements IWorld {
     private IChunk loadChunk(int startX, int startZ) {
         IChunk foundChunk = getChunk(startX, startZ);
         if (foundChunk == null && !remote) {
-            final IChunk c = new Chunk(this, new Vec3i(startX, 0, startZ), VoxelGameAPI.instance.getBiomeByID(0), true);
-            VoxelGameAPI.instance.getEventManager().push(new EventFinishChunkGen(c));
+            final IChunk c = new Chunk(this, new Vec3i(startX, 0, startZ), RadixAPI.instance.getBiomeByID(0), true);
+            RadixAPI.instance.getEventManager().push(new EventFinishChunkGen(c));
             addChunk(c, startX, startZ);
             return c;
         } else {
@@ -396,9 +396,9 @@ public class World implements IWorld {
     public void processLightQueue() {
         // If the chunk is not lighted and it is in range, setup lighting then set as lighted
         chunkList.stream().filter(c -> !c.hasInitialSun())
-                .filter(c -> VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(
+                .filter(c -> RadixClient.getInstance().getPlayer().getPosition().planeDistance(
                         c.getStartPosition().x, c.getStartPosition().z)
-                        <= VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE)
+                        <= RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE)
                 .forEach(c -> {
             setupLighting(c);
             c.finishAddingSun();
@@ -526,8 +526,8 @@ public class World implements IWorld {
     @Override
     public void rerenderChunks() {
         // If the chunk is in range, rerender it
-        chunkList.stream().filter(c -> VoxelGameClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE).forEach(this::rerenderChunk);
+        chunkList.stream().filter(c -> RadixClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE).forEach(this::rerenderChunk);
     }
 
     @Override
@@ -628,7 +628,7 @@ public class World implements IWorld {
                     for (int cy = 0; cy < getHeight(); cy++) {
                         int id = c.getBlockId(x, cy, z);
                         if (id > 0) {
-                            Block blk = VoxelGameAPI.instance.getBlockByID(id);
+                            Block blk = RadixAPI.instance.getBlockByID(id);
                             if (blk.getLightValue() > 0) {
                                 c.setBlocklight(x, cy, z, blk.getLightValue());
                                 addToBlocklightQueue(c.getStartPosition().x + x, c.getStartPosition().y + cy, c.getStartPosition().z + z);
@@ -651,7 +651,7 @@ public class World implements IWorld {
     private void processChunkUploadQueue() {
         while(!chunkUploadQueue.isEmpty()) {
             chunkUploadQueue.poll().run();
-            if(VoxelGameClient.getInstance().getSettingsManager().getVisualSettings().smoothChunkload())
+            if(RadixClient.getInstance().getSettingsManager().getVisualSettings().smoothChunkload())
                 break; // distribute chunk uploads across frames (one chunkload per frame)
         }
     }

@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Rectangle;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.client.gui.GuiScreen;
 
 public class MainMenu implements GuiScreen {
@@ -35,18 +35,18 @@ public class MainMenu implements GuiScreen {
                 new MainMenuButton("Multiplayer (Local)", this::enterMPLocal, TARGET_BUTTON_SIZE),
                 new MainMenuButton("Multiplayer (Lambda)", this::enterMPLambda, TARGET_BUTTON_SIZE),
                 new MainMenuButton("Settings", () -> System.out.println("Settings pressed!"), TARGET_BUTTON_SIZE),
-                new MainMenuButton("Quit Game", () -> VoxelGameClient.getInstance().startShutdown(), TARGET_BUTTON_SIZE),
+                new MainMenuButton("Quit Game", () -> RadixClient.getInstance().startShutdown(), TARGET_BUTTON_SIZE),
         };
     }
 
     private void enterMPLocal() {
         System.out.println("Entering local mp");
-        VoxelGameClient.getInstance().enterRemoteWorld("127.0.0.1", (short) 25565);
+        RadixClient.getInstance().enterRemoteWorld("127.0.0.1", (short) 25565);
     }
 
     private void enterMPLambda() {
         System.out.println("Entering lambda mp");
-        VoxelGameClient.getInstance().enterRemoteWorld("mc.stoj.pw", (short) 31173);
+        RadixClient.getInstance().enterRemoteWorld("mc.stoj.pw", (short) 31173);
     }
 
     private void resize() {
@@ -74,7 +74,7 @@ public class MainMenu implements GuiScreen {
         if (!initialized) {
             camera = new OrthographicCamera();
             batch = new SpriteBatch();
-            batch.setTransformMatrix(VoxelGameClient.getInstance().getHudCamera().combined);
+            batch.setTransformMatrix(RadixClient.getInstance().getHudCamera().combined);
             batch.setTransformMatrix(camera.combined);
             mmButtonTexture = new Texture(Gdx.files.internal("textures/gui/mmBtn.png"));
 

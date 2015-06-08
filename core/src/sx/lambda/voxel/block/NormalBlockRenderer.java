@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder.VertexInfo;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.client.render.meshing.PerCornerLightData;
 import sx.lambda.voxel.render.NotInitializedException;
 
@@ -187,7 +187,7 @@ public class NormalBlockRenderer implements IBlockRenderer {
 
     private static void initialize() {
         try {
-            blockMap = VoxelGameClient.getInstance().getBlockTextureAtlas();
+            blockMap = RadixClient.getInstance().getBlockTextureAtlas();
         } catch (NotInitializedException e) {
             System.err.println("Error getting block texture atlas!");
             e.printStackTrace();

@@ -1,7 +1,7 @@
 package sx.lambda.voxel.world.chunk;
 
 import org.spacehq.mc.protocol.data.game.NibbleArray3d;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
 
 /**
@@ -82,7 +82,7 @@ public class FlatBlockStorage implements BlockStorage {
 
     @Override
     public Block getBlock(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return VoxelGameAPI.instance.getBlockByID(getId(x, y, z));
+        return RadixAPI.instance.getBlockByID(getId(x, y, z));
     }
 
     @Override

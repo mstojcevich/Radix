@@ -4,8 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.math.MathUtils;
+import org.spacehq.mc.protocol.data.game.values.entity.player.GameMode;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.entity.EntityRotation;
@@ -24,11 +25,12 @@ public class Player extends LivingEntity implements Serializable {
     private static Model playerModel;
     private transient boolean moved = false;
     private int itemInHand = BuiltInBlockIds.STONE_ID;
+    private GameMode gameMode = GameMode.CREATIVE;
 
     public Player() {
         this(new EntityPosition(0, 0, 0), new EntityRotation());
 
-        if (playerModel == null && VoxelGameClient.getInstance() != null) {
+        if (playerModel == null && RadixClient.getInstance() != null) {
             playerModel = new ObjLoader().loadModel(Gdx.files.internal("entity/player.obj"));
         }
 
@@ -58,8 +60,8 @@ public class Player extends LivingEntity implements Serializable {
     public void onUpdate() {
         super.onUpdate();
         if (moved) {
-            if (VoxelGameClient.getInstance().getMinecraftConn() != null) {
-                VoxelGameClient.getInstance().getMinecraftConn().getClient().getSession().send(new ClientPlayerPositionRotationPacket(this.isOnGround(), this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), (float) 180 - this.getRotation().getYaw(), -this.getRotation().getPitch()));
+            if (RadixClient.getInstance().getMinecraftConn() != null) {
+                RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(new ClientPlayerPositionRotationPacket(this.isOnGround(), this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), (float) 180 - this.getRotation().getYaw(), -this.getRotation().getPitch()));
             }
             moved = false;
         }
@@ -94,6 +96,14 @@ public class Player extends LivingEntity implements Serializable {
         } else {
             return 0;
         }
+    }
+
+    public void setGameMode(GameMode gameMode) {
+        this.gameMode = gameMode;
+    }
+
+    public GameMode getGameMode() {
+        return this.gameMode;
     }
 
 }

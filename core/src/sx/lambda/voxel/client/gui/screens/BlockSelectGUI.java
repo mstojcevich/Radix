@@ -10,8 +10,8 @@ import com.badlogic.gdx.math.Vector2;
 import org.spacehq.mc.protocol.data.game.ItemStack;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientChangeHeldItemPacket;
 import org.spacehq.mc.protocol.packet.ingame.client.window.ClientCreativeInventoryActionPacket;
-import sx.lambda.voxel.VoxelGameClient;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.RadixClient;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.client.gui.GuiScreen;
 
@@ -59,7 +59,7 @@ public class BlockSelectGUI implements GuiScreen {
 
         // Looped twice to avoid texture rebinds
         int currentBlockNum = 0;
-        for (Block b : VoxelGameAPI.instance.getBlocksSorted()) {
+        for (Block b : RadixAPI.instance.getBlocksSorted()) {
             if (b == null) continue;
             int yIndex = currentBlockNum / widthCount;
             int xIndex = currentBlockNum % widthCount;
@@ -70,7 +70,7 @@ public class BlockSelectGUI implements GuiScreen {
         }
 
         currentBlockNum = 0;
-        for (Block b : VoxelGameAPI.instance.getBlocksSorted()) {
+        for (Block b : RadixAPI.instance.getBlocksSorted()) {
             if (b == null) continue;
             int yIndex = currentBlockNum / widthCount;
             int xIndex = currentBlockNum % widthCount;
@@ -119,13 +119,13 @@ public class BlockSelectGUI implements GuiScreen {
 
         Integer id = getBlockID(mouseX, mouseY);
         if (id != null) {
-            VoxelGameClient.getInstance().getPlayer().setItemInHand(id);
+            RadixClient.getInstance().getPlayer().setItemInHand(id);
 
-            if(VoxelGameClient.getInstance().getMinecraftConn() != null) {
-                VoxelGameClient.getInstance().getMinecraftConn().getClient().getSession().send(
+            if(RadixClient.getInstance().getMinecraftConn() != null) {
+                RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(
                         new ClientCreativeInventoryActionPacket(36 /* Bottom left of hot bar */, new ItemStack(id, 1))
                 );
-                VoxelGameClient.getInstance().getMinecraftConn().getClient().getSession().send(
+                RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(
                         new ClientChangeHeldItemPacket(0)
                 );
             }

@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.entity.LivingEntity;
@@ -19,7 +19,7 @@ public class MovementHandler implements RepeatedTask {
     // In meters per milliseconds
     private static final float WALK_SPEED = 0.0032f;
 
-    public MovementHandler(VoxelGameClient game) {
+    public MovementHandler(RadixClient game) {
         this.game = game;
     }
 
@@ -183,7 +183,7 @@ public class MovementHandler implements RepeatedTask {
     }
 
     public boolean checkCollision(Vector3 pos) {
-        if (pos.y >= VoxelGameClient.getInstance().getWorld().getHeight() || pos.y < 0)
+        if (pos.y >= RadixClient.getInstance().getWorld().getHeight() || pos.y < 0)
             return false;
 
         int x = MathUtils.floor(pos.x);
@@ -221,5 +221,5 @@ public class MovementHandler implements RepeatedTask {
         return new Vector3[]{bb.getCorner000(new Vector3()), bb.getCorner001(new Vector3()), bb.getCorner010(new Vector3()), bb.getCorner011(new Vector3()), bb.getCorner100(new Vector3()), bb.getCorner101(new Vector3()), bb.getCorner110(new Vector3()), bb.getCorner111(new Vector3())};
     }
 
-    private final VoxelGameClient game;
+    private final RadixClient game;
 }

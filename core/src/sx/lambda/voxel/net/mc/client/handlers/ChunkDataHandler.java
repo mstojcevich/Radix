@@ -3,39 +3,37 @@ package sx.lambda.voxel.net.mc.client.handlers;
 import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.data.game.Chunk;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.biome.Biome;
-import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.FlatBlockStorage;
-import sx.lambda.voxel.world.chunk.IChunk;
 
 public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
 
-    private final VoxelGameClient game;
+    private final RadixClient game;
 
-    public ChunkDataHandler(VoxelGameClient game) {
+    public ChunkDataHandler(RadixClient game) {
         this.game = game;
     }
 
     @Override
     public void handle(ServerChunkDataPacket scdp) {
         if(scdp.getChunks().length == 0) {
-            VoxelGameClient.getInstance().getWorld().rmChunk(VoxelGameClient.getInstance().getWorld().getChunk(scdp.getX(), scdp.getZ()));
+            RadixClient.getInstance().getWorld().rmChunk(RadixClient.getInstance().getWorld().getChunk(scdp.getX(), scdp.getZ()));
         }
 
         int biomeID = 0;
         if(scdp.getBiomeData() != null) {
             biomeID = scdp.getBiomeData()[0];
         }
-        Biome biome = VoxelGameAPI.instance.getBiomeByID(biomeID);
+        Biome biome = RadixAPI.instance.getBiomeByID(biomeID);
         if(biome == null)
-            biome = VoxelGameAPI.instance.getBiomeByID(biomeID-128);
+            biome = RadixAPI.instance.getBiomeByID(biomeID-128);
         if(biome == null)
-            biome = VoxelGameAPI.instance.getBiomeByID(0);
+            biome = RadixAPI.instance.getBiomeByID(0);
 
         int cx = scdp.getX()*16;
         int cz = scdp.getZ()*16;
@@ -66,7 +64,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                     continue;
                 int id = data >> 4;
                 boolean exists = false;
-                for(Block blk : VoxelGameAPI.instance.getBlocksSorted()) {
+                for(Block blk : RadixAPI.instance.getBlocksSorted()) {
                     if(blk == null)
                         continue;
                     if(blk.getID() == id)

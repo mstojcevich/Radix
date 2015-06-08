@@ -3,18 +3,18 @@ package sx.lambda.voxel.net.mc.client.handlers;
 import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.data.game.values.world.block.BlockChangeRecord;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiBlockChangePacket;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
-import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockChangePacket> {
 
-    private final VoxelGameClient game;
+    private final RadixClient game;
 
-    public MultiBlockChangeHandler(VoxelGameClient game) {
+    public MultiBlockChangeHandler(RadixClient game) {
         this.game = game;
     }
 
@@ -33,7 +33,7 @@ public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockCh
             if(chunk != null) {
                 if (id > 0) {
                     boolean blockExists = false;
-                    for(Block b : VoxelGameAPI.instance.getBlocks()) {
+                    for(Block b : RadixAPI.instance.getBlocks()) {
                         if(b.getID() == id) {
                             blockExists = true;
                             break;

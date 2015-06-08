@@ -1,16 +1,16 @@
 package sx.lambda.voxel.tasks;
 
 import com.badlogic.gdx.math.MathUtils;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class WorldLoader implements RepeatedTask {
 
-    private final VoxelGameClient game;
+    private final RadixClient game;
     private IChunk currentChunk;
 
-    public WorldLoader(VoxelGameClient game) {
+    public WorldLoader(RadixClient game) {
         this.game = game;
     }
 
@@ -36,7 +36,7 @@ public class WorldLoader implements RepeatedTask {
             }
 
         } catch (Exception e) {
-            VoxelGameClient.getInstance().handleCriticalException(e);
+            RadixClient.getInstance().handleCriticalException(e);
         }
     }
 

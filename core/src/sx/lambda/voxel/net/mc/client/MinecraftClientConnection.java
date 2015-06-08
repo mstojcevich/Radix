@@ -1,12 +1,8 @@
 package sx.lambda.voxel.net.mc.client;
 
 import org.spacehq.mc.protocol.MinecraftProtocol;
-import org.spacehq.mc.protocol.data.game.values.setting.ChatVisibility;
-import org.spacehq.mc.protocol.data.game.values.setting.SkinPart;
 import org.spacehq.mc.protocol.data.message.Message;
 import org.spacehq.mc.protocol.data.message.TranslationMessage;
-import org.spacehq.mc.protocol.packet.ingame.client.ClientChatPacket;
-import org.spacehq.mc.protocol.packet.ingame.client.ClientSettingsPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.ServerChatPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.ServerEntityMovementPacket;
@@ -22,7 +18,7 @@ import org.spacehq.packetlib.event.session.PacketReceivedEvent;
 import org.spacehq.packetlib.event.session.SessionAdapter;
 import org.spacehq.packetlib.packet.Packet;
 import org.spacehq.packetlib.tcp.TcpSessionFactory;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.net.mc.client.handlers.*;
 
 import java.util.Arrays;
@@ -31,13 +27,13 @@ import java.util.Map;
 
 public class MinecraftClientConnection {
 
-    private final VoxelGameClient game;
+    private final RadixClient game;
     private final Client client;
     private final ChatHandler chatHandler;
 
     private final Map<Class<? extends Packet>, PacketHandler> handlerMap = new HashMap<>();
 
-    public MinecraftClientConnection(final VoxelGameClient game, String hostname, short port) {
+    public MinecraftClientConnection(final RadixClient game, String hostname, short port) {
         this.game = game;
         MinecraftProtocol protocol = new MinecraftProtocol("voxeltest-dev");
         this.client = new Client(hostname, port, protocol, new TcpSessionFactory());

@@ -5,7 +5,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.files.FileHandle;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import sx.lambda.voxel.VoxelGameClient;
+import sx.lambda.voxel.RadixClient;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
@@ -25,7 +25,7 @@ public class DesktopLauncher {
             }
         }
 
-		new LwjglApplication(new VoxelGameClient(), config);
+		new LwjglApplication(new RadixClient(), config);
 	}
 
     private static LwjglApplicationConfiguration createDefaultConfig() {

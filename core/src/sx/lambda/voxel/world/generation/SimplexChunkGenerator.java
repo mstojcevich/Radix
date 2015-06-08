@@ -1,10 +1,8 @@
 package sx.lambda.voxel.world.generation;
 
 import sx.lambda.voxel.api.BuiltInBlockIds;
-import sx.lambda.voxel.api.VoxelGameAPI;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
-import sx.lambda.voxel.world.chunk.BlockStorage;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 

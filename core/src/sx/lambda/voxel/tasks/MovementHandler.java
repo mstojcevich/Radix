@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
-import groovy.transform.CompileStatic;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.block.Block;
@@ -15,7 +14,6 @@ import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
-@CompileStatic
 public class MovementHandler implements RepeatedTask {
 
     // In meters per milliseconds

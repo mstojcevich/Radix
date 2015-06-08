@@ -159,7 +159,7 @@ public class FlatBlockStorage implements BlockStorage {
         if(x < 0 || x > width || y < 0 || y > height || z < 0 || z > depth)
             throw new CoordinatesOutOfBoundsException();
 
-        return y << 8 | z << 4 | x;
+        return x + z*width + y*width*depth;
     }
 
 }

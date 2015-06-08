@@ -6,9 +6,11 @@ import org.spacehq.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import sx.lambda.voxel.VoxelGameClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.VoxelGameAPI;
+import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.biome.Biome;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
+import sx.lambda.voxel.world.chunk.FlatBlockStorage;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
@@ -37,58 +39,54 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
 
         int cx = scdp.getX()*16;
         int cz = scdp.getZ()*16;
-        IChunk ck = game.getWorld().getChunk(cx, cz);
+        sx.lambda.voxel.world.chunk.Chunk ck = (sx.lambda.voxel.world.chunk.Chunk)game.getWorld().getChunk(cx, cz);
         boolean hadChunk = ck != null;
         if(!hadChunk) {
             ck = new sx.lambda.voxel.world.chunk.Chunk(game.getWorld(), new Vec3i(cx, 0, cz), biome, false);
         }
-        int cy = 0;
-        for (Chunk c : scdp.getChunks()) {
-            if (c == null) {
-                if(!hadChunk) {
-                    for (int x = 0; x < 16; x++) {
-                        for (int z = 0; z < 16; z++) {
-                            for (int y = 0; y < 16; y++) {
-                                try {
-                                    ck.setSunlight(x, cy + y, z, 15);
-                                } catch (CoordinatesOutOfBoundsException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-                }
-                cy += 16;
+        FlatBlockStorage[] blockStorages = ck.getBlockStorage();
+
+        int yIndex = 0;
+        int highestPoint = 0;
+        for(Chunk c : scdp.getChunks()) {
+            if(c == null) {
+                yIndex++;
                 continue;
             }
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    for (int y = 0; y < 16; y++) {
-                        int id = c.getBlocks().getBlock(x, y, z);
-                        short meta = (short)c.getBlocks().getData(x, y, z);
-                        byte blocklight = (byte) c.getBlockLight().get(x, y, z);
-                        byte skylight = (byte) c.getSkyLight().get(x, y, z);
-                        boolean blockExists = false;
-                        if(id <= 0 || VoxelGameAPI.instance.getBlockByID(id) != null) {
-                            blockExists = true;
-                        }
-                        if(!blockExists)id = BuiltInBlockIds.UNKNOWN_ID;
-                        try {
-                            if (id > 0)
-                                ck.setBlock(id, x, cy + y, z, false);
-                            if (meta > 0)
-                                ck.setMeta(meta, x, cy + y, z);
-                            ck.setBlocklight(x, cy+y, z, blocklight);
-                            ck.setSunlight(x, cy+y, z, skylight);
-                            ck.finishAddingSun();
-                        } catch (CoordinatesOutOfBoundsException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
+
+            FlatBlockStorage storage = blockStorages[yIndex];
+            if(storage == null) {
+                storage = blockStorages[yIndex] = new FlatBlockStorage(16, 16, 16);
+            }
+
+            short[] blockData = c.getBlocks().getData();
+            for(int i = 0; i < blockData.length; i++) {
+                int data = blockData[i];
+                if(data == 0)
+                    continue;
+                int id = data >> 4;
+                boolean exists = false;
+                for(Block blk : VoxelGameAPI.instance.getBlocksSorted()) {
+                    if(blk == null)
+                        continue;
+                    if(blk.getID() == id)
+                        exists = true;
+                }
+                if(!exists) {
+                    blockData[i] = BuiltInBlockIds.UNKNOWN_ID << 4;
                 }
             }
-            cy += 16;
+
+            storage.setBlocks(blockData);
+            storage.setSunlight(c.getSkyLight());
+            storage.setBlocklight(c.getBlockLight());
+
+            yIndex++;
+            highestPoint = yIndex*16;
         }
+        ck.setHighestPoint(Math.max(ck.getHighestPoint(), highestPoint));
+        ck.finishAddingSun();
+
         if(!hadChunk) {
             game.getWorld().addChunk(ck);
         }

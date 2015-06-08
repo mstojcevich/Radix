@@ -609,6 +609,10 @@ public class Chunk implements IChunk {
         return hash;
     }
 
+    public void setHighestPoint(int y) {
+        this.highestPoint = y;
+    }
+
     /**
      * Get the underlying block storage.
      *

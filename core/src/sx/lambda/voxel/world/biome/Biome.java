@@ -50,20 +50,20 @@ public class Biome {
         return getColor(elevation, foliageCorners);
     }
 
+    private static final float getColTmp[] = new float[3];
     private int[] getColor(int elevation, int[][] corners) {
         float adjTemp = MathUtils.clamp(temperature - elevation*0.00166667f, 0, 1);
         float adjRainfall = MathUtils.clamp(rainfall, 0, 1) * adjTemp;
 
-        float lambda[] = new float[3];
-        lambda[0] = adjTemp - adjRainfall;
-        lambda[1] = 1 - temperature;
-        lambda[2] = rainfall;
+        getColTmp[0] = adjTemp - adjRainfall;
+        getColTmp[1] = 1 - temperature;
+        getColTmp[2] = rainfall;
 
         float red = 0, green = 0, blue = 0;
         for(int i = 0; i < 3; i++) {
-            red += lambda[i] * corners[i][0/*red*/];
-            green += lambda[i] * corners[i][1/*green*/];
-            blue += lambda[i] * corners[i][2/*blue*/];
+            red += getColTmp[i] * corners[i][0/*red*/];
+            green += getColTmp[i] * corners[i][1/*green*/];
+            blue += getColTmp[i] * corners[i][2/*blue*/];
         }
 
         return new int[]{

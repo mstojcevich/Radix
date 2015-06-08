@@ -381,50 +381,61 @@ public class Chunk implements IChunk {
     }
 
     private void updateModelInstances() {
-        if(opaqueModel != null)
-            opaqueModel.dispose();
-        if(translucentModel != null)
-            translucentModel.dispose();
+        if(opaqueFaces != null) {
+            if(opaqueModel != null)
+                opaqueModel.dispose();
 
-        Mesh opaqueMesh = mesher.meshFaces(opaqueFaces, meshBuilder);
-        Mesh translucentMesh = mesher.meshFaces(translucentFaces, meshBuilder);
-        modelBuilder.begin();
-        modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueMesh, GL20.GL_TRIANGLES,
-                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap())));
-        opaqueModel = modelBuilder.end();
-        modelBuilder.begin();
-        modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), translucentMesh, GL20.GL_TRIANGLES,
-                new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
-                        new BlendingAttribute(),
-                        FloatAttribute.createAlphaTest(0.25f)));
-        translucentModel = modelBuilder.end();
+            Mesh opaqueMesh = mesher.meshFaces(opaqueFaces, meshBuilder);
+            modelBuilder.begin();
+            modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueMesh, GL20.GL_TRIANGLES,
+                    new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap())));
+            opaqueModel = modelBuilder.end();
 
-        opaqueModelInstance = new ModelInstance(opaqueModel) {
-            @Override
-            public Renderable getRenderable(final Renderable out, final Node node,
-                                            final NodePart nodePart) {
-                super.getRenderable(out, node, nodePart);
-                if(VoxelGameClient.getInstance().isWireframe()) {
-                    out.primitiveType = GL20.GL_LINES;
-                } else {
-                    out.primitiveType = GL20.GL_TRIANGLES;
+            opaqueModelInstance = new ModelInstance(opaqueModel) {
+                @Override
+                public Renderable getRenderable(final Renderable out, final Node node,
+                                                final NodePart nodePart) {
+                    super.getRenderable(out, node, nodePart);
+                    if(VoxelGameClient.getInstance().isWireframe()) {
+                        out.primitiveType = GL20.GL_LINES;
+                    } else {
+                        out.primitiveType = GL20.GL_TRIANGLES;
+                    }
+                    return out;
                 }
-                return out;
-            }
-        };
-        translucentModelInstance = new ModelInstance(translucentModel) {
-            @Override
-            public Renderable getRenderable(final Renderable out, final Node node,
-                                            final NodePart nodePart) {
-                super.getRenderable(out, node, nodePart);
-                if(VoxelGameClient.getInstance().isWireframe()) {
-                    out.primitiveType = GL20.GL_LINES;
-                } else {
-                    out.primitiveType = GL20.GL_TRIANGLES;
+            };
+
+            opaqueFaces = null;
+        }
+
+        if(translucentFaces != null) {
+            if(translucentModel != null)
+                translucentModel.dispose();
+
+            Mesh translucentMesh = mesher.meshFaces(translucentFaces, meshBuilder);
+            modelBuilder.begin();
+            modelBuilder.part(String.format("c-%d,%d-t", startPosition.x, startPosition.z), translucentMesh, GL20.GL_TRIANGLES,
+                    new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()),
+                            new BlendingAttribute(),
+                            FloatAttribute.createAlphaTest(0.25f)));
+            translucentModel = modelBuilder.end();
+
+            translucentModelInstance = new ModelInstance(translucentModel) {
+                @Override
+                public Renderable getRenderable(final Renderable out, final Node node,
+                                                final NodePart nodePart) {
+                    super.getRenderable(out, node, nodePart);
+                    if(VoxelGameClient.getInstance().isWireframe()) {
+                        out.primitiveType = GL20.GL_LINES;
+                    } else {
+                        out.primitiveType = GL20.GL_TRIANGLES;
+                    }
+                    return out;
                 }
-                return out;
-            }
-        };
+            };
+
+            translucentFaces = null;
+        }
     }
 
     private void updateFaces() {

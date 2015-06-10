@@ -33,7 +33,6 @@ public class MainMenu implements GuiScreen {
     public MainMenu() {
         buttons = new MainMenuButton[] {
                 new MainMenuButton("Multiplayer (Local)", this::enterMPLocal, TARGET_BUTTON_SIZE),
-                new MainMenuButton("Multiplayer (Lambda)", this::enterMPLambda, TARGET_BUTTON_SIZE),
                 new MainMenuButton("Settings", () -> System.out.println("Settings pressed!"), TARGET_BUTTON_SIZE),
                 new MainMenuButton("Quit Game", () -> RadixClient.getInstance().startShutdown(), TARGET_BUTTON_SIZE),
         };
@@ -42,11 +41,6 @@ public class MainMenu implements GuiScreen {
     private void enterMPLocal() {
         System.out.println("Entering local mp");
         RadixClient.getInstance().enterRemoteWorld("127.0.0.1", (short) 25565);
-    }
-
-    private void enterMPLambda() {
-        System.out.println("Entering lambda mp");
-        RadixClient.getInstance().enterRemoteWorld("mc.stoj.pw", (short) 31173);
     }
 
     private void resize() {

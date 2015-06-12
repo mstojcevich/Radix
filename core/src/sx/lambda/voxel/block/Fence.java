@@ -3,6 +3,7 @@ package sx.lambda.voxel.block;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import sx.lambda.voxel.api.BuiltInBlockIds;
+import sx.lambda.voxel.item.Tool;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
@@ -13,7 +14,8 @@ public class Fence extends Block {
 
     public Fence() {
         super(BuiltInBlockIds.FENCE_ID, "Fence", new FenceRenderer(), new String[]{"textures/block/planks.png"},
-                false, true, true, true, false, true, false, 0);
+                false, true, true, true, false, true, false, 0,
+                0, Tool.ToolMaterial.THESE_HANDS, Tool.ToolType.AXE);
     }
 
     @Override

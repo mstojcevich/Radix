@@ -8,9 +8,14 @@ import org.spacehq.mc.protocol.data.game.values.entity.player.GameMode;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
+import sx.lambda.voxel.api.RadixAPI;
+import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.entity.EntityRotation;
 import sx.lambda.voxel.entity.LivingEntity;
+import sx.lambda.voxel.item.Item;
+import sx.lambda.voxel.item.Tool;
+import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.chunk.BlockStorage;
 import sx.lambda.voxel.world.chunk.IChunk;
@@ -26,6 +31,8 @@ public class Player extends LivingEntity implements Serializable {
     private transient boolean moved = false;
     private int itemInHand = BuiltInBlockIds.STONE_ID;
     private GameMode gameMode = GameMode.CREATIVE;
+    private float breakPercent;
+    private boolean wasBreaking;
 
     public Player() {
         this(new EntityPosition(0, 0, 0), new EntityRotation());
@@ -33,7 +40,6 @@ public class Player extends LivingEntity implements Serializable {
         if (playerModel == null && RadixClient.getInstance() != null) {
             playerModel = new ObjLoader().loadModel(Gdx.files.internal("entity/player.obj"));
         }
-
     }
 
     public Player(EntityPosition pos, EntityRotation rot) {
@@ -64,6 +70,48 @@ public class Player extends LivingEntity implements Serializable {
                 RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(new ClientPlayerPositionRotationPacket(this.isOnGround(), this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), (float) 180 - this.getRotation().getYaw(), -this.getRotation().getPitch()));
             }
             moved = false;
+        }
+
+        Vec3i selBlkPos = RadixClient.getInstance().getSelectedBlock();
+        try {
+            if(selBlkPos != null) {
+                int sbcx = selBlkPos.x & (RadixClient.getInstance().getWorld().getChunkSize() - 1);
+                int sbcz = selBlkPos.z & (RadixClient.getInstance().getWorld().getChunkSize() - 1);
+                Block selectedBlock = RadixClient.getInstance().getWorld().getChunk(selBlkPos.x, selBlkPos.z)
+                        .getBlock(sbcx, selBlkPos.y, sbcz);
+                if (Gdx.input.isTouched()) {
+                    if (selectedBlock != null && selectedBlock.isSelectable()) {
+                        if (breakPercent <= 0) {
+                            RadixClient.getInstance().beginBreak();
+                        }
+                        Item curItem = RadixAPI.instance.getItemByID(itemInHand);
+                        if (selectedBlock.getHardness() <= 0 || gameMode.equals(GameMode.CREATIVE)) {
+                            breakPercent = 1;
+                        } else {
+                            float incr;
+                            if (curItem instanceof Tool) {
+                                incr = 20f / selectedBlock.getBreakTimeMS((Tool) curItem);
+                            } else {
+                                incr = 20f / selectedBlock.getBreakTimeMS(null);
+                            }
+                            breakPercent = MathUtils.clamp(breakPercent + incr, 0, 1);
+                            wasBreaking = true;
+                        }
+                        if (breakPercent >= 1) {
+                            RadixClient.getInstance().breakBlock();
+                            wasBreaking = false;
+                        }
+                        System.out.println(breakPercent);
+                    }
+                }
+            } else {
+                if(wasBreaking) {
+                    wasBreaking = false;
+                    RadixClient.getInstance().cancelBreak();
+                }
+            }
+        } catch (BlockStorage.CoordinatesOutOfBoundsException e) {
+            e.printStackTrace();
         }
     }
 
@@ -104,6 +152,20 @@ public class Player extends LivingEntity implements Serializable {
 
     public GameMode getGameMode() {
         return this.gameMode;
+    }
+
+    /**
+     * Get the percentage of the current block break
+     */
+    public float getBreakPercent() {
+        return this.breakPercent;
+    }
+
+    /**
+     * Reset the block break percent
+     */
+    public void resetBlockBreak() {
+        this.breakPercent = 0;
     }
 
 }

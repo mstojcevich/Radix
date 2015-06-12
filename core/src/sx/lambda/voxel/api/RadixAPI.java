@@ -4,6 +4,8 @@ import pw.oxcafebabe.marcusant.eventbus.EventManager;
 import pw.oxcafebabe.marcusant.eventbus.managers.iridium.IridiumEventManager;
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.block.*;
+import sx.lambda.voxel.item.Item;
+import sx.lambda.voxel.item.Tool;
 import sx.lambda.voxel.world.biome.Biome;
 
 import java.util.ArrayList;
@@ -14,7 +16,9 @@ public class RadixAPI {
     public static final RadixAPI instance = new RadixAPI();
     private final EventManager eventManager;
     private final List<Block> registeredBlocks = new ArrayList<>();
+    private final List<Item> registeredItems = new ArrayList<>();
     private final Block[] registeredBlockArray = new Block[1024];
+    private final Item[] registeredItemArray = new Item[1024];
     private final Biome[] registeredBiomeArray = new Biome[256];
     private int highestID = 0;
 
@@ -37,17 +41,24 @@ public class RadixAPI {
     }
 
     /**
-     * Registers the built in blocks
+     * Registers the built in items and blocks
      * <p/>
      * If you're a mod, please don't call this
      */
-    public void registerBuiltinBlocks() throws BlockRegistrationException {
+    public void registerBuiltinItems() throws BlockRegistrationException {
         try {
+            registerItems(
+                    new Tool(270, "Wooden Pickaxe", Tool.ToolMaterial.WOOD, Tool.ToolType.PICKAXE),
+                    new Tool(274, "Stone Pickaxe", Tool.ToolMaterial.STONE, Tool.ToolType.PICKAXE),
+                    new Tool(257, "Iron Pickaxe", Tool.ToolMaterial.IRON, Tool.ToolType.PICKAXE)
+            );
+
+
             IBlockRenderer foliageRenderer = new FlatFoliageRenderer();
             IBlockRenderer coloredFoliageRenderer = new ColoredFoliageRenderer();
             registerBlocks(
-                    new BlockBuilder().setID(BuiltInBlockIds.DIRT_ID).setHumanName("Dirt").setTextureLocation("textures/block/dirt.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHumanName("Grass").setTextureLocations("textures/block/grass_top.png", "textures/block/grass_side.png", "textures/block/dirt.png").setBlockRenderer(new GrassRenderer()).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.DIRT_ID).setHardness(0.5f).setHumanName("Dirt").setTextureLocation("textures/block/dirt.png").build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHardness(0.5f).setHumanName("Grass").setTextureLocations("textures/block/grass_top.png", "textures/block/grass_side.png", "textures/block/dirt.png").setBlockRenderer(new GrassRenderer()).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.STONE_ID).setHumanName("Stone").setTextureLocation("textures/block/stone.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.COBBLESTONE_ID).setHumanName("Cobblestone").setTextureLocation("textures/block/cobblestone.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.MOSS_STONE_ID).setHumanName("Mossy Cobblestone").setTextureLocation("textures/block/moss_stone.png").build(),
@@ -162,6 +173,29 @@ public class RadixAPI {
         return registeredBiomeArray[id];
     }
 
+    private void registerItems(Item... items) throws BlockRegistrationException {
+        for (Item i : items) {
+            registerItem(i);
+        }
+    }
+
+    private void registerItem(Item i) throws BlockRegistrationException {
+        if (i.getID() == -1) {
+            i.setID(highestID);
+            System.err.printf("Item ID not defined for %s. Using auto generated ID. IF YOU\'RE THE MOD DEVELOPER, FIX THIS!!!\n", i.toString());
+        }
+
+        for (Item i2 : this.registeredItems) {
+            if (i.getID() == i2.getID()) {
+                throw new BlockRegistrationException("ID already in use by " + i2.getHumanName());
+            }
+        }
+
+        this.registeredItems.add(i);
+        this.registeredItemArray[i.getID()] = i;
+        highestID = Math.max(highestID, i.getID());
+    }
+
     private void registerBlocks(Block... blocks) throws BlockRegistrationException {
         for (Block b : blocks) {
             registerBlock(b);
@@ -184,6 +218,8 @@ public class RadixAPI {
         this.registeredBlocks.add(b);
         this.registeredBlockArray[b.getID()] = b;
         highestID = Math.max(highestID, b.getID());
+
+        registerItem(b);
     }
 
     public List<Block> getBlocks() {
@@ -193,6 +229,11 @@ public class RadixAPI {
     public Block getBlockByID(int id) {
         if(id <= 0)return null;
         return registeredBlockArray[id];
+    }
+
+    public Item getItemByID(int id) {
+        if(id <= 0)return null;
+        return registeredItemArray[id];
     }
 
     public Block[] getBlocksSorted() {

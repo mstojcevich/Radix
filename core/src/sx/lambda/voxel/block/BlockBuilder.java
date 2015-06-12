@@ -1,5 +1,7 @@
 package sx.lambda.voxel.block;
 
+import sx.lambda.voxel.item.Tool.*;
+
 public class BlockBuilder {
 
     private static IBlockRenderer defaultRenderer;
@@ -16,6 +18,9 @@ public class BlockBuilder {
     private boolean decreaseLight = true;
     private boolean greedyMerge = true;
     private int lightValue = 0;
+    private float hardness = 0;
+    private ToolType requiredToolType = ToolType.THESE_HANDS;
+    private ToolMaterial requiredToolMaterial = ToolMaterial.THESE_HANDS;
 
     /**
      * Set the display name for the block
@@ -139,6 +144,11 @@ public class BlockBuilder {
         return this;
     }
 
+    public BlockBuilder setHardness(float hardness) {
+        this.hardness = hardness;
+        return this;
+    }
+
     public BlockBuilder setBlockRenderer(IBlockRenderer renderer) {
         this.renderer = renderer;
         return this;
@@ -152,7 +162,7 @@ public class BlockBuilder {
             }
             renderer = defaultRenderer;
         }
-        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge, lightValue);
+        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge, lightValue, hardness, requiredToolMaterial, requiredToolType);
     }
 
     public class MissingElementException extends Exception {

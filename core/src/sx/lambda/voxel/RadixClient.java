@@ -125,7 +125,7 @@ public class RadixClient extends ApplicationAdapter {
         this.android = Gdx.app.getType().equals(Application.ApplicationType.Android);
 
         try {
-            RadixAPI.instance.registerBuiltinBlocks();
+            RadixAPI.instance.registerBuiltinItems();
             if(!settingsManager.getVisualSettings().isFancyTreesEnabled()) {
                 RadixAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_ID).setOccludeCovered(true);
                 RadixAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_TWO_ID).setOccludeCovered(true);
@@ -361,11 +361,17 @@ public class RadixClient extends ApplicationAdapter {
                         }
 
                         plotter.end();
+                        if(player != null) {
+                            player.resetBlockBreak();
+                        }
                         return;
                     }
                 } catch(CoordinatesOutOfBoundsException ex) {
                     ex.printStackTrace();
                     plotter.end();
+                    if(player != null) {
+                        player.resetBlockBreak();
+                    }
                     return;
                 }
 
@@ -376,6 +382,9 @@ public class RadixClient extends ApplicationAdapter {
 
         selectedNextPlace = null;
         selectedBlock = null;
+        if(player != null) {
+            player.resetBlockBreak();
+        }
     }
 
     public void addToGLQueue(Runnable runnable) {
@@ -564,7 +573,7 @@ public class RadixClient extends ApplicationAdapter {
             androidStage.getViewport().update(width, height, true);
     }
 
-    public void breakBlock() {
+    public void beginBreak() {
         if (this.getSelectedBlock() != null
                 && this.currentScreen == this.hud) {
             IChunk chunk = world.getChunk(selectedBlock);
@@ -575,6 +584,44 @@ public class RadixClient extends ApplicationAdapter {
                         if (this.isRemote()) {
                             mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
                             mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.START_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                        }
+                    }
+                } catch (CoordinatesOutOfBoundsException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void cancelBreak() {
+        if (this.getSelectedBlock() != null
+                && this.currentScreen == this.hud) {
+            IChunk chunk = world.getChunk(selectedBlock);
+            if(chunk != null) {
+                try {
+                    Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y, selectedBlock.z & (world.getChunkSize() - 1));
+                    if (block != null && block.isSelectable()) {
+                        if (this.isRemote()) {
+                            mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.CANCEL_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                        }
+                    }
+                } catch (CoordinatesOutOfBoundsException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void breakBlock() {
+        if (this.getSelectedBlock() != null
+                && this.currentScreen == this.hud) {
+            IChunk chunk = world.getChunk(selectedBlock);
+            if(chunk != null) {
+                try {
+                    Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y, selectedBlock.z & (world.getChunkSize() - 1));
+                    if (block != null && block.isSelectable()) {
+                        if (this.isRemote()) {
+                            mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
                             mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.FINISH_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
                         } else {
                             this.getWorld().removeBlock(this.getSelectedBlock().x, this.getSelectedBlock().y, this.getSelectedBlock().z);

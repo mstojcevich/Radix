@@ -3,6 +3,7 @@ package sx.lambda.voxel.block;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import sx.lambda.voxel.api.BuiltInBlockIds;
+import sx.lambda.voxel.item.Tool;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
@@ -12,7 +13,8 @@ public class Snow extends Block {
 
     public Snow() {
         super(BuiltInBlockIds.SNOW_ID, "Snow", new MetadataHeightRenderer(7), new String[]{"textures/block/snow.png"},
-                false, true, true, true, false, true, true, 0);
+                false, true, true, true, false, true, true, 0,
+                0, Tool.ToolMaterial.THESE_HANDS, Tool.ToolType.SHOVEL);
     }
 
     @Override

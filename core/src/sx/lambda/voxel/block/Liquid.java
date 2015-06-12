@@ -2,6 +2,7 @@ package sx.lambda.voxel.block;
 
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import sx.lambda.voxel.item.Tool;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
@@ -14,7 +15,8 @@ public class Liquid extends Block {
     public Liquid(int id, String humanName, String textureLocation, int lightValue) {
         super(id, humanName,
                 liquidRenderer == null ? (liquidRenderer = new MetadataHeightRenderer(MAX_META, true)) : liquidRenderer,
-                new String[]{textureLocation}, true, false, true, false, true, true, true, lightValue);
+                new String[]{textureLocation}, true, false, true, false, true, true, true, lightValue,
+                0, Tool.ToolMaterial.THESE_HANDS, Tool.ToolType.THESE_HANDS);
     }
 
     @Override

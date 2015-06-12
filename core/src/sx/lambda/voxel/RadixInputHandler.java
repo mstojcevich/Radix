@@ -94,9 +94,9 @@ public class RadixInputHandler implements InputProcessor {
         game.getCurrentScreen().onMouseClick(button);
         switch (button) {
             case 0:
-                if (game.getWorld() != null) {
-                    game.breakBlock();
-                }
+//                if (game.getWorld() != null) {
+//                    game.breakBlock();
+//                }
                 break;
             case 1:
                 if (game.getWorld() != null) {

@@ -2,27 +2,30 @@ package sx.lambda.voxel.block;
 
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
+import sx.lambda.voxel.item.Item;
+import sx.lambda.voxel.item.Tool;
+import sx.lambda.voxel.item.Tool.*;
 import sx.lambda.voxel.world.chunk.IChunk;
 
-public class Block {
+public class Block extends Item {
 
-    private int id;
     private final transient IBlockRenderer renderer;
     private boolean translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge;
-    private final String humanName;
     private final String[] textureLocations;
     private int textureIndex;
     private int lightValue;
+    private final float hardness;
+    private final ToolMaterial requiredMaterial;
+    private final ToolType requiredType;
 
     Block(int id, String humanName, IBlockRenderer renderer, String textureLocations[],
           boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered,
           boolean decreaseLight, boolean greedyMerge,
-          int lightValue) {
-        this.id = id;
+          int lightValue, float hardness, ToolMaterial requiredMaterial, ToolType requiredType) {
+        super(id, humanName);
         this.renderer = renderer;
         this.translucent = translucent;
         this.solid = solid;
-        this.humanName = humanName;
         this.textureLocations = textureLocations;
         this.lightPassthrough = lightPassthrough;
         this.selectable = selectable;
@@ -30,14 +33,13 @@ public class Block {
         this.decreaseLight = decreaseLight;
         this.lightValue = lightValue;
         this.greedyMerge = greedyMerge;
+        this.hardness = hardness;
+        this.requiredMaterial = requiredMaterial;
+        this.requiredType = requiredType;
     }
 
     public IBlockRenderer getRenderer() {
         return this.renderer;
-    }
-
-    public int getID() {
-        return this.id;
     }
 
     public boolean isTranslucent() {
@@ -50,14 +52,6 @@ public class Block {
 
     public boolean doesLightPassThrough() {
         return this.lightPassthrough;
-    }
-
-    public void setID(int id) {
-        this.id = id;
-    }
-
-    public String getHumanName() {
-        return this.humanName;
     }
 
     public String getTextureLocation() {
@@ -174,6 +168,37 @@ public class Block {
         Vector3 corner1 = new Vector3(c.getStartPosition().x+x, c.getStartPosition().y+y, c.getStartPosition().z+z);
         Vector3 corner2 = corner1.cpy().add(1, 1, 1);
         return new BoundingBox(corner1, corner2);
+    }
+
+    public float getHardness() {
+        return this.hardness;
+    }
+
+    /**
+     * Get the time it takes to break the block with the given tool
+     * @return Length, in milliseconds, to break the block
+     */
+    public int getBreakTimeMS(Tool tool) {
+        if(hardness > 100 || hardness < 0) {
+            return Integer.MAX_VALUE;
+        }
+
+        ToolType tType = ToolType.THESE_HANDS;
+        ToolMaterial tMaterial = ToolMaterial.THESE_HANDS;
+        if(tool != null) {
+            tType = tool.getType();
+            tMaterial = tool.getMaterial();
+        }
+
+        float timeSeconds = hardness * 1.5f;
+        if((tType != requiredType && requiredType != ToolType.THESE_HANDS)
+                || (tMaterial.materialStrength < requiredMaterial.materialStrength)) {
+            timeSeconds *= 3.33;
+        } else if(tMaterial.materialStrength >= requiredMaterial.materialStrength) {
+            timeSeconds /= requiredMaterial.speedMult;
+        }
+
+        return (int)(timeSeconds * 1000f);
     }
 
 }

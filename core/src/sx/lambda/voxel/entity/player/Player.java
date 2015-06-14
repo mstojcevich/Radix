@@ -90,24 +90,24 @@ public class Player extends LivingEntity implements Serializable {
                         } else {
                             float incr;
                             if (curItem instanceof Tool) {
-                                incr = 20f / selectedBlock.getBreakTimeMS((Tool) curItem);
+                                incr = 50f / selectedBlock.getBreakTimeMS((Tool) curItem);
                             } else {
-                                incr = 20f / selectedBlock.getBreakTimeMS(null);
+                                incr = 50f / selectedBlock.getBreakTimeMS(null);
                             }
                             breakPercent = MathUtils.clamp(breakPercent + incr, 0, 1);
                             wasBreaking = true;
                         }
                         if (breakPercent >= 1) {
                             RadixClient.getInstance().breakBlock();
+                            resetBlockBreak();
                             wasBreaking = false;
                         }
-                        System.out.println(breakPercent);
                     }
-                }
-            } else {
-                if(wasBreaking) {
-                    wasBreaking = false;
-                    RadixClient.getInstance().cancelBreak();
+                } else {
+                    if(wasBreaking) {
+                        wasBreaking = false;
+                        RadixClient.getInstance().cancelBreak();
+                    }
                 }
             }
         } catch (BlockStorage.CoordinatesOutOfBoundsException e) {

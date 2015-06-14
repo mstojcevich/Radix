@@ -340,6 +340,8 @@ public class RadixClient extends ApplicationAdapter {
         float deltaY = (float) (Math.sin(Math.toRadians(pitch)));
         float deltaZ = (float) (-Math.cos(Math.toRadians(pitch)) * Math.cos(Math.toRadians(yaw)));
 
+        final Vec3i oldPos = selectedBlock;
+
         plotter.plot(new Vector3(x, y, z), new Vector3(deltaX, deltaY, deltaZ), MathUtils.ceil(reach * reach));
         Vec3i last = null;
         while (plotter.next()) {
@@ -361,7 +363,7 @@ public class RadixClient extends ApplicationAdapter {
                         }
 
                         plotter.end();
-                        if(player != null) {
+                        if(!selectedBlock.equals(oldPos)) {
                             player.resetBlockBreak();
                         }
                         return;
@@ -369,9 +371,7 @@ public class RadixClient extends ApplicationAdapter {
                 } catch(CoordinatesOutOfBoundsException ex) {
                     ex.printStackTrace();
                     plotter.end();
-                    if(player != null) {
-                        player.resetBlockBreak();
-                    }
+                    player.resetBlockBreak();
                     return;
                 }
 

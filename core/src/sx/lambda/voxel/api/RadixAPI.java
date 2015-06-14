@@ -6,6 +6,8 @@ import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.block.*;
 import sx.lambda.voxel.item.Item;
 import sx.lambda.voxel.item.Tool;
+import sx.lambda.voxel.item.Tool.ToolMaterial;
+import sx.lambda.voxel.item.Tool.ToolType;
 import sx.lambda.voxel.world.biome.Biome;
 
 import java.util.ArrayList;
@@ -48,17 +50,22 @@ public class RadixAPI {
     public void registerBuiltinItems() throws BlockRegistrationException {
         try {
             registerItems(
-                    new Tool(270, "Wooden Pickaxe", Tool.ToolMaterial.WOOD, Tool.ToolType.PICKAXE),
-                    new Tool(274, "Stone Pickaxe", Tool.ToolMaterial.STONE, Tool.ToolType.PICKAXE),
-                    new Tool(257, "Iron Pickaxe", Tool.ToolMaterial.IRON, Tool.ToolType.PICKAXE)
+                    new Tool(270, "Wooden Pickaxe", ToolMaterial.WOOD, ToolType.PICKAXE),
+                    new Tool(274, "Stone Pickaxe", ToolMaterial.STONE, ToolType.PICKAXE),
+                    new Tool(257, "Iron Pickaxe", ToolMaterial.IRON, ToolType.PICKAXE)
             );
 
 
             IBlockRenderer foliageRenderer = new FlatFoliageRenderer();
             IBlockRenderer coloredFoliageRenderer = new ColoredFoliageRenderer();
             registerBlocks(
-                    new BlockBuilder().setID(BuiltInBlockIds.DIRT_ID).setHardness(0.5f).setHumanName("Dirt").setTextureLocation("textures/block/dirt.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHardness(0.5f).setHumanName("Grass").setTextureLocations("textures/block/grass_top.png", "textures/block/grass_side.png", "textures/block/dirt.png").setBlockRenderer(new GrassRenderer()).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.DIRT_ID).setHumanName("Dirt")
+                            .setTextureLocation("textures/block/dirt.png")
+                            .setHardness(0.5f).setRequiredToolType(ToolType.SHOVEL).build(),
+                    new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHumanName("Grass")
+                            .setTextureLocations("textures/block/grass_top.png", "textures/block/grass_side.png", "textures/block/dirt.png")
+                            .setBlockRenderer(new GrassRenderer())
+                            .setHardness(0.5f).setRequiredToolType(ToolType.SHOVEL).build(),
                     new BlockBuilder().setID(BuiltInBlockIds.STONE_ID).setHumanName("Stone").setTextureLocation("textures/block/stone.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.COBBLESTONE_ID).setHumanName("Cobblestone").setTextureLocation("textures/block/cobblestone.png").build(),
                     new BlockBuilder().setID(BuiltInBlockIds.MOSS_STONE_ID).setHumanName("Mossy Cobblestone").setTextureLocation("textures/block/moss_stone.png").build(),

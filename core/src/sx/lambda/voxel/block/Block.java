@@ -4,7 +4,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import sx.lambda.voxel.item.Item;
 import sx.lambda.voxel.item.Tool;
-import sx.lambda.voxel.item.Tool.*;
+import sx.lambda.voxel.item.Tool.ToolMaterial;
+import sx.lambda.voxel.item.Tool.ToolType;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 public class Block extends Item {
@@ -191,7 +192,7 @@ public class Block extends Item {
         }
 
         float timeSeconds = hardness * 1.5f;
-        if((tType != requiredType && requiredType != ToolType.THESE_HANDS)
+        if((tType != requiredType && requiredType != ToolType.THESE_HANDS && requiredMaterial != ToolMaterial.THESE_HANDS)
                 || (tMaterial.materialStrength < requiredMaterial.materialStrength)) {
             timeSeconds *= 3.33;
         } else if(tMaterial.materialStrength >= requiredMaterial.materialStrength) {

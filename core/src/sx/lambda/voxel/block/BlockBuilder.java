@@ -1,6 +1,7 @@
 package sx.lambda.voxel.block;
 
-import sx.lambda.voxel.item.Tool.*;
+import sx.lambda.voxel.item.Tool.ToolMaterial;
+import sx.lambda.voxel.item.Tool.ToolType;
 
 public class BlockBuilder {
 
@@ -146,6 +147,16 @@ public class BlockBuilder {
 
     public BlockBuilder setHardness(float hardness) {
         this.hardness = hardness;
+        return this;
+    }
+
+    public BlockBuilder setRequiredToolType(ToolType requiredType) {
+        this.requiredToolType = requiredType;
+        return this;
+    }
+
+    public BlockBuilder setRequiredToolMaterial(ToolMaterial requiredMaterial) {
+        this.requiredToolMaterial = requiredMaterial;
         return this;
     }
 

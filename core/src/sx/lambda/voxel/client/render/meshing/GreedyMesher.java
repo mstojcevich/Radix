@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
-import sx.lambda.voxel.block.IBlockRenderer;
+import sx.lambda.voxel.block.BlockRenderer;
 import sx.lambda.voxel.block.NormalBlockRenderer;
 import sx.lambda.voxel.block.Side;
 import sx.lambda.voxel.world.IWorld;
@@ -307,7 +307,7 @@ public class GreedyMesher implements Mesher {
                         !(blockToSide == null || (blockToSide.isTranslucent() && !curBlock.isTranslucent()))
                                 && (curBlock.occludeCovered() && blockToSide.occludeCovered()),
                 (id1, meta1, light1, pcld1, id2, meta2, light2, pcld2) -> {
-                    Block block1 = RadixAPI.instance.getBlockByID(id1);
+                    Block block1 = RadixAPI.instance.getBlock(id1);
                     if (!block1.shouldGreedyMerge())
                         return false;
                     boolean sameBlock = id1 == id2 && meta1 == meta2;
@@ -317,7 +317,7 @@ public class GreedyMesher implements Mesher {
                         sameLight = pcld1.equals(pcld2);
                     }
                     if (sameLight && !sameBlock && tooDarkToTell) {
-                        Block block2 = RadixAPI.instance.getBlockByID(id2);
+                        Block block2 = RadixAPI.instance.getBlock(id2);
                         // Other block renderers may alter shape in an unpredictable way
                         if (block1.getRenderer().getClass() == NormalBlockRenderer.class
                                 && block2.getRenderer().getClass() == NormalBlockRenderer.class
@@ -441,7 +441,7 @@ public class GreedyMesher implements Mesher {
         } else {
             builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
         }
-        builder.ensureVertices(faces.size()*4);
+        builder.ensureVertices(faces.size() * 4);
         for (Face f : faces) {
             f.render(builder);
         }
@@ -557,7 +557,7 @@ public class GreedyMesher implements Mesher {
          * @param pcld Per corner light data. Pass null if per corner lighting is disabled.
          */
         public Face(Side side, int block, float lightLevel, PerCornerLightData pcld, int startX, int startY, int endX, int endY, int z) {
-            this.block = RadixAPI.instance.getBlockByID(block);
+            this.block = RadixAPI.instance.getBlock(block);
             this.lightLevel = lightLevel;
             this.x1 = startX;
             this.y1 = startY;
@@ -569,7 +569,7 @@ public class GreedyMesher implements Mesher {
         }
 
         public void render(MeshBuilder builder) {
-            IBlockRenderer renderer = block.getRenderer();
+            BlockRenderer renderer = block.getRenderer();
 
             switch (side) {
                 case TOP:

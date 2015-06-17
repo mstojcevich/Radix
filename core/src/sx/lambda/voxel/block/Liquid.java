@@ -10,13 +10,10 @@ public class Liquid extends Block {
 
     private static final int MAX_META = 15;
 
-    private static IBlockRenderer liquidRenderer;
+    private static BlockRenderer liquidRenderer;
 
-    public Liquid(int id, String humanName, String textureLocation, int lightValue) {
-        super(id, humanName,
-                liquidRenderer == null ? (liquidRenderer = new MetadataHeightRenderer(MAX_META, true)) : liquidRenderer,
-                new String[]{textureLocation}, true, false, true, false, true, true, true, lightValue,
-                0, Tool.ToolMaterial.THESE_HANDS, Tool.ToolType.THESE_HANDS);
+    Liquid(int id, String humanName, BlockRenderer renderer, String[] textureLocations, boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered, boolean decreaseLight, boolean greedyMerge, int lightValue, float hardness, Tool.ToolMaterial requiredMaterial, Tool.ToolType requiredType) {
+        super(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge, lightValue, hardness, requiredMaterial, requiredType);
     }
 
     @Override

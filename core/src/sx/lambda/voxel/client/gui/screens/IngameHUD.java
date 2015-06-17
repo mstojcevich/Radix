@@ -26,13 +26,13 @@ public class IngameHUD implements GuiScreen {
             case BuiltInBlockIds.WATER_FLOW_ID:
             case BuiltInBlockIds.WATER_ID:
                 guiBatch.setColor(1, 1, 1, 0.6f);
-                Block bl = RadixAPI.instance.getBlockByID(blockInHead);
+                Block bl = RadixAPI.instance.getBlock(blockInHead);
                 bl.getRenderer().render2d(guiBatch, bl.getTextureIndex(), 0, 0, Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
                 guiBatch.setColor(1, 1, 1, 1);
                 break;
         }
 
-        Block handBlock = RadixAPI.instance.getBlockByID(RadixClient.getInstance().getPlayer().getItemInHand());
+        Block handBlock = RadixAPI.instance.getBlock(RadixClient.getInstance().getPlayer().getItemInHand());
         handBlock.getRenderer().render2d(guiBatch, handBlock.getTextureIndex(), 0, 0, 50);
 
         // Draw crosshair (after guiBatcher render because it needs to render with its own blending mode

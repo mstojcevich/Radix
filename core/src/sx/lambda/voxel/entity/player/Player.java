@@ -84,7 +84,7 @@ public class Player extends LivingEntity implements Serializable {
                         if (breakPercent <= 0) {
                             RadixClient.getInstance().beginBreak();
                         }
-                        Item curItem = RadixAPI.instance.getItemByID(itemInHand);
+                        Item curItem = RadixAPI.instance.getItem(itemInHand);
                         if (selectedBlock.getHardness() <= 0 || gameMode.equals(GameMode.CREATIVE)) {
                             breakPercent = 1;
                         } else {

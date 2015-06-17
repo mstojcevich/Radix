@@ -9,7 +9,12 @@ import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.client.render.meshing.PerCornerLightData;
 import sx.lambda.voxel.render.NotInitializedException;
 
-public class NormalBlockRenderer implements IBlockRenderer {
+/**
+ * Render a standard block. Ex. stone, dirt.
+ *
+ * If you extend, make sure to implement getUniqueID() yourself!
+ */
+public class NormalBlockRenderer implements BlockRenderer {
 
     private static final float TEXTURE_PERCENTAGE = 0.03125f;
     private static final int BLOCKS_PER_WIDTH = 1024 / 32;
@@ -209,4 +214,10 @@ public class NormalBlockRenderer implements IBlockRenderer {
     public static float getV(int atlasIndex) {
         return ((atlasIndex / BLOCKS_PER_WIDTH) * TEXTURE_PERCENTAGE);
     }
+
+    @Override
+    public String getUniqueID() {
+        return "Builtin.NORMAL";
+    }
+
 }

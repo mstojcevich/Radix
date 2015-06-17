@@ -28,4 +28,9 @@ public class ColoredFoliageRenderer extends NormalBlockRenderer {
         return new Color(r, g, b, 1);
     }
 
+    @Override
+    public String getUniqueID() {
+        return "Builtin.COLORED_FOLIAGE";
+    }
+
 }

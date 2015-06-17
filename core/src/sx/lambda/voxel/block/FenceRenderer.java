@@ -44,4 +44,9 @@ public class FenceRenderer extends NormalBlockRenderer {
         super.renderBottom(atlasIndex, x1 + 0.5f - R, z1 + 0.5f - R, x2 - 0.5f + R, z2 - 0.5f + R, y, lightLevel, pcld, builder);
     }
 
+    @Override
+    public String getUniqueID() {
+        return "Builtin.FENCE";
+    }
+
 }

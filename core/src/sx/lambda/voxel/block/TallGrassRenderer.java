@@ -27,4 +27,9 @@ public class TallGrassRenderer extends FlatFoliageRenderer {
         return new Color(r, g, b, 1);
     }
 
+    @Override
+    public String getUniqueID() {
+        return "BUILTIN.TALL_GRASS";
+    }
+
 }

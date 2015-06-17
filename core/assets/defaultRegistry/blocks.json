@@ -1,0 +1,365 @@
+{
+  "blocks": [
+    {
+      "humanName": "Stone",
+      "id": 1,
+      "textureLocations": [
+        "textures/block/stone.png"
+      ]
+    },
+    {
+      "humanName": "Grass",
+      "id": 2,
+      "textureLocations": [
+        "textures/block/grass_top.png",
+        "textures/block/grass_side.png",
+        "textures/block/dirt.png"
+      ],
+      "hardness": 0.5,
+      "requiredType": "SHOVEL",
+      "renderer": "Builtin.GRASS"
+    },
+    {
+      "humanName": "Dirt",
+      "id": 3,
+      "textureLocations": [
+        "textures/block/dirt.png"
+      ],
+      "hardness": 0.5,
+      "requiredType": "SHOVEL"
+    },
+    {
+      "humanName": "Cobblestone",
+      "id": 4,
+      "textureLocations": [
+        "textures/block/cobblestone.png"
+      ]
+    },
+    {
+      "humanName": "Planks",
+      "id": 5,
+      "textureLocations": [
+        "textures/block/planks.png"
+      ]
+    },
+    {
+      "humanName": "Bedrock",
+      "id": 7,
+      "textureLocations": [
+        "textures/block/bedrock.png"
+      ]
+    },
+    {
+      "humanName": "Water (Still)",
+      "id": 8,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "selectable": false,
+      "textureLocations": [
+        "textures/block/water.png"
+      ],
+      "renderer": "Builtin.METADATA_HEIGHT MAX\u003d15 REVERSED\u003dtrue",
+      "customClass": "sx.lambda.voxel.block.Liquid"
+    },
+    {
+      "humanName": "Water (Flowing)",
+      "id": 9,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "selectable": false,
+      "textureLocations": [
+        "textures/block/water.png"
+      ],
+      "renderer": "Builtin.METADATA_HEIGHT MAX\u003d15 REVERSED\u003dtrue",
+      "customClass": "sx.lambda.voxel.block.Liquid"
+    },
+    {
+      "humanName": "Lava (Flowing)",
+      "id": 10,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "selectable": false,
+      "textureLocations": [
+        "textures/block/lava.png"
+      ],
+      "lightValue": 15,
+      "renderer": "Builtin.METADATA_HEIGHT MAX\u003d15 REVERSED\u003dtrue",
+      "customClass": "sx.lambda.voxel.block.Liquid"
+    },
+    {
+      "humanName": "Lava (Still)",
+      "id": 11,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "selectable": false,
+      "textureLocations": [
+        "textures/block/lava.png"
+      ],
+      "lightValue": 15,
+      "renderer": "Builtin.METADATA_HEIGHT MAX\u003d15 REVERSED\u003dtrue",
+      "customClass": "sx.lambda.voxel.block.Liquid"
+    },
+    {
+      "humanName": "Sand",
+      "id": 12,
+      "textureLocations": [
+        "textures/block/sand.png"
+      ]
+    },
+    {
+      "humanName": "Gravel",
+      "id": 13,
+      "textureLocations": [
+        "textures/block/gravel.png"
+      ]
+    },
+    {
+      "humanName": "Gold Ore",
+      "id": 14,
+      "textureLocations": [
+        "textures/block/gold_ore.png"
+      ]
+    },
+    {
+      "humanName": "Iron Ore",
+      "id": 15,
+      "textureLocations": [
+        "textures/block/iron_ore.png"
+      ]
+    },
+    {
+      "humanName": "Coal Ore",
+      "id": 16,
+      "textureLocations": [
+        "textures/block/coal_ore.png"
+      ]
+    },
+    {
+      "humanName": "Log",
+      "id": 17,
+      "textureLocations": [
+        "textures/block/log_oak.png"
+      ]
+    },
+    {
+      "humanName": "Leaves",
+      "id": 18,
+      "translucent": true,
+      "occludeCovered": false,
+      "decreaseLight": false,
+      "textureLocations": [
+        "textures/block/leaves_oak.png"
+      ],
+      "renderer": "Builtin.COLORED_FOLIAGE"
+    },
+    {
+      "humanName": "Lapis Ore",
+      "id": 21,
+      "textureLocations": [
+        "textures/block/lapis_ore.png"
+      ]
+    },
+    {
+      "humanName": "Tall Grass",
+      "id": 31,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "occludeCovered": false,
+      "textureLocations": [
+        "textures/block/tallgrass.png"
+      ],
+      "renderer": "BUILTIN.TALL_GRASS"
+    },
+    {
+      "humanName": "Flower",
+      "id": 37,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "occludeCovered": false,
+      "textureLocations": [
+        "textures/block/flower_rose.png"
+      ],
+      "renderer": "Builtin.FLAT_FOLIAGE"
+    },
+    {
+      "humanName": "Flower",
+      "id": 38,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "occludeCovered": false,
+      "textureLocations": [
+        "textures/block/shrub.png"
+      ],
+      "renderer": "Builtin.FLAT_FOLIAGE"
+    },
+    {
+      "humanName": "Brown Mushroom",
+      "id": 39,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "textureLocations": [
+        "textures/block/mushroom_brown.png"
+      ]
+    },
+    {
+      "humanName": "Red Mushroom",
+      "id": 40,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "textureLocations": [
+        "textures/block/mushroom_red.png"
+      ]
+    },
+    {
+      "humanName": "Mossy Cobblestone",
+      "id": 48,
+      "textureLocations": [
+        "textures/block/moss_stone.png"
+      ]
+    },
+    {
+      "humanName": "Obsidian",
+      "id": 49,
+      "textureLocations": [
+        "textures/block/obsidian.png"
+      ]
+    },
+    {
+      "humanName": "Diamond Ore",
+      "id": 56,
+      "textureLocations": [
+        "textures/block/diamond_ore.png"
+      ]
+    },
+    {
+      "humanName": "Redstone Ore",
+      "id": 73,
+      "textureLocations": [
+        "textures/block/redstone_ore.png"
+      ]
+    },
+    {
+      "humanName": "Snow",
+      "id": 78,
+      "lightPassthrough": true,
+      "occludeCovered": false,
+      "textureLocations": [
+        "textures/block/snow.png"
+      ],
+      "requiredType": "SHOVEL",
+      "renderer": "Builtin.METADATA_HEIGHT MAX\u003d7 REVERSED\u003dfalse",
+      "customClass": "sx.lambda.voxel.block.Snow"
+    },
+    {
+      "humanName": "Clay",
+      "id": 82,
+      "textureLocations": [
+        "textures/block/clay.png"
+      ]
+    },
+    {
+      "humanName": "Sugar Cane",
+      "id": 83,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "textureLocations": [
+        "textures/block/sugarcane.png"
+      ]
+    },
+    {
+      "humanName": "Fence",
+      "id": 85,
+      "lightPassthrough": true,
+      "occludeCovered": false,
+      "greedyMerge": false,
+      "textureLocations": [
+        "textures/block/planks.png"
+      ],
+      "requiredType": "AXE",
+      "renderer": "Builtin.FENCE",
+      "customClass": "sx.lambda.voxel.block.Fence"
+    },
+    {
+      "humanName": "Stone (Monster Egg)",
+      "id": 97,
+      "textureLocations": [
+        "textures/block/stone.png"
+      ]
+    },
+    {
+      "humanName": "Stone Brick",
+      "id": 98,
+      "textureLocations": [
+        "textures/block/stonebrick.png"
+      ]
+    },
+    {
+      "humanName": "Brown Mushroom Block",
+      "id": 99,
+      "textureLocations": [
+        "textures/block/mushroom_block_skin_brown.png"
+      ]
+    },
+    {
+      "humanName": "Red Mushroom Block",
+      "id": 100,
+      "textureLocations": [
+        "textures/block/mushroom_block_skin_red.png"
+      ]
+    },
+    {
+      "humanName": "Emerald Ore",
+      "id": 129,
+      "textureLocations": [
+        "textures/block/emerald_ore.png"
+      ]
+    },
+    {
+      "humanName": "Leaves",
+      "id": 161,
+      "translucent": true,
+      "occludeCovered": false,
+      "decreaseLight": false,
+      "textureLocations": [
+        "textures/block/leaves_oak.png"
+      ],
+      "renderer": "Builtin.COLORED_FOLIAGE"
+    },
+    {
+      "humanName": "Log",
+      "id": 162,
+      "textureLocations": [
+        "textures/block/log_oak.png"
+      ]
+    },
+    {
+      "humanName": "Flower",
+      "id": 175,
+      "translucent": true,
+      "solid": false,
+      "lightPassthrough": true,
+      "occludeCovered": false,
+      "textureLocations": [
+        "textures/block/flower_tulip_orange.png"
+      ],
+      "renderer": "Builtin.FLAT_FOLIAGE"
+    },
+    {
+      "humanName": "Unknown",
+      "id": 1023,
+      "textureLocations": [
+        "textures/block/undefined.png"
+      ]
+    }
+  ]
+}

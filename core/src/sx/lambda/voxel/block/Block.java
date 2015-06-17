@@ -10,7 +10,7 @@ import sx.lambda.voxel.world.chunk.IChunk;
 
 public class Block extends Item {
 
-    private final transient IBlockRenderer renderer;
+    private final transient BlockRenderer renderer;
     private boolean translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge;
     private final String[] textureLocations;
     private int textureIndex;
@@ -19,7 +19,10 @@ public class Block extends Item {
     private final ToolMaterial requiredMaterial;
     private final ToolType requiredType;
 
-    Block(int id, String humanName, IBlockRenderer renderer, String textureLocations[],
+    /**
+     * DO NOT USE THIS CONSTRUCTOR, USE BLOCKBUILDER INSTEAD
+     */
+    Block(int id, String humanName, BlockRenderer renderer, String textureLocations[],
           boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered,
           boolean decreaseLight, boolean greedyMerge,
           int lightValue, float hardness, ToolMaterial requiredMaterial, ToolType requiredType) {
@@ -39,7 +42,7 @@ public class Block extends Item {
         this.requiredType = requiredType;
     }
 
-    public IBlockRenderer getRenderer() {
+    public BlockRenderer getRenderer() {
         return this.renderer;
     }
 
@@ -173,6 +176,14 @@ public class Block extends Item {
 
     public float getHardness() {
         return this.hardness;
+    }
+
+    public ToolMaterial getRequiredToolMaterial() {
+        return this.requiredMaterial;
+    }
+
+    public ToolType getRequiredToolType() {
+        return this.requiredType;
     }
 
     /**

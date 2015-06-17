@@ -301,11 +301,11 @@ public class Chunk implements IChunk {
             storage = blockStorage[storageIndex] = new FlatBlockStorage(size, 16, size);
 
         int oldBlock = storage.getId(x, sy, z);
-        Block blk = RadixAPI.instance.getBlockByID(block);
+        Block blk = RadixAPI.instance.getBlock(block);
         int newBlocklightVal = blk.getLightValue();
         storage.setBlocklight(x, sy, z, newBlocklightVal);
         if(oldBlock > 0) {
-            Block oldBlk = RadixAPI.instance.getBlockByID(oldBlock);
+            Block oldBlk = RadixAPI.instance.getBlock(oldBlock);
             int oldBlocklightVal = oldBlk.getLightValue();
             if(newBlocklightVal > oldBlocklightVal) {
                 parentWorld.addToBlocklightQueue(startPosition.x + x, startPosition.y + y, startPosition.z + z);

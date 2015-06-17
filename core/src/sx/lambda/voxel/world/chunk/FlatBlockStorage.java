@@ -82,7 +82,7 @@ public class FlatBlockStorage implements BlockStorage {
 
     @Override
     public Block getBlock(int x, int y, int z) throws CoordinatesOutOfBoundsException {
-        return RadixAPI.instance.getBlockByID(getId(x, y, z));
+        return RadixAPI.instance.getBlock(getId(x, y, z));
     }
 
     @Override

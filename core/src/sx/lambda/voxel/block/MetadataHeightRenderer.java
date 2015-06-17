@@ -112,4 +112,9 @@ public class MetadataHeightRenderer extends NormalBlockRenderer {
         return height;
     }
 
+    @Override
+    public String getUniqueID() {
+        return String.format("Builtin.METADATA_HEIGHT MAX=%d REVERSED=%b", maxData, invert);
+    }
+
 }

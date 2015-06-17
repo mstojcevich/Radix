@@ -34,6 +34,9 @@ import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.api.events.EventEarlyInit;
 import sx.lambda.voxel.api.events.EventWorldStart;
+import sx.lambda.voxel.api.events.register.EventRegisterBiomes;
+import sx.lambda.voxel.api.events.register.EventRegisterBlockRenderers;
+import sx.lambda.voxel.api.events.register.EventRegisterItems;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.client.gui.GuiScreen;
 import sx.lambda.voxel.client.gui.screens.ChatGUI;
@@ -125,20 +128,33 @@ public class RadixClient extends ApplicationAdapter {
         this.android = Gdx.app.getType().equals(Application.ApplicationType.Android);
 
         try {
-            RadixAPI.instance.registerBuiltinItems();
-            if(!settingsManager.getVisualSettings().isFancyTreesEnabled()) {
-                RadixAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_ID).setOccludeCovered(true);
-                RadixAPI.instance.getBlockByID(BuiltInBlockIds.LEAVES_TWO_ID).setOccludeCovered(true);
-            }
-        } catch (RadixAPI.BlockRegistrationException e) {
-            e.printStackTrace();
-        }
-        RadixAPI.instance.registerMinecraftBiomes();
-        try {
             RadixAPI.instance.getEventManager().register(this);
         } catch (InvalidListenerException e) {
             e.printStackTrace();
         }
+
+        try {
+            RadixAPI.instance.registerBuiltinBlockRenderers();
+            RadixAPI.instance.getEventManager().push(new EventRegisterBlockRenderers());
+        } catch (RadixAPI.DuplicateRendererException ex) {
+            ex.printStackTrace();
+        }
+
+        try {
+            RadixAPI.instance.registerBuiltinItems();
+            if(!settingsManager.getVisualSettings().isFancyTreesEnabled()) {
+                RadixAPI.instance.getBlock(BuiltInBlockIds.LEAVES_ID).setOccludeCovered(true);
+                RadixAPI.instance.getBlock(BuiltInBlockIds.LEAVES_TWO_ID).setOccludeCovered(true);
+            }
+
+            RadixAPI.instance.getEventManager().push(new EventRegisterItems());
+        } catch (RadixAPI.BlockRegistrationException e) {
+            e.printStackTrace();
+        }
+
+        RadixAPI.instance.registerMinecraftBiomes();
+        RadixAPI.instance.getEventManager().push(new EventRegisterBiomes());
+
         RadixAPI.instance.getEventManager().push(new EventEarlyInit());
 
         this.setupOGL();
@@ -532,8 +548,8 @@ public class RadixClient extends ApplicationAdapter {
         return blockTextureAtlas;
     }
 
-    @EventListener(Priority.LAST)
-    public void onBlockRegister(EventEarlyInit event) {
+    @EventListener(Priority.FIRST)
+    public void createBlockTextureMap(EventEarlyInit event) {
         // Create a texture atlas for all of the blocks
         addToGLQueue(() -> {
             Pixmap bi = new Pixmap(1024, 1024, Pixmap.Format.RGBA8888);

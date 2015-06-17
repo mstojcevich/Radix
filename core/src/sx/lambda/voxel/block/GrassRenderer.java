@@ -79,4 +79,9 @@ public class GrassRenderer extends NormalBlockRenderer {
         super.renderBottom(atlasIndex + BOTTOM_OFFSET, x1, z1, x2, z2, y, lightLevel, pcld, builder);
     }
 
+    @Override
+    public String getUniqueID() {
+        return "Builtin.GRASS";
+    }
+
 }

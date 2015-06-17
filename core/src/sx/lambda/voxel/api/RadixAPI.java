@@ -1,5 +1,8 @@
 package sx.lambda.voxel.api;
 
+import com.badlogic.gdx.Gdx;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import pw.oxcafebabe.marcusant.eventbus.EventManager;
 import pw.oxcafebabe.marcusant.eventbus.managers.iridium.IridiumEventManager;
 import sx.lambda.voxel.RadixClient;
@@ -10,8 +13,14 @@ import sx.lambda.voxel.item.Tool.ToolMaterial;
 import sx.lambda.voxel.item.Tool.ToolType;
 import sx.lambda.voxel.world.biome.Biome;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RadixAPI {
 
@@ -19,6 +28,7 @@ public class RadixAPI {
     private final EventManager eventManager;
     private final List<Block> registeredBlocks = new ArrayList<>();
     private final List<Item> registeredItems = new ArrayList<>();
+    private final Map<String, BlockRenderer> registeredRenderers = new HashMap<>();
     private final Block[] registeredBlockArray = new Block[1024];
     private final Item[] registeredItemArray = new Item[1024];
     private final Biome[] registeredBiomeArray = new Biome[256];
@@ -44,8 +54,10 @@ public class RadixAPI {
 
     /**
      * Registers the built in items and blocks
-     * <p/>
+     *
      * If you're a mod, please don't call this
+     *
+     * Called before the item registration event is fired.
      */
     public void registerBuiltinItems() throws BlockRegistrationException {
         try {
@@ -55,59 +67,42 @@ public class RadixAPI {
                     new Tool(257, "Iron Pickaxe", ToolMaterial.IRON, ToolType.PICKAXE)
             );
 
-
-            IBlockRenderer foliageRenderer = new FlatFoliageRenderer();
-            IBlockRenderer coloredFoliageRenderer = new ColoredFoliageRenderer();
-            registerBlocks(
-                    new BlockBuilder().setID(BuiltInBlockIds.DIRT_ID).setHumanName("Dirt")
-                            .setTextureLocation("textures/block/dirt.png")
-                            .setHardness(0.5f).setRequiredToolType(ToolType.SHOVEL).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.GRASS_ID).setHumanName("Grass")
-                            .setTextureLocations("textures/block/grass_top.png", "textures/block/grass_side.png", "textures/block/dirt.png")
-                            .setBlockRenderer(new GrassRenderer())
-                            .setHardness(0.5f).setRequiredToolType(ToolType.SHOVEL).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.STONE_ID).setHumanName("Stone").setTextureLocation("textures/block/stone.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.COBBLESTONE_ID).setHumanName("Cobblestone").setTextureLocation("textures/block/cobblestone.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.MOSS_STONE_ID).setHumanName("Mossy Cobblestone").setTextureLocation("textures/block/moss_stone.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.SAND_ID).setHumanName("Sand").setTextureLocation("textures/block/sand.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.CLAY_ID).setHumanName("Clay").setTextureLocation("textures/block/clay.png").build(),
-                    new Liquid(BuiltInBlockIds.WATER_ID, "Water (Still)", "textures/block/water.png", 0),
-                    new Liquid(BuiltInBlockIds.WATER_FLOW_ID, "Water (Flowing)", "textures/block/water.png", 0),
-                    new Liquid(BuiltInBlockIds.LAVA_STILL_ID, "Lava (Still)", "textures/block/lava.png", 15),
-                    new Liquid(BuiltInBlockIds.LAVA_FLOW_ID, "Lava (Flowing)", "textures/block/lava.png", 15),
-                    new BlockBuilder().setID(BuiltInBlockIds.PLANKS_ID).setHumanName("Planks").setTextureLocation("textures/block/planks.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.STONE_BRICK_ID).setHumanName("Stone Brick").setTextureLocation("textures/block/stonebrick.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.TALL_GRASS_ID).setHumanName("Tall Grass").setTextureLocation("textures/block/tallgrass.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(new TallGrassRenderer()).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.FLOWER_ID).setHumanName("Flower").setTextureLocation("textures/block/flower_tulip_orange.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.FLOWER_TWO_ID).setHumanName("Flower").setTextureLocation("textures/block/flower_rose.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.FLOWER_THREE_ID).setHumanName("Flower").setTextureLocation("textures/block/shrub.png").setSolid(false).setTranslucent(true).setOccludeCovered(false).setLightPassthrough(true).setBlockRenderer(foliageRenderer).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.SUGAR_CANE_ID).setHumanName("Sugar Cane").setTextureLocation("textures/block/sugarcane.png").setSolid(false).setTranslucent(true).setLightPassthrough(true).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.LOG_ID).setHumanName("Log").setTextureLocation("textures/block/log_oak.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.LOG_TWO_ID).setHumanName("Log").setTextureLocation("textures/block/log_oak.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.LEAVES_ID).setHumanName("Leaves").setTextureLocation("textures/block/leaves_oak.png").setBlockRenderer(coloredFoliageRenderer).setTranslucent(true).setOccludeCovered(false).setDecreaseLight(false).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.LEAVES_TWO_ID).setHumanName("Leaves").setTextureLocation("textures/block/leaves_oak.png").setBlockRenderer(coloredFoliageRenderer).setTranslucent(true).setOccludeCovered(false).setDecreaseLight(false).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.BEDROCK_ID).setHumanName("Bedrock").setTextureLocation("textures/block/bedrock.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.IRON_ORE_ID).setHumanName("Iron Ore").setTextureLocation("textures/block/iron_ore.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.COAL_ORE_ID).setHumanName("Coal Ore").setTextureLocation("textures/block/coal_ore.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.GOLD_ORE_ID).setHumanName("Gold Ore").setTextureLocation("textures/block/gold_ore.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.DIAMOND_ORE_ID).setHumanName("Diamond Ore").setTextureLocation("textures/block/diamond_ore.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.REDSTONE_ORE_ID).setHumanName("Redstone Ore").setTextureLocation("textures/block/redstone_ore.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.LAPIS_ORE_ID).setHumanName("Lapis Ore").setTextureLocation("textures/block/lapis_ore.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.EMERALD_ORE_ID).setHumanName("Emerald Ore").setTextureLocation("textures/block/emerald_ore.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.OBSIDIAN_ID).setHumanName("Obsidian").setTextureLocation("textures/block/obsidian.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.GRAVEL_ID).setHumanName("Gravel").setTextureLocation("textures/block/gravel.png").build(),
-                    new Snow(),
-                    new BlockBuilder().setID(BuiltInBlockIds.STONE_MONSTER_EGG_ID).setHumanName("Stone (Monster Egg)").setTextureLocation("textures/block/stone.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.RED_MUSHROOM_BLOCK_ID).setHumanName("Red Mushroom Block").setTextureLocation("textures/block/mushroom_block_skin_red.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.BROWN_MUSHROOM_BLOCK_ID).setHumanName("Brown Mushroom Block").setTextureLocation("textures/block/mushroom_block_skin_brown.png").build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.BROWN_MUSHROOM_ID).setHumanName("Brown Mushroom").setTextureLocation("textures/block/mushroom_brown.png").setTranslucent(true).setLightPassthrough(true).setSolid(false).build(),
-                    new BlockBuilder().setID(BuiltInBlockIds.RED_MUSHROOM_ID).setHumanName("Red Mushroom").setTextureLocation("textures/block/mushroom_red.png").setTranslucent(true).setLightPassthrough(true).setSolid(false).build(),
-                    new Fence(),
-                    new BlockBuilder().setID(BuiltInBlockIds.UNKNOWN_ID).setHumanName("Unknown").setTextureLocation("textures/block/undefined.png").build()
-            );
+            String builtinBlockJson = Gdx.files.internal("defaultRegistry/blocks.json").readString();
+            try {
+                BlockList list = loadBlocks(new Gson(), builtinBlockJson);
+                for(JsonBlock block : list.getBlocks()) {
+                    registerBlock(block.createBlock());
+                }
+            } catch (BlockBuilder.CustomClassException e) {
+                System.err.println(e.getMessage());
+                e.printStackTrace();
+            }
         } catch (BlockBuilder.MissingElementException ex) {
             throw new BlockRegistrationException(ex.getMessage());
         }
+    }
+
+    /**
+     * Register builtin block renderers.
+     *
+     * If you're a mod, please don't call this.
+     *
+     * Called before the BlockRenderer registration event is fired.
+     *
+     * @throws DuplicateRendererException Usually thrown if this is called twice or someone tried to register a block renderer that's already built in.
+     */
+    public void registerBuiltinBlockRenderers() throws DuplicateRendererException {
+        registerBlockRenderers(
+                new NormalBlockRenderer(),
+                new ColoredFoliageRenderer(),
+                new FlatFoliageRenderer(),
+                new GrassRenderer(),
+                new TallGrassRenderer(),
+                new MetadataHeightRenderer(7), // used for snow
+                new MetadataHeightRenderer(15, true), // used for liquids
+                new FenceRenderer()
+
+        );
     }
 
     public void registerMinecraftBiomes() {
@@ -159,14 +154,28 @@ public class RadixAPI {
         );
     }
 
-    private void registerBiomes(Biome... biomes) {
+    public void registerBiomes(Biome... biomes) {
         for(Biome b : biomes) {
             registerBiome(b);
         }
     }
 
-    private void registerBiome(Biome biome) {
+    public void registerBiome(Biome biome) {
         registeredBiomeArray[biome.getID()] = biome;
+    }
+
+    public void registerBlockRenderers(BlockRenderer ... renderers) throws DuplicateRendererException {
+        for(BlockRenderer br : renderers) {
+            registerBlockRenderer(br);
+        }
+    }
+
+    public void registerBlockRenderer(BlockRenderer renderer) throws DuplicateRendererException {
+        String id = renderer.getUniqueID();
+        if(registeredRenderers.containsKey(id)) {
+            throw new DuplicateRendererException(id);
+        }
+        this.registeredRenderers.put(renderer.getUniqueID(), renderer);
     }
 
     /**
@@ -233,14 +242,51 @@ public class RadixAPI {
         return registeredBlocks;
     }
 
-    public Block getBlockByID(int id) {
-        if(id <= 0)return null;
+    /**
+     * Get block by its ID.
+     * Should only be used with static IDs for builtin blocks since mods will often (and should) have configurable IDs.
+     *
+     * @param id ID that the block has in the registry.
+     * @return null (should be treated as air) if id is 0 or below, is greater than the maximum allowed id, or is not registered.
+     */
+    public Block getBlock(int id) {
+        if(id <= 0)
+            return null;
+        if(id >= registeredBlockArray.length)
+            return null;
+
         return registeredBlockArray[id];
     }
 
-    public Item getItemByID(int id) {
-        if(id <= 0)return null;
+    /**
+     * Get item by its ID.
+     * Should only be used with static IDs for builtin items since mods will often (and should) have configurable IDs.
+     *
+     * @param id ID that the item has in the registry.
+     * @return null if id is 0 or below, is greater than the maximum allowed id, or is not registered.
+     */
+    public Item getItem(int id) {
+        if(id <= 0)
+            return null;
+        if(id >= registeredItemArray.length)
+            return null;
+
         return registeredItemArray[id];
+    }
+
+    /**
+     * Get the BlockRenderer registered with the specified unique ID
+     *
+     * @param uid Unique ID of the renderer to get. Returned by BlockRenderer.getUniqueID().
+     * @throws sx.lambda.voxel.api.RadixAPI.NoSuchRendererException No renderer existed with the specified UID.
+     */
+    public BlockRenderer getBlockRenderer(String uid) throws NoSuchRendererException {
+        BlockRenderer renderer = registeredRenderers.get(uid);
+        if(renderer != null) {
+            return renderer;
+        } else {
+            throw new NoSuchRendererException(uid);
+        }
     }
 
     public Block[] getBlocksSorted() {
@@ -251,6 +297,38 @@ public class RadixAPI {
         public BlockRegistrationException(String reason) {
             super(reason);
         }
+    }
+
+    public class NoSuchRendererException extends BlockRegistrationException {
+        public NoSuchRendererException(String renderer) {
+            super(String.format(
+                    "Renderer \"%s\" does not exist. " +
+                            "Make sure you registered it before the block load phase. Also check for typos.",
+                    renderer
+            ));
+        }
+
+        public NoSuchRendererException(String blockName, String renderer) {
+            super(String.format(
+                    "Renderer \"%s\" does not exist for block \"%s\". " +
+                            "Make sure you registered it before the block load phase. Also check for typos.",
+                    renderer, blockName
+            ));
+        }
+    }
+
+    public class DuplicateRendererException extends BlockRegistrationException {
+        public DuplicateRendererException(String renderer) {
+            super(String.format(
+                    "Renderer with id \"%s\" already exists and is cannot be redifined. " +
+                            "Make sure you are using a unique ID and are not registering twice.",
+                    renderer
+            ));
+        }
+    }
+
+    private BlockList loadBlocks(Gson gson, String json) {
+        return gson.fromJson(json, BlockList.class);
     }
 
 }

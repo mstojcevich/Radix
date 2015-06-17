@@ -628,7 +628,7 @@ public class World implements IWorld {
                     for (int cy = 0; cy < getHeight(); cy++) {
                         int id = c.getBlockId(x, cy, z);
                         if (id > 0) {
-                            Block blk = RadixAPI.instance.getBlockByID(id);
+                            Block blk = RadixAPI.instance.getBlock(id);
                             if (blk.getLightValue() > 0) {
                                 c.setBlocklight(x, cy, z, blk.getLightValue());
                                 addToBlocklightQueue(c.getStartPosition().x + x, c.getStartPosition().y + cy, c.getStartPosition().z + z);

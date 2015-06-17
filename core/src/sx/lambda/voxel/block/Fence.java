@@ -12,10 +12,8 @@ public class Fence extends Block {
     private static final float WIDTH = 0.25f;
     private static final float R = WIDTH/2f;
 
-    public Fence() {
-        super(BuiltInBlockIds.FENCE_ID, "Fence", new FenceRenderer(), new String[]{"textures/block/planks.png"},
-                false, true, true, true, false, true, false, 0,
-                0, Tool.ToolMaterial.THESE_HANDS, Tool.ToolType.AXE);
+    Fence(int id, String humanName, BlockRenderer renderer, String[] textureLocations, boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered, boolean decreaseLight, boolean greedyMerge, int lightValue, float hardness, Tool.ToolMaterial requiredMaterial, Tool.ToolType requiredType) {
+        super(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge, lightValue, hardness, requiredMaterial, requiredType);
     }
 
     @Override

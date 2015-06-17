@@ -11,10 +11,8 @@ public class Snow extends Block {
 
     private static final float MAX_META = 7;
 
-    public Snow() {
-        super(BuiltInBlockIds.SNOW_ID, "Snow", new MetadataHeightRenderer(7), new String[]{"textures/block/snow.png"},
-                false, true, true, true, false, true, true, 0,
-                0, Tool.ToolMaterial.THESE_HANDS, Tool.ToolType.SHOVEL);
+    Snow(int id, String humanName, BlockRenderer renderer, String[] textureLocations, boolean translucent, boolean solid, boolean lightPassthrough, boolean selectable, boolean occludeCovered, boolean decreaseLight, boolean greedyMerge, int lightValue, float hardness, Tool.ToolMaterial requiredMaterial, Tool.ToolType requiredType) {
+        super(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge, lightValue, hardness, requiredMaterial, requiredType);
     }
 
     @Override

@@ -33,4 +33,9 @@ public class FlatFoliageRenderer extends NormalBlockRenderer {
     @Override
     public void renderBottom(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, PerCornerLightData pcld, MeshBuilder builder) {}
 
+    @Override
+    public String getUniqueID() {
+        return "Builtin.FLAT_FOLIAGE";
+    }
+
 }

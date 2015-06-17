@@ -1,17 +1,18 @@
 package sx.lambda.voxel.block;
 
+import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.item.Tool.ToolMaterial;
 import sx.lambda.voxel.item.Tool.ToolType;
 
-public class BlockBuilder {
+import java.lang.reflect.Constructor;
 
-    private static IBlockRenderer defaultRenderer;
+public class BlockBuilder {
 
     private String humanName = "Undefined";
     private String[] textureLocations = new String[]{"textures/block/undefined.png"};
     private int id = -1;
     private boolean translucent = false;
-    private IBlockRenderer renderer;
+    private BlockRenderer renderer;
     private boolean solid = true;
     private boolean lightPassthrough = false;
     private boolean selectable = true;
@@ -22,6 +23,7 @@ public class BlockBuilder {
     private float hardness = 0;
     private ToolType requiredToolType = ToolType.THESE_HANDS;
     private ToolMaterial requiredToolMaterial = ToolMaterial.THESE_HANDS;
+    private String customClass = null;
 
     /**
      * Set the display name for the block
@@ -160,25 +162,81 @@ public class BlockBuilder {
         return this;
     }
 
-    public BlockBuilder setBlockRenderer(IBlockRenderer renderer) {
+    public BlockBuilder setRenderer(BlockRenderer renderer) {
         this.renderer = renderer;
         return this;
     }
 
-    public Block build() throws MissingElementException {
+    /**
+     * Set the custom class to be used when creating the block
+     * @param clazz Fully qualified class name of the custom class for the block.
+     *              The class specified must extends Block and use the constructor that Block has.
+     */
+    public BlockBuilder setCustomClass(String clazz) {
+        this.customClass = clazz;
+        return this;
+    }
+
+    /**
+     * @throws MissingElementException A required element of the block was missing.
+     *         Usually thrown if an ID is not set.
+     * @throws CustomClassException An error occurred when trying to create an instance of the custom class.
+     */
+    public Block build() throws MissingElementException, CustomClassException {
         if (id == -1) throw new MissingElementException("id");
         if (renderer == null) {
-            if(defaultRenderer == null) {
-                defaultRenderer = new NormalBlockRenderer();
+            try {
+                renderer = RadixAPI.instance.getBlockRenderer("Builtin.NORMAL");
+            } catch (RadixAPI.NoSuchRendererException ex) {
+                System.err.printf("Block \"%s\" was created before the normal block renderer was registered.\n" +
+                                "This usually means that the block was created during the wrong event or startup stage.\n" +
+                                "The block will still be registered, but a new instance of NormalBlockRenderer will be made, which is undesirable.\n",
+                        humanName);
+                ex.printStackTrace();
+
+                renderer = new NormalBlockRenderer();
             }
-            renderer = defaultRenderer;
         }
-        return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge, lightValue, hardness, requiredToolMaterial, requiredToolType);
+
+        if(customClass == null) {
+            return new Block(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge, lightValue, hardness, requiredToolMaterial, requiredToolType);
+        } else {
+            // Use reflection to invoke the constructor of the custom class specified
+
+            try {
+                Class cl = Class.forName(customClass);
+                try {
+                    Constructor co = cl.getDeclaredConstructor(int.class, String.class, BlockRenderer.class, String[].class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, boolean.class, int.class, float.class, ToolMaterial.class, ToolType.class);
+                    co.setAccessible(true);
+                    return (Block)co.newInstance(id, humanName, renderer, textureLocations, translucent, solid, lightPassthrough, selectable, occludeCovered, decreaseLight, greedyMerge, lightValue, hardness, requiredToolMaterial, requiredToolType);
+                } catch(Exception ex) {
+                    ex.printStackTrace();
+                    throw new CustomClassException(
+                            String.format(
+                                    "Failed to find the primary Block constructor in the custom class for block \"%s\" with id %d. Make sure you have it. Also make sure your class extends Block.",
+                                    humanName, id
+                            ));
+                }
+            } catch (ClassNotFoundException e) {
+                throw new CustomClassException(
+                        String.format(
+                                "Failed to find the custom class for block \"%s\" with id %d.\n" +
+                                        "Make sure the class at \"%s\" exists.",
+                                humanName, id, customClass
+                        ));
+            }
+        }
     }
 
     public class MissingElementException extends Exception {
         public MissingElementException(String missingEl) {
             super("You cannot create a block without " + missingEl);
+        }
+    }
+
+    public class CustomClassException extends Exception {
+        public CustomClassException(String reason) {
+            super(reason);
         }
     }
 

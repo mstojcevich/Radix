@@ -111,7 +111,7 @@ public abstract class LivingEntity extends Entity implements Serializable {
             int cz = z & (world.getChunkSize() - 1);
             try {
                 int id = chunk.getBlockId(cx, y, cz);
-                Block block = RadixAPI.instance.getBlockByID(id);
+                Block block = RadixAPI.instance.getBlock(id);
                 if (block == null) return 0;
                 BoundingBox blockBox = block.calculateBoundingBox(chunk, cx, y, cz);
                 float halfWidth = width / 2f;

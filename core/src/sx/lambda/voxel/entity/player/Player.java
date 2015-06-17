@@ -1,6 +1,7 @@
 package sx.lambda.voxel.entity.player;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.math.MathUtils;
@@ -79,7 +80,7 @@ public class Player extends LivingEntity implements Serializable {
                 int sbcz = selBlkPos.z & (RadixClient.getInstance().getWorld().getChunkSize() - 1);
                 Block selectedBlock = RadixClient.getInstance().getWorld().getChunk(selBlkPos.x, selBlkPos.z)
                         .getBlock(sbcx, selBlkPos.y, sbcz);
-                if (Gdx.input.isTouched()) {
+                if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) { // left mouse button down
                     if (selectedBlock != null && selectedBlock.isSelectable()) {
                         if (breakPercent <= 0) {
                             RadixClient.getInstance().beginBreak();

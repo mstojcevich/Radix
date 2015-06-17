@@ -15,5 +15,5 @@ More recently the project has been transformed into an attempt to make a faster 
 * Chat
 
 ## Screenshots
-![Shot 1](https://lambda.sx/80u.png)
-![Wireframe](https://lambda.sx/hLh.png)
+![Shot 1](https://lambda.sx/jRi.png)
+![Wireframe](https://lambda.sx/hLh.jpg)

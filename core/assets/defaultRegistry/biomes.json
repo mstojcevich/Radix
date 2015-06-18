@@ -1,0 +1,246 @@
+/*
+ * Temperature and rainfall values taken from http://minecraft.gamepedia.com/Biome
+ */
+
+[
+  {
+    "humanName": "Ocean",
+    "id": 0,
+    "temperature": 0.5,
+    "rainfall": 0.5
+  },
+  {
+    "humanName": "Plains",
+    "id": 1,
+    "temperature": 0.8,
+    "rainfall": 0.4
+  },
+  {
+    "humanName": "Desert",
+    "id": 2,
+    "temperature": 2.0,
+    "rainfall": 0.0
+  },
+  {
+    "humanName": "Extreme Hills",
+    "id": 3,
+    "temperature": 0.2,
+    "rainfall": 0.3
+  },
+  {
+    "humanName": "Forest",
+    "id": 4,
+    "temperature": 0.7,
+    "rainfall": 0.8
+  },
+  {
+    "humanName": "Taiga",
+    "id": 5,
+    "temperature": 0.05,
+    "rainfall": 0.8
+  },
+  {
+    "humanName": "Swampland",
+    "id": 6,
+    "temperature": 0.8,
+    "rainfall": 0.9
+  },
+  {
+    "humanName": "River",
+    "id": 7,
+    "temperature": 0.5,
+    "rainfall": 0.5
+  },
+  {
+    "humanName": "Nether",
+    "id": 8,
+    "temperature": 2.0,
+    "rainfall": 0.0
+  },
+  {
+    "humanName": "End",
+    "id": 9,
+    "temperature": 0.5,
+    "rainfall": 0.5
+  },
+  {
+    "humanName": "Frozen Ocean",
+    "id": 10,
+    "temperature": 0.0,
+    "rainfall": 0.5
+  },
+  {
+    "humanName": "Frozen River",
+    "id": 11,
+    "temperature": 0.0,
+    "rainfall": 0.5
+  },
+  {
+    "humanName": "Ice Plains",
+    "id": 12,
+    "temperature": 0.0,
+    "rainfall": 0.5
+  },
+  {
+    "humanName": "Ice Mountains",
+    "id": 13,
+    "temperature": 0.0,
+    "rainfall": 0.5
+  },
+  {
+    "humanName": "Mushroom Island",
+    "id": 14,
+    "temperature": 0.9,
+    "rainfall": 1.0
+  },
+  {
+    "humanName": "Mushroom Island Shore",
+    "id": 15,
+    "temperature": 0.9,
+    "rainfall": 1.0
+  },
+  {
+    "humanName": "Beach",
+    "id": 16,
+    "temperature": 0.8,
+    "rainfall": 0.4
+  },
+  {
+    "humanName": "Desert Hills",
+    "id": 17,
+    "temperature": 0.8,
+    "rainfall": 0.4
+  },
+  {
+    "humanName": "Forest Hills",
+    "id": 18,
+    "temperature": 0.7,
+    "rainfall": 0.8
+  },
+  {
+    "humanName": "Taiga Hills",
+    "id": 19,
+    "temperature": 0.2,
+    "rainfall": 0.7
+  },
+  {
+    "humanName": "Extreme Hills Edge",
+    "id": 20,
+    "temperature": 0.2,
+    "rainfall": 0.3
+  },
+  {
+    "humanName": "Jungle",
+    "id": 21,
+    "temperature": 1.2,
+    "rainfall": 0.9
+  },
+  {
+    "humanName": "Jungle Hills",
+    "id": 22,
+    "temperature": 1.2,
+    "rainfall": 0.9
+  },
+  {
+    "humanName": "Jungle Edge",
+    "id": 23,
+    "temperature": 0.95,
+    "rainfall": 0.8
+  },
+  {
+    "humanName": "Deep Ocean",
+    "id": 24,
+    "temperature": 0.5,
+    "rainfall": 0.5
+  },
+  {
+    "humanName": "Stone Beach",
+    "id": 25,
+    "temperature": 0.2,
+    "rainfall": 0.3
+  },
+  {
+    "humanName": "Cold Beach",
+    "id": 26,
+    "temperature": 0.05,
+    "rainfall": 0.3
+  },
+  {
+    "humanName": "Birch Forest",
+    "id": 27,
+    "temperature": 0.6,
+    "rainfall": 0.6
+  },
+  {
+    "humanName": "Birch Forest Hills",
+    "id": 28,
+    "temperature": 0.6,
+    "rainfall": 0.6
+  },
+  {
+    "humanName": "Roofed Forest",
+    "id": 29,
+    "temperature": 0.7,
+    "rainfall": 0.8
+  },
+  {
+    "humanName": "Cold Taiga",
+    "id": 30,
+    "temperature": -0.5,
+    "rainfall": 0.4
+  },
+  {
+    "humanName": "Cold Taiga Hills",
+    "id": 31,
+    "temperature": -0.5,
+    "rainfall": 0.4
+  },
+  {
+    "humanName": "Mega Taiga",
+    "id": 32,
+    "temperature": 0.3,
+    "rainfall": 0.8
+  },
+  {
+    "humanName": "Mega Taiga Hills",
+    "id": 33,
+    "temperature": 0.3,
+    "rainfall": 0.8
+  },
+  {
+    "humanName": "Extreme Hills+",
+    "id": 34,
+    "temperature": 0.2,
+    "rainfall": 0.3
+  },
+  {
+    "humanName": "Savanna",
+    "id": 35,
+    "temperature": 1.2,
+    "rainfall": 0.0
+  },
+  {
+    "humanName": "Savanna Plateau",
+    "id": 36,
+    "temperature": 1.0,
+    "rainfall": 0.0
+  },
+  {
+    "humanName": "Mesa",
+    "id": 37,
+    "temperature": 2.0,
+    "rainfall": 0.0
+  },
+  {
+    "humanName": "Mesa Plateau F",
+    "id": 38,
+    "temperature": 2.0,
+    "rainfall": 0.0
+  },
+  {
+    "humanName": "Mesa Plateau",
+    "id": 39,
+    "temperature": 2.0,
+    "rainfall": 0.0
+  }
+]

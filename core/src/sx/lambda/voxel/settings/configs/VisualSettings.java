@@ -12,17 +12,17 @@ public class VisualSettings implements Serializable {
     /**
      * Whether to draw internal leaves of trees
      */
-    private boolean fancyTrees = true;
+    private boolean fancyTrees = false;
     /**
      * Whether to average light values on a per-corner basis
      */
-    private boolean perCornerLight = true;
+    private boolean perCornerLight = false;
     /**
      * Whether to only update the screen when something has changed
      * <p>
      * Saves battery on laptops and mobile phones
      */
-    private boolean nonContinuous = false;
+    private boolean nonContinuous = true;
     /**
      * Whether to distribute chunk rerenders by only uploading one to the gpu per frame.
      * This is for the GL stuff, since the non-gl stuff can be and is done on another thread.
@@ -30,7 +30,7 @@ public class VisualSettings implements Serializable {
      * This should not be enabled on machines that don't see lag spikes when loading chunks,
      * since it will make chunks take longer to load in at lower fps.
      */
-    private boolean smoothChunkLoad = false;
+    private boolean smoothChunkLoad = true;
     /**
      * Whether to call glFinish() at the end of each frame
      * <p>

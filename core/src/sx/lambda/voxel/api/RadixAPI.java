@@ -64,7 +64,7 @@ public class RadixAPI {
 
             String builtinBlockJson = Gdx.files.internal("defaultRegistry/blocks.json").readString();
             try {
-                JsonBlock[] blocks = loadBlocks(new Gson(), builtinBlockJson);
+                JsonBlock[] blocks = new Gson().fromJson(builtinBlockJson, JsonBlock[].class);
                 for(JsonBlock block : blocks) {
                     registerBlock(block.createBlock());
                 }
@@ -102,50 +102,7 @@ public class RadixAPI {
 
     public void registerMinecraftBiomes() {
         registerBiomes(
-                /*
-                Temperature and rainfall values taken from http://minecraft.gamepedia.com/Biome
-                 */
-                new Biome(0, "Ocean", 0.5f, 0.5f),
-                new Biome(1, "Plains", 0.8f, 0.4f),
-                new Biome(2, "Desert", 2.0f, 0.0f),
-                new Biome(3, "Extreme Hills", 0.2f, 0.3f),
-                new Biome(4, "Forest", 0.7f, 0.8f),
-                new Biome(5, "Taiga", 0.05f, 0.8f),
-                new Biome(6, "Swampland", 0.8f, 0.9f),
-                new Biome(7, "River", 0.5f, 0.5f),
-                new Biome(8, "Nether", 2.0f, 0.0f),
-                new Biome(9, "End", 0.5f, 0.5f),
-                new Biome(10, "Frozen Ocean", 0.0f, 0.5f),
-                new Biome(11, "Frozen River", 0.0f, 0.5f),
-                new Biome(12, "Ice Plains", 0.0f, 0.5f),
-                new Biome(13, "Ice Mountains", 0.0f, 0.5f),
-                new Biome(14, "Mushroom Island", 0.9f, 1.0f),
-                new Biome(15, "Mushroom Island Shore", 0.9f, 1.0f),
-                new Biome(16, "Beach", 0.8f, 0.4f),
-                new Biome(17, "Desert Hills", 0.8f, 0.4f),
-                new Biome(18, "Forest Hills", 0.7f, 0.8f),
-                new Biome(19, "Taiga Hills", 0.2f, 0.7f),
-                new Biome(20, "Extreme Hills Edge", 0.2f, 0.3f),
-                new Biome(21, "Jungle", 1.2f, 0.9f),
-                new Biome(22, "Jungle Hills", 1.2f, 0.9f),
-                new Biome(23, "Jungle Edge", 0.95f, 0.8f),
-                new Biome(24, "Deep Ocean", 0.5f, 0.5f),
-                new Biome(25, "Stone Beach", 0.2f, 0.3f),
-                new Biome(26, "Cold Beach", 0.05f, 0.3f),
-                new Biome(27, "Birch Forest", 0.6f, 0.6f),
-                new Biome(28, "Birch Forest Hills", 0.6f, 0.6f),
-                new Biome(29, "Roofed Forest", 0.7f, 0.8f),
-                new Biome(30, "Cold Taiga", -0.5f, 0.4f),
-                new Biome(31, "Cold Taiga Hills", -0.5f, 0.4f),
-                new Biome(32, "Mega Taiga", 0.3f, 0.8f),
-                new Biome(33, "Mega Taiga Hills", 0.3f, 0.8f),
-                new Biome(34, "Extreme Hills+", 0.2f, 0.3f),
-                new Biome(35, "Savanna", 1.2f, 0.0f),
-                new Biome(36, "Savanna Plateau", 1.0f, 0.0f),
-                new Biome(37, "Mesa", 2.0f, 0.0f),
-                new Biome(38, "Mesa Plateau F", 2.0f, 0.0f),
-                new Biome(39, "Mesa Plateau", 2.0f, 0.0f)
-
+                new Gson().fromJson(Gdx.files.internal("defaultRegistry/biomes.json").readString(), Biome[].class)
         );
     }
 
@@ -320,10 +277,6 @@ public class RadixAPI {
                     renderer
             ));
         }
-    }
-
-    private JsonBlock[] loadBlocks(Gson gson, String json) {
-        return gson.fromJson(json, JsonBlock[].class);
     }
 
 }

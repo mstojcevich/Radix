@@ -2,7 +2,6 @@ package sx.lambda.voxel.api;
 
 import com.badlogic.gdx.Gdx;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import pw.oxcafebabe.marcusant.eventbus.EventManager;
 import pw.oxcafebabe.marcusant.eventbus.managers.iridium.IridiumEventManager;
 import sx.lambda.voxel.RadixClient;
@@ -13,10 +12,6 @@ import sx.lambda.voxel.item.Tool.ToolMaterial;
 import sx.lambda.voxel.item.Tool.ToolType;
 import sx.lambda.voxel.world.biome.Biome;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,8 +64,8 @@ public class RadixAPI {
 
             String builtinBlockJson = Gdx.files.internal("defaultRegistry/blocks.json").readString();
             try {
-                BlockList list = loadBlocks(new Gson(), builtinBlockJson);
-                for(JsonBlock block : list.getBlocks()) {
+                JsonBlock[] blocks = loadBlocks(new Gson(), builtinBlockJson);
+                for(JsonBlock block : blocks) {
                     registerBlock(block.createBlock());
                 }
             } catch (BlockBuilder.CustomClassException e) {
@@ -327,8 +322,8 @@ public class RadixAPI {
         }
     }
 
-    private BlockList loadBlocks(Gson gson, String json) {
-        return gson.fromJson(json, BlockList.class);
+    private JsonBlock[] loadBlocks(Gson gson, String json) {
+        return gson.fromJson(json, JsonBlock[].class);
     }
 
 }

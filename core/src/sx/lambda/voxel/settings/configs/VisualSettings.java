@@ -30,7 +30,7 @@ public class VisualSettings implements Serializable {
      * This should not be enabled on machines that don't see lag spikes when loading chunks,
      * since it will make chunks take longer to load in at lower fps.
      */
-    private boolean smoothChunkLoad = false;
+    private boolean smoothChunkLoad = true;
     /**
      * Whether to call glFinish() at the end of each frame
      * <p>
@@ -40,7 +40,7 @@ public class VisualSettings implements Serializable {
      * <p>
      * TL;DR this makes sure everything is actually drawn before going to the next frame
      */
-    private boolean finishEachFrame = true;
+    private boolean finishEachFrame = false;
 
     public int getViewDistance() {
         return viewDistance;

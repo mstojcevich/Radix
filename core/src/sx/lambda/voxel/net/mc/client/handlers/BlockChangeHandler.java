@@ -30,13 +30,7 @@ public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket
         IChunk chunk = game.getWorld().getChunk(x, z);
         if(chunk != null) {
             if (id > 0) {
-                boolean blockExists = false;
-                for(Block b : RadixAPI.instance.getBlocks()) {
-                    if(b.getID() == id) {
-                        blockExists = true;
-                        break;
-                    }
-                }
+                boolean blockExists = RadixAPI.instance.getBlocks()[id] != null;
                 try {
                     chunk.setBlock(blockExists ? id : BuiltInBlockIds.UNKNOWN_ID, chunkRelativeX, y, chunkRelativeZ);
                     chunk.setMeta((short) (blockExists ? meta : 0), chunkRelativeX, y, chunkRelativeZ);

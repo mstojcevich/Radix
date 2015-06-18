@@ -59,7 +59,7 @@ public class BlockSelectGUI implements GuiScreen {
 
         // Looped twice to avoid texture rebinds
         int currentBlockNum = 0;
-        for (Block b : RadixAPI.instance.getBlocksSorted()) {
+        for (Block b : RadixAPI.instance.getBlocks()) {
             if (b == null) continue;
             int yIndex = currentBlockNum / widthCount;
             int xIndex = currentBlockNum % widthCount;
@@ -70,7 +70,7 @@ public class BlockSelectGUI implements GuiScreen {
         }
 
         currentBlockNum = 0;
-        for (Block b : RadixAPI.instance.getBlocksSorted()) {
+        for (Block b : RadixAPI.instance.getBlocks()) {
             if (b == null) continue;
             int yIndex = currentBlockNum / widthCount;
             int xIndex = currentBlockNum % widthCount;

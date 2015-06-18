@@ -63,13 +63,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
                 if(data == 0)
                     continue;
                 int id = data >> 4;
-                boolean exists = false;
-                for(Block blk : RadixAPI.instance.getBlocksSorted()) {
-                    if(blk == null)
-                        continue;
-                    if(blk.getID() == id)
-                        exists = true;
-                }
+                boolean exists = RadixAPI.instance.getBlock(id) != null;
                 if(!exists) {
                     blockData[i] = BuiltInBlockIds.UNKNOWN_ID << 4;
                 }

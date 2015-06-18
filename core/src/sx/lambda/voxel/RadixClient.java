@@ -557,6 +557,8 @@ public class RadixClient extends ApplicationAdapter {
             final int BLOCK_TEX_SIZE = 32;
             int textureIndex = 0;
             for (Block b : RadixAPI.instance.getBlocks()) {
+                if(b == null)
+                    continue;
                 b.setTextureIndex(textureIndex);
                 for (String texLoc : b.getTextureLocations()) {
                     int x = textureIndex * BLOCK_TEX_SIZE % bi.getWidth();

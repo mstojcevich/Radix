@@ -12,20 +12,16 @@ import sx.lambda.voxel.item.Tool.ToolMaterial;
 import sx.lambda.voxel.item.Tool.ToolType;
 import sx.lambda.voxel.world.biome.Biome;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class RadixAPI {
 
     public static final RadixAPI instance = new RadixAPI();
     private final EventManager eventManager;
-    private final List<Block> registeredBlocks = new ArrayList<>();
-    private final List<Item> registeredItems = new ArrayList<>();
+    private final Block[] registeredBlocks = new Block[1024];
+    private final Item[] registeredItems = new Item[1024];
     private final Map<String, BlockRenderer> registeredRenderers = new HashMap<>();
-    private final Block[] registeredBlockArray = new Block[1024];
-    private final Item[] registeredItemArray = new Item[1024];
     private final Biome[] registeredBiomeArray = new Biome[256];
     private int highestID = 0;
 
@@ -153,14 +149,11 @@ public class RadixAPI {
             System.err.printf("Item ID not defined for %s. Using auto generated ID. IF YOU\'RE THE MOD DEVELOPER, FIX THIS!!!\n", i.toString());
         }
 
-        for (Item i2 : this.registeredItems) {
-            if (i.getID() == i2.getID()) {
-                throw new BlockRegistrationException("ID already in use by " + i2.getHumanName());
-            }
+        if(registeredItems[i.getID()] != null) {
+            throw new BlockRegistrationException("ID already in use by " + registeredItems[i.getID()].getHumanName());
         }
 
-        this.registeredItems.add(i);
-        this.registeredItemArray[i.getID()] = i;
+        this.registeredItems[i.getID()] = i;
         highestID = Math.max(highestID, i.getID());
     }
 
@@ -176,21 +169,17 @@ public class RadixAPI {
             System.err.println("Block ID not defined for " + String.valueOf(b) + ". Using auto generated ID. IF YOU\'RE THE MOD DEVELOPER, FIX THIS!!!");
         }
 
-        for (Block bl : this.registeredBlocks) {
-            if (bl.getID() == b.getID()) {
-                throw new BlockRegistrationException("ID already in use by " + b.getHumanName());
-            }
-
+        if(registeredBlocks[b.getID()] != null) {
+            throw new BlockRegistrationException("ID already in use by " + registeredBlocks[b.getID()]);
         }
 
-        this.registeredBlocks.add(b);
-        this.registeredBlockArray[b.getID()] = b;
+        this.registeredBlocks[b.getID()] = b;
         highestID = Math.max(highestID, b.getID());
 
         registerItem(b);
     }
 
-    public List<Block> getBlocks() {
+    public Block[] getBlocks() {
         return registeredBlocks;
     }
 
@@ -204,10 +193,10 @@ public class RadixAPI {
     public Block getBlock(int id) {
         if(id <= 0)
             return null;
-        if(id >= registeredBlockArray.length)
+        if(id >= registeredBlocks.length)
             return null;
 
-        return registeredBlockArray[id];
+        return registeredBlocks[id];
     }
 
     /**
@@ -220,10 +209,10 @@ public class RadixAPI {
     public Item getItem(int id) {
         if(id <= 0)
             return null;
-        if(id >= registeredItemArray.length)
+        if(id >= registeredItems.length)
             return null;
 
-        return registeredItemArray[id];
+        return registeredItems[id];
     }
 
     /**
@@ -239,10 +228,6 @@ public class RadixAPI {
         } else {
             throw new NoSuchRendererException(uid);
         }
-    }
-
-    public Block[] getBlocksSorted() {
-        return registeredBlockArray;
     }
 
     public class BlockRegistrationException extends Exception {

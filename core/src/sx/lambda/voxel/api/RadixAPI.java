@@ -19,8 +19,8 @@ public class RadixAPI {
 
     public static final RadixAPI instance = new RadixAPI();
     private final EventManager eventManager;
-    private final Block[] registeredBlocks = new Block[1024];
-    private final Item[] registeredItems = new Item[1024];
+    private final Block[] registeredBlocks = new Block[4096];
+    private final Item[] registeredItems = new Item[4096];
     private final Map<String, BlockRenderer> registeredRenderers = new HashMap<>();
     private final Biome[] registeredBiomeArray = new Biome[256];
     private int highestID = 0;

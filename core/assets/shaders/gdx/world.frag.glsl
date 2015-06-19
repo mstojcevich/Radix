@@ -93,7 +93,7 @@ varying float v_fog;
 varying vec2 v_rawUV;
 varying vec3 v_position;
 
-const int mapWidth = 1024, mapHeight = 1024, blockWidth = 32;
+const int mapWidth = 2048, mapHeight = 2048, blockWidth = 32;
 const int blocksPerRow = mapWidth/blockWidth;
 const float uPerBlock = float(blockWidth) / float(mapWidth),
             vPerBlock = float(blockWidth) / float(mapHeight);

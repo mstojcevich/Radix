@@ -552,7 +552,7 @@ public class RadixClient extends ApplicationAdapter {
     public void createBlockTextureMap(EventEarlyInit event) {
         // Create a texture atlas for all of the blocks
         addToGLQueue(() -> {
-            Pixmap bi = new Pixmap(1024, 1024, Pixmap.Format.RGBA8888);
+            Pixmap bi = new Pixmap(2048, 2048, Pixmap.Format.RGBA8888);
             bi.setColor(1, 1, 1, 1);
             final int BLOCK_TEX_SIZE = 32;
             int textureIndex = 0;

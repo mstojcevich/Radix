@@ -16,7 +16,7 @@ import sx.lambda.voxel.render.NotInitializedException;
  */
 public class NormalBlockRenderer implements BlockRenderer {
 
-    private static final float TEXTURE_PERCENTAGE = 0.03125f;
+    private static final float TEXTURE_PERCENTAGE = (32f / 4096f) * 2;
     private static final int BLOCKS_PER_WIDTH = 4096 / 32;
 
     private static Texture blockMap;

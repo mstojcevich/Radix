@@ -20,7 +20,8 @@ public interface GuiScreen {
      */
     void finish();
 
-    void onMouseClick(int button);
+    void onMouseClick(int button, boolean up);
+    void mouseMoved(int x, int y);
 
     void keyTyped(char c);
 }

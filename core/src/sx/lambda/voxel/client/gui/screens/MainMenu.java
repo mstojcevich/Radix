@@ -99,7 +99,7 @@ public class MainMenu implements GuiScreen {
     }
 
     @Override
-    public void onMouseClick(int clickType) {
+    public void onMouseClick(int clickType, boolean up) {
         int mouseX = Gdx.input.getX();
         int mouseY = Gdx.graphics.getHeight() - Gdx.input.getY();
 
@@ -111,6 +111,9 @@ public class MainMenu implements GuiScreen {
             }
         }
     }
+
+    @Override
+    public void mouseMoved(int x, int y) {}
 
     @Override
     public void keyTyped(char c) {

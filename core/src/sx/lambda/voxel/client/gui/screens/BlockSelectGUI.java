@@ -113,7 +113,7 @@ public class BlockSelectGUI implements GuiScreen {
     }
 
     @Override
-    public void onMouseClick(int button) {
+    public void onMouseClick(int button, boolean up) {
         int mouseX = Gdx.input.getX();
         int mouseY = Gdx.input.getY();
 
@@ -131,6 +131,9 @@ public class BlockSelectGUI implements GuiScreen {
             }
         }
     }
+
+    @Override
+    public void mouseMoved(int x, int y) {}
 
     @Override
     public void keyTyped(char c) {

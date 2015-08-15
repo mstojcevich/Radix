@@ -51,12 +51,15 @@ public class IngameHUD implements GuiScreen {
     }
 
     @Override
-    public void onMouseClick(int clickType) {
+    public void onMouseClick(int clickType, boolean up) {
+    }
+
+    @Override
+    public void mouseMoved(int x, int y) {
     }
 
     @Override
     public void keyTyped(char c) {
-
     }
 
     @Override

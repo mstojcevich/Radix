@@ -3,6 +3,7 @@ package sx.lambda.voxel;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import sx.lambda.voxel.client.gui.screens.BlockSelectGUI;
+import sx.lambda.voxel.client.gui.screens.IngameMenu;
 import sx.lambda.voxel.client.keybind.Keybind;
 
 import java.util.ArrayList;
@@ -33,12 +34,12 @@ public class RadixInputHandler implements InputProcessor {
             }
 
         }));
-        registerKeybind(new Keybind("voxeltest.gui.back", "Back", Input.Keys.ESCAPE, () -> {
+        registerKeybind(new Keybind("voxeltest.gui.back", "Open Menu / Exit Screen", Input.Keys.ESCAPE, () -> {
             if (game.getWorld() != null) {
                 if (!game.getCurrentScreen().equals(game.getHud())) {
                     game.addToGLQueue(() -> game.setCurrentScreen(game.getHud()));
                 } else {
-                    game.exitWorld();// TODO show ingame options
+                    game.addToGLQueue(() -> game.setCurrentScreen(new IngameMenu()));
                 }
             }
         }));
@@ -91,7 +92,7 @@ public class RadixInputHandler implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        game.getCurrentScreen().onMouseClick(button);
+        game.getCurrentScreen().onMouseClick(button, false);
         switch (button) {
             case 0:
 //                if (game.getWorld() != null) {
@@ -111,6 +112,8 @@ public class RadixInputHandler implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        game.getCurrentScreen().onMouseClick(button, true);
+
         return false;
     }
 
@@ -126,6 +129,8 @@ public class RadixInputHandler implements InputProcessor {
     public boolean mouseMoved(int screenX, int screenY) {
         if (!game.onAndroid())
             updateRotation(screenX, screenY);
+
+        game.getCurrentScreen().mouseMoved(screenX, screenY);
 
         return true;
     }

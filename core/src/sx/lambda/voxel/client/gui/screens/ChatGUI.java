@@ -56,9 +56,12 @@ public class ChatGUI implements GuiScreen, ChatHandler.ChatMessageListener {
     }
 
     @Override
-    public void onMouseClick(int button) {
+    public void onMouseClick(int button, boolean up) {
 
     }
+
+    @Override
+    public void mouseMoved(int x, int y) {}
 
     @Override
     public void keyTyped(char c) {

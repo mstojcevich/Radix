@@ -14,7 +14,7 @@ public class RadixInputHandler implements InputProcessor {
 
     private static final float mouseSensitivity = 0.03f;
     private final RadixClient game;
-    private final List<Keybind> keybindList = Collections.synchronizedList(new ArrayList<Keybind>());
+    private final List<Keybind> keybindList = Collections.synchronizedList(new ArrayList<>());
     private int lastMouseX = -Integer.MAX_VALUE;
     private int lastMouseY = -Integer.MAX_VALUE;
 
@@ -56,13 +56,17 @@ public class RadixInputHandler implements InputProcessor {
                 }
             }
         }));
-        registerKeybind(new Keybind("voxeltest.debug.wire", "Enable Wireframe", Input.Keys.X, new Runnable() {
-            @Override
-            public void run() {
-                if (game.getWorld() != null) {
-                    if (game.getCurrentScreen().equals(game.getHud())) {
-                        game.addToGLQueue(() -> game.setWireframe(!game.isWireframe()));
-                    }
+        registerKeybind(new Keybind("voxeltest.debug.wire", "Toggle Wireframe", Input.Keys.X, () -> {
+            if (game.getWorld() != null) {
+                if (game.getCurrentScreen().equals(game.getHud())) {
+                    game.addToGLQueue(() -> game.setWireframe(!game.isWireframe()));
+                }
+            }
+        }));
+        registerKeybind(new Keybind("voxeltest.debug.info", "Toggle Debug Info", Input.Keys.X, () -> {
+            if (game.getWorld() != null) {
+                if (game.getCurrentScreen().equals(game.getHud())) {
+                    game.addToGLQueue(() -> game.setDebugInfo(!game.debugInfoEnabled()));
                 }
             }
         }));

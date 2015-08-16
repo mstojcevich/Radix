@@ -57,19 +57,21 @@ public class GameRenderer implements Renderer {
         if (!initted)
             init();
 
-        if (System.currentTimeMillis() - lastDynamicTextRerenderMS >= 250) {// Rerender the dynamic texts every quarter second
+        if (System.currentTimeMillis() - lastDynamicTextRerenderMS >= 250) { // Rerender the dynamic texts every quarter second
             createDynamicRenderers();
             lastDynamicTextRerenderMS = System.currentTimeMillis();
         }
 
-        glInfoRender.draw(batch);
-        fpsRender.draw(batch);
-        positionRender.draw(batch);
-        headingRender.draw(batch);
-        chunkposRender.draw(batch);
-        awrtRender.draw(batch);
-        lightlevelRender.draw(batch);
-        activeThreadsRender.draw(batch);
+        if(game.debugInfoEnabled()) {
+            glInfoRender.draw(batch);
+            fpsRender.draw(batch);
+            positionRender.draw(batch);
+            headingRender.draw(batch);
+            chunkposRender.draw(batch);
+            awrtRender.draw(batch);
+            lightlevelRender.draw(batch);
+            activeThreadsRender.draw(batch);
+        }
     }
 
     @Override

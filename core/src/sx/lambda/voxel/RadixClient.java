@@ -114,7 +114,7 @@ public class RadixClient extends ApplicationAdapter {
     private Touchpad moveTouchpad, rotateTouchpad;
     private ImageButton jumpButton, placeButton, breakButton;
 
-    private boolean wireframe;
+    private boolean wireframe, debugText;
 
     public static RadixClient getInstance() {
         return theGame;
@@ -695,40 +695,25 @@ public class RadixClient extends ApplicationAdapter {
         }
     }
 
-    public boolean onAndroid() {
-        return android;
-    }
+    public boolean onAndroid() { return android; }
 
-    public PerspectiveCamera getCamera() {
-        return camera;
-    }
+    public PerspectiveCamera getCamera() { return camera; }
 
-    public OrthographicCamera getHudCamera() {
-        return hudCamera;
-    }
+    public OrthographicCamera getHudCamera() { return hudCamera; }
 
-    public MovementHandler getMovementHandler() {
-        return movementHandler;
-    }
+    public MovementHandler getMovementHandler() { return movementHandler; }
 
-    public IngameHUD getHud() {
-        return this.hud;
-    }
+    public IngameHUD getHud() { return this.hud; }
 
-    public ChatGUI getChatGUI() {
-        return this.chatGUI;
-    }
+    public ChatGUI getChatGUI() { return this.chatGUI; }
 
-    public GameRenderer getGameRenderer() {
-        return this.gameRenderer;
-    }
+    public GameRenderer getGameRenderer() { return this.gameRenderer; }
 
-    public boolean isWireframe() {
-        return wireframe;
-    }
+    public boolean isWireframe() { return wireframe; }
+    public void setWireframe(boolean wireframe) { this.wireframe = wireframe; }
 
-    public void setWireframe(boolean wireframe) {
-        this.wireframe = wireframe;
-    }
+    // Debug text that shows in the ingame HUD
+    public boolean debugInfoEnabled() { return debugText; }
+    public void setDebugInfo(boolean debugText) { this.debugText = debugText; }
 
 }

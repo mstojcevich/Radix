@@ -40,7 +40,7 @@ public class IngameHUD implements GuiScreen {
         float centerY = Gdx.graphics.getHeight() / 2f;
         int crosshairSize = 32;
         float halfCrosshairSize = crosshairSize / 2f;
-        this.drawTexture(guiBatch, 0, MathUtils.round(centerX - halfCrosshairSize), MathUtils.round(centerY + halfCrosshairSize), crosshairSize, crosshairSize);
+        this.drawTexture(guiBatch, 0, MathUtils.round(centerX - halfCrosshairSize), MathUtils.round(centerY - halfCrosshairSize), crosshairSize, crosshairSize);
 
         RadixClient.getInstance().getChatGUI().renderHud(guiBatch);
     }

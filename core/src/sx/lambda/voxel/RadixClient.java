@@ -623,6 +623,7 @@ public class RadixClient extends ApplicationAdapter {
                             mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.CANCEL_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
                         }
                     }
+                    player.resetBlockBreak();
                 } catch (CoordinatesOutOfBoundsException ex) {
                     ex.printStackTrace();
                 }

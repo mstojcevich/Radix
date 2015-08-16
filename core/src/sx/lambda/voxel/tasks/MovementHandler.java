@@ -14,6 +14,9 @@ import sx.lambda.voxel.world.IWorld;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
+/**
+ * Handles input-based movement, forces, and gravity application.
+ */
 public class MovementHandler implements RepeatedTask {
 
     // In meters per milliseconds

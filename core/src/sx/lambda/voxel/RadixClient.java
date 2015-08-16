@@ -70,6 +70,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import static com.badlogic.gdx.graphics.GL20.GL_COLOR_BUFFER_BIT;
 import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_BUFFER_BIT;
 
+/**
+ * Primary class for an instance of a Radix client.
+ */
 public class RadixClient extends ApplicationAdapter {
 
     public static final String GAME_TITLE = "VoxelTest";
@@ -91,7 +94,7 @@ public class RadixClient extends ApplicationAdapter {
 
     private GuiScreen currentScreen;
     private TransitionAnimation transitionAnimation;
-    private Renderer renderer; // renders the game
+    private Renderer renderer;
     private GameRenderer gameRenderer; // renderer for when in game
     private MainMenu mainMenu;
     private IngameHUD hud;
@@ -337,6 +340,10 @@ public class RadixClient extends ApplicationAdapter {
     private void prepareNewFrame() {
         int clear = GL_DEPTH_BUFFER_BIT;
         if(world == null || getCurrentScreen() != hud || (transitionAnimation != null && !transitionAnimation.isFinished())) {
+            /*
+            Clear color buffer too when not in a world
+            When in a world, since there is a skybox, clearing the color buffer would be pointless.
+             */
             clear |= GL_COLOR_BUFFER_BIT;
             Gdx.gl.glClearColor(0.7f, 0.8f, 1f, 1f);
         }

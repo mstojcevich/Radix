@@ -24,6 +24,9 @@ import java.text.DecimalFormat;
 
 import static com.badlogic.gdx.graphics.GL20.*;
 
+/**
+ * Handles the rendering of the current world
+ */
 public class GameRenderer implements Renderer {
 
     private final RadixClient game;

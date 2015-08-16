@@ -16,6 +16,34 @@ import sx.lambda.voxel.world.chunk.IChunk;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Mesher using the "greedy meshing" technique.
+ *
+ * Similar to the method described by Mikola Lysenko at http://0fps.net/2012/06/30/meshing-in-a-minecraft-game/
+ *
+ * Goes through each direction and attempts to merge multiple faces into rectangles quickly in one pass.
+ *
+ * Begins at the origin, the steps one block at a time horizontal. Keeps going horizontal until the next block reached
+ *   would not render the same as the block that was started with, or the next block is dirty.
+ *   When a different or already used block is found, the horizontal line stops and a vertical march begins.
+ *   Vertical stepping occurs until one of the blocks in the next row would not render the same as the initial block,
+ *   or one of the blocks in the next row is dirty. When an incompatible row is found, the marching stops, and a rectangle is completed.
+ *   All of the blocks in the completed rectangle are marked as dirty and the rectangle is used as a face.
+ *   This process is repeated with the origin at the next non-dirty block until there are no more dirty blocks on the face.
+ *
+ * Example:
+ *
+ *   Source
+ *   [][][] [][][]
+ *   [][]   [][][]
+ *   []
+ *
+ *   Result
+ *   [   ]  |---|
+ *   [  ]   |___|
+ *   []
+ *
+ */
 public class GreedyMesher implements Mesher {
 
     private final IChunk chunk;

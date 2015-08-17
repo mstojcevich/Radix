@@ -32,7 +32,7 @@ allprojects {
         }
         maven { url "http://repo.maven.apache.org/maven2" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url "http://repo.spacehq.org/content/repositories/snapshots" }
+        maven { url "https://repo.spacehq.org/content/repositories/snapshots/" }
     }
 }
 
@@ -51,7 +51,9 @@ project(":core") {
 
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
-        compile group: "org.spacehq", name: 'mcprotocollib', version:'1.8-SNAPSHOT'
+        // Java doesn't work with the spacehq SSL cert right now, so going to use local copy
+        // compile group: "org.spacehq", name: 'mcprotocollib', version:'1.8.8-SNAPSHOT'
+        compile name: 'mcprotocollib-1.8.8'
         compile name: 'iridiumeventbus-v0'
     }
 }

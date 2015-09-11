@@ -6,11 +6,15 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Action;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
+import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.client.gui.GuiScreen;
 
 public class IngameMenu implements GuiScreen {
@@ -29,7 +33,28 @@ public class IngameMenu implements GuiScreen {
                 new BitmapFont());
 
         Button returnButton = new TextButton("Return to Game", btnStyle);
-        stage.addActor(returnButton);
+        returnButton.addListener(new ClickListener() {
+            @Override
+            public void clicked (InputEvent event, float x, float y) {
+                RadixClient.getInstance().setCurrentScreen(RadixClient.getInstance().getHud());
+            }
+        });
+
+        Button mainMenuButton = new TextButton("Exit to Main Menu", btnStyle);
+        mainMenuButton.addListener(new ClickListener() {
+            @Override
+            public void clicked (InputEvent event, float x, float y) {
+                RadixClient.getInstance().getMinecraftConn().getClient().getSession().disconnect("Leaving");
+                RadixClient.getInstance().setCurrentScreen(RadixClient.getInstance().getMainMenu());
+            }
+        });
+
+        Table table = new Table();
+        table.setFillParent(true);
+        table.add(returnButton);
+        table.row();
+        table.add(mainMenuButton);
+        stage.addActor(table);
     }
 
     @Override
@@ -60,6 +85,7 @@ public class IngameMenu implements GuiScreen {
 
     @Override
     public void keyTyped(char c) {
+        stage.keyTyped(c);
     }
 
 }

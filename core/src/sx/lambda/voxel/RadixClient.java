@@ -497,6 +497,9 @@ public class RadixClient extends ApplicationAdapter {
     }
 
     public void enterRemoteWorld(final String hostname, final short port) {
+        selectedBlock = null;
+        selectedNextPlace = null;
+
         enterWorld(new World(true, false), true);
         (mcClientConn = new MinecraftClientConnection(RadixClient.this, hostname, port)).start();
         chatGUI.setup(mcClientConn);

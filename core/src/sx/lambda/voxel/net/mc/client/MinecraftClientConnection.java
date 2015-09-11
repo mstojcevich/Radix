@@ -68,7 +68,11 @@ public class MinecraftClientConnection {
 
             @Override
             public void disconnected(DisconnectedEvent event) {
-                System.out.println("Disconnected: " + Message.fromString(event.getReason()).getFullText());
+                RadixClient.getInstance().addToGLQueue(() -> {
+                            RadixClient.getInstance().setCurrentScreen(RadixClient.getInstance().getMainMenu());
+                            System.out.println("Disconnected: " + Message.fromString(event.getReason()).getFullText());
+                        }
+                );
             }
         });
     }

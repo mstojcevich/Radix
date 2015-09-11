@@ -39,7 +39,7 @@ public class IngameMenu implements GuiScreen {
 
     @Override
     public void finish() {
-
+        stage.dispose();
     }
 
     @Override

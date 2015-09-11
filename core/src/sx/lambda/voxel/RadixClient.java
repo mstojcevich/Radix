@@ -724,4 +724,8 @@ public class RadixClient extends ApplicationAdapter {
     public boolean debugInfoEnabled() { return debugText; }
     public void setDebugInfo(boolean debugText) { this.debugText = debugText; }
 
+    public MainMenu getMainMenu() {
+        return mainMenu;
+    }
+
 }

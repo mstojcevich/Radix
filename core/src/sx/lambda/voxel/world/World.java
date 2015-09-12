@@ -651,7 +651,7 @@ public class World implements IWorld {
     private void processChunkUploadQueue() {
         while(!chunkUploadQueue.isEmpty()) {
             chunkUploadQueue.poll().run();
-            if(RadixClient.getInstance().getSettingsManager().getVisualSettings().smoothChunkload())
+            if(RadixClient.getInstance().getSettingsManager().getVisualSettings().getSmoothChunkLoad().getValue())
                 break; // distribute chunk uploads across frames (one chunkload per frame)
         }
     }

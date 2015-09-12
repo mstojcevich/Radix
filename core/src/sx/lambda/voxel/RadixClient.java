@@ -39,6 +39,7 @@ import sx.lambda.voxel.api.events.register.EventRegisterBlockRenderers;
 import sx.lambda.voxel.api.events.register.EventRegisterItems;
 import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.client.gui.GuiScreen;
+import sx.lambda.voxel.client.gui.SceneTheme;
 import sx.lambda.voxel.client.gui.screens.ChatGUI;
 import sx.lambda.voxel.client.gui.screens.IngameHUD;
 import sx.lambda.voxel.client.gui.screens.MainMenu;
@@ -119,6 +120,8 @@ public class RadixClient extends ApplicationAdapter {
 
     private boolean wireframe, debugText;
 
+    private SceneTheme sceneTheme;
+
     public static RadixClient getInstance() {
         return theGame;
     }
@@ -145,7 +148,7 @@ public class RadixClient extends ApplicationAdapter {
 
         try {
             RadixAPI.instance.registerBuiltinItems();
-            if(!settingsManager.getVisualSettings().isFancyTreesEnabled()) {
+            if(!settingsManager.getVisualSettings().getFancyTrees().getValue()) {
                 RadixAPI.instance.getBlock(BuiltInBlockIds.LEAVES_ID).setOccludeCovered(true);
                 RadixAPI.instance.getBlock(BuiltInBlockIds.LEAVES_TWO_ID).setOccludeCovered(true);
             }
@@ -259,9 +262,12 @@ public class RadixClient extends ApplicationAdapter {
 
         Gdx.input.setInputProcessor(new RadixInputHandler(this));
 
-        if(settingsManager.getVisualSettings().nonContinuous()) {
+        if(settingsManager.getVisualSettings().getNonContinuous().getValue()) {
             Gdx.graphics.setContinuousRendering(false);
         }
+
+        sceneTheme = new SceneTheme();
+        sceneTheme.init();
     }
 
     @Override
@@ -318,7 +324,7 @@ public class RadixClient extends ApplicationAdapter {
                 androidStage.draw();
             }
 
-            if(settingsManager.getVisualSettings().finishEachFrame())
+            if(settingsManager.getVisualSettings().getFinishEachFrame().getValue())
                 Gdx.gl.glFinish();
         } catch (Exception e) {
             done = true;
@@ -730,5 +736,7 @@ public class RadixClient extends ApplicationAdapter {
     public MainMenu getMainMenu() {
         return mainMenu;
     }
+
+    public SceneTheme getSceneTheme() { return sceneTheme; }
 
 }

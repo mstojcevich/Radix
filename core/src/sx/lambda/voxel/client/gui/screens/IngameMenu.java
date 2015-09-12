@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton.ImageTextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import sx.lambda.voxel.RadixClient;
@@ -25,12 +26,15 @@ public class IngameMenu implements GuiScreen {
     public void init() {
         stage = new Stage();
 
-        // TODO memory manage
-        ImageTextButtonStyle btnStyle = new ImageTextButtonStyle(
-                new SpriteDrawable(new Sprite(new Texture(Gdx.files.internal("textures/gui/guiButtonBackground.png")))),
-                new SpriteDrawable(new Sprite(new Texture(Gdx.files.internal("textures/gui/guiButtonBackground-pressed.png")))),
-                new SpriteDrawable(new Sprite(new Texture(Gdx.files.internal("textures/gui/guiButtonBackground-disabled.png")))),
-                new BitmapFont());
+        TextButtonStyle btnStyle = RadixClient.getInstance().getSceneTheme().getButtonStyle();
+
+        Button visualSettingsBtn = new TextButton("Visual Settings", btnStyle);
+        visualSettingsBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked (InputEvent event, float x, float y) {
+                RadixClient.getInstance().setCurrentScreen(new VisualSettingsMenu());
+            }
+        });
 
         Button returnButton = new TextButton("Return to Game", btnStyle);
         returnButton.addListener(new ClickListener() {
@@ -51,6 +55,8 @@ public class IngameMenu implements GuiScreen {
 
         Table table = new Table();
         table.setFillParent(true);
+        table.add(visualSettingsBtn);
+        table.row();
         table.add(returnButton);
         table.row();
         table.add(mainMenuButton);

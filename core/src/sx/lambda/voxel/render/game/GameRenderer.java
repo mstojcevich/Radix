@@ -156,7 +156,7 @@ public class GameRenderer implements Renderer {
         currentHeight += debugTextRenderer.getLineHeight();
 
         String fpsStr = "FPS: " + String.valueOf(Gdx.graphics.getFramesPerSecond());
-        if(RadixClient.getInstance().getSettingsManager().getVisualSettings().nonContinuous()) {
+        if(RadixClient.getInstance().getSettingsManager().getVisualSettings().getNonContinuous().getValue()) {
             fpsStr = fpsStr.concat(" (NON-CONTINUOUS! INACCURATE!)");
             fpsRender.setColor(Color.RED);
         }

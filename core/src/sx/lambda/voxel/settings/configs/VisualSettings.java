@@ -1,5 +1,7 @@
 package sx.lambda.voxel.settings.configs;
 
+import sx.lambda.voxel.settings.options.ToggleOption;
+
 import java.io.Serializable;
 
 public class VisualSettings implements Serializable {
@@ -12,17 +14,17 @@ public class VisualSettings implements Serializable {
     /**
      * Whether to draw internal leaves of trees
      */
-    private boolean fancyTrees = true;
+    private ToggleOption fancyTrees = new ToggleOption("Fancy Trees", true);
     /**
      * Whether to average light values on a per-corner basis
      */
-    private boolean perCornerLight = true;
+    private ToggleOption perCornerLight = new ToggleOption("Per Corner Light", true);
     /**
      * Whether to only update the screen when something has changed
      * <p>
      * Saves battery on laptops and mobile phones
      */
-    private boolean nonContinuous = false;
+    private ToggleOption nonContinuous = new ToggleOption("Frame Reuse", false);
     /**
      * Whether to distribute chunk rerenders by only uploading one to the gpu per frame.
      * This is for the GL stuff, since the non-gl stuff can be and is done on another thread.
@@ -30,7 +32,7 @@ public class VisualSettings implements Serializable {
      * This should not be enabled on machines that don't see lag spikes when loading chunks,
      * since it will make chunks take longer to load in at lower fps.
      */
-    private boolean smoothChunkLoad = true;
+    private ToggleOption smoothChunkLoad = new ToggleOption("Smooth Chunk Load", true);
     /**
      * Whether to call glFinish() at the end of each frame
      * <p>
@@ -40,30 +42,30 @@ public class VisualSettings implements Serializable {
      * <p>
      * TL;DR this makes sure everything is actually drawn before going to the next frame
      */
-    private boolean finishEachFrame = false;
+    private ToggleOption finishEachFrame = new ToggleOption("Finish Each Frame", false);
 
     public int getViewDistance() {
-        return viewDistance;
+        return this.viewDistance;
     }
 
-    public boolean isFancyTreesEnabled() {
-        return fancyTrees;
+    public ToggleOption getFancyTrees() {
+        return this.fancyTrees;
     }
 
-    public boolean perCornerLightEnabled() {
-        return perCornerLight;
+    public ToggleOption getPerCornerLight() {
+        return this.perCornerLight;
     }
 
-    public boolean nonContinuous() {
-        return nonContinuous;
+    public ToggleOption getNonContinuous() {
+        return this.nonContinuous;
     }
 
-    public boolean smoothChunkload() {
-        return smoothChunkLoad;
+    public ToggleOption getSmoothChunkLoad() {
+        return this.smoothChunkLoad;
     }
 
-    public boolean finishEachFrame() {
-        return finishEachFrame;
+    public ToggleOption getFinishEachFrame() {
+        return this.finishEachFrame;
     }
 
 }

@@ -44,11 +44,7 @@ public class ServerConnectGUI implements GuiScreen {
         fieldStyle.fontColor = Color.WHITE;
         TextField ipField = new TextField("IP:Port", fieldStyle);
 
-        ImageTextButtonStyle btnStyle = new ImageTextButtonStyle(
-                new SpriteDrawable(new Sprite(new Texture(Gdx.files.internal("textures/gui/guiButtonBackground.png")))),
-                new SpriteDrawable(new Sprite(new Texture(Gdx.files.internal("textures/gui/guiButtonBackground-pressed.png")))),
-                new SpriteDrawable(new Sprite(new Texture(Gdx.files.internal("textures/gui/guiButtonBackground-disabled.png")))),
-                new BitmapFont());
+        ImageTextButtonStyle btnStyle = RadixClient.getInstance().getSceneTheme().getButtonStyle();
 
         TextButton connectButton = new TextButton("Connect", btnStyle);
         connectButton.addListener(new ClickListener() {

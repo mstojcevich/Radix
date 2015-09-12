@@ -75,7 +75,7 @@ public class Chunk implements IChunk {
         }
 
         if (RadixClient.getInstance() != null) {// We're a client
-            mesher = new GreedyMesher(this, RadixClient.getInstance().getSettingsManager().getVisualSettings().perCornerLightEnabled());
+            mesher = new GreedyMesher(this, RadixClient.getInstance().getSettingsManager().getVisualSettings().getPerCornerLight().getValue());
         } else {
             mesher = null;
         }

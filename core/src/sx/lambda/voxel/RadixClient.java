@@ -76,6 +76,8 @@ import static com.badlogic.gdx.graphics.GL20.GL_DEPTH_BUFFER_BIT;
  */
 public class RadixClient extends ApplicationAdapter {
 
+    // TODO CLEANUP the render loop is VERY undocumented and things happen all over the place, clean that up
+
     public static final String GAME_TITLE = "VoxelTest";
     private static RadixClient theGame;
 

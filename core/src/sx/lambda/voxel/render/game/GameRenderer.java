@@ -2,10 +2,20 @@ package sx.lambda.voxel.render.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFontCache;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
 import sx.lambda.voxel.RadixClient;
@@ -44,6 +54,12 @@ public class GameRenderer implements Renderer {
             lightlevelRender,
             activeThreadsRender,
             selectedBlockRender;
+
+    private Texture[] blockBreakStages = new Texture[10];
+    private Model blockBreakModel;
+    private ModelInstance blockBreakModelInstance;
+    private ModelBatch blockOverlayBatch;
+    private int blockBreakStage = 0;
 
     public GameRenderer(RadixClient game) {
         this.game = game;
@@ -87,6 +103,14 @@ public class GameRenderer implements Renderer {
     public void cleanup() {
         debugTextRenderer.dispose();
 
+        for(Texture t : blockBreakStages) {
+            t.dispose();
+        }
+
+        if(blockBreakModel != null) {
+            blockBreakModel.dispose();
+        }
+
         initted = false;
     }
 
@@ -106,6 +130,13 @@ public class GameRenderer implements Renderer {
         lightlevelRender = debugTextRenderer.newFontCache();
         activeThreadsRender = debugTextRenderer.newFontCache();
         selectedBlockRender = debugTextRenderer.newFontCache();
+
+        blockOverlayBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
+
+        String destroyStageFmt = "textures/block/overlay/destroy_stage_%d.png";
+        for(int stage = 0; stage < 10; stage++) {
+            blockBreakStages[stage] = new Texture(Gdx.files.internal(String.format(destroyStageFmt, stage)));
+        }
     }
 
     private void prepareWorldRender() {
@@ -124,6 +155,32 @@ public class GameRenderer implements Renderer {
     }
 
     private void drawBlockSelection() {
+        int curProgressInt = Math.round(RadixClient.getInstance().getPlayer().getBreakPercent() * 10) - 1;
+        if((blockBreakModel == null || blockBreakStage != curProgressInt) && curProgressInt >= 0) {
+            if(blockBreakModel != null)
+                blockBreakModel.dispose();
+
+            blockBreakStage = curProgressInt;
+
+            ModelBuilder builder = new ModelBuilder();
+            blockBreakModel = builder.createBox(1f, 1f, 1f,
+                    new Material(TextureAttribute.createDiffuse(blockBreakStages[blockBreakStage]),
+                            new BlendingAttribute(),
+                            FloatAttribute.createAlphaTest(0.25f)),
+                    VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates);
+            blockBreakModelInstance = new ModelInstance(blockBreakModel);
+        }
+
+        Vec3i curBlk = RadixClient.getInstance().getSelectedBlock();
+        if(curBlk != null && curProgressInt >= 0) {
+            Gdx.gl.glPolygonOffset(100000, 2000000);
+            blockOverlayBatch.begin(RadixClient.getInstance().getCamera());
+            blockBreakModelInstance.transform.translate(curBlk.x + 0.5f, curBlk.y + 0.5f, curBlk.z + 0.5f);
+            blockOverlayBatch.render(blockBreakModelInstance);
+            blockBreakModelInstance.transform.translate(-(curBlk.x + 0.5f), -(curBlk.y + 0.5f), -(curBlk.z + 0.5f));
+            blockOverlayBatch.end();
+            Gdx.gl.glPolygonOffset(100000, -2000000);
+        }
     }
 
     private void renderEntities() {

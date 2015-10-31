@@ -190,7 +190,7 @@ public class World implements IWorld {
         }
         modelBatch.begin(RadixClient.getInstance().getCamera());
         skybox.transform.translate(playerX, playerY, playerZ);
-//        modelBatch.render(skybox);
+        modelBatch.render(skybox);
         skybox.transform.translate(-playerX, -playerY, -playerZ);
         if(sortedChunkList != null) {
             boolean[] visibleChunks = new boolean[sortedChunkList.size()];

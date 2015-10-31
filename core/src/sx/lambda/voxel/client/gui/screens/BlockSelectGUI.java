@@ -49,7 +49,7 @@ public class BlockSelectGUI implements GuiScreen {
         Gdx.gl.glClearColor(0, 0, 0, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        SpriteBatch rerenderBatch = new SpriteBatch(1000, RadixClient.getInstance().getDefaultSpriteBatchShader());
+        SpriteBatch rerenderBatch = new SpriteBatch();
         rerenderBatch.begin();
 
         final int width = Gdx.graphics.getWidth() - PADDING*2;

@@ -68,7 +68,7 @@ public class MainMenu implements GuiScreen {
     public void init() {
         if (!initialized) {
             camera = new OrthographicCamera();
-            batch = new SpriteBatch();
+            batch = new SpriteBatch(1000, RadixClient.getInstance().getDefaultSpriteBatchShader());
             batch.setTransformMatrix(RadixClient.getInstance().getHudCamera().combined);
             batch.setTransformMatrix(camera.combined);
             mmButtonTexture = new Texture(Gdx.files.internal("textures/gui/mmBtn.png"));

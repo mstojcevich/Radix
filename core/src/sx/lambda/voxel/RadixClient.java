@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -65,6 +66,7 @@ import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
 import javax.swing.*;
+import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -123,6 +125,8 @@ public class RadixClient extends ApplicationAdapter {
     private boolean wireframe, debugText;
 
     private SceneTheme sceneTheme;
+
+    private ShaderProgram defaultSpriteBatchShader;
 
     public static RadixClient getInstance() {
         return theGame;
@@ -255,7 +259,7 @@ public class RadixClient extends ApplicationAdapter {
         camera.update();
         hudCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        guiBatch = new SpriteBatch();
+        guiBatch = new SpriteBatch(1000, theGame.getDefaultSpriteBatchShader());
         guiBatch.setProjectionMatrix(hudCamera.combined);
 
         if(android) {
@@ -346,13 +350,13 @@ public class RadixClient extends ApplicationAdapter {
     }
 
     private void prepareNewFrame() {
-        int clear = GL_DEPTH_BUFFER_BIT;
+        int clear = GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT;
         if(world == null || getCurrentScreen() != hud || (transitionAnimation != null && !transitionAnimation.isFinished())) {
             /*
             Clear color buffer too when not in a world
             When in a world, since there is a skybox, clearing the color buffer would be pointless.
              */
-            clear |= GL_COLOR_BUFFER_BIT;
+            //clear |= GL_COLOR_BUFFER_BIT; TODO Readd once skybox is fixed, and remove it from clear initialization
             Gdx.gl.glClearColor(0.7f, 0.8f, 1f, 1f);
         }
         Gdx.gl.glClear(clear);
@@ -740,5 +744,18 @@ public class RadixClient extends ApplicationAdapter {
     }
 
     public SceneTheme getSceneTheme() { return sceneTheme; }
+
+    public ShaderProgram getDefaultSpriteBatchShader() {
+        if(defaultSpriteBatchShader == null) {
+            defaultSpriteBatchShader = new ShaderProgram(
+                    Gdx.files.internal("shaders/gdx/spritebatch.vert.glsl"),
+                    Gdx.files.internal("shaders/gdx/spritebatch.frag.glsl"));
+
+            if (!defaultSpriteBatchShader.isCompiled())
+                throw new IllegalArgumentException("Error compiling shader: " + defaultSpriteBatchShader.getLog());
+        }
+
+        return defaultSpriteBatchShader;
+    }
 
 }

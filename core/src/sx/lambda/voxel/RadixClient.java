@@ -291,7 +291,8 @@ public class RadixClient extends ApplicationAdapter {
     @Override
     public void render() {
         try {
-            if (done) Gdx.app.exit();
+            if (done)
+                Gdx.app.exit();
 
             prepareNewFrame();
 

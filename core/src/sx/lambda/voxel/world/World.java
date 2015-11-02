@@ -49,9 +49,7 @@ public class World implements IWorld {
 
     private final IntMap<IChunk> chunkMap = new IntMap<>();
     private final Set<IChunk> chunkList = new ConcurrentSet<>();
-    private List<IChunk> sortedChunkList;
     private final Set<IChunk> chunksToRerender = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private IChunk lastPlayerChunk;
 
     private final boolean remote, server;
     private final ChunkGenerator chunkGen;
@@ -158,28 +156,6 @@ public class World implements IWorld {
         final IChunk playerChunk = getChunk(
                 MathUtils.floor(RadixClient.getInstance().getPlayer().getPosition().getX()),
                 MathUtils.floor(RadixClient.getInstance().getPlayer().getPosition().getZ()));
-        if(playerChunk != null && (playerChunk != lastPlayerChunk || (sortedChunkList != null && chunkList.size() != sortedChunkList.size()))) {
-            sortedChunkList = new ArrayList<>();
-            for(IChunk c : chunkList) {
-                if (RadixClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                        RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
-                    sortedChunkList.add(c);
-                }
-            }
-            Collections.sort(sortedChunkList, new Comparator<IChunk>() {
-                @Override
-                public int compare(IChunk c1, IChunk c2) {
-                    int xDiff1 = playerChunk.getStartPosition().x - c1.getStartPosition().x;
-                    int zDiff1 = playerChunk.getStartPosition().z - c1.getStartPosition().z;
-                    int xDiff2 = playerChunk.getStartPosition().x - c2.getStartPosition().x;
-                    int zDiff2 = playerChunk.getStartPosition().z - c2.getStartPosition().z;
-                    int sqDist2 = xDiff2*xDiff2 + zDiff2*zDiff2;
-                    int sqDist1 = xDiff1*xDiff1 + zDiff1*zDiff1;
-                    return sqDist2 - sqDist1;
-                }
-            });
-            lastPlayerChunk = playerChunk;
-        }
 
         float playerX = RadixClient.getInstance().getPlayer().getPosition().getX(),
                 playerY = RadixClient.getInstance().getPlayer().getPosition().getY(),
@@ -192,10 +168,9 @@ public class World implements IWorld {
         skybox.transform.translate(playerX, playerY, playerZ);
         modelBatch.render(skybox);
         skybox.transform.translate(-playerX, -playerY, -playerZ);
-        if(sortedChunkList != null) {
-            boolean[] visibleChunks = new boolean[sortedChunkList.size()];
-            int chunkNum = 0;
-            for (IChunk c : sortedChunkList) {
+        if(chunkList != null) {
+            List<IChunk> visibleChunks = new LinkedList<>();
+            for (IChunk c : chunkList) {
                 int x = c.getStartPosition().x;
                 int z = c.getStartPosition().z;
                 int halfWidth = getChunkSize()/2;
@@ -204,39 +179,28 @@ public class World implements IWorld {
                 int midY = c.getHighestPoint()/2;
                 boolean visible = RadixClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
                 if(visible) {
-                    visibleChunks[chunkNum] = true;
+                    visibleChunks.add(c);
                     c.render(modelBatch);
                 }
-                chunkNum++;
             }
 
-            chunkNum = 0;
-            for (IChunk c : sortedChunkList) {
-                boolean visible = visibleChunks[chunkNum];
-                if(visible) {
+            for (IChunk c : visibleChunks) {
+                if(c != null)
                     c.renderTranslucent(modelBatch);
-                }
-                chunkNum++;
             }
-        }
-        modelBatch.end();
-        if(wireframe && sortedChunkList != null) {
-            RadixClient.getInstance().setWireframe(true);
-            Gdx.gl.glLineWidth(2);
-            wiremeshBatch.begin(RadixClient.getInstance().getCamera());
-            for (IChunk c : sortedChunkList) {
-                int x = c.getStartPosition().x;
-                int z = c.getStartPosition().z;
-                int halfWidth = getChunkSize()/2;
-                int midX = x + halfWidth;
-                int midZ = z + halfWidth;
-                int midY = c.getHighestPoint()/2;
-                boolean visible = RadixClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
-                if(visible) {
-                    c.render(wiremeshBatch);
+            modelBatch.end();
+            if(wireframe) {
+                RadixClient.getInstance().setWireframe(true);
+                Gdx.gl.glLineWidth(2);
+                wiremeshBatch.begin(RadixClient.getInstance().getCamera());
+                for (IChunk c : visibleChunks) {
+                    if(c != null)
+                        c.render(wiremeshBatch);
                 }
+                wiremeshBatch.end();
             }
-            wiremeshBatch.end();
+        } else {
+            modelBatch.end();
         }
     }
 

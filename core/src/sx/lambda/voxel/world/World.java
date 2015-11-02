@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.IntMap;
-import io.netty.util.internal.ConcurrentSet;
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.api.events.worldgen.EventFinishChunkGen;
@@ -48,8 +47,8 @@ public class World implements IWorld {
     private static final int LIGHTING_WORKERS = 2;
 
     private final IntMap<IChunk> chunkMap = new IntMap<>();
-    private final Set<IChunk> chunkList = new ConcurrentSet<>();
-    private final Set<IChunk> chunksToRerender = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Queue<IChunk> chunkList = new ConcurrentLinkedQueue<>();
+    private final Queue<IChunk> chunksToRerender = new ConcurrentLinkedQueue<>();
 
     private final boolean remote, server;
     private final ChunkGenerator chunkGen;
@@ -59,7 +58,7 @@ public class World implements IWorld {
     private final ExecutorService sunlightPoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
     private final ExecutorService blocklightPoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
     private final Queue<int[]> sunlightQueue = new LinkedBlockingQueue<>();
-    private final Queue<int[]> sunlightRemovalQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<int[]> sunlightRemovalQueue = new LinkedBlockingQueue<>();
     private final Queue<int[]> blocklightQueue = new LinkedBlockingQueue<>();
 
     // Mesh related stuff
@@ -145,17 +144,16 @@ public class World implements IWorld {
         processChunkUploadQueue();
 
         processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
-        for (IChunk c : chunksToRerender) {
-            if(RadixClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                    RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance()*CHUNK_SIZE) {
-                c.rerender();
-                chunksToRerender.remove(c);
+
+        {
+            IChunk c;
+            while((c = chunksToRerender.poll()) != null) {
+                if(RadixClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                        RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
+                    c.rerender();
+                }
             }
         }
-
-        final IChunk playerChunk = getChunk(
-                MathUtils.floor(RadixClient.getInstance().getPlayer().getPosition().getX()),
-                MathUtils.floor(RadixClient.getInstance().getPlayer().getPosition().getZ()));
 
         float playerX = RadixClient.getInstance().getPlayer().getPosition().getX(),
                 playerY = RadixClient.getInstance().getPlayer().getPosition().getY(),
@@ -185,8 +183,7 @@ public class World implements IWorld {
             }
 
             for (IChunk c : visibleChunks) {
-                if(c != null)
-                    c.renderTranslucent(modelBatch);
+                c.renderTranslucent(modelBatch);
             }
             modelBatch.end();
             if(wireframe) {
@@ -194,8 +191,7 @@ public class World implements IWorld {
                 Gdx.gl.glLineWidth(2);
                 wiremeshBatch.begin(RadixClient.getInstance().getCamera());
                 for (IChunk c : visibleChunks) {
-                    if(c != null)
-                        c.render(wiremeshBatch);
+                    c.render(wiremeshBatch);
                 }
                 wiremeshBatch.end();
             }
@@ -390,7 +386,7 @@ public class World implements IWorld {
                 if (posChunk == null) {
                     continue;
                 }
-                int ll = 0;
+                int ll;
                 try {
                     ll = posChunk.getSunlight(x & (CHUNK_SIZE-1), y, z & (CHUNK_SIZE-1));
 
@@ -470,9 +466,7 @@ public class World implements IWorld {
                     e.printStackTrace();
                 }
             }
-            for(IChunk changedChunk : changedChunks) {
-                changedChunk.finishChangingSunlight();
-            }
+            changedChunks.forEach(IChunk::finishChangingSunlight);
         }
     }
 
@@ -496,7 +490,9 @@ public class World implements IWorld {
 
     @Override
     public void rmChunk(IChunk chunk) {
-        if(chunk == null)return;
+        if(chunk == null)
+            return;
+
         removeChunkFromMap(chunk.getStartPosition());
         this.chunkList.remove(chunk);
     }

@@ -47,6 +47,7 @@ public class World implements IWorld {
     private static final int LIGHTING_WORKERS = 2;
 
     private final IntMap<IChunk> chunkMap = new IntMap<>();
+    private final Queue<IChunk> chunkList = new ConcurrentLinkedQueue<>();
     private final Queue<IChunk> chunksToRerender = new ConcurrentLinkedQueue<>();
 
     private final boolean remote, server;
@@ -165,34 +166,37 @@ public class World implements IWorld {
         skybox.transform.translate(playerX, playerY, playerZ);
         modelBatch.render(skybox);
         skybox.transform.translate(-playerX, -playerY, -playerZ);
-        List<IChunk> visibleChunks = new LinkedList<>();
-        for (IChunk c : chunkMap.values()) {
-            int x = c.getStartPosition().x;
-            int z = c.getStartPosition().z;
-            int halfWidth = getChunkSize()/2;
-            int midX = x + halfWidth;
-            int midZ = z + halfWidth;
-            int midY = c.getHighestPoint()/2;
-            boolean visible = RadixClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
-            if(visible) {
-                visibleChunks.add(c);
-                c.render(modelBatch);
+        if(chunkList != null) {
+            List<IChunk> visibleChunks = new LinkedList<>();
+            for (IChunk c : chunkList) {
+                int x = c.getStartPosition().x;
+                int z = c.getStartPosition().z;
+                int halfWidth = getChunkSize()/2;
+                int midX = x + halfWidth;
+                int midZ = z + halfWidth;
+                int midY = c.getHighestPoint()/2;
+                boolean visible = RadixClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
+                if(visible) {
+                    visibleChunks.add(c);
+                    c.render(modelBatch);
+                }
             }
-        }
 
-        for (IChunk c : visibleChunks) {
-            c.renderTranslucent(modelBatch);
-        }
-        modelBatch.end();
-
-        if(wireframe) {
-            RadixClient.getInstance().setWireframe(true);
-            Gdx.gl.glLineWidth(2);
-            wiremeshBatch.begin(RadixClient.getInstance().getCamera());
             for (IChunk c : visibleChunks) {
-                c.render(wiremeshBatch);
+                c.renderTranslucent(modelBatch);
             }
-            wiremeshBatch.end();
+            modelBatch.end();
+            if(wireframe) {
+                RadixClient.getInstance().setWireframe(true);
+                Gdx.gl.glLineWidth(2);
+                wiremeshBatch.begin(RadixClient.getInstance().getCamera());
+                for (IChunk c : visibleChunks) {
+                    c.render(wiremeshBatch);
+                }
+                wiremeshBatch.end();
+            }
+        } else {
+            modelBatch.end();
         }
     }
 
@@ -271,6 +275,7 @@ public class World implements IWorld {
         IChunk c = getChunk(chunk.getStartPosition());
         if (c != null) {
             removeChunkFromMap(chunk.getStartPosition());
+            this.chunkList.remove(c);
         }
         addChunk(chunk, chunk.getStartPosition().x, chunk.getStartPosition().z);
 
@@ -294,6 +299,7 @@ public class World implements IWorld {
 
     private void addChunk(IChunk chunk, int x, int z) {
         this.chunkMap.put(getChunkKey(x, z), chunk);
+        this.chunkList.add(chunk);
     }
 
     private IChunk loadChunk(int startX, int startZ) {
@@ -349,25 +355,19 @@ public class World implements IWorld {
     @Override
     public void processLightQueue() {
         // If the chunk is not lighted and it is in range, setup lighting then set as lighted
-        boolean skipLightRemoval = false;
-        for(IChunk c : chunkMap.values()) {
-            if(!c.hasInitialSun() &&
-                    RadixClient.getInstance().getPlayer().getPosition().planeDistance(
-                    c.getStartPosition().x, c.getStartPosition().z)
-                    <= RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
-                setupLighting(c);
-                c.finishAddingSun();
-            }
-
-            if(sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty()
-                    && c.waitingOnLightFinish()) {
-                c.finishChangingSunlight();
-                skipLightRemoval = true;
-            }
+        chunkList.stream().filter(c -> !c.hasInitialSun())
+                .filter(c -> RadixClient.getInstance().getPlayer().getPosition().planeDistance(
+                        c.getStartPosition().x, c.getStartPosition().z)
+                        <= RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE)
+                .forEach(c -> {
+            setupLighting(c);
+            c.finishAddingSun();
+        });
+        if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty()) {
+            chunkList.stream().filter(IChunk::waitingOnLightFinish).forEach(IChunk::finishChangingSunlight);
+            return;
         }
-
-        if(!skipLightRemoval)
-            processLightRemovalQueue();
+        processLightRemovalQueue();
     }
 
     private void processLightRemovalQueue() {
@@ -472,7 +472,7 @@ public class World implements IWorld {
 
     @Override
     public void cleanup() {
-        chunkMap.values().forEach(IChunk::dispose);
+        chunkList.forEach(IChunk::dispose);
         modelBatch.dispose();
         modelBatch = null;
         skyboxTexture.dispose();
@@ -483,13 +483,9 @@ public class World implements IWorld {
 
     @Override
     public void rerenderChunks() {
-        for(IChunk c : chunkMap.values()) {
-            // Check if chunk is visible by the player
-            if(RadixClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
-                    RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
-                rerenderChunk(c);
-            }
-        }
+        // If the chunk is in range, rerender it
+        chunkList.stream().filter(c -> RadixClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
+                RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE).forEach(this::rerenderChunk);
     }
 
     @Override
@@ -498,6 +494,7 @@ public class World implements IWorld {
             return;
 
         removeChunkFromMap(chunk.getStartPosition());
+        this.chunkList.remove(chunk);
     }
 
     @Override

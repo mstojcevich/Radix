@@ -5,7 +5,6 @@ import org.spacehq.mc.protocol.packet.ingame.server.world.ServerBlockChangePacke
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.RadixAPI;
-import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
@@ -27,6 +26,13 @@ public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket
         int block = packet.getRecord().getBlock();
         int id = block >> 4;
         int meta = block & 15;
+
+        Gdx.app.debug("", "ServerBlockChangePacket"
+                + ", positionX=" + x
+                + ", positionY=" + y
+                + ", positionZ=" + z
+                + ", block=" + block);
+
         IChunk chunk = game.getWorld().getChunk(x, z);
         if(chunk != null) {
             if (id > 0) {

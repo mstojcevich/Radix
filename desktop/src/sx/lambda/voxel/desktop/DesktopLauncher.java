@@ -24,9 +24,9 @@ public class DesktopLauncher {
                 config = createDefaultConfig();
             }
         }
-
 		new LwjglApplication(new RadixClient(), config);
-	}
+        // Gdx.app.setLogLevel(Application.LOG_DEBUG);
+    }
 
     private static LwjglApplicationConfiguration createDefaultConfig() {
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();

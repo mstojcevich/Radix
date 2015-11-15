@@ -6,7 +6,6 @@ import org.spacehq.mc.protocol.packet.ingame.server.world.ServerChunkDataPacket;
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.RadixAPI;
-import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.biome.Biome;
 import sx.lambda.voxel.world.chunk.FlatBlockStorage;
@@ -21,6 +20,7 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
 
     @Override
     public void handle(ServerChunkDataPacket scdp) {
+        Gdx.app.debug("", "ChunkDataHandler, chunksLength=" + scdp.getChunks().length);
         if(scdp.getChunks().length == 0) {
             RadixClient.getInstance().getWorld().rmChunk(RadixClient.getInstance().getWorld().getChunk(scdp.getX(), scdp.getZ()));
         }

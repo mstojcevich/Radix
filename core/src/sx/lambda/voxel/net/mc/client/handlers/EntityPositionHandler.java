@@ -6,6 +6,7 @@ import org.spacehq.mc.protocol.packet.ingame.server.entity.ServerEntityMovementP
 public class EntityPositionHandler implements PacketHandler<ServerEntityMovementPacket> {
     @Override
     public void handle(ServerEntityMovementPacket packet) {
+        Gdx.app.debug("", "ServerEntityMovementPacket");
         Gdx.graphics.requestRendering();
     }
 }

@@ -6,7 +6,6 @@ import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiBlockChange
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.RadixAPI;
-import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.world.chunk.BlockStorage.CoordinatesOutOfBoundsException;
 import sx.lambda.voxel.world.chunk.IChunk;
 
@@ -20,6 +19,9 @@ public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockCh
 
     @Override
     public void handle(ServerMultiBlockChangePacket packet) {
+        Gdx.app.debug("", "ServerMultiBlockChangePacket"
+                + ", recordsLength=" + packet.getRecords().length);
+
         for(BlockChangeRecord r : packet.getRecords()) {
             int x = r.getPosition().getX();
             int y = r.getPosition().getY();

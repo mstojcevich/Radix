@@ -14,9 +14,19 @@ public class PlayerSpawnHandler implements PacketHandler<ServerSpawnPlayerPacket
 
     @Override
     public void handle(ServerSpawnPlayerPacket packet) {
+        int playerId = RadixClient.getInstance().getPlayer().getID();
+        int entityId = packet.getEntityId();
+        Gdx.app.debug("", "ServerSpawnPlayerPacket"
+                        + ", positionX=" + packet.getX()
+                        + ", positionY=" + packet.getY()
+                        + ", positionZ=" + packet.getZ()
+                        + ", entityId=" + entityId
+                        + ", playerId=" + playerId);
+
         // TODO if it's not for us, set position of the entity it is for
-        if(packet.getEntityId() != RadixClient.getInstance().getPlayer().getID())
+        if(entityId != playerId) {
             return;
+        }
 
         game.getPlayer().getPosition().set((float) packet.getX(), (float) packet.getY(), (float) packet.getZ());
         game.getPlayer().getRotation().setRot(-packet.getPitch(), 180 - packet.getYaw());

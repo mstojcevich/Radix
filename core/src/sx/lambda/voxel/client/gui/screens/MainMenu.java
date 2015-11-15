@@ -34,13 +34,13 @@ public class MainMenu implements GuiScreen {
         buttons = new MainMenuButton[] {
                 new MainMenuButton("Multiplayer (Local)", this::enterMPLocal, TARGET_BUTTON_SIZE),
                 new MainMenuButton("Multiplayer (Select)", () -> RadixClient.getInstance().setCurrentScreen(new ServerConnectGUI()), TARGET_BUTTON_SIZE),
-                new MainMenuButton("Settings", () -> System.out.println("Settings pressed!"), TARGET_BUTTON_SIZE),
+                new MainMenuButton("Settings", () -> Gdx.app.debug("", "Settings pressed!"), TARGET_BUTTON_SIZE),
                 new MainMenuButton("Quit Game", () -> RadixClient.getInstance().startShutdown(), TARGET_BUTTON_SIZE),
         };
     }
 
     private void enterMPLocal() {
-        System.out.println("Entering local mp");
+        Gdx.app.log("", "Entering local mp");
         RadixClient.getInstance().enterRemoteWorld("127.0.0.1", (short) 25565);
     }
 

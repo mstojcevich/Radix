@@ -6,7 +6,6 @@ import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiChunkDataPa
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.RadixAPI;
-import sx.lambda.voxel.block.Block;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.biome.Biome;
 import sx.lambda.voxel.world.chunk.FlatBlockStorage;
@@ -21,6 +20,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
 
     @Override
     public void handle(final ServerMultiChunkDataPacket packet) {
+        Gdx.app.debug("", "ServerMultiChunkDataPacket, columns=" + packet.getColumns());
         for(int column = 0; column < packet.getColumns(); column++) {
             int cx = packet.getX(column)*16;
             int cz = packet.getZ(column)*16;

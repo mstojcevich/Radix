@@ -1,5 +1,6 @@
 package sx.lambda.voxel.net.mc.client;
 
+import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.MinecraftProtocol;
 import org.spacehq.mc.protocol.data.message.Message;
 import org.spacehq.mc.protocol.data.message.TranslationMessage;
@@ -59,9 +60,10 @@ public class MinecraftClientConnection {
                 }
                 if (event.getPacket() instanceof ServerChatPacket) {
                     Message message = event.<ServerChatPacket>getPacket().getMessage();
-                    System.out.println("Received Message: " + message.getFullText());
+                    Gdx.app.debug("", "Received Message: " + message.getFullText());
                     if (message instanceof TranslationMessage) {
-                        System.out.println("Received Translation Components: " + Arrays.toString(((TranslationMessage) message).getTranslationParams()));
+                        Gdx.app.debug("", "Received Translation Components: "
+                                + Arrays.toString(((TranslationMessage) message).getTranslationParams()));
                     }
                 }
             }
@@ -70,7 +72,7 @@ public class MinecraftClientConnection {
             public void disconnected(DisconnectedEvent event) {
                 RadixClient.getInstance().addToGLQueue(() -> {
                             RadixClient.getInstance().setCurrentScreen(RadixClient.getInstance().getMainMenu());
-                            System.out.println("Disconnected: " + Message.fromString(event.getReason()).getFullText());
+                            Gdx.app.log("", "Disconnected: " + Message.fromString(event.getReason()).getFullText());
                         }
                 );
             }

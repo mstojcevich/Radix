@@ -1,5 +1,7 @@
 package sx.lambda.voxel.desktop;
 
+import com.badlogic.gdx.Application;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.files.FileHandle;
@@ -25,7 +27,7 @@ public class DesktopLauncher {
             }
         }
 		new LwjglApplication(new RadixClient(), config);
-        // Gdx.app.setLogLevel(Application.LOG_DEBUG);
+        Gdx.app.setLogLevel(Application.LOG_DEBUG);
     }
 
     private static LwjglApplicationConfiguration createDefaultConfig() {

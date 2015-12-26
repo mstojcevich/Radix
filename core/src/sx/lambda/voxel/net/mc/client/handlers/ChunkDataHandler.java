@@ -20,7 +20,6 @@ public class ChunkDataHandler implements PacketHandler<ServerChunkDataPacket> {
 
     @Override
     public void handle(ServerChunkDataPacket scdp) {
-        Gdx.app.debug("", "ChunkDataHandler, chunksLength=" + scdp.getChunks().length);
         if(scdp.getChunks().length == 0) {
             RadixClient.getInstance().getWorld().rmChunk(RadixClient.getInstance().getWorld().getChunk(scdp.getX(), scdp.getZ()));
         }

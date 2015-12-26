@@ -27,12 +27,6 @@ public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket
         int id = block >> 4;
         int meta = block & 15;
 
-        Gdx.app.debug("", "ServerBlockChangePacket"
-                + ", positionX=" + x
-                + ", positionY=" + y
-                + ", positionZ=" + z
-                + ", block=" + block);
-
         IChunk chunk = game.getWorld().getChunk(x, z);
         if(chunk != null) {
             if (id > 0) {

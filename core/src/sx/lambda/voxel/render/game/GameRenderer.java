@@ -23,7 +23,6 @@ import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.api.events.render.EventEntityRender;
 import sx.lambda.voxel.api.events.render.EventPostWorldRender;
 import sx.lambda.voxel.block.Block;
-import sx.lambda.voxel.entity.Entity;
 import sx.lambda.voxel.render.Renderer;
 import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.chunk.BlockStorage;
@@ -59,6 +58,8 @@ public class GameRenderer implements Renderer {
     private Model blockBreakModel;
     private ModelInstance blockBreakModelInstance;
     private ModelBatch blockOverlayBatch;
+    private ModelBatch entityBatch;
+
     private int blockBreakStage = 0;
 
     public GameRenderer(RadixClient game) {
@@ -67,7 +68,7 @@ public class GameRenderer implements Renderer {
 
     @Override
     public void render() {
-        if(!initted)
+        if (!initted)
             init();
 
         prepareWorldRender();
@@ -78,15 +79,15 @@ public class GameRenderer implements Renderer {
     }
 
     public void draw2d(SpriteBatch batch) {
-        if(!initted)
+        if (!initted)
             init();
 
-        if(System.currentTimeMillis() - lastDynamicTextRerenderMS >= 250) { // Rerender the dynamic texts every quarter second
+        if (System.currentTimeMillis() - lastDynamicTextRerenderMS >= 250) { // Rerender the dynamic texts every quarter second
             createDynamicRenderers();
             lastDynamicTextRerenderMS = System.currentTimeMillis();
         }
 
-        if(game.debugInfoEnabled()) {
+        if (game.debugInfoEnabled()) {
             glInfoRender.draw(batch);
             fpsRender.draw(batch);
             positionRender.draw(batch);
@@ -103,11 +104,11 @@ public class GameRenderer implements Renderer {
     public void cleanup() {
         debugTextRenderer.dispose();
 
-        for(Texture t : blockBreakStages) {
+        for (Texture t : blockBreakStages) {
             t.dispose();
         }
 
-        if(blockBreakModel != null) {
+        if (blockBreakModel != null) {
             blockBreakModel.dispose();
         }
 
@@ -131,17 +132,21 @@ public class GameRenderer implements Renderer {
         activeThreadsRender = debugTextRenderer.newFontCache();
         selectedBlockRender = debugTextRenderer.newFontCache();
 
-        blockOverlayBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"), Gdx.files.internal("shaders/gdx/world.frag.glsl"));
-
+        blockOverlayBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"),
+                Gdx.files.internal("shaders/gdx/world.frag.glsl"));
+        entityBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"),
+                Gdx.files.internal("shaders/gdx/world.frag.glsl"));
         String destroyStageFmt = "textures/block/overlay/destroy_stage_%d.png";
-        for(int stage = 0; stage < 10; stage++) {
+        for (int stage = 0; stage < 10; stage++) {
             blockBreakStages[stage] = new Texture(Gdx.files.internal(String.format(destroyStageFmt, stage)));
         }
     }
 
     private void prepareWorldRender() {
-        if(shouldCalcFrustum()) {
-            game.getCamera().position.set(game.getPlayer().getPosition().getX(), game.getPlayer().getPosition().getY() + game.getPlayer().getEyeHeight(), game.getPlayer().getPosition().getZ());
+        if (shouldCalcFrustum()) {
+            game.getCamera().position.set(game.getPlayer().getPosition().getX(),
+                    game.getPlayer().getPosition().getY() + game.getPlayer().getEyeHeight(),
+                    game.getPlayer().getPosition().getZ());
             game.getCamera().up.set(0, 1, 0);
             game.getCamera().direction.set(0, 0, -1);
             game.getCamera().rotate(game.getPlayer().getRotation().getPitch(), 1, 0, 0);
@@ -156,8 +161,8 @@ public class GameRenderer implements Renderer {
 
     private void drawBlockSelection() {
         int curProgressInt = Math.round(RadixClient.getInstance().getPlayer().getBreakPercent() * 10) - 1;
-        if((blockBreakModel == null || blockBreakStage != curProgressInt) && curProgressInt >= 0) {
-            if(blockBreakModel != null)
+        if ((blockBreakModel == null || blockBreakStage != curProgressInt) && curProgressInt >= 0) {
+            if (blockBreakModel != null)
                 blockBreakModel.dispose();
 
             blockBreakStage = curProgressInt;
@@ -172,7 +177,7 @@ public class GameRenderer implements Renderer {
         }
 
         Vec3i curBlk = RadixClient.getInstance().getSelectedBlock();
-        if(curBlk != null && curProgressInt >= 0) {
+        if (curBlk != null && curProgressInt >= 0) {
             Gdx.gl.glPolygonOffset(100000, 2000000);
             blockOverlayBatch.begin(RadixClient.getInstance().getCamera());
             blockBreakModelInstance.transform.translate(curBlk.x + 0.5f, curBlk.y + 0.5f, curBlk.z + 0.5f);
@@ -184,12 +189,14 @@ public class GameRenderer implements Renderer {
     }
 
     private void renderEntities() {
-        for(Entity e : game.getWorld().getLoadedEntities()) {
-            if(e != null && !e.equals(game.getPlayer())) {
-                e.render();
-                RadixAPI.instance.getEventManager().push(new EventEntityRender(e));
+        entityBatch.begin(RadixClient.getInstance().getCamera());
+        game.getWorld().getLoadedEntities().forEach((entityId, entity) -> {
+            if (!entity.equals(game.getPlayer())) {
+                entity.render(entityBatch);
+                RadixAPI.instance.getEventManager().push(new EventEntityRender(entity));
             }
-        }
+        });
+        entityBatch.end();
     }
 
     public void calculateFrustum() {
@@ -207,13 +214,14 @@ public class GameRenderer implements Renderer {
     private void createDynamicRenderers() {
         float currentHeight = 2;
 
-        String glInfoStr = String.format("%s (%s) [%s]", Gdx.gl.glGetString(GL_RENDERER), Gdx.gl.glGetString(GL_VERSION), Gdx.gl.glGetString(GL_VENDOR));
+        String glInfoStr = String.format("%s (%s) [%s]",
+                Gdx.gl.glGetString(GL_RENDERER), Gdx.gl.glGetString(GL_VERSION), Gdx.gl.glGetString(GL_VENDOR));
         GlyphLayout glGl = glInfoRender.setText(glInfoStr, 0, 0);
         glInfoRender.setPosition((float) Gdx.graphics.getWidth() - glGl.width, (Gdx.graphics.getHeight() - currentHeight));
         currentHeight += debugTextRenderer.getLineHeight();
 
         String fpsStr = "FPS: " + String.valueOf(Gdx.graphics.getFramesPerSecond());
-        if(RadixClient.getInstance().getSettingsManager().getVisualSettings().getNonContinuous().getValue()) {
+        if (RadixClient.getInstance().getSettingsManager().getVisualSettings().getNonContinuous().getValue()) {
             fpsStr = fpsStr.concat(" (NON-CONTINUOUS! INACCURATE!)");
             fpsRender.setColor(Color.RED);
         }
@@ -223,19 +231,28 @@ public class GameRenderer implements Renderer {
         currentHeight += debugTextRenderer.getLineHeight();
 
         DecimalFormat posFormat = new DecimalFormat("#.00");
-        String coordsStr = String.format("(x,y,z): %s,%s,%s", posFormat.format(game.getPlayer().getPosition().getX()), posFormat.format(game.getPlayer().getPosition().getY()), posFormat.format(game.getPlayer().getPosition().getZ()));
+        String coordsStr = String.format("(x,y,z): %s,%s,%s",
+                posFormat.format(game.getPlayer().getPosition().getX()),
+                posFormat.format(game.getPlayer().getPosition().getY()),
+                posFormat.format(game.getPlayer().getPosition().getZ()));
         GlyphLayout posGl = positionRender.setText(coordsStr, 0, 0);
         positionRender.setPosition((float) Gdx.graphics.getWidth() - posGl.width, (Gdx.graphics.getHeight() - currentHeight));
         currentHeight += debugTextRenderer.getLineHeight();
 
-        String chunk = String.format("Chunk (x,z): %s,%s", game.getWorld().getChunkPosition(game.getPlayer().getPosition().getX()), game.getWorld().getChunkPosition(game.getPlayer().getPosition().getZ()));
+        String chunk = String.format("Chunk (x,z): %s,%s",
+                game.getWorld().getChunkPosition(game.getPlayer().getPosition().getX()),
+                game.getWorld().getChunkPosition(game.getPlayer().getPosition().getZ()));
         GlyphLayout chunkGl = chunkposRender.setText(chunk, 0, 0);
-        chunkposRender.setPosition((float) Gdx.graphics.getWidth() - chunkGl.width, (Gdx.graphics.getHeight() - currentHeight));
+        chunkposRender.setPosition((float) Gdx.graphics.getWidth() - chunkGl.width,
+                (Gdx.graphics.getHeight() - currentHeight));
         currentHeight += debugTextRenderer.getLineHeight();
 
-        String headingStr = String.format("(yaw,pitch): %s,%s", posFormat.format(game.getPlayer().getRotation().getYaw()), posFormat.format(game.getPlayer().getRotation().getPitch()));
+        String headingStr = String.format("(yaw,pitch): %s,%s",
+                posFormat.format(game.getPlayer().getRotation().getYaw()),
+                posFormat.format(game.getPlayer().getRotation().getPitch()));
         GlyphLayout headingGl = headingRender.setText(headingStr, 0, 0);
-        headingRender.setPosition((float) Gdx.graphics.getWidth() - headingGl.width, (Gdx.graphics.getHeight() - currentHeight));
+        headingRender.setPosition((float) Gdx.graphics.getWidth() - headingGl.width,
+                (Gdx.graphics.getHeight() - currentHeight));
         currentHeight += debugTextRenderer.getLineHeight();
 
         int playerX = MathUtils.floor(game.getPlayer().getPosition().getX());
@@ -243,10 +260,13 @@ public class GameRenderer implements Renderer {
         int playerZ = MathUtils.floor(game.getPlayer().getPosition().getZ());
         IChunk playerChunk = game.getWorld().getChunk(playerX, playerZ);
         try {
-            if(playerChunk != null) {
-                String llStr = String.format("Light Level @ Feet: %d", playerChunk.getSunlight(playerX & (game.getWorld().getChunkSize() - 1), playerY, playerZ & (game.getWorld().getChunkSize() - 1)));
+            if (playerChunk != null) {
+                String llStr = String.format("Light Level @ Feet: %d",
+                        playerChunk.getSunlight(playerX & (game.getWorld().getChunkSize() - 1),
+                                playerY, playerZ & (game.getWorld().getChunkSize() - 1)));
                 GlyphLayout llGl = lightlevelRender.setText(llStr, 0, 0);
-                lightlevelRender.setPosition((float) Gdx.graphics.getWidth() - llGl.width, (Gdx.graphics.getHeight() - currentHeight));
+                lightlevelRender.setPosition((float) Gdx.graphics.getWidth() - llGl.width,
+                        (Gdx.graphics.getHeight() - currentHeight));
                 currentHeight += debugTextRenderer.getLineHeight();
             }
         } catch (BlockStorage.CoordinatesOutOfBoundsException ex) {
@@ -255,24 +275,25 @@ public class GameRenderer implements Renderer {
 
         String threadsStr = "Active threads: " + Thread.activeCount();
         GlyphLayout threadsGl = activeThreadsRender.setText(threadsStr, 0, 0);
-        activeThreadsRender.setPosition((float) Gdx.graphics.getWidth() - threadsGl.width, (Gdx.graphics.getHeight() - currentHeight));
+        activeThreadsRender.setPosition((float) Gdx.graphics.getWidth() - threadsGl.width,
+                (Gdx.graphics.getHeight() - currentHeight));
 
         // Current looked-at block info. Draws next to the crosshair
         String currentBlockStr = "";
         Vec3i cbLoc = game.getSelectedBlock();
-        if(cbLoc != null) {
+        if (cbLoc != null) {
             try {
                 Block cbBlk = game.getWorld().getChunk(cbLoc.x, cbLoc.z).getBlock(
                         cbLoc.x & (game.getWorld().getChunkSize() - 1),
                         cbLoc.y,
                         cbLoc.z & (game.getWorld().getChunkSize() - 1)
                 );
-                if(cbBlk != null) {
+                if (cbBlk != null) {
                     currentBlockStr = String.format(
                             "%s (%d)\n" + // Name (id)
                                     "%d%%", // Breaking percentage
                             cbBlk.getHumanName(), cbBlk.getID(),
-                            100 - Math.round(game.getPlayer().getBreakPercent()*100));
+                            100 - Math.round(game.getPlayer().getBreakPercent() * 100));
                 }
             } catch (CoordinatesOutOfBoundsException e) { // Shouldn't happen
                 e.printStackTrace();

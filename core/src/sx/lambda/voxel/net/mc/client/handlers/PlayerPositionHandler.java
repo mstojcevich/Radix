@@ -14,12 +14,7 @@ public class PlayerPositionHandler implements PacketHandler<ServerPlayerPosition
 
     @Override
     public void handle(ServerPlayerPositionRotationPacket packet) {
-        Gdx.app.debug("", "ServerPlayerPositionRotationPacket"
-                        + ", positionX=" + packet.getX()
-                        + ", positionY=" + packet.getY()
-                        + ", positionZ=" + packet.getZ());
-
-        game.getPlayer().getPosition().set((float) packet.getX(), (float)packet.getY(), (float)packet.getZ());
+        game.getPlayer().getPosition().set((float) packet.getX(), (float) packet.getY(), (float) packet.getZ());
         game.getPlayer().getRotation().setRot(-packet.getPitch(), 180 - packet.getYaw());
 
         game.getGameRenderer().calculateFrustum();

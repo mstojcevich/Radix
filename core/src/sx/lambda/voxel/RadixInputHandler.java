@@ -46,13 +46,7 @@ public class RadixInputHandler implements InputProcessor {
         registerKeybind(new Keybind("voxeltest.gui.chat", "Open Chat", Input.Keys.T, () -> {
             if (game.getWorld() != null) {
                 if (game.getCurrentScreen().equals(game.getHud())) {
-                    game.addToGLQueue(new Runnable() {
-                        @Override
-                        public void run() {
-                            game.setCurrentScreen(game.getChatGUI());
-                        }
-
-                    });
+                    game.addToGLQueue(() -> game.setCurrentScreen(game.getChatGUI()));
                 }
             }
         }));
@@ -77,9 +71,9 @@ public class RadixInputHandler implements InputProcessor {
         for (Keybind kb : keybindList) {
             if (kb.getKey() == keycode) {
                 kb.press();
+                return true;
             }
         }
-
         return false;
     }
 
@@ -150,7 +144,8 @@ public class RadixInputHandler implements InputProcessor {
 
     private void updateRotation(int newMouseX, int newMouseY) {
         if (lastMouseX > -Integer.MAX_VALUE) {
-            if ((game.getWorld() != null || game.getPlayer() != null) && (game.getCurrentScreen() == null || game.getCurrentScreen().equals(game.getHud()))) {
+            if ((game.getWorld() != null || game.getPlayer() != null) && (game.getCurrentScreen() == null
+                    || game.getCurrentScreen().equals(game.getHud()))) {
                 int deltaX = newMouseX - lastMouseX;
                 int deltaY = newMouseY - lastMouseY;
                 float deltaYaw = deltaX * mouseSensitivity;

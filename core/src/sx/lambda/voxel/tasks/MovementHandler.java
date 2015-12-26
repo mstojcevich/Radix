@@ -35,6 +35,7 @@ public class MovementHandler implements RepeatedTask {
     public void run() {
         try {
             long lastMoveCheckMS = System.currentTimeMillis();
+
             while (!game.isDone()) {
                 if (game.getWorld() == null || game.getPlayer() == null) {
                     Thread.sleep(1000);

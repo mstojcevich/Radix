@@ -1,5 +1,6 @@
 package sx.lambda.voxel.entity;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
@@ -27,12 +28,12 @@ public abstract class LivingEntity extends Entity implements Serializable {
         this.height = 1;
     }
 
-    public LivingEntity(Model model, EntityPosition pos, EntityRotation rot) {
-        this(model, pos, rot, 1, 1);
+    public LivingEntity(Model model, Texture texture, EntityPosition pos, EntityRotation rot) {
+        this(model, texture, pos, rot, 1, 1);
     }
 
-    public LivingEntity(Model model, EntityPosition pos, EntityRotation rot, float width, float height) {
-        super(model, pos, rot);
+    public LivingEntity(Model model, Texture texture, EntityPosition pos, EntityRotation rot, float width, float height) {
+        super(model, texture, pos, rot);
         this.width = width;
         this.height = height;
     }

@@ -6,7 +6,7 @@ import sx.lambda.voxel.util.Vec3i;
 import sx.lambda.voxel.world.chunk.IChunk;
 import sx.lambda.voxel.world.generation.ChunkGenerator;
 
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public interface IWorld {
 
@@ -50,9 +50,9 @@ public interface IWorld {
 
     void addChunk(IChunk chunk);
 
-    List<Entity> getLoadedEntities();
+    ConcurrentHashMap<Integer, Entity> getLoadedEntities();
 
-    void addEntity(Entity e);
+    void addEntity(int entityId, Entity e);
 
     void rerenderChunk(IChunk c);
 
@@ -84,7 +84,6 @@ public interface IWorld {
     void rerenderChunks();
 
     void rmChunk(IChunk chunk);
-
     /**
      * Add to the queue of chunk meshing.
      * This queue may be processed on another thread, so shouldn't do any GL stuff.

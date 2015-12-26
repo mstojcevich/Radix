@@ -20,7 +20,7 @@ public class MultiChunkDataHandler implements PacketHandler<ServerMultiChunkData
 
     @Override
     public void handle(final ServerMultiChunkDataPacket packet) {
-        Gdx.app.debug("", "ServerMultiChunkDataPacket, columns=" + packet.getColumns());
+        // Gdx.app.debug("", "ServerMultiChunkDataPacket, columns=" + packet.getColumns());
         for(int column = 0; column < packet.getColumns(); column++) {
             int cx = packet.getX(column)*16;
             int cz = packet.getZ(column)*16;

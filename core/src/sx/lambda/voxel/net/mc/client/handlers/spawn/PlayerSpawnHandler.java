@@ -1,8 +1,9 @@
-package sx.lambda.voxel.net.mc.client.handlers;
+package sx.lambda.voxel.net.mc.client.handlers.spawn;
 
 import com.badlogic.gdx.Gdx;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
 import sx.lambda.voxel.RadixClient;
+import sx.lambda.voxel.net.mc.client.handlers.PacketHandler;
 
 public class PlayerSpawnHandler implements PacketHandler<ServerSpawnPlayerPacket> {
 
@@ -16,15 +17,8 @@ public class PlayerSpawnHandler implements PacketHandler<ServerSpawnPlayerPacket
     public void handle(ServerSpawnPlayerPacket packet) {
         int playerId = RadixClient.getInstance().getPlayer().getID();
         int entityId = packet.getEntityId();
-        Gdx.app.debug("", "ServerSpawnPlayerPacket"
-                        + ", positionX=" + packet.getX()
-                        + ", positionY=" + packet.getY()
-                        + ", positionZ=" + packet.getZ()
-                        + ", entityId=" + entityId
-                        + ", playerId=" + playerId);
-
         // TODO if it's not for us, set position of the entity it is for
-        if(entityId != playerId) {
+        if (entityId != playerId) {
             return;
         }
 
@@ -32,7 +26,6 @@ public class PlayerSpawnHandler implements PacketHandler<ServerSpawnPlayerPacket
         game.getPlayer().getRotation().setRot(-packet.getPitch(), 180 - packet.getYaw());
 
         // TODO set current item
-
         game.getGameRenderer().calculateFrustum();
         Gdx.graphics.requestRendering();
     }

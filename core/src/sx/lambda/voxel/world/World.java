@@ -52,7 +52,7 @@ public class World implements IWorld {
 
     private final boolean remote, server;
     private final ChunkGenerator chunkGen;
-    private final List<Entity> loadedEntities = new CopyOnWriteArrayList<>();
+    private final ConcurrentHashMap<Integer, Entity> loadedEntities = new ConcurrentHashMap<>();
 
     // Light-related stuff
     private final ExecutorService sunlightPoolExecutor = Executors.newFixedThreadPool(LIGHTING_WORKERS);
@@ -293,7 +293,7 @@ public class World implements IWorld {
     }
 
     @Override
-    public List<Entity> getLoadedEntities() {
+    public ConcurrentHashMap<Integer, Entity> getLoadedEntities() {
         return this.loadedEntities;
     }
 
@@ -314,8 +314,8 @@ public class World implements IWorld {
         }
     }
 
-    public void addEntity(Entity e) {
-        loadedEntities.add(e);
+    public void addEntity(int entityId, Entity e) {
+        loadedEntities.put(entityId, e);
     }
 
 

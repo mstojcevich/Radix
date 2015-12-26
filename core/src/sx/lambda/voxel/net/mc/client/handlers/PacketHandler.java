@@ -5,5 +5,4 @@ import org.spacehq.packetlib.packet.Packet;
 public interface PacketHandler <E extends Packet> {
 
     void handle(E packet);
-
 }

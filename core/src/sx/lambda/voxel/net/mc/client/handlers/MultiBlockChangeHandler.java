@@ -19,9 +19,6 @@ public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockCh
 
     @Override
     public void handle(ServerMultiBlockChangePacket packet) {
-        Gdx.app.debug("", "ServerMultiBlockChangePacket"
-                + ", recordsLength=" + packet.getRecords().length);
-
         for(BlockChangeRecord r : packet.getRecords()) {
             int x = r.getPosition().getX();
             int y = r.getPosition().getY();

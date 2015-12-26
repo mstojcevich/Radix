@@ -45,6 +45,7 @@ import sx.lambda.voxel.client.gui.screens.IngameHUD;
 import sx.lambda.voxel.client.gui.screens.MainMenu;
 import sx.lambda.voxel.client.gui.transition.SlideUpAnimation;
 import sx.lambda.voxel.client.gui.transition.TransitionAnimation;
+import sx.lambda.voxel.entity.EntityModel;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.entity.EntityRotation;
 import sx.lambda.voxel.entity.player.Player;
@@ -130,6 +131,7 @@ public class RadixClient extends ApplicationAdapter {
 
     @Override
     public void create() {
+        EntityModel.init();
         theGame = this;
         settingsManager = new SettingsManager();
 
@@ -388,7 +390,8 @@ public class RadixClient extends ApplicationAdapter {
                     if (b != null && b.isSelectable()) {
                         selectedBlock = bp;
                         if (last != null) {
-                            Block lastBlock = theChunk.getBlock(last.x & (world.getChunkSize() - 1), last.y, last.z & (world.getChunkSize() - 1));
+                            Block lastBlock = theChunk.getBlock(last.x & (world.getChunkSize() - 1),
+                                    last.y, last.z & (world.getChunkSize() - 1));
                             if (lastBlock == null || !lastBlock.isSelectable()) {
                                 selectedNextPlace = last;
                             }
@@ -544,7 +547,7 @@ public class RadixClient extends ApplicationAdapter {
         addToGLQueue(() -> {
             setRenderer(getGameRenderer());
             getPlayer().init();
-            world.addEntity(getPlayer());
+//            world.addEntity(getPlayer());
             transitionAnimation = new SlideUpAnimation(getCurrentScreen(), 1000);
             transitionAnimation.init();
             setCurrentScreen(getHud());
@@ -616,11 +619,14 @@ public class RadixClient extends ApplicationAdapter {
             IChunk chunk = world.getChunk(selectedBlock);
             if(chunk != null) {
                 try {
-                    Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y, selectedBlock.z & (world.getChunkSize() - 1));
+                    Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y,
+                            selectedBlock.z & (world.getChunkSize() - 1));
                     if (block != null && block.isSelectable()) {
                         if (this.isRemote()) {
                             mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
-                            mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.START_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                            mcClientConn.getClient().getSession().send(
+                                    new ClientPlayerActionPacket(PlayerAction.START_DIGGING,
+                                            new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
                         }
                     }
                 } catch (CoordinatesOutOfBoundsException ex) {
@@ -636,10 +642,13 @@ public class RadixClient extends ApplicationAdapter {
             IChunk chunk = world.getChunk(selectedBlock);
             if(chunk != null) {
                 try {
-                    Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y, selectedBlock.z & (world.getChunkSize() - 1));
+                    Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y,
+                            selectedBlock.z & (world.getChunkSize() - 1));
                     if (block != null && block.isSelectable()) {
                         if (this.isRemote()) {
-                            mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.CANCEL_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                            mcClientConn.getClient().getSession().send(
+                                    new ClientPlayerActionPacket(PlayerAction.CANCEL_DIGGING,
+                                            new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
                         }
                     }
                     player.resetBlockBreak();
@@ -656,13 +665,17 @@ public class RadixClient extends ApplicationAdapter {
             IChunk chunk = world.getChunk(selectedBlock);
             if(chunk != null) {
                 try {
-                    Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y, selectedBlock.z & (world.getChunkSize() - 1));
+                    Block block = chunk.getBlock(selectedBlock.x & (world.getChunkSize() - 1), selectedBlock.y,
+                            selectedBlock.z & (world.getChunkSize() - 1));
                     if (block != null && block.isSelectable()) {
                         if (this.isRemote()) {
                             mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
-                            mcClientConn.getClient().getSession().send(new ClientPlayerActionPacket(PlayerAction.FINISH_DIGGING, new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                            mcClientConn.getClient().getSession().send(
+                                    new ClientPlayerActionPacket(PlayerAction.FINISH_DIGGING,
+                                            new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
                         } else {
-                            this.getWorld().removeBlock(this.getSelectedBlock().x, this.getSelectedBlock().y, this.getSelectedBlock().z);
+                            this.getWorld().removeBlock(this.getSelectedBlock().x,
+                                    this.getSelectedBlock().y, this.getSelectedBlock().z);
                         }
                         updateSelectedBlock();
                     }
@@ -680,7 +693,8 @@ public class RadixClient extends ApplicationAdapter {
                         new Position(this.getNextPlacePos().x, this.getNextPlacePos().y, this.getNextPlacePos().z),
                         Face.TOP /* TODO MCPROTO send correct face */, new ItemStack(player.getItemInHand()), 0, 0, 0));
             } else {
-                this.getWorld().addBlock(this.getPlayer().getItemInHand(), this.getNextPlacePos().x, this.getNextPlacePos().y, this.getNextPlacePos().z);
+                this.getWorld().addBlock(this.getPlayer().getItemInHand(), this.getNextPlacePos().x,
+                        this.getNextPlacePos().y, this.getNextPlacePos().z);
             }
             updateSelectedBlock();
         }

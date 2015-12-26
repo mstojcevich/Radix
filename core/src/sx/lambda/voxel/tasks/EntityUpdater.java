@@ -23,8 +23,7 @@ public class EntityUpdater implements RepeatedTask {
             while (!game.isDone()) {
                 if (game.getWorld() != null && game.getPlayer() != null) {
                     game.getWorld().getLoadedEntities().forEach(
-                            sx.lambda.voxel.entity.Entity::onUpdate);
-
+                            (entityId, entity) -> entity.onUpdate());
                     RadixAPI.instance.getEventManager().push(new EventGameTick(game.getWorld()));
                     Thread.sleep(50);
                 } else {

@@ -3,7 +3,6 @@ package sx.lambda.voxel.entity.player;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
 import com.badlogic.gdx.math.MathUtils;
 import org.spacehq.mc.protocol.data.game.values.entity.player.GameMode;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
@@ -11,6 +10,7 @@ import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
 import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
+import sx.lambda.voxel.entity.EntityModel;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.entity.EntityRotation;
 import sx.lambda.voxel.entity.LivingEntity;
@@ -37,14 +37,10 @@ public class Player extends LivingEntity implements Serializable {
 
     public Player() {
         this(new EntityPosition(0, 0, 0), new EntityRotation());
-
-        if (playerModel == null && RadixClient.getInstance() != null) {
-            playerModel = new ObjLoader().loadModel(Gdx.files.internal("entity/player.obj"));
-        }
     }
 
     public Player(EntityPosition pos, EntityRotation rot) {
-        super(playerModel, pos, rot, WIDTH, HEIGHT);
+        super(EntityModel.getPlayerModel(), EntityModel.getPlayerTexture(), pos, rot, WIDTH, HEIGHT);
     }
 
     public float getEyeHeight() {
@@ -68,7 +64,11 @@ public class Player extends LivingEntity implements Serializable {
         super.onUpdate();
         if (moved) {
             if (RadixClient.getInstance().getMinecraftConn() != null) {
-                RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(new ClientPlayerPositionRotationPacket(this.isOnGround(), this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(), (float) 180 - this.getRotation().getYaw(), -this.getRotation().getPitch()));
+                ClientPlayerPositionRotationPacket positionRotationPacket =
+                        new ClientPlayerPositionRotationPacket(this.isOnGround(),
+                        this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(),
+                        (float) 180 - this.getRotation().getYaw(), -this.getRotation().getPitch());
+                RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(positionRotationPacket);
             }
             moved = false;
         }

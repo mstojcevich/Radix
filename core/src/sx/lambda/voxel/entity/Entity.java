@@ -1,27 +1,30 @@
 package sx.lambda.voxel.entity;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 
 import java.io.Serializable;
 
 public abstract class Entity implements Serializable {
     private final EntityPosition position;
     private final EntityRotation rotation;
-    private transient Model model;
+    private Model model;
+    private Texture texture;
     private int id = -1;
 
-    public Entity(Model model, EntityPosition position, EntityRotation rotation) {
+    public Entity(Model model, Texture texture, EntityPosition position, EntityRotation rotation) {
         this.model = model;
+        this.texture = texture;
         this.position = position;
         this.rotation = rotation;
     }
 
-    public Entity(Model model) {
-        this(model, new EntityPosition(0, 0, 0), new EntityRotation(0, 0));
-    }
-
     public Entity() {
         this.model = getDefaultModel();
+        this.texture = getDefaultTexture();
         this.position = new EntityPosition(0, 0, 0);
         this.rotation = new EntityRotation(0, 0);
     }
@@ -34,15 +37,13 @@ public abstract class Entity implements Serializable {
         return rotation;
     }
 
-    public void render() {
-        //TODO implement
+    public void render(ModelBatch batch) {
         if (model != null) {
-//            Vector3 oldPos = VoxelGameClient.instance.camera.position
-//            VoxelGameClient.instance.camera.position = new Vector3(position.x, position.y, position.z)
-//            VoxelGameClient.instance.camera.update()
-//            model.render()
-//            VoxelGameClient.instance.camera.translate(oldPos)
-//            VoxelGameClient.instance.camera.update()
+            // TODO: support subtle action. need to create instance every time?
+            ModelInstance instance = new ModelInstance(model);
+            instance.materials.get(0).set(TextureAttribute.createDiffuse(texture));
+            instance.transform.translate(position.getX(), position.getY(), position.getZ());
+            batch.render(instance);
         }
     }
 
@@ -58,6 +59,14 @@ public abstract class Entity implements Serializable {
 
     public Model getDefaultModel() {
         return null;
+    }
+
+    public Texture getDefaultTexture() {
+        return null;
+    }
+
+    public void setTexture(Texture texture) {
+        this.texture = texture;
     }
 
     public int getID() {

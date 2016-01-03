@@ -18,6 +18,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.api.events.render.EventEntityRender;
@@ -192,9 +193,14 @@ public class GameRenderer implements Renderer {
     private void renderEntities() {
         entityBatch.begin(RadixClient.getInstance().getCamera());
         game.getWorld().getLoadedEntities().forEach((entityId, entity) -> {
-            if (!entity.equals(game.getPlayer())) {
-                entity.render(entityBatch);
-                RadixAPI.instance.getEventManager().push(new EventEntityRender(entity));
+            if (!entity.equals(game.getPlayer()) && entity.getModel() != null) {
+                BoundingBox ebb = new BoundingBox();
+                entity.getModel().calculateBoundingBox(ebb);
+                if(frustum.boundsInFrustum(entity.getPosition().getX(), entity.getPosition().getY(), entity.getPosition().getZ(),
+                        ebb.getWidth()/2.0f, ebb.getDepth()/2.0f, ebb.getHeight()/2.0f)) {
+                    entity.render(entityBatch);
+                    RadixAPI.instance.getEventManager().push(new EventEntityRender(entity));
+                }
             }
         });
         entityBatch.end();

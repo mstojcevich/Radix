@@ -57,6 +57,10 @@ public abstract class Entity implements Serializable {
         this.model = model;
     }
 
+    public Model getModel() {
+        return this.model;
+    }
+
     public Model getDefaultModel() {
         return null;
     }

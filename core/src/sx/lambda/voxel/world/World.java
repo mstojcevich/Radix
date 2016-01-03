@@ -47,7 +47,7 @@ public class World implements IWorld {
     private static final int LIGHTING_WORKERS = 2;
 
     private final IntMap<IChunk> chunkMap = new IntMap<>();
-    private final Queue<IChunk> chunkList = new ConcurrentLinkedQueue<>();
+    private final List<IChunk> chunkList = Collections.synchronizedList(new LinkedList<>());
     private final Queue<IChunk> chunksToRerender = new ConcurrentLinkedQueue<>();
 
     private final boolean remote, server;
@@ -146,12 +146,19 @@ public class World implements IWorld {
         processLightQueue(); // If a chunk is doing its rerender, we want it to have the most recent lighting possible
 
         {
+            Queue<IChunk> skippedChunks = new LinkedList<>(); // Chunks that didn't rerender and need to be added back to the queue after iteration
             IChunk c;
             while((c = chunksToRerender.poll()) != null) {
                 if(RadixClient.getInstance().getPlayer().getPosition().planeDistance(c.getStartPosition().x, c.getStartPosition().z) <=
                         RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE) {
                     c.rerender();
+                } else {
+                    skippedChunks.add(c); // Add back onto the queue
                 }
+            }
+
+            while((c = skippedChunks.poll()) != null) {
+                chunksToRerender.add(c);
             }
         }
 
@@ -168,17 +175,19 @@ public class World implements IWorld {
         skybox.transform.translate(-playerX, -playerY, -playerZ);
         if(chunkList != null) {
             List<IChunk> visibleChunks = new LinkedList<>();
-            for (IChunk c : chunkList) {
-                int x = c.getStartPosition().x;
-                int z = c.getStartPosition().z;
-                int halfWidth = getChunkSize()/2;
-                int midX = x + halfWidth;
-                int midZ = z + halfWidth;
-                int midY = c.getHighestPoint()/2;
-                boolean visible = RadixClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
-                if(visible) {
-                    visibleChunks.add(c);
-                    c.render(modelBatch);
+            synchronized (chunkList) {
+                for (IChunk c : chunkList) {
+                    int x = c.getStartPosition().x;
+                    int z = c.getStartPosition().z;
+                    int halfWidth = getChunkSize() / 2;
+                    int midX = x + halfWidth;
+                    int midZ = z + halfWidth;
+                    int midY = c.getHighestPoint() / 2;
+                    boolean visible = RadixClient.getInstance().getGameRenderer().getFrustum().boundsInFrustum(midX, midY, midZ, halfWidth, midY, halfWidth);
+                    if (visible) {
+                        visibleChunks.add(c);
+                        c.render(modelBatch);
+                    }
                 }
             }
 
@@ -355,19 +364,22 @@ public class World implements IWorld {
     @Override
     public void processLightQueue() {
         // If the chunk is not lighted and it is in range, setup lighting then set as lighted
-        chunkList.stream().filter(c -> !c.hasInitialSun())
-                .filter(c -> RadixClient.getInstance().getPlayer().getPosition().planeDistance(
-                        c.getStartPosition().x, c.getStartPosition().z)
-                        <= RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE)
-                .forEach(c -> {
-            setupLighting(c);
-            c.finishAddingSun();
-        });
-        if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty()) {
-            chunkList.stream().filter(IChunk::waitingOnLightFinish).forEach(IChunk::finishChangingSunlight);
-            return;
+        synchronized(chunkList) {
+            chunkList.stream().filter(c -> !c.hasInitialSun())
+                    .filter(c -> RadixClient.getInstance().getPlayer().getPosition().planeDistance(
+                            c.getStartPosition().x, c.getStartPosition().z)
+                            <= RadixClient.getInstance().getSettingsManager().getVisualSettings().getViewDistance() * CHUNK_SIZE)
+                    .forEach(c -> {
+                        setupLighting(c);
+                        c.finishAddingSun();
+                    });
+            if (sunlightQueue.isEmpty() && sunlightRemovalQueue.isEmpty()) {
+                chunkList.stream().filter(IChunk::waitingOnLightFinish).forEach(IChunk::finishChangingSunlight);
+                return;
+            }
+
+            processLightRemovalQueue();
         }
-        processLightRemovalQueue();
     }
 
     private void processLightRemovalQueue() {

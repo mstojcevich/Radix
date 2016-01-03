@@ -78,6 +78,7 @@ public class GameRenderer implements Renderer {
         renderEntities();
     }
 
+    @Override
     public void draw2d(SpriteBatch batch) {
         if (!initted)
             init();

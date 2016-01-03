@@ -8,13 +8,14 @@ import sx.lambda.voxel.client.keybind.Keybind;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class RadixInputHandler implements InputProcessor {
 
     private static final float mouseSensitivity = 0.03f;
     private final RadixClient game;
-    private final List<Keybind> keybindList = Collections.synchronizedList(new ArrayList<>());
+    private final List<Keybind> keybindList = new LinkedList<>();
     private int lastMouseX = -Integer.MAX_VALUE;
     private int lastMouseY = -Integer.MAX_VALUE;
 
@@ -68,13 +69,14 @@ public class RadixInputHandler implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
+        boolean consumed = false;
         for (Keybind kb : keybindList) {
             if (kb.getKey() == keycode) {
                 kb.press();
-                return true;
+                consumed = true;
             }
         }
-        return false;
+        return consumed;
     }
 
     @Override

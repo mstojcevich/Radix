@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.collision.BoundingBox;
@@ -53,7 +54,8 @@ public class GameRenderer implements Renderer {
             awrtRender,
             lightlevelRender,
             activeThreadsRender,
-            selectedBlockRender;
+            selectedBlockRender,
+            glDebugRender;
 
     private Texture[] blockBreakStages = new Texture[10];
     private Model blockBreakModel;
@@ -62,6 +64,10 @@ public class GameRenderer implements Renderer {
     private ModelBatch entityBatch;
 
     private int blockBreakStage = 0;
+
+    // GL debug counters
+    private int lastDC, lastGLC, lastVTCS, lastTB, lastSS;
+    private int curDC, curGLC, curVTCS, curTB, curSS;
 
     public GameRenderer(RadixClient game) {
         this.game = game;
@@ -77,6 +83,18 @@ public class GameRenderer implements Renderer {
         RadixAPI.instance.getEventManager().push(new EventPostWorldRender());
         drawBlockSelection();
         renderEntities();
+
+        curDC = GLProfiler.drawCalls - lastDC;
+        curGLC = GLProfiler.calls - lastGLC;
+        curVTCS = (int) GLProfiler.vertexCount.total - lastVTCS;
+        curTB = GLProfiler.textureBindings - lastTB;
+        curSS = GLProfiler.shaderSwitches - lastSS;
+
+        lastDC = GLProfiler.drawCalls;
+        lastGLC = GLProfiler.calls;
+        lastVTCS = (int) GLProfiler.vertexCount.total;
+        lastTB = GLProfiler.textureBindings;
+        lastSS = GLProfiler.shaderSwitches;
     }
 
     @Override
@@ -99,6 +117,7 @@ public class GameRenderer implements Renderer {
             lightlevelRender.draw(batch);
             activeThreadsRender.draw(batch);
             selectedBlockRender.draw(batch);
+            glDebugRender.draw(batch);
         }
     }
 
@@ -133,6 +152,7 @@ public class GameRenderer implements Renderer {
         lightlevelRender = debugTextRenderer.newFontCache();
         activeThreadsRender = debugTextRenderer.newFontCache();
         selectedBlockRender = debugTextRenderer.newFontCache();
+        glDebugRender = debugTextRenderer.newFontCache();
 
         blockOverlayBatch = new ModelBatch(Gdx.files.internal("shaders/gdx/world.vert.glsl"),
                 Gdx.files.internal("shaders/gdx/world.frag.glsl"));
@@ -308,6 +328,10 @@ public class GameRenderer implements Renderer {
         }
         selectedBlockRender.setText(currentBlockStr, 0, 0);
         selectedBlockRender.setPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
+
+        glDebugRender.setText(String.format("DC: %d, GLC: %d, VTCS: %d, TB: %d, SS: %d",
+                        curDC, curGLC, curVTCS, curTB, curSS),
+                0, debugTextRenderer.getLineHeight() + 45);
     }
 
 }

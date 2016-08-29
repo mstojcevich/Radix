@@ -44,6 +44,7 @@ public class MovementHandler implements RepeatedTask {
                     Player player = game.getPlayer();
                     IWorld world = game.getWorld();
                     long moveDiffMS = System.currentTimeMillis() - lastMoveCheckMS;
+                    lastMoveCheckMS = System.currentTimeMillis();
                     final boolean threeDMove = false;
                     Vector3 lastPosition = player.getPosition().cpy();
                     if (game.getCurrentScreen().equals(game.getHud())) {
@@ -145,8 +146,7 @@ public class MovementHandler implements RepeatedTask {
                         Gdx.graphics.requestRendering();
                     }
 
-                    lastMoveCheckMS = System.currentTimeMillis();
-                    Thread.sleep(10l);
+                    Thread.sleep(5l);
                 }
             }
         } catch (Exception e) {

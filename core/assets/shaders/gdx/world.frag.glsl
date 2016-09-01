@@ -168,104 +168,35 @@ vec3 gamma(vec3 color){
 }
 
 void main() {
-	#if defined(normalFlag) 
-		vec3 normal = v_normal;
-	#endif // normalFlag
-
-    #if defined(diffuseTextureFlag)
-    #if defined(normalFlag)
-    vec3 texGetNormal = -abs(normal);
+#ifdef normalFlag
+    vec3 texGetNormal = -abs(v_normal);
 	float texIndex = v_rawUV.x*100.0;
     vec2 uvMult = fract(vec2(dot(texGetNormal.zxy, v_position),
                            dot(texGetNormal.yzx, v_position)));
     vec2 uvStart = vec2(mod(texIndex, float(blocksPerRow))*uPerBlock, float(int(floor(texIndex+0.5) / float(blocksPerRow)))*vPerBlock);
-    vec2 v_diffuseUV;
-    if(normal.x != 0.0) {
-    	v_diffuseUV = uvStart+vec2(vPerBlock*uvMult.y, uPerBlock*uvMult.x);
+    vec2 v_texUV;
+    if(v_normal.x != 0.0) {
+    	v_texUV = uvStart+vec2(vPerBlock*uvMult.y, uPerBlock*uvMult.x);
     } else {
-    	v_diffuseUV = uvStart+vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
+    	v_texUV = uvStart+vec2(uPerBlock*uvMult.x, vPerBlock*uvMult.y);
     }
-    #endif
-	#endif
+#else
+	vec2 v_texUV = v_rawUV;
+#endif
 
-	#if defined(diffuseTextureFlag) && defined(diffuseColorFlag) && defined(colorFlag)
-		vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor * v_color;
-	#elif defined(diffuseTextureFlag) && defined(diffuseColorFlag)
-		vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * u_diffuseColor;
-	#elif defined(diffuseTextureFlag) && defined(colorFlag)
-		vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV) * v_color;
-	#elif defined(diffuseTextureFlag)
-		vec4 diffuse = texture2D(u_diffuseTexture, v_diffuseUV);
-	#elif defined(diffuseColorFlag) && defined(colorFlag)
-		vec4 diffuse = u_diffuseColor * v_color;
-	#elif defined(diffuseColorFlag)
-		vec4 diffuse = u_diffuseColor;
-	#elif defined(colorFlag)
-		vec4 diffuse = v_color;
-	#else
-		vec4 diffuse = vec4(1.0);
-	#endif
+#if defined(colorFlag)
+    gl_FragColor = texture2D(u_diffuseTexture, v_texUV) * v_color;
+#else
+	gl_FragColor = texture2D(u_diffuseTexture, v_texUV);
+#endif
 
-	#if (!defined(lightingFlag))  
-		gl_FragColor.rgb = diffuse.rgb;
-	#elif (!defined(specularFlag))
-		#if defined(ambientFlag) && defined(separateAmbientFlag)
-			#ifdef shadowMapFlag
-				gl_FragColor.rgb = (diffuse.rgb * (v_ambientLight + getShadow() * v_lightDiffuse));
-				//gl_FragColor.rgb = texture2D(u_shadowTexture, v_shadowMapUv.xy);
-			#else
-				gl_FragColor.rgb = (diffuse.rgb * (v_ambientLight + v_lightDiffuse));
-			#endif //shadowMapFlag
-		#else
-			#ifdef shadowMapFlag
-				gl_FragColor.rgb = getShadow() * (diffuse.rgb * v_lightDiffuse);
-			#else
-				gl_FragColor.rgb = (diffuse.rgb * v_lightDiffuse);
-			#endif //shadowMapFlag
-		#endif
-	#else
-		#if defined(specularTextureFlag) && defined(specularColorFlag)
-			vec3 specular = texture2D(u_specularTexture, v_specularUV).rgb * u_specularColor.rgb * v_lightSpecular;
-		#elif defined(specularTextureFlag)
-			vec3 specular = texture2D(u_specularTexture, v_specularUV).rgb * v_lightSpecular;
-		#elif defined(specularColorFlag)
-			vec3 specular = u_specularColor.rgb * v_lightSpecular;
-		#else
-			vec3 specular = v_lightSpecular;
-		#endif
-			
-		#if defined(ambientFlag) && defined(separateAmbientFlag)
-			#ifdef shadowMapFlag
-			gl_FragColor.rgb = (diffuse.rgb * (getShadow() * v_lightDiffuse + v_ambientLight)) + specular;
-				//gl_FragColor.rgb = texture2D(u_shadowTexture, v_shadowMapUv.xy);
-			#else
-				gl_FragColor.rgb = (diffuse.rgb * (v_lightDiffuse + v_ambientLight)) + specular;
-			#endif //shadowMapFlag
-		#else
-			#ifdef shadowMapFlag
-				gl_FragColor.rgb = getShadow() * ((diffuse.rgb * v_lightDiffuse) + specular);
-			#else
-				gl_FragColor.rgb = (diffuse.rgb * v_lightDiffuse) + specular;
-			#endif //shadowMapFlag
-		#endif
-	#endif //lightingFlag
+#ifdef alphaTestFlag
+    if (gl_FragColor.a <= v_alphaTest)
+    	discard;
+#endif
 
-	#ifdef fogFlag
-		gl_FragColor.rgb = mix(gl_FragColor.rgb, u_fogColor.rgb, v_fog);
-	#endif // end fogFlag
-
-	#ifdef blendedFlag
-		gl_FragColor.a = diffuse.a * v_opacity;
-		#ifdef alphaTestFlag
-			if (gl_FragColor.a <= v_alphaTest)
-				discard;
-		#endif
-	#else
-		gl_FragColor.a = 1.0;
-	#endif
-
-	#if defined(normalFlag)
-	gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(normal, groove)), gl_FragColor.w);
-	#endif
+#ifdef normalFlag
+	gl_FragColor = vec4(gl_FragColor.xyz*gamma(sh_light(v_normal, groove)), gl_FragColor.w);
+#endif
 
 }

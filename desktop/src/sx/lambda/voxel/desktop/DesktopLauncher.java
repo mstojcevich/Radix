@@ -32,7 +32,6 @@ public class DesktopLauncher {
 
     private static LwjglApplicationConfiguration createDefaultConfig() {
         LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-        config.useGL30 = true;
         config.vSyncEnabled = false;
         config.foregroundFPS = 0;
         config.samples = 16;

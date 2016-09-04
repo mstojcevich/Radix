@@ -203,7 +203,7 @@ void main() {
 		#endif //alphaTestFlag
 	#endif // blendedFlag
 
-	gl_Position = u_projViewTrans * vec4(a_position, 1.0);
+	gl_Position = u_projViewTrans * u_worldTrans *  vec4(a_position, 1.0);
 
     #ifdef normalFlag
     	v_normal = a_normal;

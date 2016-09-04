@@ -362,6 +362,9 @@ public class World implements IWorld {
 
         for(IChunk c : chunkMap.values()) {
             // If the chunk is not lighted and it is in range, setup lighting then set as lighted
+            if(c == null)
+                continue;
+            
             if(!c.hasInitialSun()
                     && RadixClient.getInstance().getPlayer().getPosition().planeDistance(
                         c.getStartPosition().x, c.getStartPosition().z)

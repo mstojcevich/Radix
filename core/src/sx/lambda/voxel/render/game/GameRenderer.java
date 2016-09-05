@@ -211,19 +211,19 @@ public class GameRenderer implements Renderer {
     }
 
     private void renderEntities() {
-        entityBatch.begin(RadixClient.getInstance().getCamera());
-        game.getWorld().getLoadedEntities().forEach((entityId, entity) -> {
-            if (!entity.equals(game.getPlayer()) && entity.getModel() != null) {
-                BoundingBox ebb = new BoundingBox();
-                entity.getModel().calculateBoundingBox(ebb);
-                if(frustum.boundsInFrustum(entity.getPosition().getX(), entity.getPosition().getY(), entity.getPosition().getZ(),
-                        ebb.getWidth()/2.0f, ebb.getDepth()/2.0f, ebb.getHeight()/2.0f)) {
-                    entity.render(entityBatch);
-                    RadixAPI.instance.getEventManager().push(new EventEntityRender(entity));
-                }
-            }
-        });
-        entityBatch.end();
+//        entityBatch.begin(RadixClient.getInstance().getCamera());
+//        game.getWorld().getLoadedEntities().forEach((entityId, entity) -> {
+//            if (!entity.equals(game.getPlayer()) && entity.getModel() != null) {
+//                BoundingBox ebb = new BoundingBox();
+//                entity.getModel().calculateBoundingBox(ebb);
+//                if(frustum.boundsInFrustum(entity.getPosition().getX(), entity.getPosition().getY(), entity.getPosition().getZ(),
+//                        ebb.getWidth()/2.0f, ebb.getDepth()/2.0f, ebb.getHeight()/2.0f)) {
+//                    entity.render(entityBatch);
+//                    RadixAPI.instance.getEventManager().push(new EventEntityRender(entity));
+//                }
+//            }
+//        });
+//        entityBatch.end();
     }
 
     public void calculateFrustum() {

@@ -175,6 +175,9 @@ public class World implements IWorld {
         if(chunkMap != null) {
             List<IChunk> visibleChunks = new LinkedList<>();
             for (IChunk c : chunkMap.values()) {
+                if(c == null)
+                    continue;
+
                 int x = c.getStartPosition().x;
                 int z = c.getStartPosition().z;
                 int halfWidth = getChunkSize() / 2;

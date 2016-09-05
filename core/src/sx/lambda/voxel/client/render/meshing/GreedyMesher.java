@@ -464,11 +464,8 @@ public class GreedyMesher implements Mesher {
     }
 
     public Mesh meshFaces(List<Face> faces, MeshBuilder builder) {
-        if(perCornerLight) {
-            builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorUnpacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
-        } else {
-            builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
-        }
+        builder.begin(VertexAttributes.Usage.Position | VertexAttributes.Usage.TextureCoordinates | VertexAttributes.Usage.ColorPacked | VertexAttributes.Usage.Normal, GL20.GL_TRIANGLES);
+
         builder.ensureVertices(faces.size() * 4);
         for (Face f : faces) {
             f.render(builder);

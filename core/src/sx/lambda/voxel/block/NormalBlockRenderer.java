@@ -45,8 +45,9 @@ public class NormalBlockRenderer implements BlockRenderer {
     @Override
     public void renderNorth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, PerCornerLightData pcld, MeshBuilder builder) {
         // POSITIVE Z
-        float uv = atlasIndex / 100.0f;
-        builder.setUVRange(uv, uv, uv, uv);
+        float u = getU(atlasIndex);
+        float v = getV(atlasIndex);
+        builder.setUVRange(u, v, u, v);
 
         c00.setPos(x1, y1, z).setNor(0, 0, 1);
         c01.setPos(x1, y2, z).setNor(0, 0, 1);
@@ -69,8 +70,9 @@ public class NormalBlockRenderer implements BlockRenderer {
     @Override
     public void renderSouth(int atlasIndex, float x1, float y1, float x2, float y2, float z, float lightLevel, PerCornerLightData pcld, MeshBuilder builder) {
         // NEGATIVE Z
-        float uv = atlasIndex / 100.0f;
-        builder.setUVRange(uv, uv, uv, uv);
+        float u = getU(atlasIndex);
+        float v = getV(atlasIndex);
+        builder.setUVRange(u, v, u, v);
 
         c00.setPos(x1, y1, z).setNor(0, 0, -1);
         c01.setPos(x1, y2, z).setNor(0, 0, -1);
@@ -93,8 +95,9 @@ public class NormalBlockRenderer implements BlockRenderer {
     @Override
     public void renderWest(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, PerCornerLightData pcld, MeshBuilder builder) {
         // NEGATIVE X
-        float uv = atlasIndex / 100.0f;
-        builder.setUVRange(uv, uv, uv, uv);
+        float u = getU(atlasIndex);
+        float v = getV(atlasIndex);
+        builder.setUVRange(u, v, u, v);
 
         c00.setPos(x, y1, z1).setNor(-1, 0, 0);
         c01.setPos(x, y1, z2).setNor(-1, 0, 0);
@@ -117,8 +120,9 @@ public class NormalBlockRenderer implements BlockRenderer {
     @Override
     public void renderEast(int atlasIndex, float z1, float y1, float z2, float y2, float x, float lightLevel, PerCornerLightData pcld, MeshBuilder builder) {
         // POSITIVE X
-        float uv = atlasIndex / 100.0f;
-        builder.setUVRange(uv, uv, uv, uv);
+        float u = getU(atlasIndex);
+        float v = getV(atlasIndex);
+        builder.setUVRange(u, v, u, v);
 
         c00.setPos(x, y1, z1).setNor(1, 0, 0);
         c01.setPos(x, y1, z2).setNor(1, 0, 0);
@@ -141,8 +145,9 @@ public class NormalBlockRenderer implements BlockRenderer {
     @Override
     public void renderTop(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, PerCornerLightData pcld, MeshBuilder builder) {
         // POSITIVE Y
-        float uv = atlasIndex / 100.0f;
-        builder.setUVRange(uv, uv, uv, uv);
+        float u = getU(atlasIndex);
+        float v = getV(atlasIndex);
+        builder.setUVRange(u, v, u, v);
 
         c00.setPos(x1, y, z1).setNor(0, 1, 0);
         c01.setPos(x1, y, z2).setNor(0, 1, 0);
@@ -165,8 +170,9 @@ public class NormalBlockRenderer implements BlockRenderer {
     @Override
     public void renderBottom(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, PerCornerLightData pcld, MeshBuilder builder) {
         // NEGATIVE Y
-        float uv = atlasIndex / 100.0f;
-        builder.setUVRange(uv, uv, uv, uv);
+        float u = getU(atlasIndex);
+        float v = getV(atlasIndex);
+        builder.setUVRange(u, v, u, v);
 
         c00.setPos(x1, y, z1).setNor(0, -1, 0);
         c01.setPos(x1, y, z2).setNor(0, -1, 0);

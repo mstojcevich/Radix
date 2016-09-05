@@ -170,10 +170,9 @@ vec3 gamma(vec3 color){
 void main() {
 #ifdef normalFlag
     vec3 texGetNormal = -abs(v_normal);
-	float texIndex = v_rawUV.x*100.0;
     vec2 uvMult = fract(vec2(dot(texGetNormal.zxy, v_position),
                            dot(texGetNormal.yzx, v_position)));
-    vec2 uvStart = vec2(mod(texIndex, float(blocksPerRow))*uPerBlock, float(int(floor(texIndex+0.5) / float(blocksPerRow)))*vPerBlock);
+    vec2 uvStart = v_rawUV;
     vec2 v_texUV;
     if(v_normal.x != 0.0) {
     	v_texUV = uvStart+vec2(vPerBlock*uvMult.y, uPerBlock*uvMult.x);

@@ -43,8 +43,9 @@ public class GrassRenderer extends NormalBlockRenderer {
 
     @Override
     public void renderTop(int atlasIndex, float x1, float z1, float x2, float z2, float y, float lightLevel, PerCornerLightData pcld, MeshBuilder builder) {
-        float uv = atlasIndex / 100.0f;
-        builder.setUVRange(uv, uv, uv, uv);
+        float u = getU(atlasIndex);
+        float v = getV(atlasIndex);
+        builder.setUVRange(u, v, u, v);
 
         MeshPartBuilder.VertexInfo c00 = new MeshPartBuilder.VertexInfo().setPos(x1, y, z1).setNor(0, 1, 0);
         MeshPartBuilder.VertexInfo c01 = new MeshPartBuilder.VertexInfo().setPos(x1, y, z2).setNor(0, 1, 0);

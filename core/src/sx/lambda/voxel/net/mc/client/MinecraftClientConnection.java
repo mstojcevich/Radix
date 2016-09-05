@@ -46,7 +46,7 @@ public class MinecraftClientConnection {
 
     public MinecraftClientConnection(final RadixClient game, String hostname, short port) {
         this.game = game;
-        MinecraftProtocol protocol = new MinecraftProtocol("voxeltest-dev");
+        MinecraftProtocol protocol = new MinecraftProtocol("radix-dev");
         this.client = new Client(hostname, port, protocol, new TcpSessionFactory());
         this.chatHandler = new ChatHandler(game);
 

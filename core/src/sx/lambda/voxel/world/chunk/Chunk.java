@@ -146,10 +146,10 @@ public class Chunk implements IChunk {
 
     @Override
     public void eachBlock(EachBlockCallee callee) {
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < height; y++) {
+        for (int y = 0; y < height; y++) {
+            for (int z = 0; z < size; z++) {
                 BlockStorage storage = blockStorage[y / 16];
-                for (int z = 0; z < size; z++) {
+                for (int x = 0; x < size; x++) {
                     try {
                         Block blk = storage.getBlock(x, y & 0xF, z);
                         callee.call(blk, x, y, z);

@@ -92,8 +92,8 @@ public class GreedyMesher implements Mesher {
             if(perCornerLight) {
                 btmPcld = new PerCornerLightData[width][depth];
             }
-            for (int x = 0; x < width; x++) {
-                for (int z = 0; z < depth; z++) {
+            for (int z = 0; z < depth; z++) {
+                for (int x = 0; x < width; x++) {
                     try {
                         Block curBlock = chunk.getBlock(x, y, z);
                         if (curBlock == null || !condition.shouldUse(curBlock))
@@ -148,8 +148,8 @@ public class GreedyMesher implements Mesher {
             if(perCornerLight) {
                 eastPcld = new PerCornerLightData[depth][chunk.getHighestPoint()+1];
             }
-            for (int z = 0; z < depth; z++) {
-                for (int y = 0; y <= chunk.getHighestPoint(); y++) {
+            for (int y = 0; y <= chunk.getHighestPoint(); y++) {
+                for (int z = 0; z < depth; z++) {
                     try {
                         Block curBlock = chunk.getBlock(x, y, z);
                         if (curBlock == null || !condition.shouldUse(curBlock))
@@ -220,8 +220,8 @@ public class GreedyMesher implements Mesher {
             if(perCornerLight) {
                 southPcld = new PerCornerLightData[width][chunk.getHighestPoint()+1];
             }
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y <= chunk.getHighestPoint(); y++) {
+            for (int y = 0; y <= chunk.getHighestPoint(); y++) {
+                for (int x = 0; x < width; x++) {
                     try {
                         Block curBlock = chunk.getBlock(x, y, z);
                         if (curBlock == null || !condition.shouldUse(curBlock))
@@ -527,11 +527,11 @@ public class GreedyMesher implements Mesher {
         // sx,sy,sz are the x, y, and z positions of the side block
         int count = 0;
         float lightSum = 0;
-        for(int sx = cx + negX; sx <= cx + posX; sx++) {
-            for(int sy = y + negY; sy <= y + posY; sy++) {
-                if(sy < 0 || sy >= chunk.getWorld().getHeight())
-                    continue;
-                for(int sz = cz + negZ; sz <= cz + posZ; sz++) {
+        for(int sy = y + negY; sy <= y + posY; sy++) {
+            if(sy < 0 || sy >= chunk.getWorld().getHeight())
+                continue;
+            for(int sz = cz + negZ; sz <= cz + posZ; sz++) {
+                for(int sx = cx + negX; sx <= cx + posX; sx++) {
                     IChunk sChunk = chunk;
                     boolean getChunk = false; // whether the block is not in the current chunk and a new chunk should be found
                     int getChunkX = chunk.getStartPosition().x + sx;

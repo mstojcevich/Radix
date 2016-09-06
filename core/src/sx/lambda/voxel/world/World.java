@@ -593,9 +593,9 @@ public class World implements IWorld {
 
     private void setupLighting(IChunk c) {
         try {
-            for (int x = 0; x < CHUNK_SIZE; x++) {
-                for (int z = 0; z < CHUNK_SIZE; z++) {
-                    int y = WORLD_HEIGHT - 1;
+            int y = WORLD_HEIGHT - 1;
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                for (int x = 0; x < CHUNK_SIZE; x++) {
                     if (c.getBlockId(x, y, z) > 0) {
                         break;
                     }

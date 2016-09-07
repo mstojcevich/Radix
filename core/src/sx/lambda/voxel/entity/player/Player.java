@@ -66,7 +66,7 @@ public class Player extends LivingEntity implements Serializable {
             if (RadixClient.getInstance().getMinecraftConn() != null) {
                 ClientPlayerPositionRotationPacket positionRotationPacket =
                         new ClientPlayerPositionRotationPacket(this.isOnGround(),
-                        this.getPosition().getX(), this.getPosition().getY() + 2, this.getPosition().getZ(),
+                        this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(),
                         (float) 180 - this.getRotation().getYaw(), -this.getRotation().getPitch());
                 RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(positionRotationPacket);
             }

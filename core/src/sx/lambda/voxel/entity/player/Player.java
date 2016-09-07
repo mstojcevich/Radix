@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.math.MathUtils;
-import org.spacehq.mc.protocol.data.game.values.entity.player.GameMode;
+import org.spacehq.mc.protocol.data.game.entity.player.GameMode;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerPositionRotationPacket;
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
@@ -66,7 +66,7 @@ public class Player extends LivingEntity implements Serializable {
             if (RadixClient.getInstance().getMinecraftConn() != null) {
                 ClientPlayerPositionRotationPacket positionRotationPacket =
                         new ClientPlayerPositionRotationPacket(this.isOnGround(),
-                        this.getPosition().getX(), this.getPosition().getY(), this.getPosition().getZ(),
+                        this.getPosition().getX(), this.getPosition().getY() + 2, this.getPosition().getZ(),
                         (float) 180 - this.getRotation().getYaw(), -this.getRotation().getPitch());
                 RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(positionRotationPacket);
             }

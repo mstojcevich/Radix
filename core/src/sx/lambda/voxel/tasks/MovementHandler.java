@@ -112,13 +112,19 @@ public class MovementHandler implements RepeatedTask {
                         int cx = playerX & (game.getWorld().getChunkSize() - 1);
                         int cz = playerZ & (game.getWorld().getChunkSize() - 1);
                         int feetBlockY = MathUtils.floor(player.getPosition().getY() - 0.02f);
-                        Block blockAtPlayer = playerChunk.getBlock(cx, feetBlockY, cz);
+                        try {
+                            Block blockAtPlayer = playerChunk.getBlock(cx, feetBlockY, cz);
                         if (blockAtPlayer != null && blockAtPlayer.isSolid() &&
                                 blockAtPlayer.calculateBoundingBox(playerChunk, cx, feetBlockY, cz)
                                         .contains(player.getPosition().cpy().add(0, -0.02f, 0))) {
+                                player.setOnGround(true);
+                            } else {
+                                player.setOnGround(false);
+                            }
+                        } catch (CoordinatesOutOfBoundsException ex) {
+                            System.out.println(feetBlockY);
                             player.setOnGround(true);
-                        } else {
-                            player.setOnGround(false);
+                            ex.printStackTrace();
                         }
                     } else {
                         player.setOnGround(true);

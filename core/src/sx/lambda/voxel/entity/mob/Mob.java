@@ -1,6 +1,6 @@
 package sx.lambda.voxel.entity.mob;
 
-import org.spacehq.mc.protocol.data.game.values.entity.MobType;
+import org.spacehq.mc.protocol.data.game.entity.type.MobType;
 import sx.lambda.voxel.entity.EntityModel;
 import sx.lambda.voxel.entity.EntityPosition;
 import sx.lambda.voxel.entity.EntityRotation;

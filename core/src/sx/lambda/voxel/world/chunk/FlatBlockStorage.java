@@ -1,6 +1,6 @@
 package sx.lambda.voxel.world.chunk;
 
-import org.spacehq.mc.protocol.data.game.NibbleArray3d;
+import org.spacehq.mc.protocol.data.game.chunk.NibbleArray3d;
 import sx.lambda.voxel.api.RadixAPI;
 import sx.lambda.voxel.block.Block;
 

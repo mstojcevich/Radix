@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector2;
-import org.spacehq.mc.protocol.data.game.ItemStack;
-import org.spacehq.mc.protocol.packet.ingame.client.player.ClientChangeHeldItemPacket;
+import org.spacehq.mc.protocol.data.game.entity.metadata.ItemStack;
+import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerChangeHeldItemPacket;
 import org.spacehq.mc.protocol.packet.ingame.client.window.ClientCreativeInventoryActionPacket;
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.RadixAPI;
@@ -126,7 +126,7 @@ public class BlockSelectGUI implements GuiScreen {
                         new ClientCreativeInventoryActionPacket(36 /* Bottom left of hot bar */, new ItemStack(id, 1))
                 );
                 RadixClient.getInstance().getMinecraftConn().getClient().getSession().send(
-                        new ClientChangeHeldItemPacket(0)
+                        new ClientPlayerChangeHeldItemPacket(0)
                 );
             }
         }

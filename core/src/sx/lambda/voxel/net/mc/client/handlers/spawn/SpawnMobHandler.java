@@ -1,7 +1,7 @@
 package sx.lambda.voxel.net.mc.client.handlers.spawn;
 
 import com.badlogic.gdx.Gdx;
-import org.spacehq.mc.protocol.data.game.values.entity.MobType;
+import org.spacehq.mc.protocol.data.game.entity.type.MobType;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.entity.EntityPosition;

@@ -1,7 +1,8 @@
 package sx.lambda.voxel.net.mc.client.handlers;
 
 import com.badlogic.gdx.Gdx;
-import org.spacehq.mc.protocol.data.game.values.world.block.BlockChangeRecord;
+import org.spacehq.mc.protocol.data.game.world.block.BlockChangeRecord;
+import org.spacehq.mc.protocol.data.game.world.block.BlockState;
 import org.spacehq.mc.protocol.packet.ingame.server.world.ServerMultiBlockChangePacket;
 import sx.lambda.voxel.RadixClient;
 import sx.lambda.voxel.api.BuiltInBlockIds;
@@ -25,9 +26,9 @@ public class MultiBlockChangeHandler implements PacketHandler<ServerMultiBlockCh
             int z = r.getPosition().getZ();
             int chunkRelativeX = x & (game.getWorld().getChunkSize()-1);
             int chunkRelativeZ = z & (game.getWorld().getChunkSize()-1);
-            int block = r.getBlock();
-            int id = block >> 4;
-            int meta = block & 15;
+            BlockState block = r.getBlock();
+            int id = block.getId();
+            int meta = block.getData();
             IChunk chunk = game.getWorld().getChunk(x, z);
             if(chunk != null) {
                 if (id > 0) {

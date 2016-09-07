@@ -1,7 +1,7 @@
 package sx.lambda.voxel.net.mc.client.handlers;
 
 import com.badlogic.gdx.Gdx;
-import org.spacehq.mc.protocol.data.game.EntityMetadata;
+import org.spacehq.mc.protocol.data.game.entity.metadata.EntityMetadata;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.*;
 import org.spacehq.packetlib.packet.Packet;
 import sx.lambda.voxel.RadixClient;
@@ -51,7 +51,7 @@ public class EntityHandler implements PacketHandler<Packet> {
             ServerEntityMetadataPacket packet = (ServerEntityMetadataPacket) object;
             EntityMetadata[] entityMetadatas = packet.getMetadata();
             for (EntityMetadata metadata : entityMetadatas) {
-                if (metadata.getId() == 6) {
+                if (metadata.getId() == 7) {
                     Float health = (Float) metadata.getValue();
                     if (health < 0.0001F) {
                         ConcurrentHashMap<Integer, Entity> entities = game.getWorld().getLoadedEntities();

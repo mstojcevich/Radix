@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -21,13 +20,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad.TouchpadStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import org.spacehq.mc.protocol.data.game.ItemStack;
-import org.spacehq.mc.protocol.data.game.Position;
-import org.spacehq.mc.protocol.data.game.values.Face;
-import org.spacehq.mc.protocol.data.game.values.entity.player.PlayerAction;
+import org.spacehq.mc.protocol.data.game.entity.metadata.ItemStack;
+import org.spacehq.mc.protocol.data.game.entity.metadata.Position;
+import org.spacehq.mc.protocol.data.game.entity.player.Hand;
+import org.spacehq.mc.protocol.data.game.entity.player.PlayerAction;
+import org.spacehq.mc.protocol.data.game.world.block.BlockFace;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerActionPacket;
 import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerPlaceBlockPacket;
-import org.spacehq.mc.protocol.packet.ingame.client.player.ClientSwingArmPacket;
+import org.spacehq.mc.protocol.packet.ingame.client.player.ClientPlayerSwingArmPacket;
 import pw.oxcafebabe.marcusant.eventbus.EventListener;
 import pw.oxcafebabe.marcusant.eventbus.Priority;
 import pw.oxcafebabe.marcusant.eventbus.exceptions.InvalidListenerException;
@@ -132,7 +132,7 @@ public class RadixClient extends ApplicationAdapter {
 
     @Override
     public void create() {
-        GLProfiler.enable();
+        //GLProfiler.enable();
 
         EntityModel.init();
         theGame = this;
@@ -582,7 +582,7 @@ public class RadixClient extends ApplicationAdapter {
             final int BLOCK_TEX_SIZE = 32;
             int textureIndex = 0;
             for (Block b : RadixAPI.instance.getBlocks()) {
-                if(b == null)
+                if (b == null)
                     continue;
                 b.setTextureIndex(textureIndex);
                 for (String texLoc : b.getTextureLocations()) {
@@ -626,10 +626,10 @@ public class RadixClient extends ApplicationAdapter {
                             selectedBlock.z & (world.getChunkSize() - 1));
                     if (block != null && block.isSelectable()) {
                         if (this.isRemote()) {
-                            mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
+                            mcClientConn.getClient().getSession().send(new ClientPlayerSwingArmPacket(Hand.MAIN_HAND));
                             mcClientConn.getClient().getSession().send(
                                     new ClientPlayerActionPacket(PlayerAction.START_DIGGING,
-                                            new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                                            new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), BlockFace.UP));
                         }
                     }
                 } catch (CoordinatesOutOfBoundsException ex) {
@@ -651,7 +651,7 @@ public class RadixClient extends ApplicationAdapter {
                         if (this.isRemote()) {
                             mcClientConn.getClient().getSession().send(
                                     new ClientPlayerActionPacket(PlayerAction.CANCEL_DIGGING,
-                                            new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                                            new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), BlockFace.UP));
                         }
                     }
                     player.resetBlockBreak();
@@ -672,10 +672,10 @@ public class RadixClient extends ApplicationAdapter {
                             selectedBlock.z & (world.getChunkSize() - 1));
                     if (block != null && block.isSelectable()) {
                         if (this.isRemote()) {
-                            mcClientConn.getClient().getSession().send(new ClientSwingArmPacket());
+                            mcClientConn.getClient().getSession().send(new ClientPlayerSwingArmPacket(Hand.MAIN_HAND));
                             mcClientConn.getClient().getSession().send(
                                     new ClientPlayerActionPacket(PlayerAction.FINISH_DIGGING,
-                                            new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), Face.TOP));
+                                            new Position(selectedBlock.x, selectedBlock.y, selectedBlock.z), BlockFace.UP));
                         } else {
                             this.getWorld().removeBlock(this.getSelectedBlock().x,
                                     this.getSelectedBlock().y, this.getSelectedBlock().z);
@@ -694,7 +694,7 @@ public class RadixClient extends ApplicationAdapter {
             if (this.isRemote() && this.mcClientConn != null) {
                 this.mcClientConn.getClient().getSession().send(new ClientPlayerPlaceBlockPacket(
                         new Position(this.getNextPlacePos().x, this.getNextPlacePos().y, this.getNextPlacePos().z),
-                        Face.TOP /* TODO MCPROTO send correct face */, new ItemStack(player.getItemInHand()), 0, 0, 0));
+                        BlockFace.UP /* TODO MCPROTO send correct face */, Hand.MAIN_HAND, 0, 0, 0));
             } else {
                 this.getWorld().addBlock(this.getPlayer().getItemInHand(), this.getNextPlacePos().x,
                         this.getNextPlacePos().y, this.getNextPlacePos().z);

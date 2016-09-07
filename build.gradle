@@ -53,7 +53,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         // Java doesn't work with the spacehq SSL cert right now, so going to use local copy
         // compile group: "org.spacehq", name: 'mcprotocollib', version:'1.8.8-SNAPSHOT'
-        compile name: 'mcprotocollib-1.8.8'
+        compile name: 'mcprotocollib-1.10.2-20160906.022930-8'
         compile name: 'iridiumeventbus-v0'
     }
 }

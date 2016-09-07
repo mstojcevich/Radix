@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.ObjLoader;
-import org.spacehq.mc.protocol.data.game.values.entity.MobType;
+import org.spacehq.mc.protocol.data.game.entity.type.MobType;
 
 import java.util.HashMap;
 import java.util.Map;

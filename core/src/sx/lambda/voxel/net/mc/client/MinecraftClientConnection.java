@@ -10,8 +10,8 @@ import org.spacehq.mc.protocol.packet.ingame.server.entity.ServerEntityMetadataP
 import org.spacehq.mc.protocol.packet.ingame.server.entity.ServerEntityMovementPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.ServerEntityPositionPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerAbilitiesPacket;
+import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerHealthPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerPlayerPositionRotationPacket;
-import org.spacehq.mc.protocol.packet.ingame.server.entity.player.ServerUpdateHealthPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnMobPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.entity.spawn.ServerSpawnPlayerPacket;
 import org.spacehq.mc.protocol.packet.ingame.server.world.*;
@@ -51,7 +51,6 @@ public class MinecraftClientConnection {
         this.chatHandler = new ChatHandler(game);
 
         handlerMap.put(ServerChunkDataPacket.class, new ChunkDataHandler(game));
-        handlerMap.put(ServerMultiChunkDataPacket.class, new MultiChunkDataHandler(game));
         handlerMap.put(ServerPlayerPositionRotationPacket.class, new PlayerPositionHandler(game));
         handlerMap.put(ServerSpawnPlayerPacket.class, new PlayerSpawnHandler(game));
         handlerMap.put(ServerBlockChangePacket.class, new BlockChangeHandler(game));
@@ -68,7 +67,7 @@ public class MinecraftClientConnection {
         handlerMap.put(ServerSpawnPositionPacket.class, new SpawnPositionHandler(game));
         handlerMap.put(ServerUpdateTimePacket.class, new UpdateTimeHandler());
         handlerMap.put(ServerPlayerListEntryPacket.class, new PlayerListEntryHandler());
-        handlerMap.put(ServerUpdateHealthPacket.class, new UpdateHealthHandler());
+        handlerMap.put(ServerPlayerHealthPacket.class, new UpdateHealthHandler());
         handlerMap.put(ServerSpawnMobPacket.class, new SpawnMobHandler(game));
         handlerMap.put(ServerEntityHeadLookPacket.class, new EntityHandler(game));
         handlerMap.put(ServerEntityMetadataPacket.class, new EntityHandler(game));

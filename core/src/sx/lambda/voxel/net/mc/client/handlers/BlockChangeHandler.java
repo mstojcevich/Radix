@@ -23,9 +23,8 @@ public class BlockChangeHandler implements PacketHandler<ServerBlockChangePacket
         int z = packet.getRecord().getPosition().getZ();
         int chunkRelativeX = x & (game.getWorld().getChunkSize()-1);
         int chunkRelativeZ = z & (game.getWorld().getChunkSize()-1);
-        int block = packet.getRecord().getBlock();
-        int id = block >> 4;
-        int meta = block & 15;
+        int id = packet.getRecord().getBlock().getId();
+        int meta = packet.getRecord().getBlock().getData();
 
         IChunk chunk = game.getWorld().getChunk(x, z);
         if(chunk != null) {

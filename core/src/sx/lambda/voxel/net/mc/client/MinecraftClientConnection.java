@@ -75,21 +75,25 @@ public class MinecraftClientConnection {
             @Override
             public void packetReceived(PacketReceivedEvent event) {
                 if (event.getPacket() == null) return;
-                PacketHandler handler = handlerMap.get(event.getPacket().getClass());
-                if (handler != null) {
-                    handler.handle(event.getPacket());
-                    return;
-                }
-                if (event.getPacket() instanceof ServerChatPacket) {
-                    Message message = event.<ServerChatPacket>getPacket().getMessage();
-                    if (message instanceof TranslationMessage) {
-                        Gdx.app.debug("", "Received Translation Components: "
-                                + Arrays.toString(((TranslationMessage) message).getTranslationParams()));
-                    } else {
-                        Gdx.app.debug("", "Received Message: " + message.getFullText());
+                try {
+                    PacketHandler handler = handlerMap.get(event.getPacket().getClass());
+                    if (handler != null) {
+                        handler.handle(event.getPacket());
+                        return;
                     }
-                } else {
-                    // Gdx.app.debug("", "Received Unknown Components: " + event.getPacket());
+                    if (event.getPacket() instanceof ServerChatPacket) {
+                        Message message = event.<ServerChatPacket>getPacket().getMessage();
+                        if (message instanceof TranslationMessage) {
+                            Gdx.app.debug("", "Received Translation Components: "
+                                    + Arrays.toString(((TranslationMessage) message).getTranslationParams()));
+                        } else {
+                            Gdx.app.debug("", "Received Message: " + message.getFullText());
+                        }
+                    } else {
+                        // Gdx.app.debug("", "Received Unknown Components: " + event.getPacket());
+                    }
+                } catch(Exception e) {
+                    e.printStackTrace();
                 }
 
             }

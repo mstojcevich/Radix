@@ -193,10 +193,6 @@ void main() {
         v_position = a_position.xyz;
 	#endif //diffuseTextureFlag
 
-	#if defined(colorFlag)
-		v_color = a_color;
-	#endif // colorFlag
-
 	#ifdef blendedFlag
 		#ifdef alphaTestFlag
 			v_alphaTest = u_alphaTest;
@@ -204,6 +200,11 @@ void main() {
 	#endif // blendedFlag
 
 	gl_Position = u_projViewTrans * u_worldTrans *  vec4(a_position, 1.0);
+
+	#if defined(colorFlag)
+	        float invDist = 5.0 / sqrt(gl_Position.x*gl_Position.x + gl_Position.y*gl_Position.y + gl_Position.z*gl_Position.z);
+		v_color = a_color * vec4(1.0, 1.0, 1.0, 1.0/invDist);
+	#endif // colorFlag
 
     #ifdef normalFlag
     	v_normal = a_normal;

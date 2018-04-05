@@ -388,7 +388,7 @@ public class Chunk implements IChunk {
             Mesh opaqueMesh = mesher.meshFaces(opaqueFaces, meshBuilder);
             modelBuilder.begin();
             modelBuilder.part(String.format("c-%d,%d", startPosition.x, startPosition.z), opaqueMesh, GL20.GL_TRIANGLES,
-                    new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap())));
+                    new Material(TextureAttribute.createDiffuse(NormalBlockRenderer.getBlockMap()), new BlendingAttribute()));
             opaqueModel = modelBuilder.end();
 
             opaqueModelInstance = new ModelInstance(opaqueModel) {
